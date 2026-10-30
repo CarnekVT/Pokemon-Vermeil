@@ -49,6 +49,7 @@ module BifrostCapture
           :held=>!!(key && Input.press?(key)), :frames=>0
         }
         @hud = BifrostCapture::ThrowHUD.new
+        BifrostCapture::Audio.play(:aim,cfg) if defined?(BifrostCapture::Audio)
         BifrostCapture.instance_variable_set(:@aim_open,true)
         true
       end
@@ -144,14 +145,17 @@ module BifrostCapture
         ball_key = binding(cfg,"ball_key",:JUMPDOWN)
         target_key = binding(cfg,"target_key",:ACTION)
         if ball_key && Input.trigger?(ball_key)
+          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
           if s[:mode] == :ball && !s[:balls].empty?
             s[:ball_index] = (s[:ball_index]+1)%s[:balls].length
           elsif s[:mode] == :battle && !s[:party].empty?
             s[:party_index] = (s[:party_index]+1)%s[:party].length
           end
         end
-        cycle_target if target_key && target_key != ball_key &&
-                        Input.trigger?(target_key)
+        if target_key && target_key != ball_key && Input.trigger?(target_key)
+          cycle_target
+          BifrostCapture::Audio.play(:lock,cfg) if defined?(BifrostCapture::Audio)
+        end
 
         # Movement arrows remain owned by Game_Player. They are NEVER
         # consumed by the aim interface. Keyboard switches locked targets
@@ -340,6 +344,7 @@ module BifrostCapture
           sp.visible = false
           sp
         }
+        BifrostCapture::Audio.play(:throw,cfg) if defined?(BifrostCapture::Audio)
         @flight = {
           :vp=>vp, :sprites=>[ball,shadow,*trails],
           :shared_bitmaps=>[trail_bmp],
@@ -438,6 +443,8 @@ module BifrostCapture
         return if a[:frame] < a[:frames]
         @flight = nil
         release_resources(a)
+        BifrostCapture::Audio.play(:hit,a[:config]) if
+          !a[:miss] && defined?(BifrostCapture::Audio)
         BifrostCapture.resolve_throw(event,a[:mode],a[:item],
                                       a[:config],a[:back],a[:roll],a[:origin])
         # A Pokémon battle is launched only after UI and animation are gone.
@@ -467,6 +474,9 @@ module BifrostCapture
         elsif frame <= shake_end
           event.transparent = true
           phase = (frame-absorb-7) % (a[:phase_frames]+4)
+          if phase == 0 && defined?(BifrostCapture::Audio)
+            BifrostCapture::Audio.play(:shake,a[:config])
+          end
           if phase < a[:phase_frames]
             ball.angle = Math.sin(phase*2*Math::PI/a[:phase_frames])*15
             ball.x = x + Math.sin(phase*2*Math::PI/a[:phase_frames])*3
