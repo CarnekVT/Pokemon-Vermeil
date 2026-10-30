@@ -6,8 +6,8 @@ const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE ME
 const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
  ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
- contextual_mode_toggle:"0",mode_double_tap_frames:"16",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
- allow_shared_bindings:"0",ball_hold_mode_frames:"22",
+ contextual_mode_toggle:"0",mode_double_tap_frames:"0",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
+ allow_shared_bindings:"0",ball_hold_mode_frames:"10",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
@@ -76,7 +76,7 @@ const F=[
  ["Cambiar Poké Ball","ball_key"],["Objetivo opcional","target_key"],
  ["Alternar Ball/Team (durante apuntado)","mode_key"],
  ["Permitir W contextual (avanzado; colisiona con debug)","contextual_mode_toggle"],
- ["Doble toque S para alternar modo (frames)","mode_double_tap_frames",0,30],
+ ["Doble toque S (legado/inactivo)","mode_double_tap_frames",0,30],
  ["Selección con rueda del ratón","mouse_wheel_select"],
  ["Clic derecho cambia modo","mouse_right_mode"],
  ["Recordar Ball / Team / modo","remember_selection"],
@@ -358,14 +358,14 @@ class Studio{
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
-    '<p class="bf-sub">A mantiene apuntado, S cambia selección, doble toque S o clic derecho alterna Ball/Team. W está reservado al debug de pasabilidades.</p>'+
+    '<p class="bf-sub">A mantiene apuntado, S cambia selección, mantener S brevemente o clic derecho alterna Ball/Team. W está reservado al debug de pasabilidades.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
     ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
     ["Objetivo","Se fija automáticamente o selecciona con ratón"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
     ["S / JUMPDOWN","Cambiar Ball o Pokémon seleccionado"],
-    ["Doble toque S","Alternar Ball / Team en teclado"],
+    ["Mantener S brevemente","Alternar Ball / Team en teclado"],
     ["Rueda del ratón","Anterior o siguiente Ball/Pokémon"],
     ["Clic derecho","Alternar Ball / Team"],
     ["C / USE","Lanzar directamente"],
