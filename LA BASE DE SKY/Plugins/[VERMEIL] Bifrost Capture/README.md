@@ -1,8 +1,55 @@
-# Bifröst Capture 0.5.1 — corrección de encuentro OW y compatibilidad de batalla
+# Bifröst Capture 0.6.0 — lanzamiento dinámico y confirmación de captura
 
 **Pokémon Vermeil · Pokémon Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
-Los archivos Ruby 001–006 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
+Los archivos Ruby 001–007 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
+
+## Captura rápida y resultados visibles (0.6.0)
+
+Esta actualización se ha diseñado tras revisar los dos videos aportados y el
+archivo `ZIJUK‘s ICSystem.rar`. Los archivos chinos son **referencia de interacción**,
+no se han copiado ni integrado sus scripts o su dependencia VOWE.
+
+- **Gesto rápido predeterminado:** mantener **W (AUX2)** para apuntar y
+  **soltar W** para lanzar. Sigue disponible **C (USE)** para lanzar mientras
+  apuntas. Los otros proyectos pueden recuperar `control_mode=toggle` y
+  `aim_chain=1` desde Maker Studio.
+- **Selector de Balls:** HUD pequeño con tres iconos reales de `Graphics/Items`,
+  Ball central equipada, unidades restantes y nivel de objetivo.
+  **Q (AUX1)** alterna Balls, **D (SPECIAL)** alterna Pokémon/Ball,
+  flechas/ratón orientan; **Z/Shift (ACTION)** fija el Pokémon más cercano.
+- **Lanzamiento:** giro, estela luminosa de cuatro partículas, sombra de
+  suelo, apuntado magnético a Pokémon que se mueven, mismo roll para trayectoria
+  desviada y fallo por precisión. Sin cuadrícula visible.
+- **Contacto:** anillo de absorción y ocultación gradual del Pokémon, espera
+  antes de las sacudidas, Ball con rotación y pausa entre cada sacudida,
+  un efecto verde/azul al capturar y rojo si se libera.
+- **Resultado inequívoco:** notificación en la parte superior del mapa que
+  sobrevive al cierre del apuntado. `¡CAPTURADO!` / `¡CAPTURA CRÍTICA!`
+  muestra especie y si llegó al **equipo** o a una **caja**;
+  `¡SE HA LIBERADO!`, `¡LANZAMIENTO FALLIDO!` y
+  `¡POKÉMON ESCAPÓ!` utilizan estados y colores diferentes. No se usa
+  `pbMessage` para la confirmación normal de captura.
+- **Sonido:** se intentan utilizar efectos de sonido del juego; un audio
+  ausente no anula una captura. Las opciones de audio/efectos se pueden desactivar.
+
+```ini
+control_mode=hold
+aim_chain=0
+feedback_enabled=1
+feedback_frames=150
+feedback_sfx=1
+capture_fx=1
+```
+
+Todos los valores pueden editarse en Maker Studio. `feedback_frames` acepta
+45–300 fotogramas. Para volver al modo de abrir/cerrar con W y lanzar varias
+Balls por sesión, usa `control_mode=toggle`, `aim_chain=1`.
+
+**Pruebas aisladas:** captura y almacenamiento sin mensaje modal, resultado
+capturado/liberado/bloqueado y misma tirada de precisión para trayectoria y
+resolución. Pendiente de probar en el ejecutable con Visual 2.5D HD: posición
+final de efectos, sonido, ritmo, FPS y compatibilidad con otras interfaces.
 
 ## Dos formas de usarlo
 
@@ -38,7 +85,7 @@ En modo completo, **todos los Pokémon naturales generados son capturables** inc
 | Direcciones | Flechas | Mover la retícula |
 | Ratón | Movimiento/clic | Apuntar y lanzar (si mkxp expone la entrada) |
 
-`control_mode=toggle`: W abre, USE lanza. `control_mode=hold`: mantener W prepara; soltar lanza. Todos los controles se interpretan mediante las acciones de Essentials, no mediante caracteres del teclado.
+**Predeterminado: `control_mode=hold`**; mantener W prepara y soltar lanza. **Opcional: `control_mode=toggle`**; W abre y USE lanza. Todos los controles se interpretan mediante las acciones de Essentials, no mediante caracteres del teclado.
 
 ## Encadenamiento del sistema
 
