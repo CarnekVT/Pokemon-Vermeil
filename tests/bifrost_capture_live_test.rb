@@ -72,6 +72,17 @@ module BifrostCapture
     def capture_result(*args); self.result=args; end
   end
 end
+module BifrostCapture
+  class << self
+    attr_accessor :test_baits
+    def bait_choices; @test_baits || []; end
+  end
+  module Pressure
+    def self.locked?(event,_cfg)
+      !!event.instance_variable_get(:@bifrost_max_alert)
+    end
+  end
+end
 $game_map=Struct.new(:map_id).new(1)
 $game_player=Struct.new(:x,:y,:screen_x,:screen_y,:direction,:moving?).
   new(10,10,100,150,8,true)
@@ -93,12 +104,38 @@ class BifrostLiveTest < Minitest::Test
     BifrostCapture.result=nil
     BifrostCapture.test_options=nil
     BifrostCapture.test_balls=nil
+    BifrostCapture.test_baits=nil
     $PokemonGlobal=Struct.new(:bifrost_last_ball,
       :bifrost_last_party_index,:bifrost_last_mode).new
   end
   def teardown
     BifrostCapture::Motion.cancel
   end
+  def test_r_switches_bait_mode_without_overwriting_e_ball_team_binding
+    BifrostCapture.test_baits=[[:ORANBERRY,3],[:HONEY,1]]
+    BifrostCapture.test_options={"keyboard_bait_key"=>"r"}
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{},0,{:R=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :bait,BifrostCapture::LiveAim.session[:mode]
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal 1,BifrostCapture::LiveAim.session[:bait_index]
+    Input.configure({Input::JUMPUP=>true},{},0,{:E=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+  end
+
+  def test_max_alert_blocks_pokeballs_but_not_bait_or_team
+    event=Object.new
+    event.instance_variable_set(:@bifrost_max_alert,true)
+    cfg=BifrostCapture.options.merge("max_flights"=>"3")
+    refute BifrostCapture::Motion.can_launch?(event,:POKEBALL,:ball,cfg)
+    assert BifrostCapture::Motion.can_launch?(event,:ORANBERRY,:bait,cfg)
+    assert BifrostCapture::Motion.can_launch?(event,Object.new,:battle,cfg)
+  end
+
   def test_w_opens_without_stopping_player_movement
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
