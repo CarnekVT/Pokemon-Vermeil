@@ -166,7 +166,8 @@ module BifrostCapture
                         $game_temp.in_menu ||
                         $game_temp.message_window_showing
     return :disabled if $game_system && $game_system.encounter_disabled
-    return :disabled if $PokemonGlobal && $PokemonGlobal.surfing
+    return :disabled if $PokemonGlobal && $PokemonGlobal.respond_to?(:surfing) &&
+                        $PokemonGlobal.surfing
     return :disabled if defined?($DEBUG) && $DEBUG &&
                         Input.const_defined?(:CTRL) && Input.press?(Input::CTRL)
     return :disabled unless $PokemonEncounters.respond_to?(:encounter_type) &&
