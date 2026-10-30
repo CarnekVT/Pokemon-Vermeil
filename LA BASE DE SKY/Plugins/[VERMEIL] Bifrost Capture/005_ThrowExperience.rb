@@ -25,6 +25,8 @@ module BifrostCapture
       @icons = {}
       @ball_list = []
       @selected = 0
+      @selection_key = nil
+      @selection_frame = 0
     end
 
     def equip(list,selected)
@@ -37,6 +39,21 @@ module BifrostCapture
       return @icons[item] if @icons.key?(item)
       filename = pbResolveBitmap("Graphics/Items/#{item}")
       @icons[item] = filename ? Bitmap.new(filename) : nil
+    end
+
+    def team_icon(pokemon)
+      return nil unless pokemon && pokemon.respond_to?(:species)
+      species = pokemon.species
+      form = pokemon.respond_to?(:form) ? pokemon.form.to_i : 0
+      key = [:pokemon_icon,species,form]
+      return @icons[key] if @icons.key?(key)
+      paths = []
+      paths << "Graphics/Pokemon/Icons/#{species}_#{form}" if form > 0
+      paths << "Graphics/Pokemon/Icons/#{species}"
+      filename = paths.map { |p| pbResolveBitmap(p) }.compact.first
+      @icons[key] = filename ? Bitmap.new(filename) : nil
+    rescue StandardError
+      @icons[key] = nil
     end
 
     def reticle(x,y,status,mood=:neutral)
@@ -69,7 +86,7 @@ module BifrostCapture
       bmp.fill_rect(30,30,4,4,color)
     end
 
-    def draw(mode,item,count,focus,notice)
+    def draw(mode,item,count,focus,notice,party=nil,party_index=0)
       bmp = @panel.bitmap
       bmp.clear
       bmp.fill_rect(0,0,278,90,Color.new(13,21,32,205))
@@ -77,7 +94,13 @@ module BifrostCapture
       bmp.font.size = 11
       bmp.font.bold = false
       bmp.font.color = Color.new(190,205,222)
-      bmp.draw_text(11,2,175,17,mode == :ball ? "BALL EQUIPADA" : "POKÉMON LISTO")
+      selection_key = mode == :ball ? [:ball,item] : [:battle,item && item.object_id]
+      if @selection_key != selection_key
+        @selection_key = selection_key
+        @selection_frame = 0
+      end
+      @selection_frame = [@selection_frame+1,9].min
+      bmp.draw_text(11,2,175,17,mode == :ball ? "BALL EQUIPADA" : "EQUIPO POKÉMON")
       if mode == :ball
         [-1,0,1].each_with_index do |offset,i|
           next if @ball_list.empty?
@@ -99,10 +122,38 @@ module BifrostCapture
           bmp.draw_text(left+2,47,40,13,"x#{$bag.quantity(selected_ball)}",1)
         end
       else
-        bmp.fill_rect(12,22,136,37,Color.new(40,62,83,200))
-        bmp.font.size = 15
-        bmp.font.color = Color.new(237,244,251)
-        bmp.draw_text(17,27,127,24,item ? item.name : "-")
+        # Z-A-style compact team selection: Pokémon icon and readable name.
+        # Slide the selected icon in over 9 map frames without blocking input.
+        bmp.fill_rect(11,20,138,43,Color.new(40,62,83,205))
+        bmp.fill_rect(11,59,138,2,Color.new(134,217,196))
+        if item
+          icon = team_icon(item)
+          offset = ((9-@selection_frame)*1.4).round
+          if icon && icon.width > 0 && icon.height > 0
+            frame_width = icon.width > icon.height ? icon.width/2 : icon.width
+            bmp.stretch_blt(Rect.new(13-offset,23,35,35),icon,
+              Rect.new(0,0,frame_width,icon.height))
+          else
+            bmp.fill_rect(19,29,23,23,Color.new(119,180,220))
+          end
+          bmp.font.color = Color.new(245,249,255)
+          bmp.font.size = 13
+          bmp.font.bold = true
+          bmp.draw_text(53,25,92,19,item.name.to_s)
+          bmp.font.bold = false
+          bmp.font.size = 11
+          bmp.font.color = Color.new(174,220,237)
+          level = item.respond_to?(:level) ? item.level : "-"
+          position = party ? "#{party_index.to_i+1}/#{party.length}" : ""
+          bmp.draw_text(54,44,90,16,"Nv.#{level}  #{position}")
+          if item.respond_to?(:hp) && item.respond_to?(:totalhp) &&
+             item.totalhp.to_i > 0
+            hp_fraction = (item.hp.to_f/item.totalhp).clamp(0.0,1.0)
+            bmp.fill_rect(54,58,88,2,Color.new(35,47,60))
+            bmp.fill_rect(54,58,(88*hp_fraction).round,2,
+              Color.new(142,230,187))
+          end
+        end
       end
       spec = focus && BifrostCapture.event_spec(focus)
       if spec
@@ -134,7 +185,7 @@ module BifrostCapture
       aim = BifrostCapture.binding_name(cfg,"hotkey")
       ball = BifrostCapture.binding_name(cfg,"ball_key")
       bmp.draw_text(11,78,256,12,
-        "#{aim} apuntar · #{ball} Ball / mant.: modo")
+        "#{aim} apuntar · #{ball} cambiar · W modo · rueda")
     end
 
     def dispose
