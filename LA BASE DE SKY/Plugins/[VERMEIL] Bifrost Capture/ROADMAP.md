@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.9.0 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.9.1 (reconstrucción completa de código)
 
 Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -7,12 +7,15 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 | Área | Estado | Verificación / siguiente tarea |
 |---|---|---|
 | Selección inmediata y bidireccional | Código integrado y tests | S y rueda cambian Ball o Team en ambos sentidos sin esperar |
-| Cambio Ball/Team con W contextual | Código integrado y tests | W solo se usa dentro del apuntado; clic derecho como alternativa |
+| Doble toque S / clic derecho cambia Ball/Team | Código integrado; validar mkxp | W queda reservado al debug de pasabilidades, no abre controles Bifröst |
 | Recordar Ball/Team/modo en guardado | Código integrado y tests | Persistencia en PokemonGlobalMetadata; Ball por ID, miembro por índice |
+| Profundidad real de Ball vs tiles/animated props | Código integrado; validar en mkxp | Sprites usan viewport del mapa y Z según screen_z, sin capas 999996/999997 |
+| Giro de captura desde la base | Código integrado; validar en mkxp | Anclaje inferior, sin flotación durante absorción y sacudidas |
+| Mochila, Ready Menu, debug y transferencia | Código integrado y tests | Cancelación de aim/vuelo/sacudidas y recursos liberados al salir del mapa |
 | HUD Team con icono y nombre | Código integrado; falta validación visual | Icono real de Pokémon, nombre, nivel, PS y transición rápida |
 | Notificación lateral izquierda animada | Código integrado y tests | Entrada, hold, salida, cola y resultados diferenciados |
-| Perfiles PLA-like y Z-A-like | Router implementado; assets opcionales | Hasta 12 eventos; reutiliza sonidos vanilla si faltan recursos autorizados |
-| Migración de keybindings anteriores | Código integrado; falta probar Studio | Valores D/Q/Shift heredados se sustituyen en el editor con cambios pendientes de guardar |
+| Audio Z-A predeterminado con SFX originales procedurales | Código integrado; comprobar reproducción en mkxp | Genera WAV de 12 eventos si faltan recursos, sin sonidos extraídos de Nintendo |
+| Migración de keybindings anteriores | Código integrado; falta probar Studio | Valores D/Q/Shift/W heredados se sustituyen en el editor con cambios pendientes de guardar |
 | Interacción contextual C/X sin doble acción | Código integrado; tests | Protección del mapa incluso si Bifröst cierra antes del update de Scene_Map |
 | Auditoría de inputs en Vermeil | Revisados los módulos relevantes | D Ready Menu, Q Turbo, Shift/Z carrera, F9 debug, flechas movimiento; falta prueba de terceros en mkxp |
 | Tasa OW adicional separada | Código integrado; test automatizado | 12 % extra por paso en Vermeil, enfriamiento de 7 pasos, sin alterar batalla vanilla |
