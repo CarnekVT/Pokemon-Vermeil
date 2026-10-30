@@ -242,6 +242,8 @@ class Studio{
    const opts=CHOICES[key]||["1","0"];
    input='<select class="bf-select" data-field="'+key+'">'+opts.map(x=>
     '<option value="'+x+'"'+(val===x?' selected':'')+'>'+esc(T(x))+'</option>').join("")+'</select>';
+  }else if(key.startsWith("sfx_")){
+   input='<input class="bf-input" type="text" maxlength="60" data-field="'+key+'" placeholder="none / nombre_archivo" value="'+esc(val)+'">';
   }else{
    input='<input class="bf-input" type="number" data-field="'+key+'" min="'+(meta[2]??0)+
     '" max="'+(meta[3]??999)+'" value="'+esc(val)+'">';
@@ -316,11 +318,11 @@ class Studio{
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
     '<p class="bf-sub">El jugador puede caminar durante la preparación, el vuelo y la captura. No existe una escena de apuntado que congele el mapa.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
-    ["W / AUX2","Mantener para apuntar; soltar para lanzar"],
+    ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
     ["Shift / Z (ACTION)","Cambiar Pokémon fijado"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
-    ["Q / AUX1","Cambiar Poké Ball"],
+    ["S / JUMPDOWN","Cambiar Poké Ball"],
     ["C / USE","Lanzar directamente"],
     ["D / SPECIAL","Cambiar Ball y Pokémon"],
     ["X / BACK","Cancelar sin lanzar"]].map(x=>'<div class="bf-stat"><span>'+
@@ -334,16 +336,33 @@ class Studio{
     '" data-mode="'+k+'"><strong>'+esc(T(k))+'</strong><small>'+
     (k==="overworld"?"Convierte la hierba en fauna visible":"Mantiene la ruta original")+
     '</small></button>').join("")+'</div>'+
-    this.panel("Requisitos",'<p class="bf-help">Los OW usan sprites de Graphics/Characters/Followers. Si un Pokémon no tiene sprite o el mapa carece de espacio, se conserva el combate habitual en lugar de crear un OW invisible. No se altera Surf o pesca.</p>');
-  if(this.section==="behavior")return '<h1 class="bf-headline">Huida y alerta</h1>'+
-   this.panel("Flujo",'<div class="bf-cards">'+[
-   ["Detección","Distancia y orientación"],["Huida","Movimiento real, no desaparición instantánea"],
-   ["Escape","Desaparece sin marcarse capturado"]].map(x=>
-   '<div class="bf-stat"><span>'+x[0]+'</span><strong>'+x[1]+'</strong></div>').join("")+'</div>');
+    this.panel("Ritmo de apariciones",'<div class="bf-cards">'+[
+      ["OW adicional / paso",c.ow_extra_spawn_chance+"%"],
+      ["Enfriamiento",c.ow_extra_spawn_cooldown+" pasos"],
+      ["Máximo en mapa",c.spawn_limit+" Pokémon"]
+    ].map(x=>'<div class="bf-stat"><span>'+x[0]+'</span><strong>'+
+      x[1]+'</strong></div>').join("")+'</div><p class="bf-help">El ratio adicional se evalúa aparte del encuentro tradicional. Usa las tablas PBS y solo genera OW con sprite, casilla libre y espacio en el mapa. En OW completo nunca fuerza un combate por falta de recursos.</p>');
+  if(this.section==="behavior")return '<h1 class="bf-headline">Temperamentos OW</h1>'+
+    '<p class="bf-sub">Cada individuo mantiene su temperamento desde que aparece. En Catálogo → Editar puedes definir una personalidad para toda una especie.</p>'+
+    this.panel("Comportamiento y lectura visual",'<div class="bf-cards">'+[
+      ["NEUTRO","Observa, puede alejarse brevemente después de una Ball fallida y vuelve a su rutina."],
+      ["MIEDOSO","Detecta antes y huye por las casillas del mapa antes de desaparecer."],
+      ["AGRESIVO","Persigue al entrenador y puede iniciar un combate con bonificación configurable."]
+    ].map((item,i)=>'<div class="bf-stat bf-mood-'+i+'"><span>'+item[0]+
+      '</span><strong>'+item[1]+'</strong></div>').join("")+'</div>'+
+      '<p class="bf-help">Los pesos de cada temperamento se normalizan automáticamente; no necesitan sumar 100. Los ajustes locales de especie prevalecen sobre los del mapa y el perfil.</p>');
+  if(this.section==="audio")return '<h1 class="bf-headline">Audio de captura y comportamiento</h1>'+
+    '<p class="bf-sub">Cada evento dispone de un SFX propio y reemplazable, sin detener la exploración.</p>'+
+    this.panel("Pistas de diseño",'<div class="bf-cards">'+[
+      ["PREPARACIÓN","Apuntar, cambiar Ball, fijar objetivo"],
+      ["LANZAMIENTO","Salida, impacto y sacudidas"],
+      ["REACCIÓN","Captura, liberación, huida y alerta agresiva"]
+    ].map(item=>'<div class="bf-stat"><span>'+item[0]+'</span><strong>'+
+      item[1]+'</strong></div>').join("")+'</div><p class="bf-help">Coloca archivos .ogg o .wav autorizados en Audio/SE/Bifrost/ y escribe solo el nombre, sin extensión. «none» usa sonidos vanilla cuando el modo sea Essentials; en Original guarda silencio para ese evento. No se incluye audio extraído de otros juegos.</p>');
   if(this.section==="capture")return '<h1 class="bf-headline">Captura inmediata</h1>'+
     this.panel("Condiciones",'<p class="bf-help">El impacto y el resultado de captura son dos comprobaciones independientes. Puedes ajustar la distancia, los críticos por espalda, el multiplicador instantáneo y los intentos máximos.</p>');
   if(this.section==="tests")return '<h1 class="bf-headline">Validación e integración</h1>'+
-   this.panel("Qué comprobar en el juego",'<div class="bf-help">1. Entrar en la hierba del mapa con OW completo.<p>2. Aparece un Pokémon visible y capturable.</p><p>3. W apunta, flechas/ratón orientan, C lanza.</p><p>4. Captura se guarda en equipo/caja.</p><p>5. Al fallar, la criatura huye visiblemente.</p><p>6. Vuelve a recorrer el mapa con Visual 2.5D y Turbo.</p><p>Los tests de Ruby/JavaScript no equivalen a ejecutar mkxp.</p></div>');
+   this.panel("Qué comprobar en el juego",'<div class="bf-help">1. Entrar en la hierba del mapa con OW completo.<p>2. Aparece un Pokémon visible y capturable.</p><p>3. A prepara, flechas mueven y C lanza.</p><p>4. Captura se guarda en equipo/caja.</p><p>5. Al fallar, la criatura huye visiblemente.</p><p>6. Vuelve a recorrer el mapa con Visual 2.5D y Turbo.</p><p>Los tests de Ruby/JavaScript no equivalen a ejecutar mkxp.</p></div>');
   return '<h1 class="bf-headline">Bifröst Capture Studio 1.0</h1>'+
    '<p class="bf-sub">Motor reconstruido: cada encuentro natural convertido a OW es la misma entidad utilizada para apuntar, lanzar, capturar y huir.</p>'+
    '<div class="bf-cards">'+[["Perfil",T(c.profile)],["Acceso",T(c.access_mode)],
@@ -355,7 +374,7 @@ class Studio{
  render(){
   const dirty=this.dirty();
   this.root.innerHTML='<header class="bf-top"><div class="bf-logo">◈</div>'+
-   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Motor 1.0</small></div>'+
+   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.8</small></div>'+
    '<div class="bf-spacer"></div><select class="bf-scope" data-scope>'+
    Object.keys(this.cfg).sort().map(k=>'<option value="'+esc(k)+'"'+
    (k===this.scope?" selected":"")+'>'+esc(k)+'</option>').join("")+'</select>'+
@@ -385,6 +404,10 @@ class Studio{
   if(n.matches("[data-scope]")){this.scope=n.value;this.render();return;}
   const key=n.getAttribute("data-field");
   if(key&&META[key]){
+   if(key.startsWith("sfx_")&&!/^(none|[a-z0-9_]{1,60})$/i.test(n.value)){
+    this.message="SFX inválido: solo letras, números y guion bajo, sin extensión.";
+    this.render();return;
+   }
    if(META[key].length>2){
     const x=Number(n.value),min=META[key][2],max=META[key][3];
     if(!Number.isInteger(x)||x<min||x>max){this.message="Valor fuera de rango: "+key;this.render();return;}
