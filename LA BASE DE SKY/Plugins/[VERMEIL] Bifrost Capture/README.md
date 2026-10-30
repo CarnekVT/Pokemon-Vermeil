@@ -413,3 +413,55 @@ Para regresar a las probabilidades naturales, utiliza `debug_force_shiny=0`.
   que su hoja cambia a la shiny, entra en combate y comprueba sus colores.
   Después genera otro y captúralo directamente; verifica `shiny?` en el
   equipo o caja. Desactiva la opción tras la prueba.
+
+
+## Shiny OW: partículas, chime y feedback de captura (v1)
+
+Inspiración audiovisual: `Legends: Arceus`. El efecto **no** usa
+partículas ni audios extraídos: las estrellas, brillos y halo se dibujan
+proceduralmente; el sonido por defecto reaprovecha el `real_critical.wav`
+CC0 de Kenney con volumen/tono distintos. Para sustituirlo por un
+audio propio autorizado, añade `Audio/SE/Bifrost/za_shiny.ogg` si tu
+`audio_profile` es `za_like` (o `pla_shiny.ogg` con `pla_like`).
+Alternativamente indica `sfx_shiny=nombre` sin extensión.
+
+- **Aparición:** cuando termina el fundido inicial del Pokémon,
+  Bifröst muestra un anillo dorado/cian expansivo y estrellas alrededor
+  del sprite. El sonido se dispara solo una vez por aparición visible,
+  con protección frente a múltiples spawn simultáneos.
+- **Permanencia:** pequeños destellos espaciados se reciclan mientras
+  el individuo esté vivo y visible en OW. No se generan nuevos bitmaps
+  ni sprites en cada frame, no hay viewport flotante encima de los
+  tiles; el efecto sigue el mismo encuadre real de la cámara 2.5D.
+- **Salida:** el sonido/FX se desactiva al capturar, derrotar, cambiar
+  de mapa o salir a combate. Los sprites se liberan al desaparecer
+  el encuentro; el Pokémon conserva su personalidad y condición shiny.
+- **Otros impactos:** una onda luminosa acompaña las capturas normales,
+  no solo las críticas. Las capturas por espalda pueden usar el audio
+  específico `sfx_backstrike` y las bayas tranquilizadoras `sfx_calmed`.
+  Se usan sonidos CC0 como fallback si faltan archivos propios.
+- **Pruebas:** activa `pbBifrostShinyTest(true)` y provoca encuentros
+  nuevos. Comprueba un shiny estático y otro en movimiento, la entrada
+  en combate, captura, desaparición, zoom 2.5D y cambio de mapa.
+
+```ini
+[global]
+shiny_fx_enabled=1
+shiny_fx_intensity=2
+shiny_pulse_frames=150
+shiny_sound_enabled=1
+shiny_sound_volume=85
+shiny_sound_pitch=112
+shiny_repeat_sound=0
+sfx_shiny=none
+```
+
+En Maker Studio existe **Shiny OW** para ajustar estos valores,
+además de `Encuentros OW → Prueba shiny`. Usa intensidad 1 para máquinas
+modestas; intensidad 2 es el valor equilibrado. `shiny_repeat_sound=1`
+permite una campanilla espaciada (~12 segundos visibles), desactivada
+por defecto para no saturar el audio.
+
+La prueba automática de Ruby valida la gestión de recursos, el cue
+único de aparición y las estrellas persistentes. No equivale a una
+validación auditiva o visual en mkxp-z.
