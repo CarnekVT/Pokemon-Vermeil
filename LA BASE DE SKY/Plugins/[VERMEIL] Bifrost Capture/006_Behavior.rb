@@ -25,7 +25,8 @@ module BifrostCapture
     state = {
       :steps=>0, :blocked=>0,
       :original_speed=>event.move_speed,
-      :original_type=>event.instance_variable_get(:@move_type)
+      :original_type=>event.instance_variable_get(:@move_type),
+      :windup=>cfg["timid_reaction_frames"].to_i.clamp(0,120)
     }
     event.instance_variable_set(:@bifrost_flee_state,state)
     event.instance_variable_set(:@bifrost_mood_state,:flee)
@@ -33,7 +34,10 @@ module BifrostCapture
     event.move_speed = cfg["flee_speed"].to_i.clamp(1,6)
     @fleeing ||= {}
     @fleeing[event.object_id] = event
-    notice(_INTL("¡El Pokémon está huyendo!"))
+    event.turn_toward_player if event.respond_to?(:turn_toward_player)
+    event.jump(0,0) if event.respond_to?(:jump) &&
+      (!event.respond_to?(:jumping?) || !event.jumping?)
+    notice(_INTL("¡El Pokémon se asustó!"))
     true
   end
 
@@ -67,6 +71,10 @@ module BifrostCapture
     return unless fleeing?(event)
     return if event.instance_variable_get(:@bifrost_capture_lock)
     state = event.instance_variable_get(:@bifrost_flee_state)
+    if state[:windup].to_i > 0
+      state[:windup] -= 1
+      return
+    end
     return if event.moving? || event.move_route_forcing
     steps = cfg["flee_steps"].to_i.clamp(1,30)
     dist = cfg["flee_disappear_distance"].to_i.clamp(4,30)
@@ -105,6 +113,8 @@ module BifrostCapture
     event.instance_variable_set(:@move_type,0)
     event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(5,6)
     event.turn_toward_player if event.respond_to?(:turn_toward_player)
+    event.jump(0,0) if event.respond_to?(:jump) &&
+      (!event.respond_to?(:jumping?) || !event.jumping?)
     @chasing ||= {}
     @chasing[event.object_id] = event
     BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
@@ -137,6 +147,7 @@ module BifrostCapture
     dist = distance(event)
     alert_dist = cfg["aggressive_alert_distance"].to_i.clamp(1,20)
     if dist > alert_dist+3
+      Pressure.on_escape(event,cfg) if defined?(Pressure)
       stop_chase(event)
       event.instance_variable_set(:@bifrost_alert_cooldown,90)
       return
@@ -158,12 +169,19 @@ module BifrostCapture
       state[:rest] = 0
       event.move_speed = cfg["aggressive_lunge_speed"].to_i.clamp(5,6)
       event.instance_variable_set(:@bifrost_mood_state,:charge)
+      event.jump(0,0) if event.respond_to?(:jump) &&
+        (!event.respond_to?(:jumping?) || !event.jumping?)
       BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
     end
     if dist <= cfg["aggressive_attack_distance"].to_i.clamp(1,6)
       event.instance_variable_set(:@bifrost_mood_state,:threat)
       event.turn_toward_player if event.respond_to?(:turn_toward_player) &&
                                   !event.moving?
+      unless state[:threat_jump]
+        event.jump(0,0) if event.respond_to?(:jump) &&
+          (!event.respond_to?(:jumping?) || !event.jumping?)
+        state[:threat_jump] = true
+      end
       state[:attack] += 1
       if state[:attack] >=
          cfg["aggressive_attack_windup"].to_i.clamp(0,90) &&
@@ -174,6 +192,7 @@ module BifrostCapture
       return
     end
     state[:attack] = 0
+    state[:threat_jump] = false
     event.instance_variable_set(:@bifrost_mood_state,
       state[:phase] == :charge ? :charge : :chase)
     return if event.moving? || event.move_route_forcing
@@ -240,12 +259,15 @@ module BifrostCapture
       :range=>cfg["escape_reaction_range"].to_i.clamp(1,12),
       :hp=>cfg["escape_reaction_hp_percent"].to_i.clamp(0,30),
       :recovery=>cfg["escape_reaction_recovery"].to_i.clamp(0,600),
-      :previous=>event.instance_variable_get(:@bifrost_mood_state)
+      :previous=>event.instance_variable_get(:@bifrost_mood_state),
+      :lunged=>false
     }
     stop_chase(event) if chasing?(event)
     event.turn_toward_player if event.respond_to?(:turn_toward_player)
     event.instance_variable_set(:@bifrost_escape_reaction,state)
     event.instance_variable_set(:@bifrost_mood_state,:threat)
+    event.jump(0,0) if event.respond_to?(:jump) &&
+      (!event.respond_to?(:jumping?) || !event.jumping?)
     @escape_reactions ||= {}
     @escape_reactions[event.object_id] = event
     notice(_INTL("¡El Pokémon se enfadó! Aléjate de su alcance."))
@@ -277,6 +299,16 @@ module BifrostCapture
               event.instance_variable_get(:@bifrost_capture_lock)
       state[:frames] -= 1
       next if state[:frames] > 0
+      unless state[:lunged]
+        state[:lunged] = true
+        event.move_toward_player if !event.moving? &&
+          event.respond_to?(:move_toward_player)
+        spec = event_spec(event)
+        local = spec ? options($game_map.map_id,spec[0],event.id) : options
+        state[:frames] = local["escape_lunge_delay"].to_i.clamp(6,45)
+        next
+      end
+      next if event.moving?
       inside = distance(event) <= state[:range]
       if inside && state[:hp] > 0 && $player.respond_to?(:party)
         pokemon = $player.party.find do |pkmn|
@@ -287,11 +319,11 @@ module BifrostCapture
           max = pokemon.totalhp.to_i
           amount = [(max*state[:hp]/100.0).round,1].max
           pokemon.hp = [pokemon.hp.to_i-amount,1].max if max > 1
-          notice(_INTL("¡{1} recibió el impacto!".dup,pokemon.name.to_s))
+          notice(_INTL("¡{1} perdió {2} PS!".dup,pokemon.name.to_s,amount))
           if defined?(Feedback)
             spec = event_spec(event)
-            Feedback.publish(:counter,spec && spec[0],
-              _INTL("El equipo resiste el contraataque"))
+            Feedback.publish(:party_hit,pokemon.species,
+              _INTL("{1}: -{2} PS".dup,pokemon.name.to_s,amount))
           end
         end
       else
@@ -325,7 +357,10 @@ module BifrostCapture
     return false unless wild
     BifrostCapture::Feedback.reset if defined?(BifrostCapture::Feedback)
     result = WildBattle.start(wild)
-    remove_event(event) if result
+    if result
+      Pressure.clear_success(event) if defined?(Pressure)
+      remove_event(event)
+    end
     true
   end
 
