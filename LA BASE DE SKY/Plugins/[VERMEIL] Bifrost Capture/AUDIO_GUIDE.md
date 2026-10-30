@@ -25,13 +25,14 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_breakout` | Se libera | Nota descendente + ruptura |
 | `sfx_flee` | Pokémon escapa | Movimiento corto y evasivo |
 | `sfx_alert` | Agresivo detecta | Aviso seco y urgente |
+| `sfx_critical` | Ball con captura crítica al salir de la mano | Confirmación especial ascendente |
 
 ## Predeterminado en Vermeil: audio grabado real
 
 `audio_profile=za_like` sigue siendo la configuración por defecto.
 El motor da prioridad a los recursos `za_*.ogg/.wav/.mp3` que el autor
 haya colocado explícitamente en `Audio/SE/Bifrost`. Si faltan, se
-reproducen los 12 efectos reales `real_*.wav` incluidos en el proyecto,
+reproducen los 13 efectos reales `real_*.wav` incluidos en el proyecto,
 bajo licencia CC0. **No son sonidos del juego Pokémon Legends: Z-A**;
 son sustitutos de Kenney y no se deben promocionar como sonidos oficiales.
 
@@ -78,3 +79,7 @@ sfx_alert=alerta
 ## Pendiente de verificar en juego
 
 Mezcla, volumen relativo, reproducción espacial y superposición de efectos, sincronización con el shader 2.5D, tiempo de impacto y las transiciones entre exploración y combate. Las pruebas Ruby únicamente validan enrutamiento, no el sonido reproducido en mkxp.
+
+## Señal especial de lanzamiento crítico
+
+La selección crítica se decide antes de animar el vuelo. Una estela cian y `sfx_critical` destacan la Ball lanzada como crítica; al llegar se muestra una onda luminosa y una secuencia de una sacudida. El archivo `real_critical.wav` incluido es un efecto CC0 de Kenney, no audio extraído de Pokémon Legends. `za_critical.ogg` o `za_critical.wav` lo reemplaza cuando el desarrollador aporta una grabación autorizada.
