@@ -12,12 +12,13 @@ end
 module Input
   AUX2=:aux2; AUX1=:aux1; ACTION=:action; SPECIAL=:special
   JUMPUP=:jumpup; JUMPDOWN=:jumpdown; F9=:f9
-  BACK=:back; USE=:use; MOUSELEFT=:mouseleft
+  BACK=:back; USE=:use; MOUSELEFT=:mouseleft; MOUSERIGHT=:mouseright
   @pressed={};@triggered={}
   def self.press?(key); !!@pressed[key]; end
   def self.trigger?(key); !!@triggered[key]; end
-  def self.configure(pressed={},triggered={})
-    @pressed=pressed;@triggered=triggered
+  def self.scroll_v; @scroll || 0; end
+  def self.configure(pressed={},triggered={},scroll=0)
+    @pressed=pressed;@triggered=triggered;@scroll=scroll
   end
 end
 class FakeHUD
@@ -33,13 +34,15 @@ module BifrostCapture
   @result=nil
   @aim_open=false
   class << self
-    attr_accessor :result
+    attr_accessor :result,:test_options
     def options(*)
       {"access_mode"=>"always","control_mode"=>"hold","aim_chain"=>"0",
        "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"1",
        "hotkey"=>"jumpup","ball_key"=>"jumpdown",
-       "mode_key"=>"none","target_key"=>"none",
-       "ball_hold_mode_frames"=>"3","line_of_sight"=>"0"}
+       "mode_key"=>"aux2","target_key"=>"none",
+       "contextual_mode_toggle"=>"1","mouse_wheel_select"=>"1",
+       "mouse_right_mode"=>"1","remember_selection"=>"1",
+       "line_of_sight"=>"0"}.merge(@test_options || {})
     end
     def hotkey; Input::JUMPUP; end
     def input_action(name)
@@ -47,7 +50,8 @@ module BifrostCapture
        "jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN}[name]
     end
     def capture_action(cfg,field)
-      {"jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN}[cfg[field]]
+      {"jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN,
+       "aux2"=>Input::AUX2}[cfg[field]]
     end
     def aim_allowed?; true; end
     def ball_choices; [[:POKEBALL,10],[:GREATBALL,7]]; end
@@ -75,6 +79,9 @@ class BifrostLiveTest < Minitest::Test
     $player.party=[]
     Input.configure
     BifrostCapture.result=nil
+    BifrostCapture.test_options=nil
+    $PokemonGlobal=Struct.new(:bifrost_last_ball,
+      :bifrost_last_party_index,:bifrost_last_mode).new
   end
   def teardown
     BifrostCapture::Motion.cancel
@@ -111,16 +118,14 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
   end
 
-  def test_s_long_hold_switches_pokemon_mode_and_preserves_d_ready_menu
+  def test_w_contextual_mode_and_d_reserved_ready_menu
     able_mon=Object.new
     def able_mon.able?; true; end
     $player.party=[able_mon]
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
-    4.times do
-      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},{})
-      BifrostCapture::LiveAim.update
-    end
+    Input.configure({Input::JUMPUP=>true},{Input::AUX2=>true})
+    BifrostCapture::LiveAim.update
     assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
     Input.configure({Input::JUMPUP=>true},{Input::SPECIAL=>true})
     BifrostCapture::LiveAim.update
@@ -128,6 +133,51 @@ class BifrostLiveTest < Minitest::Test
     $scene.update_input
     assert_equal 1,$scene.map_input_count
     refute BifrostCapture::LiveAim.active?
+  end
+
+  def test_mouse_wheel_changes_ball_in_both_directions
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{},-1)
+    BifrostCapture::LiveAim.update
+    assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+    Input.configure({Input::JUMPUP=>true},{},1)
+    BifrostCapture::LiveAim.update
+    assert_equal 0,BifrostCapture::LiveAim.session[:ball_index]
+  end
+
+  def test_last_ball_restored_after_closing_and_reopening
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :GREATBALL,$PokemonGlobal.bifrost_last_ball
+    BifrostCapture::LiveAim.close
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+  end
+
+  def test_party_mode_and_member_survive_reopening
+    party=Array.new(2) do
+      mon=Object.new
+      def mon.able?; true; end
+      mon
+    end
+    $player.party=party
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::AUX2=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal 1,BifrostCapture::LiveAim.session[:party_index]
+    BifrostCapture::LiveAim.close
+    assert_equal "battle",$PokemonGlobal.bifrost_last_mode
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 1,BifrostCapture::LiveAim.session[:party_index]
   end
 
   def test_c_and_x_are_contextual_and_do_not_activate_vanilla_map_actions
