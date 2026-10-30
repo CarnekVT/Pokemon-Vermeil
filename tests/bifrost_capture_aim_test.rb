@@ -172,6 +172,37 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     refute BifrostCapture.valid_target?(event)
   end
 
+  def test_full_ow_never_falls_back_to_battle_when_sprite_missing
+    # A missing follower graphic must not reach Battle::Scene in OW-only mode.
+    BifrostCapture.singleton_class.class_eval do
+      alias_method :_test_original_spawn_wild, :spawn_wild
+      define_method(:spawn_wild) { |_type| :missing_sprite }
+    end
+    begin
+      refute PokemonEncounters.new.encounter_triggered?(:Land)
+    ensure
+      BifrostCapture.singleton_class.class_eval do
+        alias_method :spawn_wild, :_test_original_spawn_wild
+        remove_method :_test_original_spawn_wild
+      end
+    end
+  end
+
+  def test_full_ow_never_falls_back_to_battle_without_free_tile
+    BifrostCapture.singleton_class.class_eval do
+      alias_method :_test_original_spawn_wild, :spawn_wild
+      define_method(:spawn_wild) { |_type| :no_tile }
+    end
+    begin
+      refute PokemonEncounters.new.encounter_triggered?(:Land)
+    ensure
+      BifrostCapture.singleton_class.class_eval do
+        alias_method :spawn_wild, :_test_original_spawn_wild
+        remove_method :_test_original_spawn_wild
+      end
+    end
+  end
+
   def test_eighth_tile_stays_outside_capture_range
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
