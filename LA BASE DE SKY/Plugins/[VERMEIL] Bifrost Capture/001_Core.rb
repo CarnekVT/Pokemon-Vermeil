@@ -219,9 +219,12 @@ module BifrostCapture
       next unless eligible_event?(event)
       pkmn = ow_pokemon_for(event)
       next unless pkmn && pkmn.respond_to?(:shiny=)
+      was_shiny = pkmn.respond_to?(:shiny?) && pkmn.shiny?
       pkmn.shiny = true
       refresh_ow_shiny_sprite(event,pkmn) if
         respond_to?(:refresh_ow_shiny_sprite)
+      BifrostCapture::ShinySignals.on_spawn(event) if !was_shiny &&
+        defined?(BifrostCapture::ShinySignals)
       count += 1
     end
     count
