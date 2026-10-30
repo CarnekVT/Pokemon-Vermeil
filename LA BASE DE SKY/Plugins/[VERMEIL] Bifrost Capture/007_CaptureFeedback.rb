@@ -28,81 +28,113 @@ module BifrostCapture
     class << self
       attr_reader :last_result
 
+      # Up to three simultaneous, independently animated cards.
+      # Only overflow waits. Each event remains visible for its own lifetime.
       def publish(kind,species=nil,detail=nil,cfg=nil)
         cfg ||= BifrostCapture.options
         return nil if cfg["feedback_enabled"] == "0"
+        @frame_counter ||= 0
+        signature = [kind,species,detail.to_s]
+        if kind == :blocked && @last_signature == signature &&
+           @frame_counter - @last_signature_frame.to_i < 35
+          return @last_result
+        end
+        @last_signature = signature
+        @last_signature_frame = @frame_counter
         incoming = {
           :kind=>kind, :species=>species, :detail=>detail.to_s,
           :enter=>cfg["feedback_enter_frames"].to_i.clamp(6,30),
-          :hold=>kind == :backstrike ? 28 : cfg["feedback_hold_frames"].to_i.clamp(25,180),
+          :hold=>kind == :backstrike ? 28 :
+            cfg["feedback_hold_frames"].to_i.clamp(25,180),
           :exit=>cfg["feedback_exit_frames"].to_i.clamp(6,30),
-          :frames=>0
+          :frames=>0, :sprite=>nil, :config=>cfg
         }
-        @last_result = incoming # Stable public result for tests/debug consumers.
+        @last_result = incoming
         @queue ||= []
+        @visible ||= []
         @queue << incoming
         limit = cfg["feedback_queue_limit"].to_i.clamp(1,8)
         @queue.shift while @queue.length > limit
-        advance_queue unless @active
+        advance_queue
         @last_result
       end
 
+      def max_visible(cfg)
+        (cfg["feedback_stack_count"] || "3").to_i.clamp(1,3)
+      end
+
       def advance_queue
-        @active = @queue && @queue.shift
-        if @active
-          redraw
-        else
-          dispose
+        @visible ||= []
+        @queue ||= []
+        while @queue.any? && @visible.length < max_visible(@queue.first[:config])
+          state = @queue.shift
+          @visible << state
+          ensure_sprite(state)
+          redraw(state)
         end
+        @active = @visible.first
+        @toast = @active && @active[:sprite]
       end
 
       def update
-        return unless @active
+        return unless @visible && !@visible.empty?
         return unless defined?($scene) && $scene.is_a?(Scene_Map)
-        ensure_sprite
-        state = @active
-        state[:frames] += 1
-        frame = state[:frames]
-        enter_frames = state[:enter]
-        exit_start = enter_frames + state[:hold]
-        if frame <= enter_frames
-          t = frame.to_f/enter_frames
-          ease = t*t*(3-2*t)
-          @toast.x = -@toast.bitmap.width-8 +
-            ((@toast.bitmap.width+20)*ease)
-          @toast.opacity = (255*ease).to_i
-        elsif frame <= exit_start
-          @toast.x = 12
-          @toast.opacity = 255
-        elsif frame < exit_start+state[:exit]
-          t = (frame-exit_start).to_f/state[:exit]
-          ease = t*t*(3-2*t)
-          @toast.x = 12 - ((@toast.bitmap.width+24)*ease)
-          @toast.opacity = (255*(1.0-ease)).to_i
-        else
-          advance_queue
-          return
+        @frame_counter = @frame_counter.to_i+1
+        finished = []
+        @visible.each_with_index do |state,index|
+          ensure_sprite(state)
+          sprite = state[:sprite]
+          next unless sprite
+          state[:frames] += 1
+          frame = state[:frames]
+          enter_frames = state[:enter]
+          exit_start = enter_frames+state[:hold]
+          if frame <= enter_frames
+            t = frame.to_f/enter_frames
+            ease = t*t*(3-2*t)
+            sprite.x = -sprite.bitmap.width-8 +
+              ((sprite.bitmap.width+20)*ease)
+            sprite.opacity = (255*ease).to_i
+          elsif frame <= exit_start
+            sprite.x = 12
+            sprite.opacity = 255
+          elsif frame < exit_start+state[:exit]
+            t = (frame-exit_start).to_f/state[:exit]
+            ease = t*t*(3-2*t)
+            sprite.x = 12-((sprite.bitmap.width+24)*ease)
+            sprite.opacity = (255*(1.0-ease)).to_i
+          else
+            finished << state
+            next
+          end
+          top = [(Graphics.height*0.12).round,16].max
+          sprite.y = top+index*73
         end
-        @toast.y = [(Graphics.height*0.19).round,20].max
+        finished.each do |state|
+          release_card(state)
+          @visible.delete(state)
+        end
+        advance_queue unless finished.empty?
       end
 
-      def ensure_sprite
-        return if @toast && !@toast.disposed?
-        @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+      def ensure_sprite(state)
+        sprite = state[:sprite]
+        return if sprite && !sprite.disposed?
+        @viewport ||= Viewport.new(0,0,Graphics.width,Graphics.height)
         @viewport.z = 999999
-        @toast = Sprite.new(@viewport)
-        @toast.bitmap = Bitmap.new([[Graphics.width-20,318].min,180].max,70)
-        @toast.x = -@toast.bitmap.width-8
-        @toast.y = [(Graphics.height*0.19).round,20].max
-        @toast.opacity = 0
+        sprite = Sprite.new(@viewport)
+        sprite.bitmap = Bitmap.new([[Graphics.width-20,318].min,180].max,70)
+        sprite.x = -sprite.bitmap.width-8
+        sprite.y = [(Graphics.height*0.12).round,16].max
+        sprite.opacity = 0
+        state[:sprite] = sprite
       end
 
-      def redraw
-        return unless @active
-        ensure_sprite
-        bmp = @toast.bitmap
+      def redraw(state=@active)
+        return unless state
+        ensure_sprite(state)
+        bmp = state[:sprite].bitmap
         bmp.clear
-        state = @active
         fill,accent = COLORS[state[:kind]] || COLORS[:blocked]
         w = bmp.width
         # Layered compact surface; clearer than an opaque central toast.
@@ -161,24 +193,36 @@ module BifrostCapture
         nil
       end
 
+      def release_card(state)
+        return unless state
+        sprite = state[:sprite]
+        return unless sprite && !sprite.disposed?
+        bmp = sprite.bitmap
+        sprite.dispose
+        bmp.dispose if bmp && !bmp.disposed?
+        state[:sprite] = nil
+      end
+
       def dispose
-        @icon_bitmap.dispose if @icon_bitmap && !@icon_bitmap.disposed?
+        (@visible || []).each { |state| release_card(state) }
+        @visible = []
+        if @icon_bitmap && !@icon_bitmap.disposed?
+          @icon_bitmap.dispose
+        end
         @icon_bitmap = nil
         @icon_species = nil
-        if @toast && !@toast.disposed?
-          bmp = @toast.bitmap
-          @toast.dispose
-          bmp.dispose if bmp && !bmp.disposed?
-        end
-        @toast = nil
         @viewport.dispose if @viewport && !@viewport.disposed?
         @viewport = nil
+        @toast = nil
+        @active = nil
       end
 
       def reset
         @last_result = nil
+        @last_signature = nil
+        @last_signature_frame = nil
+        @frame_counter = 0
         @queue = []
-        @active = nil
         dispose
       end
     end
