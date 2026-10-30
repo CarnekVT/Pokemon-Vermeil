@@ -36,6 +36,7 @@ module BifrostCapture
   def self.reset_wild_events
     (@wild_events || {}).values.dup.each { |event| erase_wild(event) }
     @wild_events = {}
+    @extra_cooldown = 0
   end
 
   def self.valid_spawn_tile?(x,y,cfg,cave=false)
@@ -91,9 +92,10 @@ module BifrostCapture
     names.find { |name| pbResolveBitmap("Graphics/Characters/#{name}") }
   end
 
-  def self.spawn_wild(enc_type)
+  def self.spawn_wild(enc_type, extra: false)
     cfg = options
-    return :not_available if !overworld_encounters?(cfg)
+    return :not_available if !extra && !overworld_encounters?(cfg)
+    return :not_available if cfg["enabled"] != "1"
     return :full if wild_events.length >= cfg["spawn_limit"].to_i.clamp(1,16)
     wild = $PokemonEncounters.choose_wild_pokemon(enc_type)
     return :not_available unless wild && wild[0] && wild[1]
@@ -140,12 +142,47 @@ module BifrostCapture
     # alone leaves a static or invisible Pokémon until the map refreshes.
     $game_map.register_event(event)
     register_ow(event,species,level,form)
+    # Temperament is sampled exactly once per individual, not on every tick.
+    temperament_for(event,local)
     if $scene.is_a?(Scene_Map)
       spriteset = $scene.spriteset($game_map.map_id)
       spriteset.bifrost_add_character(event) if spriteset
     end
     @wild_events[event.object_id] = event
     :spawned
+  end
+
+  def self.try_extra_spawn
+    cfg = options
+    return :disabled if cfg["enabled"] != "1"
+    chance = cfg["ow_extra_spawn_chance"].to_i.clamp(0,100)
+    return :disabled if chance <= 0
+    @extra_cooldown = (@extra_cooldown || 0) - 1
+    return :cooldown if @extra_cooldown > 0
+    return :disabled if !$PokemonEncounters || !$player || !$game_map ||
+                        !$game_player || !$game_temp
+    return :disabled if $game_temp.in_battle ||
+                        $game_temp.in_menu ||
+                        $game_temp.message_window_showing
+    return :disabled if $game_system && $game_system.encounter_disabled
+    return :disabled if $PokemonGlobal && $PokemonGlobal.surfing
+    return :disabled if defined?($DEBUG) && $DEBUG &&
+                        Input.const_defined?(:CTRL) && Input.press?(Input::CTRL)
+    return :disabled unless $PokemonEncounters.respond_to?(:encounter_type) &&
+                             $PokemonEncounters.respond_to?(:encounter_possible_here?)
+    return :disabled unless $PokemonEncounters.encounter_possible_here?
+    kind = $PokemonEncounters.encounter_type
+    return :disabled unless kind && GameData::EncounterType.exists?(kind)
+    type = GameData::EncounterType.get(kind).type
+    return :disabled unless [:land,:cave].include?(type)
+    return :roll_failed if rand(100) >= chance
+    # Use the ordinary PBS table to choose species; only the OW roll is extra.
+    # The original wild battle chance remains untouched.
+    outcome = spawn_wild(kind, :extra=>true)
+    if outcome == :spawned
+      @extra_cooldown = cfg["ow_extra_spawn_cooldown"].to_i.clamp(0,250) + 1
+    end
+    outcome
   end
 
   def self.step_wild_events
@@ -157,6 +194,7 @@ module BifrostCapture
       event.instance_variable_set(:@bifrost_remaining_steps,steps)
       erase_wild(event) if steps == 0
     end
+    try_extra_spawn
   end
 
   def self.remove_event(event)
