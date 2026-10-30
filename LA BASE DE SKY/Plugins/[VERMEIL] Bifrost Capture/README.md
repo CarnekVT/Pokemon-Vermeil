@@ -1,4 +1,4 @@
-# Bifröst Capture 0.5.0 — reconstrucción experimental desde cero
+# Bifröst Capture 0.5.1 — corrección de encuentro OW y compatibilidad de batalla
 
 **Pokémon Vermeil · Pokémon Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -6,7 +6,7 @@ Los archivos Ruby 001–006 y el editor Maker Studio se sustituyeron por impleme
 
 ## Dos formas de usarlo
 
-**Configuración Bifröst (base):** `profile=bifrost`, `encounter_mode=classic`, `restricted_species=1`. Los encuentros habituales siguen en hierba. Los legendarios OW colocados manualmente y declarados mediante etiquetas pueden capturarse.
+**Configuración Bifröst (preset):** `profile=bifrost`, `encounter_mode=classic`, `restricted_species=1`. Permanece disponible en Maker Studio. **En esta rama de pruebas se activa `profile=full_ow` por defecto**, para que el modo de fauna visible realmente se ejecute. Los legendarios OW colocados manualmente y declarados mediante etiquetas pueden capturarse.
 
 **Proyecto con fauna visible completa:** abre Maker Studio → **Perfiles** → **OW completo** → **Aplicar perfil** → **Guardar cambios**. Se establece:
 
@@ -23,7 +23,7 @@ La tirada normal del encuentro de hierba o cueva se convierte en **un evento Pok
 
 En modo completo, **todos los Pokémon naturales generados son capturables** incluso si una configuración heredada conserva `restricted_species=1`. Esa restricción continúa aplicándose a los eventos manuales. Los eventos decorativos marcados `[OWDECOR]` nunca se vuelven capturables.
 
-**Límite conocido:** es necesario un gráfico de personaje `Graphics/Characters/Followers/ESPECIE` o variante de forma. Si no existe o no se puede encontrar una casilla libre, el juego utiliza el combate original en vez de generar un sprite invisible o un OW sin interacción. Surf, pesca y encuentros por script permanecen originales. La integración específica con otras bibliotecas OW se puede hacer mediante `register_ow`, no detectando NPCs indiscriminadamente.
+**Límite conocido:** es necesario un gráfico de personaje `Graphics/Characters/Followers/ESPECIE` o variante de forma. En OW completo, si falta el recurso o no se encuentra una casilla válida, **se cancela el encuentro sin abrir batalla normal** y se registra un aviso de diagnóstico. Se intenta también una casilla cercana transitable. En modo mixto sí se puede mantener el encuentro normal. Surf, pesca y encuentros por script permanecen originales. La integración específica con otras bibliotecas OW se puede hacer mediante `register_ow`, no detectando NPCs indiscriminadamente.
 
 ## Controles de Essentials (según Key bindings compartido)
 
@@ -83,7 +83,9 @@ El menú opcional dentro de la partida está disponible por `pbBifrostRulesMenu`
 - Hay pruebas automatizadas para perfiles, alcance de 7 casillas, aparición desde encuentros naturales, captura/almacenamiento, lanzamiento vacío y huida visible.
 - GitHub Actions comprueba sintaxis de todos los módulos Ruby, sintaxis ES module del editor y tests Ruby aislados.
 - **NO se ha ejecutado el juego en mkxp en esta revisión**. Falta validar visualmente posición real de proyectiles y retícula con Visual 2.5D HD, FPS, sincronización con Turbo, sonido, animación del entrenador, guardado/cargas y captura de legendarios errantes de Essentials.
-- El mapa debe tener las tablas naturales de encuentros y gráficos Followers para poder ofrecer fauna visible. La ausencia de recursos utiliza el combate original.
+- El mapa debe tener las tablas naturales de encuentros y gráficos Followers para poder ofrecer fauna visible. En OW completo no se abre combate normal si faltan recursos; la aparición se omite y se deja un aviso.
 - No se modifica BSS/BAS ni la cámara de combate: los combates OW pasan por el disparador habitual de `WildBattle`.
+
+**Parche 0.5.1:** se corrigió el enlace de `pbFrameUpdate` entre SleepAnimations y Suncorona/Eclipsora, se activó OW completo en la configuración de pruebas, se impidió la caída de OW completo a batallas normales y se añadió `Game_Map#register_event` al generar un OW para garantizar que Essentials lo actualice. Hay tests aislados de esos tres casos.
 
 Consultar `ROADMAP.md` para la lista de seguimiento actualizada.
