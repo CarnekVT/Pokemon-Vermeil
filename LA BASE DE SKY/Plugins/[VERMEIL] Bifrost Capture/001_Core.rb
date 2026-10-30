@@ -201,7 +201,26 @@ module BifrostCapture
   # Create exactly one Pokémon per OW event. This retains shininess, form,
   # personality, IVs and other traits through both battle and direct capture.
   def self.debug_force_shiny?(cfg = options)
-    defined?($DEBUG) && $DEBUG && cfg["debug_force_shiny"] == "1"
+    # Explicit testing switch. The project ships with it disabled.
+    # No dependency on a particular launcher setting ($DEBUG).
+    cfg["debug_force_shiny"] == "1"
+  end
+
+  # Immediately apply the testing switch to visible OW targets if requested.
+  # Disabling does not remove naturally rolled (or already caught) shinies.
+  def self.force_shiny_visible_ow
+    return 0 unless defined?($game_map) && $game_map
+    count = 0
+    $game_map.events.values.each do |event|
+      next unless eligible_event?(event)
+      pkmn = ow_pokemon_for(event)
+      next unless pkmn && pkmn.respond_to?(:shiny=)
+      pkmn.shiny = true
+      refresh_ow_shiny_sprite(event,pkmn) if
+        respond_to?(:refresh_ow_shiny_sprite)
+      count += 1
+    end
+    count
   end
 
   def self.ow_pokemon_for(event,cfg=nil)
