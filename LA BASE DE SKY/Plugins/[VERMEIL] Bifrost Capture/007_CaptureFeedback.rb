@@ -118,6 +118,7 @@ module BifrostCapture
           @visible.delete(state)
         end
         advance_queue unless finished.empty?
+        dispose if @visible.empty? && (@queue || []).empty?
       end
 
       def ensure_sprite(state)
