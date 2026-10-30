@@ -3,6 +3,35 @@
 # USE and BACK are contextual; SPECIAL and F9 ALWAYS keep their original jobs.
 module BifrostCapture
   module MapInputGuard
+    def bifrost_suspend_for_ui
+      BifrostCapture::LiveAim.close if defined?(BifrostCapture::LiveAim) &&
+                                       BifrostCapture::LiveAim.active?
+      BifrostCapture::Motion.cancel if defined?(BifrostCapture::Motion) &&
+                                       BifrostCapture::Motion.busy?
+    end
+
+    # Menu and debug transitions are authoritative. Do not leave an in-flight
+    # world sprite visible over the bag/ready menu, or keep OW AI active there.
+    def call_menu(*args)
+      bifrost_suspend_for_ui
+      super
+    end
+
+    def call_ready_menu(*args)
+      bifrost_suspend_for_ui
+      super
+    end
+
+    def call_debug(*args)
+      bifrost_suspend_for_ui
+      super
+    end
+
+    def transfer_player(*args)
+      bifrost_suspend_for_ui
+      super
+    end
+
     def update_input(*args)
       if defined?(BifrostCapture::LiveAim) &&
          BifrostCapture::LiveAim.consume_claimed_map_input?
