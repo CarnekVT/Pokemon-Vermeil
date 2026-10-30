@@ -88,6 +88,8 @@ module BifrostCapture
           BifrostCapture.fleeing?(event)
         BifrostCapture.cancel_escape_reaction(event) if
           BifrostCapture.respond_to?(:cancel_escape_reaction)
+        BifrostCapture.cancel_pending_attack(event) if
+          BifrostCapture.respond_to?(:cancel_pending_attack)
         event.instance_variable_set(:@bifrost_alert_cooldown,180)
         event.instance_variable_set(:@bifrost_mood_state,:curious)
         spec = BifrostCapture.event_spec(event)
