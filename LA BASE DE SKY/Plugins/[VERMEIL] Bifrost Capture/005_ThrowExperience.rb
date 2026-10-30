@@ -365,11 +365,15 @@ module BifrostCapture
       old_mouse = nil
       frames = 0
       key = hotkey
+      # A manual event opening must not auto-fire when the configured mode is
+      # hold-to-release unless the player actually held the aiming button.
+      held_seen = !!(key && Input.press?(key))
       loop do
         Graphics.update
         Input.update
         update_frame
         frames += 1
+        held_seen = true if key && Input.press?(key)
         if Input.trigger?(Input::BACK) ||
            (cfg["control_mode"] != "hold" && key && frames > 8 &&
              Input.trigger?(key))
@@ -444,7 +448,7 @@ module BifrostCapture
         click = cfg["aim_mouse"] == "1" && defined?(Input::MOUSELEFT) &&
                 Input.trigger?(Input::MOUSELEFT)
         release = cfg["control_mode"] == "hold" && key &&
-                  frames > 2 && !Input.press?(key)
+                  held_seen && frames > 2 && !Input.press?(key)
         next unless frames > 5 && (Input.trigger?(Input::USE) || click || release)
         if click && old_mouse
           px,py = old_mouse
