@@ -39,6 +39,60 @@ module BSSSceneVisibilityAndHud
     BSS064.log("BSS sendout visibility: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
+  # Cinematics may restore only Pokémon whose native sendout has completed.
+  # Identity tokens stop a previous battler in the same slot being resurrected.
+  def bss_dialogue_record_revealed(indices=nil, completed_sendout=false)
+    return unless @bss_dialogue_seen_sendout && bss_visibility_active?
+    return unless @battle && @sprites.is_a?(Hash)
+    return if @bss_nds_intro_active || @bss096_native_formation_depth.to_i>0
+    @bss_dialogue_revealed ||= {}
+    @battle.battlers.each do |bat|
+      next unless bat && !(bat.fainted? rescue true)
+      idx=bat.index
+      next if indices && !indices.include?(idx)
+      mon=(bat.pokemon rescue nil)
+      sp=@sprites["pokemon_#{idx}"]
+      next unless mon && sp && !(sp.disposed? rescue true)
+      unless completed_sendout
+        next unless (sp.visible rescue false) && (sp.opacity rescue 0).to_i>0
+      end
+      @bss_dialogue_revealed[idx]=mon.object_id
+    end
+  rescue StandardError => e
+    BSS064.log("BSS cinematic reveal registry: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
+  def bss_dialogue_restore_revealed
+    return unless bss_visibility_active? && @battle && @sprites.is_a?(Hash)
+    return if @bss_nds_intro_active || @bss070_ebdx_bas_frame ||
+              @bas_runtime_playback_depth.to_i>0 ||
+              @bss_camera_attack_phase_depth.to_i>0 ||
+              @bss096_native_formation_depth.to_i>0 ||
+              @bss096_battler_anim_depth.to_i>0 ||
+              @bss087_native_move_active || @bss084_native_move_active ||
+              @vermeil_cinema_trainer_intro_depth.to_i>0
+    changed=false
+    (@bss_dialogue_revealed || {}).each do |idx,token|
+      bat=(@battle.battlers[idx] rescue nil)
+      next unless bat && !(bat.fainted? rescue true)
+      mon=(bat.pokemon rescue nil)
+      next unless mon && mon.object_id==token
+      sp=@sprites["pokemon_#{idx}"]
+      next unless sp && !(sp.disposed? rescue true)
+      if sp.respond_to?(:visible=) && !(sp.visible rescue true)
+        sp.visible=true
+        changed=true
+      end
+      if sp.respond_to?(:opacity=) && (sp.opacity rescue 255).to_i==0
+        sp.opacity=255
+        changed=true
+      end
+    end
+    bss070_ebdx_apply_world_alignment if changed && respond_to?(:bss070_ebdx_apply_world_alignment)
+  rescue StandardError => e
+    BSS064.log("BSS cinematic visibility restore: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
   def pbSendOutBattlers(*args,&block)
     result=super
     rows=args[0].is_a?(Array) ? args[0] : []
@@ -48,6 +102,8 @@ module BSSSceneVisibilityAndHud
     end
     indices=nil if indices.empty?
     bss_recover_active_battlers_after_sendout(indices)
+    @bss_dialogue_seen_sendout=true
+    bss_dialogue_record_revealed(indices,true)
     # The DynamicPokemonSprite can load one frame after the sendout method.
     # Perform a single second recovery on the next scene update.
     @bss_pending_visibility_restore=indices || :all
@@ -68,6 +124,8 @@ module BSSSceneVisibilityAndHud
       @bss_first_command_visibility_recovered=true
       bss_recover_active_battlers_after_sendout
     end
+    @bss_dialogue_seen_sendout=true if bss_visibility_active?
+    bss_dialogue_record_revealed
     super
   end
 
@@ -154,8 +212,10 @@ module BSSSceneVisibilityAndHud
         @bss_cinematic_hud_saved[key]=sp.visible unless @bss_cinematic_hud_saved.key?(key)
       end
     end
+    bss_dialogue_record_revealed if bss
     result=super
     if bss
+      bss_dialogue_restore_revealed
       bss_cinematic_hud_hide!
       bss_cinematic_tone_refresh!
     end
@@ -169,8 +229,9 @@ module BSSSceneVisibilityAndHud
   end
 
   def pbForceEndSpeech(*args,&block)
+    was_cinematic=@bss_dialogue_cinema_active
     result=super
-    if @bss_dialogue_cinema_active
+    if was_cinematic
       # Only restore coordinates saved before this speech. Trainer visibility
       # remains owned by DBK/Essentials (e.g., it can legitimately disappear).
       (@bss_cinematic_trainer_home || {}).each do |name,xy|
@@ -183,12 +244,23 @@ module BSSSceneVisibilityAndHud
       @bss_dialogue_cinema_active=false
       bss_cinematic_hud_release!
       bss_cinematic_tone_refresh!
+      bss_dialogue_restore_revealed
+      # Catch deferred visibility writes by DBK after cinematic speech.
+      @bss_dialogue_visibility_tail=8
     end
     result
   end
 
   def pbUpdate(*args,&block)
     result=super
+    if bss_visibility_active?
+      if @bss_dialogue_cinema_active || @bss_dialogue_visibility_tail.to_i>0
+        bss_dialogue_restore_revealed
+        @bss_dialogue_visibility_tail=[@bss_dialogue_visibility_tail.to_i-1,0].max unless @bss_dialogue_cinema_active
+      else
+        bss_dialogue_record_revealed
+      end
+    end
     if bss_visibility_active?
       want=@bss_dialogue_cinema_active ? 1.0 : 0.0
       have=@bss_dialogue_dim_alpha.to_f
