@@ -13,7 +13,6 @@ module BSSVideoReview
   CAMERA_TWEEN_FRAMES = 70
   AMBIENT_VECTOR_SPEED = 0.0040
   AMBIENT_HOLD_FRAMES = 260
-  TRAINER_BLACKBAR_Y = 15
   MULTI_BATTLER_SPREAD_PX = 16.0
   # Set to false to respect authored fixed-hour (day/dawn/night) backdrops.
   MATCH_GAME_CLOCK = true
@@ -199,6 +198,9 @@ module BSSVideoSceneCamera
   def bss_video_camera_to(side, frames = BSSVideoReview::CAMERA_TWEEN_FRAMES)
     return false unless BSSVideoReview.active?(self)
     return false if BSSVideoReview.leased?(self) || @bss083_camera_freeze.to_i > 0
+    # Scripted speech and trainer intros own the camera, not the idle director.
+    return false if @bss_dialogue_cinema_active || @bss_video_blackbars
+    return false if respond_to?(:vermeil_cinema_script_locked?) && vermeil_cinema_script_locked?
     dest = BSSVideoReview.vec(self, side)
     return false unless dest
     cur = @vector.get.map { |x| x.to_f }
@@ -232,7 +234,9 @@ module BSSVideoSceneCamera
   # No random 2D jitter. Long, deterministic, slow player/enemy sweeps.
   def bss102_next_ambient_target(*args, &block)
     return super unless BSSVideoReview.active?(self)
-    if BSSVideoReview.leased?(self) || @bss_video_menu_state || @bss_video_targeting
+    if BSSVideoReview.leased?(self) || @bss_video_menu_state || @bss_video_targeting ||
+       @bss_dialogue_cinema_active || @bss_video_blackbars ||
+       (respond_to?(:vermeil_cinema_script_locked?) && vermeil_cinema_script_locked?)
       @bss102_ambient_due = BSSVideoReview::AMBIENT_HOLD_FRAMES
       return nil
     end
@@ -301,23 +305,6 @@ module BSSVideoCinematicScene
     super
   end
 
-  def bss070_ebdx_apply_world_alignment(*args, &block)
-    result = super
-    if @bss_video_blackbars && @battle && @battle.opponent
-      room = instance_variable_get(:@bss070_ebdx_room)
-      sprites = instance_variable_get(:@sprites)
-      if room && sprites.is_a?(Hash)
-        @battle.opponent.each_index do |i|
-          sp = sprites["trainer_#{i}"]
-          a = (room.trainer(i * 2 + 1) rescue nil)
-          next unless BSSVideoReview.valid_sprite?(sp) && BSSVideoReview.valid_sprite?(a)
-          sp.y = a.y + BSSVideoReview::TRAINER_BLACKBAR_Y if sp.respond_to?(:y=)
-        end
-      end
-    end
-    result
-  end
-
   def pbShowSpeakerWindows(*args, &block)
     result = super
     bss_video_ensure_second_battlers
@@ -326,19 +313,10 @@ module BSSVideoCinematicScene
 
   def bss_video_ensure_second_battlers
     return unless BSSVideoReview::KEEP_ACTIVE_SECOND_VISIBLE_IN_DIALOGUE
-    return unless @bss_video_blackbars && @battle && @battle.respond_to?(:battlers)
-    sprites = instance_variable_get(:@sprites)
-    return unless sprites.is_a?(Hash)
-    # Only slots 2/3: don't override an intentional hide on a first send-out.
-    [2, 3].each do |i|
-      b = @battle.battlers[i] rescue nil
-      next unless BSSVideoReview.battler_active?(b)
-      sp = sprites["pokemon_#{i}"]
-      next unless BSSVideoReview.valid_sprite?(sp)
-      next unless sp.respond_to?(:visible=) && sp.respond_to?(:bitmap) && sp.bitmap
-      next unless (sp.opacity rescue 0).to_i > 0
-      sp.visible = true
-    end
+    return unless @bss_video_blackbars || @bss_dialogue_cinema_active
+    # DynamicPokemonSprite need not expose bitmap: recover only previously
+    # revealed active Pokémon, without touching BAS or native sendout frames.
+    bss_dialogue_restore_revealed if respond_to?(:bss_dialogue_restore_revealed)
   end
 end
 
