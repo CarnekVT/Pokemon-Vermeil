@@ -24,11 +24,15 @@ module BSSSceneVisibilityAndHud
       else
         "#{key}=(vis:#{(sp.visible rescue '?')},op:#{(sp.opacity rescue '?')}," +
         "xy:#{(sp.x rescue '?')},#{(sp.y rescue '?')}," +
-        "zoom:#{(sp.zoom_y rescue '?')},z:#{(sp.z rescue '?')})"
+        "zoom:#{(sp.zoom_y rescue '?')},z:#{(sp.z rescue '?')}," +
+        "vanish:#{(sp.vanishMode rescue '?')}," +
+        "nativeVis:#{(sp.instance_variable_get(:@spriteVisible) rescue '?')}," +
+        "loaded:#{!!(sp.bitmap rescue nil)})"
       end
     end
     expected=(Battle::Scene.pbTrainerPosition(1)[1] rescue '?')
     line="[#{stage}] turn=#{(@battle.turnCount rescue '?')} " +
+         "camera=#{(@vector.get.inspect rescue '?')} " +
          "expected_trainer_y=#{expected} " +
          "cinema=#{!!@bss_dialogue_cinema_active} " +
          "sendout=#{!!@bss_dialogue_seen_sendout} " + fields.join(' ')
