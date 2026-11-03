@@ -2345,25 +2345,20 @@ module BSS070EBDXSceneBridge
   end
 
   def bss070_ebdx_native_trainer_position_for(index)
-    # EBDX uses battler indices (1,3,5), while Essentials' REAL trainers
-    # are numbered from trainer_1, never trainer_0. Do not fall back to
-    # a Pokemon's battle position (FOE_BASE_Y misses the trainer offset).
+    # Trainer_1/etc are display sprites, which DBK intentionally slides off
+    # screen during a sendout and may animate during dialogue. Those changing
+    # screen coordinates are NOT world-space metric anchors.
+    # Sample Essentials' immutable, authored trainer floor instead.
     idx=[index.to_i,0].max
     side=idx.odd? ? 1 : 0
-    trainer_index=(idx/2)+1
-    key="#{side==1 ? 'trainer' : 'player'}_#{trainer_index}"
-    sp=@sprites[key] rescue nil
-    default_z=(side==1 ? 7 : 80)+trainer_index-1
-    if sp && !(sp.disposed? rescue true) && sp.respond_to?(:x) && sp.respond_to?(:y)
-      return [sp.x.to_f,sp.y.to_f,(sp.z rescue default_z).to_i]
-    end
+    slot=idx/2
     count=(side==1 ? (@battle.opponent.length rescue 1) : (@battle.player.length rescue 1))
     count=1 if count.to_i<1
-    pos=Battle::Scene.pbTrainerPosition(side,trainer_index-1,count)
-    [pos[0].to_f,pos[1].to_f,default_z]
+    pos=Battle::Scene.pbTrainerPosition(side,slot,count)
+    [pos[0].to_f,pos[1].to_f,(side==1 ? 7 : 80)+slot]
   rescue StandardError
-    pos=(Battle::Scene.pbTrainerPosition(index.to_i.odd? ? 1 : 0) rescue [Graphics.width*0.5,Graphics.height*0.5])
-    [pos[0].to_f,pos[1].to_f,7]
+    fallback=(Battle::Scene.pbTrainerPosition(index.to_i.odd? ? 1 : 0) rescue [Graphics.width*0.5,Graphics.height*0.5])
+    [fallback[0].to_f,fallback[1].to_f,7]
   end
 
   def bss070_ebdx_anchor_scale(index)
