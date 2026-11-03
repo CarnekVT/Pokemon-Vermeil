@@ -47,7 +47,9 @@ module BSS070EBDXCore
     [0,384,26,322,1,1], [198,298,18,282,1,1], [196,306,26,242,0.6,1],
     [156,280,18,226,0.6,1], [60,280,12,388,1,1], [160,286,16,340,1,1]
   ]
-  MAIN_FALLBACK = [102,408,32,342,1,1]
+  # The 0.92-wide baseline is the NORMAL 100% framing for Vermeil EBDX.
+  # Subsequent camera shots are relative to MAIN, not to the source EBDX 1.0.
+  MAIN_FALLBACK = [102,408,32,342,0.92,0.92]
   BUILTIN = {}
   TERRAIN = {}
   @next_vectors = []
@@ -2352,8 +2354,12 @@ module BSS070EBDXSceneBridge
     idx=[index.to_i,0].max
     side=idx.odd? ? 1 : 0
     slot=idx/2
-    count=(side==1 ? (@battle.opponent.length rescue 1) : (@battle.player.length rescue 1))
-    count=1 if count.to_i<1
+    # Wild encounters have no trainer array. An exception-rescue around
+    # nil.length still emits a NoMethodError in the Essentials debugger on
+    # EVERY frame; check the owner before accessing length.
+    owners=side==1 ? (@battle.opponent rescue nil) : (@battle.player rescue nil)
+    count=(owners && owners.respond_to?(:length)) ? owners.length.to_i : 1
+    count=1 if count<1
     pos=Battle::Scene.pbTrainerPosition(side,slot,count)
     [pos[0].to_f,pos[1].to_f,(side==1 ? 7 : 80)+slot]
   rescue StandardError
