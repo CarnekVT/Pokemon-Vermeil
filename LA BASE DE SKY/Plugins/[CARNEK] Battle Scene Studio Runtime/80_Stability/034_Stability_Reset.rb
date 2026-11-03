@@ -467,20 +467,59 @@ module BSS106SceneStability
     room.bss106_pop_behind! if room && room.respond_to?(:bss106_pop_behind!)
   end
 
+  # Native sendout is dispatched DIRECTLY from this authority; external
+  # pbSendOutBattlers prepend wrappers are intentionally bypassed. Therefore
+  # final visual state MUST be reconciled here, after the actual animation.
+  # This handles repeated opponents in one slot without reviving a fainted mon.
+  def bss106_finish_sendout(sendouts)
+    return unless @battle && @sprites.is_a?(Hash)
+    Array(sendouts).each do |row|
+      idx = row.is_a?(Array) ? row[0] : row
+      idx = idx.index if idx.respond_to?(:index)
+      next unless idx.is_a?(Integer)
+      battler = (@battle.battlers[idx] rescue nil)
+      next unless battler && !(battler.fainted? rescue true)
+      mon = (battler.pokemon rescue nil)
+      next unless mon
+      sprite = @sprites["pokemon_#{idx}"]
+      next unless sprite && !(sprite.disposed? rescue true)
+      next unless sprite.respond_to?(:pkmn) && sprite.pkmn
+      next if sprite.respond_to?(:substitute) && sprite.substitute
+      # DBK Animated Pokemon stores a persistent logical visibility bit and
+      # reassigns Sprite#visible from that bit during Sprite#update.
+      # Only its BattlerSprite exposes vanishMode; trainers/shadows do NOT.
+      if sprite.is_a?(Battle::Scene::BattlerSprite) &&
+         sprite.respond_to?(:vanishMode) && sprite.respond_to?(:vanishMode=)
+        sprite.vanishMode = 0 if sprite.vanishMode.to_i > 0
+      end
+      sprite.visible = true if sprite.respond_to?(:visible=)
+      sprite.opacity = 255 if sprite.respond_to?(:opacity=) && sprite.opacity.to_i == 0
+      @bss106_presented_pokemon ||= {}
+      @bss106_presented_pokemon[idx] = mon.object_id
+    end
+  end
+
   def pbSendOutBattlers(*args,&block)
     return super unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
-    state=BSS106.camera_state(self); old=@bss106_party_camera_freeze; @bss106_party_camera_freeze=true
+    state=BSS106.camera_state(self)
+    old=@bss106_party_camera_freeze
+    @bss106_party_camera_freeze=true
+    finished=false
     m=BSS106.native_scene_method(self,:pbSendOutBattlers)
-    return m.call(*args,&block) if m
-    super
+    result=m ? m.call(*args,&block) : super
+    finished=true
+    result
   ensure
     @bss106_party_camera_freeze=old
     BSS106.restore_camera_target(self,state) if state
     begin
       bss070_ebdx_invalidate_anchors if respond_to?(:bss070_ebdx_invalidate_anchors)
-      room=BSS106.room(self); room.update if room && !(room.disposed? rescue true)
+      room=BSS106.room(self)
+      room.update if room && !(room.disposed? rescue true)
       bss070_ebdx_apply_world_alignment if respond_to?(:bss070_ebdx_apply_world_alignment)
-    rescue
+      bss106_finish_sendout(args[0]) if finished
+    rescue StandardError => e
+      BSS064.log("Native sendout completion: #{e.class}: #{e.message}") if defined?(BSS064)
     end
   end
 
