@@ -186,6 +186,8 @@ module VermeilBSSCinemaScene
 
   def vermeil_cinema_return_main(frames=9)
     return unless vermeil_cinema_active? && @vector
+    # Never animate to MAIN while DBK/BSS owns scripted speech.
+    return if vermeil_cinema_script_locked?
     main=BSS070EBDXCore.get_vector(:MAIN,@battle)
     # Ease the SINGLE shared world vector instead of using a too-fast fixed
     # @vector.inc and snapping 8%-20% of the remaining distance at the end.
@@ -208,6 +210,33 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_last_shot=nil
   rescue StandardError => e
     BSS064.log("BSS camera main: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
+  # Bag/party/cancel are not focus shots. Interpolate back to the
+  # NORMAL EBDX MAIN composition and hold it until another command is shown.
+  def vermeil_cinema_queue_home
+    return unless vermeil_cinema_active? && @vector
+    @vermeil_cinema_home_from=@vector.get.clone
+    @vermeil_cinema_home_started=Time.now.to_f
+    @vermeil_cinema_home_hold=true
+    @vermeil_cinema_sweep_phase=nil
+    @vermeil_cinema_last_shot=nil
+  end
+
+  def vermeil_cinema_home_tick
+    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    return unless main.is_a?(Array) && @vector
+    began=@vermeil_cinema_home_started
+    if began
+      t=[[((Time.now.to_f-began)/0.42),0.0].max,1.0].min
+      smooth=t*t*(3.0-2.0*t)
+      from=@vermeil_cinema_home_from || @vector.get
+      @vector.snap(6.times.map{|i| from[i].to_f+(main[i].to_f-from[i].to_f)*smooth})
+      @vermeil_cinema_home_started=nil if t>=1.0
+    else
+      # Keep the Bag/Party view at the normalized full-field baseline.
+      @vector.snap(main)
+    end
   end
 
   # A single absolute EBDX world-vector tween: smoothstep begins/ends at
@@ -271,9 +300,17 @@ module VermeilBSSCinemaScene
   # update the room, but receive advance_camera=false (no competing retarget).
   def bss070_ebdx_tick(advance_camera = true, align = true)
     return super unless vermeil_cinema_active?
-    # Do not modify the vector or recalibrate battlers/trainers during scripted
-    # dialogue, DBK speech, trainer animation, or the NDS overlay handoff.
-    return super(false, false) if vermeil_cinema_script_locked?
+    # Scripted dialogue/DBK speech is an exclusive presentation lease.
+    # Some older BSS helpers can still call vector.set directly; restore the
+    # snapshot before rendering this frame without affecting BAS ownership.
+    if vermeil_cinema_script_locked?
+      held=@vermeil_cinema_script_camera_hold
+      if held.is_a?(Array) && @vector && @bas_runtime_playback_depth.to_i<=0 &&
+         !(respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?)
+        @vector.snap(held)
+      end
+      return super(false,false)
+    end
     # Ownership: intro > speech/forced > BAS/native attack phase > menu > idle.
     # Always render the room, but only command/fight menus can write a new
     # presentation camera target. This prevents vector drift between moves.
@@ -284,7 +321,9 @@ module VermeilBSSCinemaScene
     # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
     if advance_camera
-      if phase==:idle || phase==:command
+      if @vermeil_cinema_home_hold && phase==:idle
+        vermeil_cinema_home_tick
+      elsif phase==:idle || phase==:command
         vermeil_cinema_sweep_tick(phase)
       elsif phase==:fight || phase==:target
         # Target selection receives a discrete, user-initiated composition.
@@ -315,6 +354,8 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_idle_side = 0
     @vermeil_cinema_sweep_phase = nil
     @vermeil_cinema_sweep_started = nil
+    @vermeil_cinema_home_started = nil
+    @vermeil_cinema_home_hold = false
     @bss_fight_actor_index=nil
     @bss_selected_target_index=nil
     @bss_target_select_depth=0
@@ -324,11 +365,16 @@ module VermeilBSSCinemaScene
   def pbCommandMenu(*args, &block)
     return super unless vermeil_cinema_active?
     @vermeil_cinema_first_command_reached = true
+    @vermeil_cinema_home_hold=false
+    @vermeil_cinema_home_started=nil
     @vermeil_cinema_last_shot = nil  # new turn / reacquire Command
     @vermeil_cinema_command_depth = @vermeil_cinema_command_depth.to_i + 1
-    super
+    choice=super
+    choice
   ensure
     @vermeil_cinema_command_depth = [@vermeil_cinema_command_depth.to_i - 1, 0].max if @vermeil_cinema_command_depth
+    # Essentials: 0=Fight; 1=Bag; 2=Party; -1=Cancel.
+    vermeil_cinema_queue_home if defined?(choice) && choice!=0
   end
 
   def pbFightMenu(*args, &block)
@@ -340,6 +386,7 @@ module VermeilBSSCinemaScene
   ensure
     @vermeil_cinema_fight_depth = [@vermeil_cinema_fight_depth.to_i - 1, 0].max if @vermeil_cinema_fight_depth
     @bss_fight_actor_index=nil if @vermeil_cinema_fight_depth.to_i<=0
+    vermeil_cinema_queue_home if @vermeil_cinema_fight_depth.to_i==0
   end
 
   # Legacy callbacks attempted to return to MAIN or choose random EBDX shots.
