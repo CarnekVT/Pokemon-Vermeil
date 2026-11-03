@@ -14,8 +14,8 @@ module VermeilBSSNDSHandoff
   START_ZOOM = 2.0
   # Seconds, not frames: 20 iterations at 110+ FPS were a blink.
   # Keep the scene anchored during hold and ease to 100% over the reveal.
-  HOLD_SECONDS = 0.32
-  REVEAL_SECONDS = 1.30
+  HOLD_SECONDS = 0.24
+  REVEAL_SECONDS = 1.06
   TAGS = {
     :grass => ["Graphics/Transitions/GrassIntro", ["Anim/Wind8",40,110], [-7,3]],
     :water => ["Graphics/Transitions/WaterIntro", ["Anim/Water1",40,115], [-4,4]],
@@ -130,7 +130,6 @@ module VermeilBSSNDSIntroScene
     path=VermeilBSSNDSHandoff.asset(@battle,tag)
     return false unless path
     @bss_nds_intro_active=true
-    hidden=[]
     viewport=nil
     cover=nil
     grass=nil
@@ -139,13 +138,9 @@ module VermeilBSSNDSIntroScene
     flash_bitmap=nil
     saved_vector=(@vector.get.clone rescue nil)
     begin
-      (@sprites || {}).each do |key,sp|
-        next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
-        next unless sp && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
-        hidden << [sp,sp.visible]
-        sp.visible=false
-      rescue StandardError
-      end
+      # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
+      # Hiding them for the capture caused a visible pop at the reveal edge.
+      # Do not reveal unreleased party Pokemon; respect native scene state.
 
       # An initial shot from MAIN means the visual reference and Essentials'
       # trainer sendout use one baseline. No competing per-frame zoom writers.
@@ -157,6 +152,8 @@ module VermeilBSSNDSIntroScene
       Graphics.update
       bitmap=(Graphics.snap_to_bitmap rescue nil)
       return false unless bitmap && !(bitmap.disposed? rescue false)
+      # The screenshot must include any already-visible opponent as well as
+      # the EBDX landscape; their actual sprites remain untouched underneath.
 
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
@@ -255,12 +252,6 @@ module VermeilBSSNDSIntroScene
     ensure
       # Never force an old trainer position or leave the scene behind a
       # full-screen temporary sprite, even on error.
-      hidden.each do |sp,was_visible|
-        begin
-          sp.visible=was_visible if sp && !(sp.disposed? rescue true)
-        rescue StandardError
-        end
-      end
       if @vector && @vector.respond_to?(:snap)
         # Native trainer sendout must inherit the same MAIN shot the reveal
         # settled on, not a stale overview shot saved before the transition.
@@ -303,9 +294,9 @@ module VermeilBSSNDSIntroScene
     @battle.sideSizes[1].times do |i|
       idx=(2*i)+1
       next unless @battle.battlers[idx]
-      @animations.push(Animation::DataBoxAppear.new(@sprites,@viewport,idx))
+      @animations.push(Battle::Scene::Animation::DataBoxAppear.new(@sprites,@viewport,idx))
     end
-    @animations.push(Animation::Intro2.new(@sprites,@viewport,@battle.sideSizes[1]))
+    @animations.push(Battle::Scene::Animation::Intro2.new(@sprites,@viewport,@battle.sideSizes[1]))
     while inPartyAnimation?
       pbUpdate
     end
