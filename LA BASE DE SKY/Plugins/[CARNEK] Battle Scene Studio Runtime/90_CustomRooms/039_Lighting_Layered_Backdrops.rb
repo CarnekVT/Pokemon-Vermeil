@@ -504,11 +504,37 @@ module BSSLayeredRoomSupport
 
   def update(*args,&block)
     result=super
-    # position() already synchronized the three planes once this frame.
-    now=defined?(System) && System.respond_to?(:uptime) ? System.uptime : Time.now.to_f
-    if !@bss_layered_next_tint || now>=@bss_layered_next_tint
-      @bss_layered_next_tint=now+0.25
-      bss_layered_apply_tone!
+    # Cinematic terrain/sky dimming has ONE owning target in BSSDialogueEngine.
+    # Interpolate here, in the real room update (not in a hotfix or after the
+    # black-bar animation). Use wall-clock delta for 60/110+ FPS compatibility.
+    cinematic_active=false
+    if @scene && @scene.instance_variable_defined?(:@bss_dialogue_dim_target)
+      target=[[(@scene.instance_variable_get(:@bss_dialogue_dim_target).to_f),0.0].max,1.0].min
+      alpha=(@scene.instance_variable_get(:@bss_dialogue_dim_alpha) || 0.0).to_f
+      alpha=[[alpha,0.0].max,1.0].min
+      now=Time.now.to_f
+      delta=@bss_layered_dim_last_time ? (now-@bss_layered_dim_last_time) : 0.0
+      @bss_layered_dim_last_time=now
+      delta=[[delta,0.0].max,0.08].min
+      if (target-alpha).abs>0.001
+        duration=target>alpha ? 0.30 : 0.44
+        step=delta/duration
+        alpha=target>alpha ? [alpha+step,target].min : [alpha-step,target].max
+        @scene.instance_variable_set(:@bss_dialogue_dim_alpha,alpha)
+        cinematic_active=true
+      end
+    else
+      @bss_layered_dim_last_time=nil
+    end
+    if cinematic_active
+      bss_layered_apply_tone!(true)
+    else
+      # Preserve the inexpensive 4Hz refresh for actual day/night lighting.
+      now=defined?(System) && System.respond_to?(:uptime) ? System.uptime : Time.now.to_f
+      if !@bss_layered_next_tint || now>=@bss_layered_next_tint
+        @bss_layered_next_tint=now+0.25
+        bss_layered_apply_tone!
+      end
     end
     result
   end
