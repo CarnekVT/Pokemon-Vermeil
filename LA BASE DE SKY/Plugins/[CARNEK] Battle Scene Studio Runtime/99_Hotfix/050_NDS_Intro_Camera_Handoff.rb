@@ -14,8 +14,8 @@ module VermeilBSSNDSHandoff
   START_ZOOM = 2.0
   # Seconds, not frames: 20 iterations at 110+ FPS were a blink.
   # Keep the scene anchored during hold and ease to 100% over the reveal.
-  HOLD_SECONDS = 0.24
-  REVEAL_SECONDS = 1.06
+  HOLD_SECONDS = 0.12
+  REVEAL_SECONDS = 0.82
   TAGS = {
     :grass => ["Graphics/Transitions/GrassIntro", ["Anim/Wind8",40,110], [-7,3]],
     :water => ["Graphics/Transitions/WaterIntro", ["Anim/Water1",40,115], [-4,4]],
@@ -160,11 +160,28 @@ module VermeilBSSNDSIntroScene
       room=@bss070_ebdx_room
       room.update if room && !(room.disposed? rescue true)
       bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
-      Graphics.update
-      bitmap=(Graphics.snap_to_bitmap rescue nil)
+      # Snapshot ONLY the EBDX environment, not the animated actors. Restore
+      # their original visibility IMMEDIATELY after one capture frame. Capturing
+      # trainers/Pokemon in this bitmap froze them while the live sprites moved,
+      # and their positions appeared to jump when the overlay disappeared.
+      captured=[]
+      begin
+        @sprites.each do |key,sp|
+          next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
+          next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
+          captured << [sp,sp.visible]
+          sp.visible=false
+        end
+        Graphics.update
+        bitmap=Graphics.snap_to_bitmap
+      ensure
+        captured.each do |sp,was_visible|
+          sp.visible=was_visible if sp && !(sp.disposed? rescue true)
+        end
+      end
       return false unless bitmap && !(bitmap.disposed? rescue false)
-      # The screenshot must include any already-visible opponent as well as
-      # the EBDX landscape; their actual sprites remain untouched underneath.
+      # Underlying TrainerSprite and DBK animated Pokemon keep playing while
+      # this environment-only snapshot zooms and fades.
 
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
@@ -222,7 +239,7 @@ module VermeilBSSNDSIntroScene
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
-      last_progress=-1.0
+      trainer_frame_at=began
       frame=0
       loop do
         elapsed=[Time.now.to_f-began,0.0].max
@@ -242,10 +259,26 @@ module VermeilBSSNDSIntroScene
         # while its alpha reveals the real, already rendered EBDX room.
         grass.x=(dx.to_f*(elapsed*60.0)*0.25).round
         grass.y=(dy.to_f*(elapsed*60.0)*0.12).round
-        grass.opacity=(255.0*(1.0-[[p*1.15,1.0].min,0.0].max)).round
-        flash_p=[[(elapsed-hold)/0.27,0.0].max,1.0].min
-        flash.opacity=elapsed<hold ? 0 : (100.0*(1.0-(2.0*flash_p-1.0).abs)).round
+        grass.opacity=(255.0*(1.0-[[p*1.35,1.0].min,0.0].max)).round
+        # Strong but brief impact flash as the GrassIntro tears away.
+        flash_p=[[(elapsed-hold)/0.22,0.0].max,1.0].min
+        flash.opacity=elapsed<hold ? 0 : (158.0*(1.0-(2.0*flash_p-1.0).abs)).round
+        # Reveal live actors/terrain during the final third, not a frozen
+        # copy of the battlers. Native animation frames remain authoritative.
+        reveal=[[(p-0.57)/0.43,0.0].max,1.0].min
+        cover.opacity=(255.0*(1.0-reveal*reveal*(3.0-2.0*reveal))).round
+        if @battle.trainerBattle? && p>=0.22 && Time.now.to_f-trainer_frame_at>=0.045
+          (@battle.opponent || []).each_index do |i|
+            trainer=@sprites["trainer_#{i+1}"]
+            trainer.play if trainer && trainer.respond_to?(:play) &&
+                            trainer.respond_to?(:finished?) && !trainer.finished?
+          end
+          trainer_frame_at=Time.now.to_f
+        end
+        # DBK advances animated Pokemon from pbFrameUpdate; Graphics.update
+        # alone makes them appear frozen for the whole encounter transition.
         Graphics.update
+        pbFrameUpdate if respond_to?(:pbFrameUpdate)
         frame+=1
         break if elapsed>=hold+duration && frame>=2
         break if frame>=1000 # Never hang if a platform clock misbehaves.
@@ -255,6 +288,7 @@ module VermeilBSSNDSIntroScene
       cover.zoom_y=1.0
       grass.opacity=0
       flash.opacity=0
+      cover.opacity=0
       Graphics.update
       true
     rescue StandardError => e
@@ -298,6 +332,10 @@ module VermeilBSSNDSIntroScene
     # after revealing the battlefield. The former BSS bridge did, producing
     # another black flash/slide and spoiling the camera handoff.
     if @battle.trainerBattle?
+      # TrainerBitmapWrapper animation (not Pokemon Intro2) is the one that
+      # should run in a scripted trainer battle. Resume any unplayed frames
+      # from the reveal before native PokeballTrainerSendOut takes over.
+      pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
       return
