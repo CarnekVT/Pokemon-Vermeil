@@ -374,7 +374,15 @@ module VermeilBSSCinemaScene
   ensure
     @vermeil_cinema_command_depth = [@vermeil_cinema_command_depth.to_i - 1, 0].max if @vermeil_cinema_command_depth
     # Essentials: 0=Fight; 1=Bag; 2=Party; -1=Cancel.
-    vermeil_cinema_queue_home if defined?(choice) && choice!=0
+    # External Bag/Party screens do not keep calling this Battle::Scene's
+    # pbUpdate. Finish the short MAIN handoff NOW, before the new UI opens;
+    # otherwise a wall-clock tween teleports to MAIN when gameplay resumes.
+    if defined?(choice) && choice!=0
+      if vermeil_cinema_active? && @vector && !vermeil_cinema_locked?
+        vermeil_cinema_return_main(19)
+      end
+      vermeil_cinema_queue_home
+    end
   end
 
   def pbFightMenu(*args, &block)
