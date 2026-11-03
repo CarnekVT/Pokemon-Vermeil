@@ -58,6 +58,13 @@ module BSSSceneVisibilityAndHud
       sprite=@sprites["pokemon_#{i}"]
       next if sprite && sprite.respond_to?(:substitute) && sprite.substitute
       next unless sprite && !(sprite.disposed? rescue true)
+      # DBK Animated Pokemon replaces bitmap with vanishMode=nil during sendout.
+      # The previous battler's vanishMode can survive that sprite swap.
+      # Clear it only after native sendout or at a safe command-menu boundary.
+      if sprite.respond_to?(:vanishMode) && sprite.respond_to?(:vanishMode=) &&
+         sprite.vanishMode.to_i>0
+        sprite.vanishMode=0
+      end
       # DynamicPokemonSprite may expose only animatedBitmap (not bitmap).
       # Requiring a non-nil bitmap here skipped freshly switched-in Pokémon,
       # leaving them invisible until the first BAS move assigned a frame.
@@ -120,6 +127,10 @@ module BSSSceneVisibilityAndHud
       sp=@sprites["pokemon_#{idx}"]
       next unless sp && !(sp.disposed? rescue true)
       next if sp.respond_to?(:substitute) && sp.substitute
+      if sp.respond_to?(:vanishMode) && sp.respond_to?(:vanishMode=) &&
+         sp.vanishMode.to_i>0
+        sp.vanishMode=0
+      end
       if sp.respond_to?(:visible=) && !(sp.visible rescue true)
         sp.visible=true
         changed=true
