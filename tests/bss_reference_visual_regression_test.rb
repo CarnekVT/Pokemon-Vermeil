@@ -16,7 +16,9 @@ paths={
   "World actor projection"=>File.join(bss,"70_Runtime_Pipeline","031_World_Battlers_Intro.rb"),
   "Native sendout authority"=>File.join(bss,"80_Stability","034_Stability_Reset.rb"),
   "Presentation camera"=>File.join(bss,"99_Hotfix","044_Cinematic_Camera_Director.rb"),
-  "NDS intro"=>File.join(bss,"99_Hotfix","050_NDS_Intro_Camera_Handoff.rb")
+  "NDS intro"=>File.join(bss,"99_Hotfix","050_NDS_Intro_Camera_Handoff.rb"),
+  "Layered lighting"=>File.join(bss,"90_CustomRooms","039_Lighting_Layered_Backdrops.rb"),
+  "Animated Pokemon"=>File.join(plugin,"[LBDS] Sprites Animados DBK","[006] Battler Sprites.rb")
 }
 def assert(label,pass)
   raise "FAIL: #{label}" unless pass
@@ -38,9 +40,21 @@ assert("map movement checks BSS runtime owner",source.include?("BSS064.instance_
 intro=File.read(paths["NDS intro"])
 assert("intro timing in seconds, not 20 frames",intro.include?("HOLD_SECONDS") && intro.include?("REVEAL_SECONDS"))
 assert("intro uses elapsed wall clock",intro.include?("Time.now.to_f-began"))
+assert("native intro animations have qualified owner",intro.include?("Battle::Scene::Animation::DataBoxAppear.new") &&
+       intro.include?("Battle::Scene::Animation::Intro2.new"))
+assert("intro preserves already-visible actors",!intro.include?("hidden.each") && !intro.include?("sp.visible=false"))
 camera=File.read(paths["Presentation camera"])
-assert("one stable idle shot at a time",camera.include?("IDLE_HOLD_FRAMES"))
-assert("idle camera has actual movement",camera.include?("IDLE_PAN_X") && camera.include?("phase == :idle"))
+assert("real-time camera sweeps exist",camera.include?("SWEEP_SECONDS = 3.0") &&
+       camera.include?("vermeil_cinema_sweep_tick"))
+assert("slow camera moves in command and idle",camera.include?("phase==:idle || phase==:command"))
+dialogue=File.read(paths["BSS Dialogue Engine"])
+lighting=File.read(paths["Layered lighting"])
+assert("cinematic overlay has separate tween targets",dialogue.include?("dim_target,1.0") &&
+       dialogue.include?("dim_target,0.0"))
+assert("layered lighting advances fades every update",lighting.include?("duration=target>alpha ? 0.30 : 0.44"))
+animated=File.read(paths["Animated Pokemon"])
+assert("animated sprite drops old vanish state on replacement",animated.include?("!previous.equal?(pkmn)") &&
+       animated.include?("pkmnSprite.vanishMode = 0"))
 
 # Real BSS106 native sendout completion logic with stubbed battle actors.
 module BSS064
@@ -89,6 +103,11 @@ sprite=Battle::Scene::BattlerSprite.new(new_pokemon)
 scene.instance_variable_set(:@sprites,{"pokemon_1"=>sprite,"trainer_1"=>Object.new})
 scene.bss106_finish_sendout([[1,new_pokemon]])
 assert("replacement in same slot is revealed",sprite.visible && sprite.vanishMode==0)
+sprite.visible=false
+sprite.opacity=0
+sprite.vanishMode=1
+scene.bss106_restore_presented_on_command
+assert("command boundary recovers a hidden replacement",sprite.visible && sprite.opacity==255 && sprite.vanishMode==0)
 battler.faint=true
 sprite.visible=false
 scene.bss106_finish_sendout([[1,new_pokemon]])
