@@ -437,6 +437,15 @@ class Battle::Scene
     back = !@battle.opposes?(idxBattler)
     pkmn = pbGetDynamaxPokemon(idxBattler, pkmn) if PluginManager.installed?("[DBK] Dynamax")
     battler = @battle.battlers[idxBattler]
+    # Sprite objects are reused for each battler slot. The previous Pokemon
+    # may have left vanishMode=1/2 (e.g. mid-move), but that state must never
+    # be inherited by the next species after a knockout/switch. Clear only
+    # when the actual Pokemon object changes, before loading its new bitmap.
+    previous = pkmnSprite.pkmn if pkmnSprite.respond_to?(:pkmn)
+    if previous && !previous.equal?(pkmn) &&
+       pkmnSprite.respond_to?(:vanishMode) && pkmnSprite.respond_to?(:vanishMode=)
+      pkmnSprite.vanishMode = 0
+    end
     pkmnSprite.setPokemonBitmap(pkmn, battler, back)
     shadowSprite.setPokemonBitmap(pkmn, pkmnSprite)
     if pkmnSprite.prepare_mosaic && pkmnSprite.vanishMode == 0
