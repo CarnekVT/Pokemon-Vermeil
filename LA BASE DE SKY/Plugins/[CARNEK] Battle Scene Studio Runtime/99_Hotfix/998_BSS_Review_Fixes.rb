@@ -334,8 +334,10 @@ begin
     BSS070EBDXRoom.prepend(BSSVideoClockRoom)
   end
   if defined?(Battle::Scene)
-    Battle::Scene.prepend(BSSVideoFormationMetrics) unless Battle::Scene.ancestors.include?(BSSVideoFormationMetrics)
-    Battle::Scene.prepend(BSSVideoSceneCamera) unless Battle::Scene.ancestors.include?(BSSVideoSceneCamera)
+    # The scene/world-camera writer is VermeilBSSCinemaScene (044), NOT the
+    # legacy review override. Prepending both made 998 intercept *every*
+    # command/target and fought the 044 camera's set/settle state.
+    # BSS103 already owns formation spacing; do not stack a second offset.
     Battle::Scene.prepend(BSSVideoCinematicScene) unless Battle::Scene.ancestors.include?(BSSVideoCinematicScene)
   end
 rescue StandardError => e
