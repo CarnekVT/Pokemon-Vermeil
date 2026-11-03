@@ -9,6 +9,35 @@ module BSSSceneVisibilityAndHud
     false
   end
 
+  # Diagnostics are limited to the built-in scripted Youngster QA battle,
+  # never written on normal battles and never include player/save data.
+  def bss_scripted_qa_snapshot(stage)
+    bp=(@battle.bss_blueprint rescue nil)
+    return unless bp.is_a?(Hash) && bp["key"].to_s=="bss_qa_script_trainer"
+    return unless @sprites.is_a?(Hash)
+    @bss_qa_snapshot_count=@bss_qa_snapshot_count.to_i+1
+    return if @bss_qa_snapshot_count>100
+    fields=["trainer_1","midbattle_speaker","pokemon_0","pokemon_1","shadow_1"].map do |key|
+      sp=@sprites[key]
+      if !sp || (sp.disposed? rescue true)
+        "#{key}=missing"
+      else
+        "#{key}=(vis:#{(sp.visible rescue '?')},op:#{(sp.opacity rescue '?')}," +
+        "xy:#{(sp.x rescue '?')},#{(sp.y rescue '?')}," +
+        "zoom:#{(sp.zoom_y rescue '?')},z:#{(sp.z rescue '?')})"
+      end
+    end
+    expected=(Battle::Scene.pbTrainerPosition(1)[1] rescue '?')
+    line="[#{stage}] turn=#{(@battle.turnCount rescue '?')} " +
+         "expected_trainer_y=#{expected} " +
+         "cinema=#{!!@bss_dialogue_cinema_active} " +
+         "sendout=#{!!@bss_dialogue_seen_sendout} " + fields.join(' ')
+    dir="Data/BattleSceneStudio"
+    File.open(File.join(dir,"scripted_trainer_visual_debug.log"),"a") {|f| f.puts(line)} if File.directory?(dir)
+  rescue StandardError
+    nil
+  end
+
   def bss_recover_active_battlers_after_sendout(indices=nil)
     return unless bss_visibility_active? && @sprites.is_a?(Hash) && @battle
     return if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
@@ -16,9 +45,13 @@ module BSSSceneVisibilityAndHud
     room=@bss070_ebdx_room
     @battle.battlers.each do |bat|
       next unless bat && !(bat.fainted? rescue true)
+      # A flying/hidden attack or substitute may intentionally suppress the
+      # battler's real sprite even when the battler has not fainted.
+      next if bat.respond_to?(:semiInvulnerable?) && bat.semiInvulnerable?
       i=bat.index
       next if indices && !indices.include?(i)
       sprite=@sprites["pokemon_#{i}"]
+      next if sprite && sprite.respond_to?(:substitute) && sprite.substitute
       next unless sprite && !(sprite.disposed? rescue true)
       # DynamicPokemonSprite may expose only animatedBitmap (not bitmap).
       # Requiring a non-nil bitmap here skipped freshly switched-in Pokémon,
@@ -75,10 +108,12 @@ module BSSSceneVisibilityAndHud
     (@bss_dialogue_revealed || {}).each do |idx,token|
       bat=(@battle.battlers[idx] rescue nil)
       next unless bat && !(bat.fainted? rescue true)
+      next if bat.respond_to?(:semiInvulnerable?) && bat.semiInvulnerable?
       mon=(bat.pokemon rescue nil)
       next unless mon && mon.object_id==token
       sp=@sprites["pokemon_#{idx}"]
       next unless sp && !(sp.disposed? rescue true)
+      next if sp.respond_to?(:substitute) && sp.substitute
       if sp.respond_to?(:visible=) && !(sp.visible rescue true)
         sp.visible=true
         changed=true
@@ -109,23 +144,32 @@ module BSSSceneVisibilityAndHud
     @bss_pending_visibility_restore=indices || :all
     # Dynamic spritesheets can resolve after the sendout scene has returned.
     # Retry briefly instead of attempting a single premature visible=true.
-    @bss_pending_visibility_frames=12
+    @bss_pending_visibility_frames=24
+    bss_scripted_qa_snapshot("sendout-complete")
     result
   end
 
   def pbChangePokemon(*args,&block)
-    # Sprite swap is NOT a sendout. Leave it invisible until the native
-    # Poké Ball animation completes; pbSendOutBattlers performs recovery.
+    # Reset the previous identity before Essentials loads the new battler's
+    # sprite; do not reveal it until the native sendout has finished.
+    idx=args[0]
+    idx=idx.index if idx.respond_to?(:index)
+    @bss_dialogue_revealed.delete(idx) if idx.is_a?(Integer) && @bss_dialogue_revealed
     super
   end
 
   def pbCommandMenu(*args,&block)
-    if bss_visibility_active? && !@bss_first_command_visibility_recovered
-      @bss_first_command_visibility_recovered=true
+    if bss_visibility_active?
+      # BSS106 sometimes dispatches directly into the native sendout method.
+      # The next command menu is the unambiguous safe point after *every*
+      # completed sendout, not just the first menu of the entire battle.
+      bss_scripted_qa_snapshot("command-before-recovery")
       bss_recover_active_battlers_after_sendout
+      @bss_dialogue_seen_sendout=true
+      bss_dialogue_record_revealed
+      bss_dialogue_restore_revealed
+      bss_scripted_qa_snapshot("command-after-recovery")
     end
-    @bss_dialogue_seen_sendout=true if bss_visibility_active?
-    bss_dialogue_record_revealed
     super
   end
 
@@ -218,6 +262,7 @@ module BSSSceneVisibilityAndHud
       bss_dialogue_restore_revealed
       bss_cinematic_hud_hide!
       bss_cinematic_tone_refresh!
+      bss_scripted_qa_snapshot("speech-start")
     end
     result
   end
@@ -246,13 +291,20 @@ module BSSSceneVisibilityAndHud
       bss_cinematic_tone_refresh!
       bss_dialogue_restore_revealed
       # Catch deferred visibility writes by DBK after cinematic speech.
-      @bss_dialogue_visibility_tail=8
+      @bss_dialogue_visibility_tail=16
+      bss_scripted_qa_snapshot("speech-end")
     end
     result
   end
 
   def pbUpdate(*args,&block)
     result=super
+    if @bss_dialogue_cinema_active || @bss_pending_visibility_restore
+      @bss_qa_snapshot_tick=@bss_qa_snapshot_tick.to_i+1
+      bss_scripted_qa_snapshot("scene-update") if @bss_qa_snapshot_tick%20==1
+    else
+      @bss_qa_snapshot_tick=0
+    end
     if bss_visibility_active?
       if @bss_dialogue_cinema_active || @bss_dialogue_visibility_tail.to_i>0
         bss_dialogue_restore_revealed
