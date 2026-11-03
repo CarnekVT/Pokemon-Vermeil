@@ -17,7 +17,8 @@ module BSSCameraPhaseAuthority
     # starts. Do this BEFORE claiming attack ownership so the EBDX room and
     # animated battler anchors interpolate together.
     if outer && scene.respond_to?(:vermeil_cinema_return_main) &&
-       scene.instance_variable_get(:@vector)
+       scene.instance_variable_get(:@vector) &&
+       !(scene.respond_to?(:vermeil_cinema_script_locked?) && scene.vermeil_cinema_script_locked?)
       begin
         vector=scene.instance_variable_get(:@vector)
         main=BSS070EBDXCore.get_vector(:MAIN,self)
@@ -63,7 +64,11 @@ module BSSCameraTrainerDepth
       next if (trainer.disposed? rescue false) || (battler.disposed? rescue false)
       next unless battler.visible && (battler.opacity rescue 255).to_i > 0
       next unless trainer.respond_to?(:z=) && battler.respond_to?(:z)
-      trainer.z = battler.z.to_i - 2
+      # Old relayer pushed TrainerSprite BEHIND the Pokemon and sometimes
+      # behind EBDX trees/terrain; the player originally reported the
+      # Pokemon covering the trainer. Keep native XY/animation untouched,
+      # while only correcting draw order once the native sendout has settled.
+      trainer.z = [battler.z.to_i + 2, 52 + i].max
     end
   rescue StandardError => e
     BSS064.log("Trainer Z-order: #{e.class}: #{e.message}") if defined?(BSS064)
