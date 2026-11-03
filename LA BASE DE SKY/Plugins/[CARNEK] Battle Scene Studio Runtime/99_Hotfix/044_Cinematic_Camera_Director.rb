@@ -12,7 +12,7 @@ module VermeilBSSCinema
     "cinematicIdleZoom" => 1.0,
     "cinematicCommandZoom" => 1.0,
     "cinematicFightZoom" => 1.0,
-    "cinematicSmooth" => 0.065,
+    "cinematicSmooth" => 0.20,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
   }
@@ -52,6 +52,8 @@ module VermeilBSSCinemaScene
   end
 
   def vermeil_cinema_script_locked?
+    return true if @bss_dialogue_cinema_active || @bss_video_blackbars
+    return true if respond_to?(:pbInCinematicSpeech?) && (pbInCinematicSpeech? rescue false)
     return true if @bss_nds_intro_active
     return true if @vermeil_cinema_script_depth.to_i > 0
     return true if @vermeil_cinema_trainer_intro_depth.to_i > 0
@@ -132,15 +134,8 @@ module VermeilBSSCinemaScene
       shot = vermeil_cinema_focus_vector(@bss_selected_target_index)
       return shot if shot
     end
-    # Slow bounded GEN5 ambient eyeline changes while a menu is OPEN.
-    # A step target every ~2 seconds is perceptible but never drifts or
-    # triggers a second-camera transition during BAS or dialogue frames.
-    ambient=VermeilBSSCinema.clamp(cfg["idleStrength"] || 40,0,100)/100.0
-    if phase==:command || phase==:fight
-      direction=@vermeil_cinema_ambient_step.to_i.even? ? 1.0 : -1.0
-      target[0] += direction * 5.0 * ambient * pan_x
-      target[1] += direction * 1.8 * ambient * pan_y
-    end
+    # Camera target depends only on the menu phase and active battler.
+    # Never oscillate on a timer while the player navigates a choice.
     # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
@@ -156,9 +151,12 @@ module VermeilBSSCinemaScene
     return nil unless sprite && !(sprite.disposed? rescue true)
     return nil unless (sprite.visible rescue false)
     main=BSS070EBDXCore.get_vector(:MAIN,@battle).clone.map{|v|v.to_f}
-    pos=(sprite.x rescue nil)
+    # Read the canonical screen-space/native formation, NEVER the already
+    # projected sprite. Using sprite.x made successive shots chase their own
+    # previous offset and drift across the screen.
+    native=(bss070_ebdx_neutral_battler_position(index) rescue nil)
+    pos=native.is_a?(Array) ? native[0] : nil
     return nil unless pos
-    # Keep active battlers inside the viewport without extreme tracking.
     dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.13,-17.0,17.0)
     main[0]+=dx
     main
@@ -168,7 +166,7 @@ module VermeilBSSCinemaScene
 
   def vermeil_cinema_acquire_shot(shot)
     return unless vermeil_cinema_active? && @vector && !vermeil_cinema_locked?
-    @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.035,0.085)
+    @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.08,0.22)
     @vector.set(shot) if shot
     @vermeil_cinema_ambient_due=120
   end
@@ -190,8 +188,9 @@ module VermeilBSSCinemaScene
       if defined?(BSS103WorldSpaceBattlers)
         BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
       end
+      # Do not call Input.update here. Those extra polling frames consumed
+      # arrows/confirm presses while Essentials was changing menus.
       Graphics.update
-      Input.update if defined?(Input)
     end
     @vermeil_cinema_last_shot=nil
   rescue StandardError => e
@@ -249,10 +248,9 @@ module VermeilBSSCinemaScene
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
       @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
       changed=@vermeil_cinema_last_shot != phase
-      # Lock fight/target focus until actor/cursor changes. Recalculating
-      # these shots every 2 seconds used the ALREADY MOVED sprite coordinates
-      # and caused focus to hunt/oscillate around the selected Pokemon.
-      if changed || (@vermeil_cinema_ambient_due<=0 && phase==:command)
+      # Acquire exactly ONE composition per menu phase, never a periodic
+      # forced retarget. The saved vector eases into this one destination.
+      if changed
         @vermeil_cinema_ambient_step=@vermeil_cinema_ambient_step.to_i+1 unless changed
         cfg=vermeil_cinema_config
         speed=VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50,1,150)
@@ -262,7 +260,7 @@ module VermeilBSSCinemaScene
         target = vermeil_cinema_vector
         if target
           cfg = vermeil_cinema_config
-          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.035, 0.085)
+          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.08, 0.22)
           @vector.set(target)
           @vermeil_cinema_last_shot = phase
           BSS064.log("[Camera v2.5] #{phase} shot, BAS owns moves") if defined?(BSS064)
@@ -281,7 +279,6 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_logged = false
     @vermeil_cinema_last_shot = nil
     @vermeil_cinema_ambient_due = 0
-    @vermeil_cinema_ambient_step = 0
     @bss_fight_actor_index=nil
     @bss_selected_target_index=nil
     @bss_target_select_depth=0
