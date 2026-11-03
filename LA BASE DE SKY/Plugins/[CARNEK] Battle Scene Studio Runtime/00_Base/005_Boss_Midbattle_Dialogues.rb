@@ -363,12 +363,80 @@ class BSSDialogueEngine
     bss_close_owned_speech if @bss_dialogue_event_depth.to_i==0 && @bss_bars_owned
   end
 
+  # The dialogue engine itself owns cinematic UI state. The native DBK
+  # speaker/databox transitions remain untouched; only BSS-specific boss HUD
+  # and layered scenery tint need explicit management.
+  def bss_cinematic_ui_enter
+    scene=(@battle.scene rescue nil)
+    return unless scene
+    sprites=(scene.instance_variable_get(:@sprites) rescue {})
+    @bss_cinematic_owned_hud ||= {}
+    if sprites.is_a?(Hash)
+      sprites.each do |key,sp|
+        next unless key.to_s.match?(/\A(?:bss_boss_hud|boss.*(?:hud|bar|box)|totem.*(?:hud|bar|box)|raid.*(?:hud|bar|box))/i)
+        next unless sp && !(sp.disposed? rescue true)
+        @bss_cinematic_owned_hud[key]=sp.visible if sp.respond_to?(:visible)
+        if sp.respond_to?(:request_visibility)
+          sp.request_visibility(false,0.18)
+        elsif sp.respond_to?(:visible=)
+          sp.visible=false
+        end
+      end
+    end
+    scene.instance_variable_set(:@bss_dialogue_dim_alpha,1.0)
+    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
+    room.bss_layered_apply_tone!(true) if room && room.respond_to?(:bss_layered_apply_tone!)
+  rescue StandardError => e
+    BSS064.log("BSS cinematic UI enter: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
+  def bss_cinematic_ui_leave
+    scene=(@battle.scene rescue nil)
+    return unless scene
+    sprites=(scene.instance_variable_get(:@sprites) rescue {})
+    if sprites.is_a?(Hash)
+      (@bss_cinematic_owned_hud || {}).each do |key,visible|
+        sp=sprites[key]
+        next unless sp && !(sp.disposed? rescue true)
+        if sp.respond_to?(:request_visibility)
+          sp.request_visibility(visible,0.18)
+        elsif sp.respond_to?(:visible=)
+          sp.visible=visible
+        end
+      end
+    end
+    @bss_cinematic_owned_hud=nil
+    scene.instance_variable_set(:@bss_dialogue_dim_alpha,0.0)
+    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
+    room.bss_layered_apply_tone!(true) if room && room.respond_to?(:bss_layered_apply_tone!)
+  rescue StandardError => e
+    BSS064.log("BSS cinematic UI leave: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
+  def bss_align_cinematic_trainer_speaker(scene, speaker_type, display_idx)
+    return unless speaker_type=="trainer" && scene
+    sprites=(scene.instance_variable_get(:@sprites) rescue nil)
+    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
+    return unless sprites.is_a?(Hash) && room && room.respond_to?(:trainer)
+    sp=sprites["midbattle_speaker"]
+    return unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:y=)
+    trainer_index=display_idx.to_i.odd? ? display_idx.to_i : 1
+    anchor=room.trainer(trainer_index)
+    return unless anchor && !(anchor.disposed? rescue true)
+    # Use the SAME projected trainer floor as the EBDX scenery; the separate
+    # DBK IconSprite otherwise stays at unprojected vanilla screen Y.
+    sp.y=anchor.y if anchor.respond_to?(:y)
+  rescue StandardError => e
+    BSS064.log("BSS trainer speaker alignment: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
   def bss_close_owned_speech
     return unless @bss_bars_owned
     scene=(@battle.scene rescue nil)
     @bss_bars_owned=false
     scene.pbForceEndSpeech if scene && scene.respond_to?(:pbForceEndSpeech)
     scene.instance_variable_set(:@bss_dialogue_cinema_active,false) if scene
+    bss_cinematic_ui_leave
   rescue StandardError => e
     BSS064.log("BSS cinematic close: #{e.class}: #{e.message}") if defined?(BSS064)
   end
@@ -480,7 +548,9 @@ class BSSDialogueEngine
         cinematic_owner = !already_speaking
         @bss_bars_owned=true if cinematic_owner
         scene.instance_variable_set(:@bss_dialogue_cinema_active,true)
+        bss_cinematic_ui_enter if cinematic_owner
         scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech) && !already_speaking
+        bss_align_cinematic_trainer_speaker(scene,t[:speaker],display_idx)
         if speaker_label && !speaker_label.empty?
           scene.pbUpdateSpeakerWindows(speaker_label) if scene.respond_to?(:pbUpdateSpeakerWindows)
           name_window.visible = true if name_window
