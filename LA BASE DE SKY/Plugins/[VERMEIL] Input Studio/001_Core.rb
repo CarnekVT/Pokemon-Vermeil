@@ -398,12 +398,14 @@ module Input
     # dir4, while the native mkxp API often receives zero arguments.
     # Accept either form; route the optional value to the map controller.
     def dir4(*args)
-      # Core callers (battle commands, inventory and menus) must NEVER read
-      # custom map bindings; only Game_Player owns custom locomotion.
-      input_studio_native_dir4(*args)
+      # Native commands/menus are never routed to the map remapper. BSS can
+      # own an in-game battle while $scene stays Scene_Map; @running catches it.
+      InputStudio.map_movement_allowed? ? InputStudio.dir4(*args) :
+        input_studio_native_dir4(*args)
     end
     def dir8(*args)
-      input_studio_native_dir8(*args)
+      InputStudio.map_movement_allowed? ? InputStudio.dir8(*args) :
+        input_studio_native_dir8(*args)
     end
     def update
       input_studio_native_update
