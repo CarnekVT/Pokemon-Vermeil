@@ -473,30 +473,67 @@ module BSS106SceneStability
   # This handles repeated opponents in one slot without reviving a fainted mon.
   def bss106_finish_sendout(sendouts)
     return unless @battle && @sprites.is_a?(Hash)
-    Array(sendouts).each do |row|
-      idx = row.is_a?(Array) ? row[0] : row
-      idx = idx.index if idx.respond_to?(:index)
+    @bss106_presented_pokemon ||= {}
+    @bss106_pending_sendout ||= {}
+    Array(sendouts).each do |entry|
+      idx=entry.is_a?(Array) ? entry[0] : entry
+      idx=idx.index if idx.respond_to?(:index)
       next unless idx.is_a?(Integer)
-      battler = (@battle.battlers[idx] rescue nil)
+      battler=(@battle.battlers[idx] rescue nil)
       next unless battler && !(battler.fainted? rescue true)
-      mon = (battler.pokemon rescue nil)
+      mon=(battler.pokemon rescue nil)
       next unless mon
-      sprite = @sprites["pokemon_#{idx}"]
-      next unless sprite && !(sprite.disposed? rescue true)
-      next unless sprite.respond_to?(:pkmn) && sprite.pkmn
-      next if sprite.respond_to?(:substitute) && sprite.substitute
-      # DBK Animated Pokemon stores a persistent logical visibility bit and
-      # reassigns Sprite#visible from that bit during Sprite#update.
-      # Only its BattlerSprite exposes vanishMode; trainers/shadows do NOT.
-      if sprite.is_a?(Battle::Scene::BattlerSprite) &&
-         sprite.respond_to?(:vanishMode) && sprite.respond_to?(:vanishMode=)
-        sprite.vanishMode = 0 if sprite.vanishMode.to_i > 0
-      end
-      sprite.visible = true if sprite.respond_to?(:visible=)
-      sprite.opacity = 255 if sprite.respond_to?(:opacity=) && sprite.opacity.to_i == 0
-      @bss106_presented_pokemon ||= {}
-      @bss106_presented_pokemon[idx] = mon.object_id
+      # DBK's animated bitmap can be populated AFTER pbSendOutBattlers ends.
+      # Register the completed native sendout even if sprite.pkmn is still nil.
+      @bss106_presented_pokemon[idx]=mon.object_id
+      @bss106_pending_sendout[idx]=[mon.object_id,32]
     end
+    bss106_reconcile_pending_sendout
+  end
+
+  def bss106_reconcile_pending_sendout
+    return unless @bss106_pending_sendout.is_a?(Hash) &&
+                  !@bss106_pending_sendout.empty? && @battle && @sprites.is_a?(Hash)
+    return if @bss_nds_intro_active || @bss070_ebdx_bas_frame ||
+              @bas_runtime_playback_depth.to_i>0 ||
+              @bss096_battler_anim_depth.to_i>0 ||
+              @bss087_native_move_active || @bss084_native_move_active
+    return if (respond_to?(:inPartyAnimation?) && inPartyAnimation?)
+    reloaded=false
+    @bss106_pending_sendout.delete_if do |idx,state|
+      token,frames=state
+      battler=(@battle.battlers[idx] rescue nil)
+      mon=(battler.pokemon rescue nil)
+      if !battler || (battler.fainted? rescue true) || !mon || mon.object_id!=token
+        true
+      elsif (battler.respond_to?(:semiInvulnerable?) && battler.semiInvulnerable?)
+        true
+      else
+        sp=@sprites["pokemon_#{idx}"]
+        if sp.is_a?(Battle::Scene::BattlerSprite) &&
+           !(sp.disposed? rescue true) && sp.respond_to?(:pkmn) && sp.pkmn
+          next true if sp.respond_to?(:substitute) && sp.substitute
+          sp.vanishMode=0 if sp.respond_to?(:vanishMode=) &&
+                             sp.respond_to?(:vanishMode) && sp.vanishMode.to_i>0
+          sp.visible=true if sp.respond_to?(:visible=)
+          sp.opacity=255 if sp.respond_to?(:opacity=) && sp.opacity.to_i==0
+          reloaded=true
+          true
+        else
+          state[1]=frames.to_i-1
+          state[1]<=0
+        end
+      end
+    end
+    bss070_ebdx_invalidate_anchors if reloaded &&
+      respond_to?(:bss070_ebdx_invalidate_anchors)
+  end
+
+  def pbUpdate(*args,&block)
+    ret=super
+    bss106_reconcile_pending_sendout if @bss106_pending_sendout &&
+      respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    ret
   end
 
   # A few native animation plugins can clear the DBK BattlerSprite's
