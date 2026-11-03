@@ -40,8 +40,13 @@ module BSSSceneVisibilityAndHud
 
   def bss_recover_active_battlers_after_sendout(indices=nil)
     return unless bss_visibility_active? && @sprites.is_a?(Hash) && @battle
+    # Battle#pbAttackPhase encloses the opponent's *entire* faint/switch
+    # sequence, including the completed native sendout. Blocking on that
+    # phase counter left the second opponent invisible for the whole turn.
+    # Only actual BAS/native sprite animations may withhold visibility.
     return if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
-    return if @bss_camera_attack_phase_depth.to_i>0
+    return if @bss096_battler_anim_depth.to_i>0
+    return if @bss087_native_move_active || @bss084_native_move_active
     room=@bss070_ebdx_room
     @battle.battlers.each do |bat|
       next unless bat && !(bat.fainted? rescue true)
@@ -97,9 +102,10 @@ module BSSSceneVisibilityAndHud
 
   def bss_dialogue_restore_revealed
     return unless bss_visibility_active? && @battle && @sprites.is_a?(Hash)
+    # Dialogue events often execute inside the battle's attack phase.
+    # That high-level counter is not evidence of a running attack animation.
     return if @bss_nds_intro_active || @bss070_ebdx_bas_frame ||
               @bas_runtime_playback_depth.to_i>0 ||
-              @bss_camera_attack_phase_depth.to_i>0 ||
               @bss096_native_formation_depth.to_i>0 ||
               @bss096_battler_anim_depth.to_i>0 ||
               @bss087_native_move_active || @bss084_native_move_active ||
@@ -239,13 +245,8 @@ module BSSSceneVisibilityAndHud
 
   def pbStartSpeech(*args,&block)
     bss = bss_visibility_active? && @bss_dialogue_cinema_active
-    if bss && !@bss_cinematic_trainer_home
-      @bss_cinematic_trainer_home={}
-      @sprites.each do |name,sp|
-        next unless name.to_s =~ /\Atrainer_\d+\z/ && sp && !(sp.disposed? rescue true)
-        @bss_cinematic_trainer_home[name]=[sp.x,sp.y] if sp.respond_to?(:x) && sp.respond_to?(:y)
-      end
-    end
+    # Trainer XY is owned by native DBK/Essentials cinematic keyframes.
+    # Never snapshot then reapply a stale screen coordinate across camera shots.
     # Snapshot the HUD BEFORE DBK toggles its databoxes. Otherwise the
     # snapshot captures the hidden state and restores invisible HUD forever.
     if bss && @sprites.is_a?(Hash)
@@ -277,15 +278,8 @@ module BSSSceneVisibilityAndHud
     was_cinematic=@bss_dialogue_cinema_active
     result=super
     if was_cinematic
-      # Only restore coordinates saved before this speech. Trainer visibility
-      # remains owned by DBK/Essentials (e.g., it can legitimately disappear).
-      (@bss_cinematic_trainer_home || {}).each do |name,xy|
-        sp=@sprites[name] rescue nil
-        next unless sp && !(sp.disposed? rescue true)
-        sp.x=xy[0] if sp.respond_to?(:x=)
-        sp.y=xy[1] if sp.respond_to?(:y=)
-      end
-      @bss_cinematic_trainer_home=nil
+      # Native speech finishes its own trainer movement and visibility.
+      # Do not force an old Y back onto a different camera composition.
       @bss_dialogue_cinema_active=false
       bss_cinematic_hud_release!
       bss_cinematic_tone_refresh!
@@ -323,7 +317,10 @@ module BSSSceneVisibilityAndHud
       end
     end
     if @bss_pending_visibility_restore && !@bss070_ebdx_bas_frame &&
-       @bss_camera_attack_phase_depth.to_i==0 && !@bss_nds_intro_active
+       @bas_runtime_playback_depth.to_i==0 &&
+       @bss096_battler_anim_depth.to_i==0 &&
+       !@bss087_native_move_active && !@bss084_native_move_active &&
+       !@bss_nds_intro_active
       indices=@bss_pending_visibility_restore==:all ? nil : @bss_pending_visibility_restore
       bss_recover_active_battlers_after_sendout(indices)
       @bss_pending_visibility_frames=@bss_pending_visibility_frames.to_i-1
