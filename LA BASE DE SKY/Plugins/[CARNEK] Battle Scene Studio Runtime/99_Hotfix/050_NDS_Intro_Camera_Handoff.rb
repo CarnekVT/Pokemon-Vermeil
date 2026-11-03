@@ -118,109 +118,153 @@ module VermeilBSSNDSIntroScene
     false
   end
 
+  # Follow the user's original WildIntroNDS sequence, but render a frozen
+  # *snapshot of the EBDX room* instead of replacing its native battleback.
+  # Map transition squares are owned by pbBattleAnimation and play beforehand.
   def bss_nds_prelude
     tag=VermeilBSSNDSHandoff.tag(@battle)
     path=VermeilBSSNDSHandoff.asset(@battle,tag)
     return false unless path
     @bss_nds_intro_active=true
-    viewport=nil
-    strip=nil
-    saved_main=nil
     hidden=[]
-    # Trainers/battlers remain hidden until their native reveal, *after* the
-    # NDS terrain strip. Otherwise transparent sky exposes the trainer early.
-    (@sprites || {}).each do |key,sp|
-      next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
-      next unless sp && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
-      hidden << [sp,sp.visible]
-      sp.visible=false
-    rescue StandardError
-    end
-    # Keep the real EBDX battle world underneath: there must not be a second
-    # capture/zoom/background nor a full black frame between transitions.
-    # The NDS strip is RGBA with transparent sky and an opaque patterned floor.
+    viewport=nil
+    cover=nil
+    grass=nil
+    flash=nil
+    bitmap=nil
+    flash_bitmap=nil
+    saved_vector=(@vector.get.clone rescue nil)
     begin
-      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
-      room=@bss070_ebdx_room
-      room.position if room && room.respond_to?(:position)
-      room.update if room && room.respond_to?(:update)
-      saved_main=(BSS070EBDXCore.get_vector(:MAIN,@battle).clone rescue nil)
-      if @vector && saved_main && @vector.respond_to?(:snap)
-        start=saved_main.clone
-        # A real, restrained EBDX room zoom before native trainer sendout.
-        # All battlers are hidden, and MAIN is restored at the handoff.
-        # Only translate by a tiny amount; scaling the scene vector causes
-        # EBDX cropped sky/terrain layers to expose gaps at the horizon.
-        start[0]+=6.0;start[1]-=3.0
-        @vector.snap(start)
-        room.update if room
+      (@sprites || {}).each do |key,sp|
+        next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
+        next unless sp && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
+        hidden << [sp,sp.visible]
+        sp.visible=false
+      rescue StandardError
       end
+
+      # An initial shot from MAIN means the visual reference and Essentials'
+      # trainer sendout use one baseline. No competing per-frame zoom writers.
+      main=(BSS070EBDXCore.get_vector(:MAIN,@battle) rescue nil)
+      @vector.snap(main) if main && @vector && @vector.respond_to?(:snap)
+      room=@bss070_ebdx_room
+      room.update if room && !(room.disposed? rescue true)
+      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+      Graphics.update
+      bitmap=(Graphics.snap_to_bitmap rescue nil)
+      return false unless bitmap && !(bitmap.disposed? rescue false)
+
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
-      strip=Sprite.new(viewport)
-      strip.bitmap=pbBitmap(path)
-      return false unless strip.bitmap
-      strip.z=1
-      # The shipped 2044x480 biome images contain a large opaque solid-colour
-      # lower half. Never stretch that half across the battle: it hid the
-      # rendered EBDX terrain under a flat green/blue/brown slab.
-      foliage_height=(strip.bitmap.height*0.52).round
-      strip.src_rect.set(0,0,strip.bitmap.width,foliage_height)
-      base_scale=Graphics.height.to_f/[strip.bitmap.height,1].max
-      strip.zoom_y=base_scale*1.12
-      strip.zoom_x=base_scale*1.12
-      # Start at the leftmost section; strips are authored at 2044x480
-      # and can move across the screen without wrapping or black seams.
-      max_travel=[strip.bitmap.width*base_scale-Graphics.width,0.0].max
-      travel=[Graphics.width.to_f*0.28,max_travel].min
-      strip.x=0
-      strip.y=0
-      strip.opacity=255
+      cover=Sprite.new(viewport)
+      cover.bitmap=bitmap
+      cover.ox=bitmap.width/2
+      cover.oy=bitmap.height/2
+      cover.z=0
+      cover.opacity=255
+      cx=Graphics.width/2.0
+      cy=Graphics.height/2.0
+      focus=if @battle.trainerBattle?
+              @sprites["trainer_1"]
+            else
+              @sprites["pokemon_1"]
+            end
+      fx=(focus.x rescue nil)
+      fy=(focus.y rescue nil)
+      if !fx || !fy
+        pos=if @battle.trainerBattle?
+              Battle::Scene.pbTrainerPosition(1)
+            else
+              Battle::Scene.pbBattlerPosition(1)
+            end
+        fx=pos[0];fy=pos[1]
+      end
+      fx=fx.to_f;fy=fy.to_f
+
+      grass=Sprite.new(viewport)
+      grass.bitmap=pbBitmap(path)
+      return false unless grass.bitmap
+      # Source WildIntroNDS paints the FULL 2044x480 RGBA strip, at 100%.
+      # The old BSS bridge cut it at 52%, stretched it and left a hard seam.
+      grass.z=4
+      grass.ox=0
+      grass.oy=0
+      grass.x=0
+      grass.y=0
+      grass.zoom_x=1.0
+      grass.zoom_y=1.0
+      grass.opacity=255
+
+      flash=Sprite.new(viewport)
+      flash_bitmap=Bitmap.new(1,1)
+      flash_bitmap.fill_rect(0,0,1,1,Color.new(255,255,255,255))
+      flash.bitmap=flash_bitmap
+      flash.z=5
+      flash.zoom_x=Graphics.width.to_f
+      flash.zoom_y=Graphics.height.to_f
+      flash.opacity=0
+
       VermeilBSSNDSHandoff.play_sound(tag)
       hold=VermeilBSSNDSHandoff::HOLD
-      move=[VermeilBSSNDSHandoff::MOVE*2,18].max
-      duration=hold+move
-      duration.times do |frame|
-        p=[[((frame-hold).to_f/[move,1].max),0.0].max,1.0].min
-        eased=p*p*(3.0-2.0*p)
-        strip.zoom_x=base_scale*(1.12-0.12*eased)
-        strip.zoom_y=base_scale*(1.12-0.12*eased)
-        strip.x=-(travel*eased).round
-        # Anchor the cropped grass/waves/cave silhouettes at the bottom.
-        strip.y=(Graphics.height-strip.src_rect.height*strip.zoom_y).round
-        # The actual room also zooms back to MAIN under the strip.
-        if saved_main && @vector && @vector.respond_to?(:snap)
-          v=6.times.map{|i| start[i].to_f+(saved_main[i].to_f-start[i].to_f)*eased}
-          @vector.snap(v)
-          room.update if room
+      move=VermeilBSSNDSHandoff::MOVE
+      frames=hold+move
+      drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
+      dx,dy=drift
+      (frames+1).times do |frame|
+        t=[[((frame-hold).to_f/[move,1].max),0.0].max,1.0].min
+        smooth=t*t*(3.0-2.0*t)
+        zoom=2.0-smooth
+        # Exact reference concept: begin at 200% over the encounter's
+        # position and return to the original world at 100%.
+        sx=cx+(cx-fx)*zoom
+        sy=cy+(cy-fy)*zoom
+        halfw=bitmap.width.to_f*zoom/2.0
+        halfh=bitmap.height.to_f*zoom/2.0
+        cover.x=[[sx,Graphics.width-halfw].max,halfw].min
+        cover.y=[[sy,Graphics.height-halfh].max,halfh].min
+        cover.zoom_x=zoom
+        cover.zoom_y=zoom
+        grass.x=(dx.to_f*hold+dx.to_f*move*VermeilBSSNDSHandoff::REVEAL_SPEED*t).round if frame>=hold
+        grass.x=(dx.to_f*frame).round if frame<hold
+        grass.y=(dy.to_f*move*VermeilBSSNDSHandoff::REVEAL_SPEED*t).round
+        grass.opacity=frame<hold ? 255 : (255.0*(1.0-[[t*2.0,1.0].min,0.0].max)).round
+        if frame>=hold && frame<hold+2
+          flash.opacity=(160*(frame-hold+1)/2.0).round
+        elsif frame<hold+8 && frame>=hold+2
+          flash.opacity=(160*(1.0-(frame-hold-2).to_f/6.0)).round
+        else
+          flash.opacity=0
         end
-        fade=[[((p-0.32)/0.68),0.0].max,1.0].min
-        strip.opacity=(255*(1.0-fade)).round
         Graphics.update
-        Input.update if defined?(Input)
       end
-      # Every NDS overlay ends here. The trainer/Pokémon intro continues via
-      # native super(), which already owns its sendout and cry.
-      strip.opacity=0
       true
     rescue StandardError => e
-      BSS064.log("NDS overlay prelude: #{e.class}: #{e.message}") if defined?(BSS064)
+      BSS064.log("NDS reference reveal: #{e.class}: #{e.message}") if defined?(BSS064)
       false
     ensure
-      if saved_main && @vector && @vector.respond_to?(:snap)
-        @vector.snap(saved_main)
-        room.update if room
-      end
+      # Never force an old trainer position or leave the scene behind a
+      # full-screen temporary sprite, even on error.
       hidden.each do |sp,was_visible|
         begin
-          sp.visible=was_visible if sp && !(sp.disposed? rescue false)
+          sp.visible=was_visible if sp && !(sp.disposed? rescue true)
         rescue StandardError
         end
       end
-      if strip
-        begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
+      if @vector && saved_vector && @vector.respond_to?(:snap)
+        @vector.snap(saved_vector)
       end
-      begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
+      if flash
+        begin;flash.bitmap=nil;flash.dispose unless flash.disposed?;rescue StandardError;end
+      end
+      begin;flash_bitmap.dispose if flash_bitmap && !flash_bitmap.disposed?;rescue StandardError;end
+      if grass
+        begin;grass.bitmap=nil;grass.dispose unless grass.disposed?;rescue StandardError;end
+      end
+      if cover
+        begin;cover.bitmap=nil;cover.dispose unless cover.disposed?;rescue StandardError;end
+      end
+      begin;bitmap.dispose if bitmap && !bitmap.disposed?;rescue StandardError;end
+      begin;viewport.dispose if viewport && !viewport.disposed?;rescue StandardError;end
       @bss_nds_intro_active=false
     end
   end
@@ -231,10 +275,36 @@ module VermeilBSSNDSIntroScene
     engaged=true
     @bss_nds_intro_played=true
     @vermeil_cinema_trainer_intro_depth=@vermeil_cinema_trainer_intro_depth.to_i+1
-    bss_nds_prelude
-    # Handoff: after the NDS texture zoom, continue with the original Trainer
-    # intro animation (or the native Wild reveal) instead of replacing it.
-    super
+    # If the reference textures or screenshot renderer are missing, the
+    # original native intro is the safe fallback.
+    return super unless bss_nds_prelude
+
+    # WildIntroNDS intentionally does not invoke a second Animation::Intro
+    # after revealing the battlefield. The former BSS bridge did, producing
+    # another black flash/slide and spoiling the camera handoff.
+    if @battle.trainerBattle?
+      pbShowPartyLineup(0,true)
+      pbShowPartyLineup(1,true)
+      return
+    end
+    @battle.sideSizes[1].times do |i|
+      idx=(2*i)+1
+      next unless @battle.battlers[idx]
+      @animations.push(Animation::DataBoxAppear.new(@sprites,@viewport,idx))
+    end
+    @animations.push(Animation::Intro2.new(@sprites,@viewport,@battle.sideSizes[1]))
+    while inPartyAnimation?
+      pbUpdate
+    end
+    unless @battle.rules[:no_battle_animations]
+      @battle.sideSizes[1].times do |i|
+        idx=(2*i)+1
+        battler=@battle.battlers[idx]
+        next unless battler && battler.shiny?
+        kind=(Settings::SUPER_SHINY && battler.super_shiny?) ? "SuperShiny" : "Shiny"
+        pbCommonAnimation(kind,battler)
+      end
+    end
   ensure
     if engaged && @vermeil_cinema_trainer_intro_depth.to_i>0
       @vermeil_cinema_trainer_intro_depth-=1
