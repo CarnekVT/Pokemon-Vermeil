@@ -6,10 +6,12 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "3.0.0"
-  IDLE_HOLD_FRAMES = 260
-  IDLE_PAN_X = 9.0
-  IDLE_PAN_Y = 2.2
+  VERSION = "3.1.0"
+  # Deliberate real-time eyeline sweeps rather than one-frame retargets.
+  SWEEP_SECONDS = 3.0
+  SWEEP_HOLD_SECONDS = 0.52
+  IDLE_PAN_X = 19.0
+  IDLE_PAN_Y = 3.6
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -127,11 +129,12 @@ module VermeilBSSCinemaScene
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
-    if phase == :idle
-      # A stable side-to-side eyeline, never a sine wave or random jitter.
+    if phase == :idle || phase == :command
+      # Both idle AND command menus must visibly drift; the user spends most
+      # of a turn in the command menu, not the idle phase.
       direction=@vermeil_cinema_idle_side.to_i.even? ? 1.0 : -1.0
-      target[0]+=direction*VermeilBSSCinema::IDLE_PAN_X*strength*pan_x
-      target[1]+=direction*VermeilBSSCinema::IDLE_PAN_Y*strength*pan_y
+      target[0]+=direction*VermeilBSSCinema::IDLE_PAN_X*pan_x
+      target[1]+=direction*VermeilBSSCinema::IDLE_PAN_Y*pan_y
     end
     # During move selection focus the actual active USER of that move,
     # not the first opponent nor a fixed right-side pan.
@@ -207,6 +210,32 @@ module VermeilBSSCinemaScene
     BSS064.log("BSS camera main: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
+  # A single absolute EBDX world-vector tween: smoothstep begins/ends at
+  # zero speed and the deliberate 3-second travel remains visible at 60 or
+  # 110 FPS. No extra camera and no per-frame retarget of BSSVector#set.
+  def vermeil_cinema_sweep_tick(phase)
+    now=Time.now.to_f
+    started=@vermeil_cinema_sweep_started
+    if @vermeil_cinema_sweep_phase!=phase || !started
+      @vermeil_cinema_sweep_phase=phase
+      @vermeil_cinema_sweep_started=now
+      @vermeil_cinema_sweep_from=@vector.get.clone
+      @vermeil_cinema_sweep_to=vermeil_cinema_vector
+    elsif now-started >= VermeilBSSCinema::SWEEP_SECONDS+VermeilBSSCinema::SWEEP_HOLD_SECONDS
+      @vermeil_cinema_idle_side=@vermeil_cinema_idle_side.to_i+1
+      @vermeil_cinema_sweep_started=now
+      @vermeil_cinema_sweep_from=@vector.get.clone
+      @vermeil_cinema_sweep_to=vermeil_cinema_vector
+    end
+    from=@vermeil_cinema_sweep_from
+    dest=@vermeil_cinema_sweep_to
+    return unless from.is_a?(Array) && dest.is_a?(Array) && from.length>=6 && dest.length>=6
+    p=[[((now-@vermeil_cinema_sweep_started)/VermeilBSSCinema::SWEEP_SECONDS),0.0].max,1.0].min
+    p=p*p*(3.0-2.0*p)
+    @vector.snap(6.times.map{|i| from[i].to_f+(dest[i].to_f-from[i].to_f)*p})
+    @vermeil_cinema_last_shot=phase
+  end
+
   # An absolute pan, not a scale animation. Base battler coordinates and
   # zooms come from the native Essentials/DBK formation every frame.
   def vermeil_cinema_project_point(x, y, vector, main, _scale, weight = 1.0)
@@ -254,22 +283,23 @@ module VermeilBSSCinemaScene
     phase = vermeil_cinema_phase
     # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
-    if advance_camera && [:idle,:command,:fight,:target].include?(phase)
-      @vermeil_cinema_ticks=@vermeil_cinema_ticks.to_i+1
-      @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
-      changed=@vermeil_cinema_last_shot!=phase
-      idle_due=phase==:idle && @vermeil_cinema_ambient_due.to_i<=0
-      if changed || idle_due
-        @vermeil_cinema_idle_side=@vermeil_cinema_idle_side.to_i+1 if idle_due && !changed
-        @vermeil_cinema_ambient_due=VermeilBSSCinema::IDLE_HOLD_FRAMES
-        target=vermeil_cinema_vector
-        if target
-          @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.025,0.075)
-          @vector.set(target)
-          @vermeil_cinema_last_shot=phase
+    if advance_camera
+      if phase==:idle || phase==:command
+        vermeil_cinema_sweep_tick(phase)
+      elsif phase==:fight || phase==:target
+        # Target selection receives a discrete, user-initiated composition.
+        # No ambient sweep may compete with the selected battler or BAS.
+        @vermeil_cinema_sweep_phase=nil
+        if @vermeil_cinema_last_shot!=phase
+          shot=vermeil_cinema_vector
+          if shot
+            @vector.inc=0.065
+            @vector.set(shot)
+            @vermeil_cinema_last_shot=phase
+          end
         end
+        @vector.update
       end
-      @vector.update
     end
     super(false, align && !owned)
   end
@@ -283,6 +313,8 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_last_shot = nil
     @vermeil_cinema_ambient_due = 0
     @vermeil_cinema_idle_side = 0
+    @vermeil_cinema_sweep_phase = nil
+    @vermeil_cinema_sweep_started = nil
     @bss_fight_actor_index=nil
     @bss_selected_target_index=nil
     @bss_target_select_depth=0
