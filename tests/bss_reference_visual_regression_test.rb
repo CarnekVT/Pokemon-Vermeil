@@ -1,101 +1,96 @@
 # frozen_string_literal: true
-# Run: ruby tests/bss_reference_visual_regression_test.rb
-# Stub-only checks: compile edited Ruby files and exercise the BSS-native
-# Animated Pokemon visibility state. NOT a substitute for an in-game render.
+# Run from the repository root:
+#   ruby tests/bss_reference_visual_regression_test.rb
+#
+# These are syntax and core-contract tests. They do not simulate graphics,
+# timing, physical input polling or BSS/BAS playback in mkxp-z.
 require "ripper"
-
-ROOT=File.expand_path("..",__dir__)
-BSS=File.join(ROOT,"LA BASE DE SKY","Plugins","[CARNEK] Battle Scene Studio Runtime")
-INPUT=File.join(ROOT,"LA BASE DE SKY","Plugins","[VERMEIL] Input Studio","001_Core.rb")
-TARGETS=[
-  INPUT,
-  File.join(BSS,"10_EBDX_Source","005_Faithful_EBDX_Room.rb"),
-  File.join(BSS,"99_Hotfix","044_Cinematic_Camera_Director.rb"),
-  File.join(BSS,"99_Hotfix","050_NDS_Intro_Camera_Handoff.rb"),
-  File.join(BSS,"99_Hotfix","052_Battler_Visibility_and_Cinematic_HUD.rb"),
-  File.join(BSS,"99_Hotfix","998_BSS_Review_Fixes.rb")
-]
-def assert(message,condition)
-  raise "FAIL: #{message}" unless condition
-end
-TARGETS.each do |path|
-  assert("Ruby source exists: #{path}",File.file?(path))
-  assert("Ruby syntax parses: #{path}",!Ripper.sexp(File.read(path)).nil?)
+root=File.expand_path("..",__dir__)
+plugin=File.join(root,"LA BASE DE SKY","Plugins")
+bss=File.join(plugin,"[CARNEK] Battle Scene Studio Runtime")
+input=File.join(plugin,"[VERMEIL] Input Studio","001_Core.rb")
+paths={
+  "Input Studio"=>input,
+  "BSS Dialogue Engine"=>File.join(bss,"00_Base","005_Boss_Midbattle_Dialogues.rb"),
+  "Native trainer floor"=>File.join(bss,"10_EBDX_Source","005_Faithful_EBDX_Room.rb"),
+  "World actor projection"=>File.join(bss,"70_Runtime_Pipeline","031_World_Battlers_Intro.rb"),
+  "Native sendout authority"=>File.join(bss,"80_Stability","034_Stability_Reset.rb"),
+  "Presentation camera"=>File.join(bss,"99_Hotfix","044_Cinematic_Camera_Director.rb"),
+  "NDS intro"=>File.join(bss,"99_Hotfix","050_NDS_Intro_Camera_Handoff.rb")
+}
+def assert(label,pass)
+  raise "FAIL: #{label}" unless pass
 end
 
-input=File.read(INPUT)
-review=File.read(TARGETS[-1])
-cinema=File.read(TARGETS[2])
-intro=File.read(TARGETS[3])
-assert("battle context wins over map scene",input.include?("$game_temp.in_battle"))
-assert("only one camera module is prepended",!review.include?("Battle::Scene.prepend(BSSVideoSceneCamera)"))
-assert("review has no duplicate formation writer",!review.include?("Battle::Scene.prepend(BSSVideoFormationMetrics)"))
-assert("cinematic return does not poll Input",!cinema.match?(/Graphics\.update\s*\n\s*Input\.update/))
-assert("NDS reveal uses EBDX screenshot",intro.include?("Graphics.snap_to_bitmap"))
-assert("NDS wild handoff keeps intro cry",intro.include?("Animation::Intro2.new"))
+paths.each do |label,path|
+  assert("exists: #{label}",File.file?(path))
+  assert("Ruby parses: #{label}",!!Ripper.sexp(File.read(path,encoding:"UTF-8")))
+end
+assert("obsolete visibility hotfix removed",
+       !File.exist?(File.join(bss,"99_Hotfix","052_Battler_Visibility_and_Cinematic_HUD.rb")))
+assert("obsolete review fixes removed",
+       !File.exist?(File.join(bss,"99_Hotfix","998_BSS_Review_Fixes.rb")))
+source=File.read(input)
+legacy=source.split("LEGACY_STUDIO_ACTIONS = {",2)[1].split("}.freeze",2)[0]
+assert("native directions not intercepted globally",
+       !legacy.match?(/\b(?:UP|DOWN|LEFT|RIGHT)\s*=>/))
+assert("map movement checks BSS runtime owner",source.include?("BSS064.instance_variable_get(:@running)"))
+intro=File.read(paths["NDS intro"])
+assert("intro timing in seconds, not 20 frames",intro.include?("HOLD_SECONDS") && intro.include?("REVEAL_SECONDS"))
+assert("intro uses elapsed wall clock",intro.include?("Time.now.to_f-began"))
+camera=File.read(paths["Presentation camera"])
+assert("one stable idle shot at a time",camera.include?("IDLE_HOLD_FRAMES"))
+assert("idle camera has actual movement",camera.include?("IDLE_PAN_X") && camera.include?("phase == :idle"))
 
+# Real BSS106 native sendout completion logic with stubbed battle actors.
 module BSS064
-  def self.log(*); end
+  def self.log(*);end
 end
 class Battle
   class Scene
-    def bss070_ebdx_active?; true; end
-    def bss070_ebdx_apply_world_alignment; true; end
+    class BattlerSprite
+      attr_reader :pkmn
+      attr_accessor :vanishMode,:opacity,:substitute
+      def initialize(pokemon)
+        @pkmn=pokemon
+        @visible=false
+        @spriteVisible=false
+        @vanishMode=2
+        @opacity=0
+      end
+      def visible=(flag)
+        @spriteVisible=flag
+        @visible=flag
+      end
+      def visible;@visible;end
+      def disposed?;false;end
+      def update
+        @visible=@spriteVisible
+      end
+    end
   end
 end
-require File.join(BSS,"99_Hotfix","052_Battler_Visibility_and_Cinematic_HUD")
-
-class SpriteStub
-  attr_accessor :opacity,:vanishMode,:substitute
-  attr_reader :visible
-  def initialize
-    @visible=false
-    @spriteVisible=false
-    @opacity=0
-    @vanishMode=1
-    @substitute=false
-  end
-  def disposed?; false; end
-  def visible=(value)
-    @spriteVisible=value unless @updating
-    @visible=value
-  end
-  def update
-    @updating=true
-    self.visible=@spriteVisible
-    @updating=false
-  end
-end
-class BattlerStub
-  attr_reader :index,:pokemon
-  attr_accessor :faint,:semi
-  def initialize(index)
-    @index=index;@pokemon=Object.new;@faint=false;@semi=false
-  end
-  def fainted?;@faint;end
-  def semiInvulnerable?;@semi;end
-end
-
+load paths["Native sendout authority"]
 scene=Battle::Scene.new
-bat=BattlerStub.new(1)
-mon=SpriteStub.new
-shadow=SpriteStub.new
-scene.instance_variable_set(:@battle,Struct.new(:battlers).new([nil,bat]))
-scene.instance_variable_set(:@sprites,{"pokemon_1"=>mon,"shadow_1"=>shadow})
-scene.bss_recover_active_battlers_after_sendout([1])
-assert("post-sendout resets the old vanish state",mon.vanishMode==0)
-assert("post-sendout makes the second trainer Pokemon visible",mon.visible && mon.opacity==255)
-mon.update
-assert("native animated update keeps the visibility correction",mon.visible)
-scene.instance_variable_set(:@bss_dialogue_revealed,{1=>bat.pokemon.object_id})
-mon.visible=false;mon.opacity=0;mon.vanishMode=1
-scene.bss_dialogue_restore_revealed
-assert("scripted dialogue restores the same living Pokemon",mon.visible && mon.opacity==255 && mon.vanishMode==0)
-mon.substitute=true;mon.visible=false
-scene.bss_recover_active_battlers_after_sendout([1])
-assert("substitute presentation is never forcibly revealed",!mon.visible)
-mon.substitute=false
-bat.semi=true
-scene.bss_recover_active_battlers_after_sendout([1])
-assert("semi-invulnerable Pokemon stays intentionally hidden",!mon.visible)
-puts "BSS source and visibility regression contracts PASS (no rendering test)"
+old_pokemon=Object.new
+new_pokemon=Object.new
+battler=Struct.new(:index,:pokemon,:faint) do
+  def fainted?;!!faint;end
+end.new(1,old_pokemon,false)
+sprite=Battle::Scene::BattlerSprite.new(old_pokemon)
+scene.instance_variable_set(:@battle,Struct.new(:battlers).new([nil,battler]))
+scene.instance_variable_set(:@sprites,{"pokemon_1"=>sprite,"trainer_1"=>Object.new})
+scene.bss106_finish_sendout([[1,old_pokemon]])
+assert("first Pokemon is revealed",sprite.visible && sprite.opacity==255 && sprite.vanishMode==0)
+sprite.update
+assert("DBK logical visible state persists",sprite.visible)
+battler.pokemon=new_pokemon
+sprite=Battle::Scene::BattlerSprite.new(new_pokemon)
+scene.instance_variable_set(:@sprites,{"pokemon_1"=>sprite,"trainer_1"=>Object.new})
+scene.bss106_finish_sendout([[1,new_pokemon]])
+assert("replacement in same slot is revealed",sprite.visible && sprite.vanishMode==0)
+battler.faint=true
+sprite.visible=false
+scene.bss106_finish_sendout([[1,new_pokemon]])
+assert("fainted Pokemon not resurrected",!sprite.visible)
+puts "BSS CORE REGRESSION TESTS PASS (not an in-game render test)"
