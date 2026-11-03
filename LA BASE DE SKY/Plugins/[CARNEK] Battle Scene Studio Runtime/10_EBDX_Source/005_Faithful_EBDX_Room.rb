@@ -2345,13 +2345,22 @@ module BSS070EBDXSceneBridge
   end
 
   def bss070_ebdx_native_trainer_position_for(index)
-    # Trainer sprites are left compatible with the renderer supplied by the
-    # project. Their neutral point is sampled, then EBDX projects that point.
-    t=(index.to_i/2);sp=@sprites["trainer_#{t}"] rescue nil
-    return [sp.x,sp.y,sp.z] if sp && !(sp.disposed? rescue true)
-    bss070_ebdx_native_position_for(index)
-  rescue
-    bss070_ebdx_native_position_for(index)
+    # EBDX uses battler indices (1,3,5), while Essentials' REAL trainers
+    # are numbered from trainer_1, never trainer_0. Do not fall back to
+    # a Pokemon's battle position (FOE_BASE_Y misses the trainer offset).
+    idx=index.to_i
+    trainer_index=(idx/2)+1
+    sp=@sprites["trainer_#{trainer_index}"] rescue nil
+    if sp && !(sp.disposed? rescue true) && sp.respond_to?(:x) && sp.respond_to?(:y)
+      return [sp.x.to_f,sp.y.to_f,(sp.z rescue 7).to_i]
+    end
+    count=(@battle.opponent.length rescue 1)
+    count=1 if count.to_i<1
+    pos=Battle::Scene.pbTrainerPosition(1,trainer_index-1,count)
+    [pos[0].to_f,pos[1].to_f,7+trainer_index-1]
+  rescue StandardError
+    pos=(Battle::Scene.pbTrainerPosition(1) rescue [Graphics.width*0.75,Graphics.height*0.34])
+    [pos[0].to_f,pos[1].to_f,7]
   end
 
   def bss070_ebdx_anchor_scale(index)
