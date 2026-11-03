@@ -6,13 +6,16 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.9.0"
+  VERSION = "3.0.0"
+  IDLE_HOLD_FRAMES = 260
+  IDLE_PAN_X = 9.0
+  IDLE_PAN_Y = 2.2
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
     "cinematicCommandZoom" => 1.0,
     "cinematicFightZoom" => 1.0,
-    "cinematicSmooth" => 0.20,
+    "cinematicSmooth" => 0.045,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
   }
@@ -74,7 +77,8 @@ module VermeilBSSCinemaScene
     # leases above still win; do not let stale ambient locks veto a menu shot.
     menu_phase = [:command, :fight, :target].include?(vermeil_cinema_phase)
     unless menu_phase
-      return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
+      # Legacy freeze counters can outlive a native sendout.
+      return true if @bss070_ebdx_suspend_depth.to_i > 0
       return true if @bss098_native_move_active || @bss096_move_projection_active
       return true if @bss087_native_move_active || @bss084_native_move_active
       return true if @bss096_native_formation_depth.to_i > 0 || @bss096_battler_anim_depth.to_i > 0
@@ -123,6 +127,12 @@ module VermeilBSSCinemaScene
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
+    if phase == :idle
+      # A stable side-to-side eyeline, never a sine wave or random jitter.
+      direction=@vermeil_cinema_idle_side.to_i.even? ? 1.0 : -1.0
+      target[0]+=direction*VermeilBSSCinema::IDLE_PAN_X*strength*pan_x
+      target[1]+=direction*VermeilBSSCinema::IDLE_PAN_Y*strength*pan_y
+    end
     # During move selection focus the actual active USER of that move,
     # not the first opponent nor a fixed right-side pan.
     if phase == :fight && @bss_fight_actor_index.is_a?(Integer)
@@ -244,26 +254,19 @@ module VermeilBSSCinemaScene
     phase = vermeil_cinema_phase
     # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
-    if advance_camera && (phase == :command || phase == :fight || phase == :target)
-      @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
+    if advance_camera && [:idle,:command,:fight,:target].include?(phase)
+      @vermeil_cinema_ticks=@vermeil_cinema_ticks.to_i+1
       @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
-      changed=@vermeil_cinema_last_shot != phase
-      # Acquire exactly ONE composition per menu phase, never a periodic
-      # forced retarget. The saved vector eases into this one destination.
-      if changed
-        @vermeil_cinema_ambient_step=@vermeil_cinema_ambient_step.to_i+1 unless changed
-        cfg=vermeil_cinema_config
-        speed=VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50,1,150)
-        @vermeil_cinema_ambient_due=(175.0-speed*0.55).round
-        # Acquire a deterministic new composition at a small interval instead
-        # of recomputing random/oscillating camera coordinates every frame.
-        target = vermeil_cinema_vector
+      changed=@vermeil_cinema_last_shot!=phase
+      idle_due=phase==:idle && @vermeil_cinema_ambient_due.to_i<=0
+      if changed || idle_due
+        @vermeil_cinema_idle_side=@vermeil_cinema_idle_side.to_i+1 if idle_due && !changed
+        @vermeil_cinema_ambient_due=VermeilBSSCinema::IDLE_HOLD_FRAMES
+        target=vermeil_cinema_vector
         if target
-          cfg = vermeil_cinema_config
-          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.08, 0.22)
+          @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.025,0.075)
           @vector.set(target)
-          @vermeil_cinema_last_shot = phase
-          BSS064.log("[Camera v2.5] #{phase} shot, BAS owns moves") if defined?(BSS064)
+          @vermeil_cinema_last_shot=phase
         end
       end
       @vector.update
@@ -279,6 +282,7 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_logged = false
     @vermeil_cinema_last_shot = nil
     @vermeil_cinema_ambient_due = 0
+    @vermeil_cinema_idle_side = 0
     @bss_fight_actor_index=nil
     @bss_selected_target_index=nil
     @bss_target_select_depth=0
