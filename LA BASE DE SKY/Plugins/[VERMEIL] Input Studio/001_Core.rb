@@ -234,6 +234,12 @@ module InputStudio
 
     def context
       return @context_override if @context_override
+      # BSS launches in-game/test battles from Scene_Map and sets this flag.
+      # Checking only $scene misidentifies the command/choice screen as the
+      # overworld, hijacking arrow keys with custom walking bindings.
+      if defined?($game_temp) && $game_temp && ($game_temp.in_battle rescue false)
+        return "battle"
+      end
       klass = (defined?($scene) && $scene) ? $scene.class.name.to_s : ""
       return "battle" if klass.match?(/battle/i)
       if klass == "Scene_Map"
