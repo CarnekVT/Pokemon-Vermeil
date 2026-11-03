@@ -159,6 +159,14 @@ module VermeilBSSNDSIntroScene
       end
       room=@bss070_ebdx_room
       room.update if room && !(room.disposed? rescue true)
+      # Pre-align each real battler to the SAME projected EBDX anchor it will
+      # occupy after the intro. Otherwise its native pbInitSprites Y is visible
+      # throughout the reveal and abruptly jumps higher at the first command.
+      # One alignment BEFORE animations is safe; no runtime movement is
+      # applied again while native/DBK intro owns the scene.
+      if defined?(BSS103WorldSpaceBattlers) && @battle && @sprites.is_a?(Hash)
+        BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+      end
       bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
       # Snapshot ONLY the EBDX environment, not the animated actors. Restore
       # their original visibility IMMEDIATELY after one capture frame. Capturing
