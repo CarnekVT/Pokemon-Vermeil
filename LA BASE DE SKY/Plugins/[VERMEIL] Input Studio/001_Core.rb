@@ -232,11 +232,30 @@ module InputStudio
       false
     end
 
+    # Physical cardinal input is never an Input Studio hotkey in a battle,
+    # dialogue, command window, target menu or BSS editor-launched encounter.
+    # BSS keeps Scene_Map alive and may transition $game_temp flags while its
+    # windows are open; @running is the stable owner marker.
+    def map_movement_allowed?
+      return false if @modal
+      return false unless defined?($scene) && $scene &&
+                          $scene.class.name.to_s == "Scene_Map"
+      if defined?($game_temp) && $game_temp
+        return false if ($game_temp.in_battle rescue false)
+        return false if ($game_temp.in_menu rescue false)
+        return false if ($game_temp.message_window_showing rescue false)
+      end
+      return false if defined?(BSS064) &&
+        (BSS064.instance_variable_get(:@running) ||
+         BSS064.instance_variable_get(:@active_live_test_scene))
+      true
+    rescue StandardError
+      false
+    end
     def context
+      return "battle" if !map_movement_allowed? &&
+        defined?(BSS064) && BSS064.instance_variable_get(:@running)
       return @context_override if @context_override
-      # BSS launches in-game/test battles from Scene_Map and sets this flag.
-      # Checking only $scene misidentifies the command/choice screen as the
-      # overworld, hijacking arrow keys with custom walking bindings.
       if defined?($game_temp) && $game_temp && ($game_temp.in_battle rescue false)
         return "battle"
       end
@@ -261,6 +280,9 @@ module InputStudio
     def active?(id)
       action = definitions[id.to_s]
       return false unless action
+      # Directional actions belong EXCLUSIVELY to player movement, never
+      # reusable UI keys. This check cannot be overridden by context flags.
+      return map_movement_allowed? if id.to_s.match?(/\Amove_(?:up|down|left|right)\z/)
       return true if action["context"] == "global"
       return action["context"] == context
     end
@@ -341,7 +363,8 @@ InputStudio.load!
 # Preserve raw physical Input.pressex?/triggerex? etc and all other buttons.
 module Input
   LEGACY_STUDIO_ACTIONS = {
-    UP => "move_up", DOWN => "move_down", LEFT => "move_left", RIGHT => "move_right",
+    # Directional UI and battle navigation must always use native mkxp input.
+    # Move remapping is applied in Game_Player only, not in Input.press?/repeat?.
     USE => "confirm", BACK => "back", ACTION => "action",
     JUMPUP => "jump_up", JUMPDOWN => "jump_down",
     SPECIAL => "special", AUX1 => "aux1", AUX2 => "aux2"
@@ -375,18 +398,12 @@ module Input
     # dir4, while the native mkxp API often receives zero arguments.
     # Accept either form; route the optional value to the map controller.
     def dir4(*args)
-      if InputStudio.context == "map"
-        InputStudio.dir4(*args)
-      else
-        input_studio_native_dir4(*args)
-      end
+      # Core callers (battle commands, inventory and menus) must NEVER read
+      # custom map bindings; only Game_Player owns custom locomotion.
+      input_studio_native_dir4(*args)
     end
     def dir8(*args)
-      if InputStudio.context == "map"
-        InputStudio.dir8(*args)
-      else
-        input_studio_native_dir8(*args)
-      end
+      input_studio_native_dir8(*args)
     end
     def update
       input_studio_native_update
