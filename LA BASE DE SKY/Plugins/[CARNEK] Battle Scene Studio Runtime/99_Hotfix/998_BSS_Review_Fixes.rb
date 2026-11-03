@@ -222,7 +222,16 @@ module BSSVideoSceneCamera
   def pbInitSprites(*args, &block)
     result = super
     if BSSVideoReview.active?(self) && !BSSVideoReview.leased?(self)
-      dest = BSSVideoReview.vec(self, :main)
+      # The opponent's native trainer_1 intro is screen-space. Applying the
+      # modified overview zoom BEFORE it slides in shifts the EBDX floor from
+      # its native trainer baseline and makes the trainer look too high.
+      # Trainer battles open on true MAIN; wild scenes keep the wide shot.
+      trainer_battle = @battle && @battle.respond_to?(:trainerBattle?) && @battle.trainerBattle?
+      dest = if trainer_battle
+               BSS070EBDXCore.get_vector(:MAIN,@battle)
+             else
+               BSSVideoReview.vec(self, :main)
+             end
       @vector.snap(dest) if dest && @vector.respond_to?(:snap)
       @bss_video_step = 0
       @bss102_ambient_due = BSSVideoReview::AMBIENT_HOLD_FRAMES
@@ -297,8 +306,8 @@ module BSSVideoSceneCamera
   end
 end
 
-# Keep scripted trainer dialogue above bars but the trainer sprite in the lower
-# band of the composition; do not alter the sprite's authored home coordinates.
+# BSS cinema bridges DBK's bars and restored battler visibility.
+# Real trainer sprites keep their native Essentials/DBK coordinates.
 module BSSVideoCinematicScene
   def pbToggleBlackBars(toggle = false)
     @bss_video_blackbars = !!toggle
