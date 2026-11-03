@@ -146,6 +146,17 @@ module VermeilBSSNDSIntroScene
       # trainer sendout use one baseline. No competing per-frame zoom writers.
       main=(BSS070EBDXCore.get_vector(:MAIN,@battle) rescue nil)
       @vector.snap(main) if main && @vector && @vector.respond_to?(:snap)
+      # EBDX foliage/terrain uses room z up to ~27. Native DBK TrainerSprite
+      # begins at z=10 and can therefore look absent during the reveal,
+      # only popping in when later battle animations raise its depth.
+      # Keep the ORIGINAL sprite and original XY, but put it above scenery.
+      if @battle.trainerBattle? && @battle.opponent
+        @battle.opponent.each_index do |i|
+          trainer=@sprites["trainer_#{i+1}"]
+          next unless trainer && !(trainer.disposed? rescue true) && trainer.respond_to?(:z=)
+          trainer.z=[trainer.z.to_i,49+i].max
+        end
+      end
       room=@bss070_ebdx_room
       room.update if room && !(room.disposed? rescue true)
       bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
