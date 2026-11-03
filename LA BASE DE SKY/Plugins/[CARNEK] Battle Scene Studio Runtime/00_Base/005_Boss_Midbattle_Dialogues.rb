@@ -383,9 +383,11 @@ class BSSDialogueEngine
         end
       end
     end
-    scene.instance_variable_set(:@bss_dialogue_dim_alpha,1.0)
-    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
-    room.bss_layered_apply_tone!(true) if room && room.respond_to?(:bss_layered_apply_tone!)
+    # The layered room interpolates this target every frame; setting alpha
+    # instantly caused the entire background to pop dark at speech start.
+    scene.instance_variable_set(:@bss_dialogue_dim_alpha,0.0) unless
+      scene.instance_variable_defined?(:@bss_dialogue_dim_alpha)
+    scene.instance_variable_set(:@bss_dialogue_dim_target,1.0)
   rescue StandardError => e
     BSS064.log("BSS cinematic UI enter: #{e.class}: #{e.message}") if defined?(BSS064)
   end
@@ -406,9 +408,9 @@ class BSSDialogueEngine
       end
     end
     @bss_cinematic_owned_hud=nil
-    scene.instance_variable_set(:@bss_dialogue_dim_alpha,0.0)
-    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
-    room.bss_layered_apply_tone!(true) if room && room.respond_to?(:bss_layered_apply_tone!)
+    # Preserve the current alpha and ease it toward zero instead of
+    # teleporting the daylight tint back on the last speech frame.
+    scene.instance_variable_set(:@bss_dialogue_dim_target,0.0)
   rescue StandardError => e
     BSS064.log("BSS cinematic UI leave: #{e.class}: #{e.message}") if defined?(BSS064)
   end
