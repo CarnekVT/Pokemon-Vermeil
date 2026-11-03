@@ -499,6 +499,42 @@ module BSS106SceneStability
     end
   end
 
+  # A few native animation plugins can clear the DBK BattlerSprite's
+  # logical @spriteVisible *after* the sendout callback has returned.
+  # Reconcile only at the next safe command boundary, never during a move,
+  # a recall, a semi-invulnerable state or a cinematic intro.
+  def bss106_restore_presented_on_command
+    return unless @bss106_presented_pokemon.is_a?(Hash) && @battle && @sprites.is_a?(Hash)
+    return if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
+    return if @bss_nds_intro_active || @vermeil_cinema_trainer_intro_depth.to_i>0
+    return if @bss_camera_attack_phase_depth.to_i>0 || @bss096_battler_anim_depth.to_i>0
+    return if (respond_to?(:inPartyAnimation?) && inPartyAnimation?)
+    @bss106_presented_pokemon.delete_if do |idx,identity|
+      battler=(@battle.battlers[idx] rescue nil)
+      if !battler || (battler.fainted? rescue true)
+        true
+      elsif (battler.pokemon rescue nil).object_id!=identity
+        true
+      else
+        sprite=@sprites["pokemon_#{idx}"]
+        next false unless sprite.is_a?(Battle::Scene::BattlerSprite) &&
+                          !(sprite.disposed? rescue true)
+        next false if sprite.respond_to?(:substitute) && sprite.substitute
+        next false if battler.respond_to?(:semiInvulnerable?) && battler.semiInvulnerable?
+        sprite.vanishMode=0 if sprite.respond_to?(:vanishMode=) &&
+                             sprite.respond_to?(:vanishMode) && sprite.vanishMode.to_i>0
+        sprite.visible=true unless sprite.visible
+        sprite.opacity=255 if sprite.respond_to?(:opacity=) && sprite.opacity.to_i==0
+        false
+      end
+    end
+  end
+
+  def pbCommandMenu(*args,&block)
+    bss106_restore_presented_on_command if respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    super
+  end
+
   def pbSendOutBattlers(*args,&block)
     return super unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
     state=BSS106.camera_state(self)
