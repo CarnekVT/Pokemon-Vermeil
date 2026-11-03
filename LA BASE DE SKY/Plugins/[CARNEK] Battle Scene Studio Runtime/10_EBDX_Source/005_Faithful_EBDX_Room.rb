@@ -2348,18 +2348,21 @@ module BSS070EBDXSceneBridge
     # EBDX uses battler indices (1,3,5), while Essentials' REAL trainers
     # are numbered from trainer_1, never trainer_0. Do not fall back to
     # a Pokemon's battle position (FOE_BASE_Y misses the trainer offset).
-    idx=index.to_i
+    idx=[index.to_i,0].max
+    side=idx.odd? ? 1 : 0
     trainer_index=(idx/2)+1
-    sp=@sprites["trainer_#{trainer_index}"] rescue nil
+    key="#{side==1 ? 'trainer' : 'player'}_#{trainer_index}"
+    sp=@sprites[key] rescue nil
+    default_z=(side==1 ? 7 : 80)+trainer_index-1
     if sp && !(sp.disposed? rescue true) && sp.respond_to?(:x) && sp.respond_to?(:y)
-      return [sp.x.to_f,sp.y.to_f,(sp.z rescue 7).to_i]
+      return [sp.x.to_f,sp.y.to_f,(sp.z rescue default_z).to_i]
     end
-    count=(@battle.opponent.length rescue 1)
+    count=(side==1 ? (@battle.opponent.length rescue 1) : (@battle.player.length rescue 1))
     count=1 if count.to_i<1
-    pos=Battle::Scene.pbTrainerPosition(1,trainer_index-1,count)
-    [pos[0].to_f,pos[1].to_f,7+trainer_index-1]
+    pos=Battle::Scene.pbTrainerPosition(side,trainer_index-1,count)
+    [pos[0].to_f,pos[1].to_f,default_z]
   rescue StandardError
-    pos=(Battle::Scene.pbTrainerPosition(1) rescue [Graphics.width*0.75,Graphics.height*0.34])
+    pos=(Battle::Scene.pbTrainerPosition(index.to_i.odd? ? 1 : 0) rescue [Graphics.width*0.5,Graphics.height*0.5])
     [pos[0].to_f,pos[1].to_f,7]
   end
 
