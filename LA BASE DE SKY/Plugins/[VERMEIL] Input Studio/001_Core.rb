@@ -398,14 +398,15 @@ module Input
     # dir4, while the native mkxp API often receives zero arguments.
     # Accept either form; route the optional value to the map controller.
     def dir4(*args)
-      # Native commands/menus are never routed to the map remapper. BSS can
-      # own an in-game battle while $scene stays Scene_Map; @running catches it.
-      InputStudio.map_movement_allowed? ? InputStudio.dir4(*args) :
-        input_studio_native_dir4(*args)
+      # Native mkxp Input.dir4 accepts zero arguments, while Essentials'
+      # Game_Player may pass one moved_last_frame hint. Strip the hint ONLY
+      # on the native branch; Input Studio's map branch accepts it.
+      return InputStudio.dir4(*args) if InputStudio.map_movement_allowed?
+      input_studio_native_dir4
     end
     def dir8(*args)
-      InputStudio.map_movement_allowed? ? InputStudio.dir8(*args) :
-        input_studio_native_dir8(*args)
+      return InputStudio.dir8(*args) if InputStudio.map_movement_allowed?
+      input_studio_native_dir8
     end
     def update
       input_studio_native_update
