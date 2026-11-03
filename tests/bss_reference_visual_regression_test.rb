@@ -18,7 +18,9 @@ paths={
   "Presentation camera"=>File.join(bss,"99_Hotfix","044_Cinematic_Camera_Director.rb"),
   "NDS intro"=>File.join(bss,"99_Hotfix","050_NDS_Intro_Camera_Handoff.rb"),
   "Layered lighting"=>File.join(bss,"90_CustomRooms","039_Lighting_Layered_Backdrops.rb"),
-  "Animated Pokemon"=>File.join(plugin,"[LBDS] Sprites Animados DBK","[006] Battler Sprites.rb")
+  "Animated Pokemon"=>File.join(plugin,"[LBDS] Sprites Animados DBK","[006] Battler Sprites.rb"),
+  "Trainer z order"=>File.join(bss,"99_Hotfix","051_Camera_Phase_and_Depth_Authority.rb"),
+  "Scripted camera lock"=>File.join(bss,"99_Hotfix","049_Scripted_Speech_Camera_Hold.rb")
 }
 def assert(label,pass)
   raise "FAIL: #{label}" unless pass
@@ -42,11 +44,26 @@ assert("intro timing in seconds, not 20 frames",intro.include?("HOLD_SECONDS") &
 assert("intro uses elapsed wall clock",intro.include?("Time.now.to_f-began"))
 assert("native intro animations have qualified owner",intro.include?("Battle::Scene::Animation::DataBoxAppear.new") &&
        intro.include?("Battle::Scene::Animation::Intro2.new"))
-assert("intro preserves already-visible actors",!intro.include?("hidden.each") && !intro.include?("sp.visible=false"))
+assert("intro captures scenery separately",intro.include?("captured=[]") &&
+       intro.include?("captured.each") && intro.include?("pbFrameUpdate"))
+assert("animated trainer plays during reveal",intro.include?("trainer.play") &&
+       intro.include?("pbAnimateTrainerIntros"))
+assert("impact timing shortened",intro.include?("HOLD_SECONDS = 0.12") &&
+       intro.include?("REVEAL_SECONDS = 0.82"))
 camera=File.read(paths["Presentation camera"])
 assert("real-time camera sweeps exist",camera.include?("SWEEP_SECONDS = 3.0") &&
        camera.include?("vermeil_cinema_sweep_tick"))
 assert("slow camera moves in command and idle",camera.include?("phase==:idle || phase==:command"))
+assert("bag and party return to MAIN",camera.include?("vermeil_cinema_queue_home") &&
+       camera.include?("choice!=0") && camera.include?("vermeil_cinema_home_tick"))
+assert("scripted dialogue owns camera vector",camera.include?("@vermeil_cinema_script_camera_hold") &&
+       File.read(paths["Scripted camera lock"]).include?("script_camera_hold"))
+assert("trainer kept above Pokemon and terrain",
+       File.read(paths["Trainer z order"]).include?("battler.z.to_i + 2"))
+assert("wild opponent trainer count is nil-safe",
+       File.read(paths["Native trainer floor"]).include?("owners.respond_to?(:length)"))
+assert("MAIN zoom-out is normalized baseline",
+       File.read(paths["Native trainer floor"]).include?("342,0.92,0.92"))
 dialogue=File.read(paths["BSS Dialogue Engine"])
 lighting=File.read(paths["Layered lighting"])
 assert("cinematic overlay has separate tween targets",dialogue.include?("dim_target,1.0") &&
@@ -103,6 +120,7 @@ sprite=Battle::Scene::BattlerSprite.new(new_pokemon)
 scene.instance_variable_set(:@sprites,{"pokemon_1"=>sprite,"trainer_1"=>Object.new})
 scene.bss106_finish_sendout([[1,new_pokemon]])
 assert("replacement in same slot is revealed",sprite.visible && sprite.vanishMode==0)
+assert("native sendout token is tracked",scene.instance_variable_get(:@bss106_presented_pokemon)[1]==new_pokemon.object_id)
 sprite.visible=false
 sprite.opacity=0
 sprite.vanishMode=1
