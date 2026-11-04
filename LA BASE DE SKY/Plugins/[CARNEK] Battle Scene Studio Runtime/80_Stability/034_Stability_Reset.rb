@@ -531,44 +531,73 @@ module BSS106SceneStability
 
   def pbUpdate(*args,&block)
     ret=super
-    bss106_reconcile_pending_sendout if @bss106_pending_sendout &&
-      respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    if respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+      bss106_reconcile_pending_sendout if @bss106_pending_sendout
+      bss106_restore_active_battlers
+    end
     ret
   end
 
-  # A few native animation plugins can clear the DBK BattlerSprite's
-  # logical @spriteVisible *after* the sendout callback has returned.
-  # Reconcile only at the next safe command boundary, never during a move,
-  # a recall, a semi-invulnerable state or a cinematic intro.
-  def bss106_restore_presented_on_command
-    return unless @bss106_presented_pokemon.is_a?(Hash) && @battle && @sprites.is_a?(Hash)
-    return if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
-    return if @bss_nds_intro_active || @vermeil_cinema_trainer_intro_depth.to_i>0
-    return if @bss_camera_attack_phase_depth.to_i>0 || @bss096_battler_anim_depth.to_i>0
-    return if (respond_to?(:inPartyAnimation?) && inPartyAnimation?)
-    @bss106_presented_pokemon.delete_if do |idx,identity|
-      battler=(@battle.battlers[idx] rescue nil)
-      if !battler || (battler.fainted? rescue true)
-        true
-      elsif (battler.pokemon rescue nil).object_id!=identity
-        true
-      else
-        sprite=@sprites["pokemon_#{idx}"]
-        next false unless sprite.is_a?(Battle::Scene::BattlerSprite) &&
-                          !(sprite.disposed? rescue true)
-        next false if sprite.respond_to?(:substitute) && sprite.substitute
-        next false if battler.respond_to?(:semiInvulnerable?) && battler.semiInvulnerable?
-        sprite.vanishMode=0 if sprite.respond_to?(:vanishMode=) &&
-                             sprite.respond_to?(:vanishMode) && sprite.vanishMode.to_i>0
-        sprite.visible=true unless sprite.visible
-        sprite.opacity=255 if sprite.respond_to?(:opacity=) && sprite.opacity.to_i==0
-        false
+  # DBK BattlerSprite#update reapplies @spriteVisible every frame. A BAS
+  # transition can leave the logical bit hidden after its animation ends.
+  # Reconcile stable scene frames, not just the single sendout callback.
+  def bss106_stable_battler_frame?
+    return false unless @battle && @sprites.is_a?(Hash)
+    return false if @bss106_party_camera_freeze || @bss106_sos_camera_freeze ||
+                    @bss106_transition_freeze
+    return false if @bss_nds_intro_active || @vermeil_cinema_trainer_intro_depth.to_i>0
+    return false if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
+    return false if @bss070_ebdx_suspend_depth.to_i>0
+    return false if @bss096_native_formation_depth.to_i>0 ||
+                    @bss096_battler_anim_depth.to_i>0
+    return false if @bss087_native_move_active || @bss084_native_move_active ||
+                    @vermeil_cinema_native_move_depth.to_i>0
+    return false if respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?
+    return false if respond_to?(:inPartyAnimation?) && inPartyAnimation?
+    true
+  end
+
+  def bss106_restore_active_battlers
+    return unless bss106_stable_battler_frame?
+    # Before initial sendout, all battlers must remain under the native intro.
+    return unless @vermeil_cinema_first_command_reached ||
+                  (@bss106_presented_pokemon && !@bss106_presented_pokemon.empty?)
+    @battle.battlers.each do |bat|
+      next unless bat && !(bat.fainted? rescue true)
+      next if bat.respond_to?(:semiInvulnerable?) && bat.semiInvulnerable?
+      idx=(bat.index rescue nil)
+      next unless idx.is_a?(Integer)
+      mon=(bat.pokemon rescue nil)
+      next unless mon
+      sp=@sprites["pokemon_#{idx}"]
+      next unless sp.is_a?(Battle::Scene::BattlerSprite) &&
+                  !(sp.disposed? rescue true) && sp.pkmn
+      next if sp.respond_to?(:substitute) && sp.substitute
+      # Target blinking uses a transient Sprite#visible=false while keeping
+      # @spriteVisible true. Never override that animation.
+      next if sp.respond_to?(:selected) && sp.selected.to_i==2
+      logical=sp.instance_variable_defined?(:@spriteVisible) ?
+              sp.instance_variable_get(:@spriteVisible) : (sp.visible rescue false)
+      hidden=!logical || !(sp.visible rescue false)
+      hidden ||= (sp.opacity.to_i==0) if sp.respond_to?(:opacity)
+      next unless hidden
+      if sp.respond_to?(:vanishMode) && sp.respond_to?(:vanishMode=)
+        sp.vanishMode=0 if sp.vanishMode.to_i>0
       end
+      sp.visible=true
+      sp.opacity=255 if sp.respond_to?(:opacity=) && sp.opacity.to_i==0
+      # Do not reload its bitmap or reproject XY; DBK owns frames and BSS103
+      # owns the shared world-floor alignment.
     end
   end
 
+  def bss106_restore_presented_on_command
+    bss106_restore_active_battlers
+  end
+
   def pbCommandMenu(*args,&block)
-    bss106_restore_presented_on_command if respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    bss106_restore_active_battlers if respond_to?(:bss070_ebdx_active?) &&
+                                     bss070_ebdx_active?
     super
   end
 
