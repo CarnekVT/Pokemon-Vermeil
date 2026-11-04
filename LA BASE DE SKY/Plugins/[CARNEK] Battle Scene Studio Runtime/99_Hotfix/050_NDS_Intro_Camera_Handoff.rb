@@ -273,9 +273,11 @@ module VermeilBSSNDSIntroScene
         flash.opacity=elapsed<hold ? 0 : (158.0*(1.0-(2.0*flash_p-1.0).abs)).round
         # Reveal live actors/terrain during the final third, not a frozen
         # copy of the battlers. Native animation frames remain authoritative.
-        reveal=[[(p-0.57)/0.43,0.0].max,1.0].min
+        # Dissolve the scenery snapshot earlier so the real animated actor
+        # becomes visible DURING the push, not suddenly on its final frames.
+        reveal=[[(p-0.36)/0.64,0.0].max,1.0].min
         cover.opacity=(255.0*(1.0-reveal*reveal*(3.0-2.0*reveal))).round
-        if @battle.trainerBattle? && p>=0.22 && Time.now.to_f-trainer_frame_at>=0.045
+        if @battle.trainerBattle? && p>=0.32 && Time.now.to_f-trainer_frame_at>=0.045
           (@battle.opponent || []).each_index do |i|
             trainer=@sprites["trainer_#{i+1}"]
             trainer.play if trainer && trainer.respond_to?(:play) &&
