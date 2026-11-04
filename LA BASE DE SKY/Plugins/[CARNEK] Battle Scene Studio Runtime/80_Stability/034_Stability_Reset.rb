@@ -542,7 +542,8 @@ module BSS106SceneStability
   # transition can leave the logical bit hidden after its animation ends.
   # Reconcile stable scene frames, not just the single sendout callback.
   def bss106_stable_battler_frame?
-    return false unless @battle && @sprites.is_a?(Hash)
+    return false unless @battle && @battle.respond_to?(:battlers) &&
+                        @battle.battlers.respond_to?(:each) && @sprites.is_a?(Hash)
     return false if @bss106_party_camera_freeze || @bss106_sos_camera_freeze ||
                     @bss106_transition_freeze
     return false if @bss_nds_intro_active || @vermeil_cinema_trainer_intro_depth.to_i>0
@@ -563,22 +564,21 @@ module BSS106SceneStability
     return unless @vermeil_cinema_first_command_reached ||
                   (@bss106_presented_pokemon && !@bss106_presented_pokemon.empty?)
     @battle.battlers.each do |bat|
-      next unless bat && !(bat.fainted? rescue true)
+      next unless bat && bat.respond_to?(:fainted?) && !bat.fainted?
       next if bat.respond_to?(:semiInvulnerable?) && bat.semiInvulnerable?
-      idx=(bat.index rescue nil)
-      next unless idx.is_a?(Integer)
-      mon=(bat.pokemon rescue nil)
-      next unless mon
+      next unless bat.respond_to?(:index) && bat.respond_to?(:pokemon)
+      idx=bat.index
+      next unless idx.is_a?(Integer) && bat.pokemon
       sp=@sprites["pokemon_#{idx}"]
       next unless sp.is_a?(Battle::Scene::BattlerSprite) &&
-                  !(sp.disposed? rescue true) && sp.pkmn
+                  !sp.disposed? && sp.pkmn
       next if sp.respond_to?(:substitute) && sp.substitute
       # Target blinking uses a transient Sprite#visible=false while keeping
       # @spriteVisible true. Never override that animation.
       next if sp.respond_to?(:selected) && sp.selected.to_i==2
       logical=sp.instance_variable_defined?(:@spriteVisible) ?
-              sp.instance_variable_get(:@spriteVisible) : (sp.visible rescue false)
-      hidden=!logical || !(sp.visible rescue false)
+              sp.instance_variable_get(:@spriteVisible) : sp.visible
+      hidden=!logical || !sp.visible
       hidden ||= (sp.opacity.to_i==0) if sp.respond_to?(:opacity)
       next unless hidden
       if sp.respond_to?(:vanishMode) && sp.respond_to?(:vanishMode=)
