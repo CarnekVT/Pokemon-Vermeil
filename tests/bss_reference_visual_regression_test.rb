@@ -64,6 +64,9 @@ assert("wild opponent trainer count is nil-safe",
        File.read(paths["Native trainer floor"]).include?("owners.respond_to?(:length)"))
 assert("MAIN zoom-out is normalized baseline",
        File.read(paths["Native trainer floor"]).include?("342,0.86,0.86"))
+assert("zero-sized native sendout zoom is not treated as neutral",
+       File.read(paths["Native trainer floor"]).include?("bss070_ebdx_safe_metric_scale") &&
+       File.read(paths["Native trainer floor"]).include?("x>0.02 && y>0.02"))
 world=File.read(paths["World actor projection"])
 assert("both player and enemy doubles gain lateral space",
        world.include?("[-21.0,27.0]") && world.include?("[-15.0,22.0]"))
@@ -75,6 +78,10 @@ assert("stable visibility check recognizes BAS leases",
        native.include?("@bas_runtime_playback_depth.to_i>0"))
 assert("scene update reconciles DBK logical visibility",
        native.include?("bss106_restore_active_battlers"))
+assert("visual recovery detects zero zoom without touching BAS playback",
+       native.include?("collapsed=sp.respond_to?(:zoom_x)") &&
+       native.include?("sp.zoom_x=scale[0]") &&
+       native.include?("@bas_runtime_playback_depth.to_i>0"))
 dialogue=File.read(paths["BSS Dialogue Engine"])
 lighting=File.read(paths["Layered lighting"])
 assert("cinematic overlay has separate tween targets",dialogue.include?("dim_target,1.0") &&
@@ -92,13 +99,15 @@ class Battle
   class Scene
     class BattlerSprite
       attr_reader :pkmn
-      attr_accessor :vanishMode,:opacity,:substitute,:selected
+      attr_accessor :vanishMode,:opacity,:substitute,:selected,:zoom_x,:zoom_y
       def initialize(pokemon)
         @pkmn=pokemon
         @visible=false
         @spriteVisible=false
         @vanishMode=2
         @opacity=0
+        @zoom_x=1.0
+        @zoom_y=1.0
       end
       def visible=(flag)
         @spriteVisible=flag
@@ -114,6 +123,7 @@ class Battle
 end
 load paths["Native sendout authority"]
 scene=Battle::Scene.new
+def scene.bss070_ebdx_anchor_scale(_idx);[1.0,1.0];end
 old_pokemon=Object.new
 new_pokemon=Object.new
 battler=Struct.new(:index,:pokemon,:faint) do
@@ -146,6 +156,10 @@ assert("BAS playback owns temporary invisible frame",!sprite.visible)
 scene.instance_variable_set(:@bas_runtime_playback_depth,0)
 scene.bss106_restore_active_battlers
 assert("post-BAS stable scene restores logical visibility",sprite.visible)
+sprite.zoom_x=0.0
+sprite.zoom_y=0.0
+scene.bss106_restore_active_battlers
+assert("zero zoom is recovered in stable scene frames",sprite.zoom_x==1.0 && sprite.zoom_y==1.0)
 sprite.instance_variable_set(:@visible,false)
 sprite.selected=2
 scene.bss106_restore_active_battlers
