@@ -34,9 +34,15 @@ module BSS103WorldSpaceBattlers
     # using more breadth on the player's near plane. All offsets are in
     # screen pixels after EBDX projection and mirrored for the shadow.
     if index.to_i.even?
-      side_size==2 ? [-10.0,20.0][slot].to_f : [-14.0,7.0,29.0][slot].to_f
+      # Player-side allies are larger/closer to camera: give them slightly
+      # more breathing room than the far-side opponents.
+      return [-21.0,27.0][slot] if side_size==2 && slot<2
+      return [-28.0,3.0,36.0][slot] if side_size==3 && slot<3
+      return [[(slot-(side_size-1)/2.0)*29.0,-56.0].max,56.0].min
     else
-      side_size==2 ? [-6.0,12.0][slot].to_f : [-8.0,3.0,14.0][slot].to_f
+      return [-15.0,22.0][slot] if side_size==2 && slot<2
+      return [-21.0,3.0,26.0][slot] if side_size==3 && slot<3
+      return [[(slot-(side_size-1)/2.0)*23.0,-46.0].max,46.0].min
     end
   rescue StandardError
     0.0
