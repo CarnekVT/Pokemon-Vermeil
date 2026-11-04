@@ -47,9 +47,9 @@ module BSS070EBDXCore
     [0,384,26,322,1,1], [198,298,18,282,1,1], [196,306,26,242,0.6,1],
     [156,280,18,226,0.6,1], [60,280,12,388,1,1], [160,286,16,340,1,1]
   ]
-  # The 0.92-wide baseline is the NORMAL 100% framing for Vermeil EBDX.
-  # Subsequent camera shots are relative to MAIN, not to the source EBDX 1.0.
-  MAIN_FALLBACK = [102,408,32,342,0.92,0.92]
+  # This wider 0.86 shot is Vermeil EBDX's NORMAL 100% baseline.
+  # Fight/target camera movements remain relative to MAIN (not source zoom 1).
+  MAIN_FALLBACK = [102,408,32,342,0.86,0.86]
   BUILTIN = {}
   TERRAIN = {}
   @next_vectors = []
