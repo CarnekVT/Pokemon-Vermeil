@@ -59,16 +59,14 @@ module BSSCameraTrainerDepth
       # DBK/Essentials index trainer sprites FROM ONE. Earlier BSS world
       # projection used trainer_0 for the first trainer, which was incorrect.
       trainer = @sprites["trainer_#{i + 1}"]
+      next unless trainer && !(trainer.disposed? rescue true) && trainer.respond_to?(:z=)
       battler = @sprites["pokemon_#{2*i+1}"]
-      next unless trainer && battler
-      next if (trainer.disposed? rescue false) || (battler.disposed? rescue false)
-      next unless battler.visible && (battler.opacity rescue 255).to_i > 0
-      next unless trainer.respond_to?(:z=) && battler.respond_to?(:z)
-      # Old relayer pushed TrainerSprite BEHIND the Pokemon and sometimes
-      # behind EBDX trees/terrain; the player originally reported the
-      # Pokemon covering the trainer. Keep native XY/animation untouched,
-      # while only correcting draw order once the native sendout has settled.
-      trainer.z = [battler.z.to_i + 2, 52 + i].max
+      # The trainer's depth must NOT depend on the currently visible Pokemon:
+      # after a switch the foe can be logically hidden for a frame, and the
+      # previous code skipped the trainer entirely, burying it in EBDX terrain.
+      foe_z=(battler && !(battler.disposed? rescue true)) ? (battler.z rescue 50).to_i : 50
+      trainer.z=[trainer.z.to_i,foe_z+2,52+i].max
+      # DBK alone owns TrainerSprite#visible and its animated X/Y positions.
     end
   rescue StandardError => e
     BSS064.log("Trainer Z-order: #{e.class}: #{e.message}") if defined?(BSS064)
