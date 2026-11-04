@@ -2377,7 +2377,10 @@ module BSS070EBDXSceneBridge
          @battle.battlers.respond_to?(:[])) ? @battle.battlers[index] : nil
     mon=bat && bat.respond_to?(:pokemon) ? bat.pokemon : nil
     token=mon ? mon.object_id : sp.object_id
-    key=[index.to_i,token,shadow]
+    # Track a separate neutral scale for each species/form in a reused slot.
+    species=mon && mon.respond_to?(:species) ? mon.species : nil
+    form=mon && mon.respond_to?(:form) ? mon.form : nil
+    key=[index.to_i,token,species,form,shadow]
     @bss070_ebdx_valid_scale ||= {}
     old=@bss070_ebdx_valid_scale[key]
     # Neutral metrics must not be sampled during native/BAS animation frames.
@@ -2389,8 +2392,9 @@ module BSS070EBDXSceneBridge
     x=vals && vals.length>4 ? vals[3].to_f : sp.zoom_x.to_f
     y=vals && vals.length>4 ? vals[4].to_f : sp.zoom_y.to_f
     if x.finite? && y.finite? && x>0.02 && y>0.02
-      @bss070_ebdx_valid_scale[key]=[x,y]
-      [x,y]
+      # Keep the first stable neutral metric; later camera projection must
+      # never be sampled again as a new baseline for the SAME Pokemon.
+      @bss070_ebdx_valid_scale[key] ||= [x,y]
     else
       old || fallback
     end
