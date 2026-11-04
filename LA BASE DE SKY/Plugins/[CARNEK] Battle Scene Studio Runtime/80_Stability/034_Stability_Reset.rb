@@ -578,16 +578,26 @@ module BSS106SceneStability
       next if sp.respond_to?(:selected) && sp.selected.to_i==2
       logical=sp.instance_variable_defined?(:@spriteVisible) ?
               sp.instance_variable_get(:@spriteVisible) : sp.visible
+      # The native Pokeball animation also temporarily shrinks zoom to 0.
+      # If the EBDX anchor sampled that transient frame the battler is fully
+      # transparent geometrically even when Sprite#visible is true.
+      collapsed=sp.respond_to?(:zoom_x) && sp.respond_to?(:zoom_y) &&
+                (sp.zoom_x.to_f<=0.02 || sp.zoom_y.to_f<=0.02)
       hidden=!logical || !sp.visible
       hidden ||= (sp.opacity.to_i==0) if sp.respond_to?(:opacity)
-      next unless hidden
+      next unless hidden || collapsed
       if sp.respond_to?(:vanishMode) && sp.respond_to?(:vanishMode=)
         sp.vanishMode=0 if sp.vanishMode.to_i>0
       end
-      sp.visible=true
+      sp.visible=true if hidden
       sp.opacity=255 if sp.respond_to?(:opacity=) && sp.opacity.to_i==0
-      # Do not reload its bitmap or reproject XY; DBK owns frames and BSS103
-      # owns the shared world-floor alignment.
+      if collapsed && respond_to?(:bss070_ebdx_anchor_scale)
+        scale=bss070_ebdx_anchor_scale(idx)
+        sp.zoom_x=scale[0] if sp.respond_to?(:zoom_x=) && sp.zoom_x.to_f<=0.02
+        sp.zoom_y=scale[1] if sp.respond_to?(:zoom_y=) && sp.zoom_y.to_f<=0.02
+      end
+      # Do not reload bitmap or rewrite XY; DBK owns frames and BSS103
+      # owns projected world-floor alignment.
     end
   end
 
