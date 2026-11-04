@@ -2367,22 +2367,55 @@ module BSS070EBDXSceneBridge
     [fallback[0].to_f,fallback[1].to_f,7]
   end
 
+  # A native Pokeball reveal temporarily sets zoom=0. Never cache that as
+  # the EBDX *neutral* scale: an invisible replacement then remains at zero
+  # until some unrelated animation explicitly restores its zoom.
+  def bss070_ebdx_safe_metric_scale(sp,index,vals,shadow=false)
+    fallback=shadow ? [1.0,0.25] : [1.0,1.0]
+    return fallback unless sp
+    bat=(@battle && @battle.respond_to?(:battlers) &&
+         @battle.battlers.respond_to?(:[])) ? @battle.battlers[index] : nil
+    mon=bat && bat.respond_to?(:pokemon) ? bat.pokemon : nil
+    token=mon ? mon.object_id : sp.object_id
+    key=[index.to_i,token,shadow]
+    @bss070_ebdx_valid_scale ||= {}
+    old=@bss070_ebdx_valid_scale[key]
+    # Neutral metrics must not be sampled during native/BAS animation frames.
+    native_owned=@bss106_party_camera_freeze || @bss070_ebdx_bas_frame ||
+                 @bas_runtime_playback_depth.to_i>0 ||
+                 @bss096_native_formation_depth.to_i>0 ||
+                 @bss096_battler_anim_depth.to_i>0
+    return old || fallback if native_owned
+    x=vals && vals.length>4 ? vals[3].to_f : sp.zoom_x.to_f
+    y=vals && vals.length>4 ? vals[4].to_f : sp.zoom_y.to_f
+    if x.finite? && y.finite? && x>0.02 && y>0.02
+      @bss070_ebdx_valid_scale[key]=[x,y]
+      [x,y]
+    else
+      old || fallback
+    end
+  end
+
   def bss070_ebdx_anchor_scale(index)
-    sp=bss070_ebdx_native_sprite(index);return [1.0,1.0] if !sp
-    side=(@battle.pbSideSize(index) rescue 1).to_i;key=[sp.object_id,index.to_i,side,bss070_ebdx_sprite_loaded?(sp)]
+    sp=bss070_ebdx_native_sprite(index)
+    return [1.0,1.0] unless sp
+    side=(@battle.pbSideSize(index) rescue 1).to_i
+    key=[sp.object_id,index.to_i,side,bss070_ebdx_sprite_loaded?(sp)]
     vals=@bss070_ebdx_anchor_cache && @bss070_ebdx_anchor_cache[key]
-    bss070_ebdx_native_position_for(index) if !vals
+    bss070_ebdx_native_position_for(index) unless vals
     vals=@bss070_ebdx_anchor_cache && @bss070_ebdx_anchor_cache[key]
-    vals ? [vals[3].to_f,vals[4].to_f] : [(sp.zoom_x rescue 1.0).to_f,(sp.zoom_y rescue 1.0).to_f]
+    bss070_ebdx_safe_metric_scale(sp,index,vals)
   end
 
   def bss070_ebdx_shadow_anchor_scale(index)
-    sp=bss070_ebdx_native_shadow_sprite(index);return [1.0,0.25] if !sp
-    side=(@battle.pbSideSize(index) rescue 1).to_i;key=[sp.object_id,index.to_i,side,bss070_ebdx_sprite_loaded?(sp)]
+    sp=bss070_ebdx_native_shadow_sprite(index)
+    return [1.0,0.25] unless sp
+    side=(@battle.pbSideSize(index) rescue 1).to_i
+    key=[sp.object_id,index.to_i,side,bss070_ebdx_sprite_loaded?(sp)]
     vals=@bss070_ebdx_shadow_anchor_cache && @bss070_ebdx_shadow_anchor_cache[key]
-    bss070_ebdx_native_shadow_position_for(index) if !vals
+    bss070_ebdx_native_shadow_position_for(index) unless vals
     vals=@bss070_ebdx_shadow_anchor_cache && @bss070_ebdx_shadow_anchor_cache[key]
-    vals ? [vals[3].to_f,vals[4].to_f] : [(sp.zoom_x rescue 1.0).to_f,(sp.zoom_y rescue 0.25).to_f]
+    bss070_ebdx_safe_metric_scale(sp,index,vals,true)
   end
 
   def bss070_ebdx_invalidate_anchors
