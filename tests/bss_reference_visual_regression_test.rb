@@ -59,11 +59,22 @@ assert("bag and party return to MAIN",camera.include?("vermeil_cinema_queue_home
 assert("scripted dialogue owns camera vector",camera.include?("@vermeil_cinema_script_camera_hold") &&
        File.read(paths["Scripted camera lock"]).include?("script_camera_hold"))
 assert("trainer kept above Pokemon and terrain",
-       File.read(paths["Trainer z order"]).include?("battler.z.to_i + 2"))
+       File.read(paths["Trainer z order"]).include?("trainer.z=[trainer.z.to_i,foe_z+2,52+i].max"))
 assert("wild opponent trainer count is nil-safe",
        File.read(paths["Native trainer floor"]).include?("owners.respond_to?(:length)"))
 assert("MAIN zoom-out is normalized baseline",
-       File.read(paths["Native trainer floor"]).include?("342,0.92,0.92"))
+       File.read(paths["Native trainer floor"]).include?("342,0.86,0.86"))
+world=File.read(paths["World actor projection"])
+assert("both player and enemy doubles gain lateral space",
+       world.include?("[-21.0,27.0]") && world.include?("[-15.0,22.0]"))
+assert("both player and enemy triples gain lateral space",
+       world.include?("[-28.0,3.0,36.0]") && world.include?("[-21.0,3.0,26.0]"))
+native=File.read(paths["Native sendout authority"])
+assert("stable visibility check recognizes BAS leases",
+       native.include?("bss106_stable_battler_frame?") &&
+       native.include?("@bas_runtime_playback_depth.to_i>0"))
+assert("scene update reconciles DBK logical visibility",
+       native.include?("bss106_restore_active_battlers"))
 dialogue=File.read(paths["BSS Dialogue Engine"])
 lighting=File.read(paths["Layered lighting"])
 assert("cinematic overlay has separate tween targets",dialogue.include?("dim_target,1.0") &&
@@ -81,7 +92,7 @@ class Battle
   class Scene
     class BattlerSprite
       attr_reader :pkmn
-      attr_accessor :vanishMode,:opacity,:substitute
+      attr_accessor :vanishMode,:opacity,:substitute,:selected
       def initialize(pokemon)
         @pkmn=pokemon
         @visible=false
@@ -126,6 +137,21 @@ sprite.opacity=0
 sprite.vanishMode=1
 scene.bss106_restore_presented_on_command
 assert("command boundary recovers a hidden replacement",sprite.visible && sprite.opacity==255 && sprite.vanishMode==0)
+# BAS is the exclusive animation owner. The recovery must never flash
+# a target back into view before its authored BAS timeline ends.
+scene.instance_variable_set(:@bas_runtime_playback_depth,1)
+sprite.visible=false
+scene.bss106_restore_active_battlers
+assert("BAS playback owns temporary invisible frame",!sprite.visible)
+scene.instance_variable_set(:@bas_runtime_playback_depth,0)
+scene.bss106_restore_active_battlers
+assert("post-BAS stable scene restores logical visibility",sprite.visible)
+sprite.instance_variable_set(:@visible,false)
+sprite.selected=2
+scene.bss106_restore_active_battlers
+assert("native target blink remains respected",!sprite.visible)
+sprite.selected=0
+sprite.update
 battler.faint=true
 sprite.visible=false
 scene.bss106_finish_sendout([[1,new_pokemon]])
