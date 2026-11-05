@@ -53,7 +53,7 @@ export function installTrainerPortraitChoice(ctx,host){
       select.dataset.dialogueField="trainerPortraitMode";
       for(const [value,text] of [
         ["hidden","Oculto si ya hay Pokémon rival en el campo"],
-        ["behind","Visible · detrás de los Pokémon"]
+        ["behind","Mostrar entrenador real detrás del Pokémon"]
       ]){
         const option=document.createElement("option");
         option.value=value;
@@ -63,7 +63,7 @@ export function installTrainerPortraitChoice(ctx,host){
       select.value=saved.get(id.value)||"hidden";
       const help=document.createElement("small");
       help.className="bss-note";
-      help.textContent="Visible coloca el retrato DBK detrás de los Pokémon rivales; oculto evita duplicarlo cuando ya están en el campo.";
+      help.textContent="Utiliza el sprite real del entrenador, con altura/offset definidos por el editor 042, sin dibujar un segundo retrato delante del Pokémon.";
       field.append(label,select,help);
       const parent=speaker.closest(".bss-field");
       if(parent)parent.insertAdjacentElement("afterend",field);
