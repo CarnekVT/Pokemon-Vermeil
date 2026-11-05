@@ -188,16 +188,31 @@ module BSSScriptedSpeakerComposition
     if mode=="behind"
       @bss_scripted_trainer_restore ||= {}
       if !@bss_scripted_trainer_restore.key?(trainer.object_id)
+        was_visible=(trainer.visible rescue false)
         @bss_scripted_trainer_restore[trainer.object_id]=[
-          trainer,(trainer.visible rescue false),(trainer.x rescue nil),
-          (trainer.y rescue nil),(trainer.z rescue nil)
+          trainer,was_visible,(trainer.x rescue nil),
+          (trainer.y rescue nil),(trainer.z rescue nil),(trainer.opacity rescue 255)
         ]
-        # A native slide/sendout may have moved the trainer offscreen.
-        # This project patch applies GameData::TrainerType#SpriteOffset to
-        # both X and Y and owns matching shadow coordinates.
-        trainer.pbSetPosition if trainer.respond_to?(:pbSetPosition)
+        unless was_visible
+          # Capture the exact X/Y that 042_TrainerSpriteEditorShadowFix
+          # calculated at intro setup. Never recompute pbSetPosition during
+          # dialogue: that reset caused the trainer to jump/flicker.
+          authored=(@bss_nds_trainer_anchor || {})[1]
+          if authored && authored.length>=2
+            trainer.x=authored[0] if trainer.respond_to?(:x=)
+            trainer.y=authored[1] if trainer.respond_to?(:y=)
+          end
+          trainer.opacity=0 if trainer.respond_to?(:opacity=)
+          @bss_scripted_trainer_fade_started=Time.now.to_f
+        end
       end
       trainer.visible=true if trainer.respond_to?(:visible=)
+      if @bss_scripted_trainer_fade_started && trainer.respond_to?(:opacity=)
+        passed=[Time.now.to_f-@bss_scripted_trainer_fade_started,0.0].max
+        alpha=[[passed/0.22,0.0].max,1.0].min
+        trainer.opacity=(255.0*alpha*alpha*(3.0-2.0*alpha)).round
+        @bss_scripted_trainer_fade_started=nil if alpha>=1.0
+      end
       foes=@battle.battlers.each_with_index.filter_map do |b,idx|
         next unless idx.odd? && b && !(b.fainted? rescue true)
         foe=@sprites["pokemon_#{idx}"]
@@ -215,14 +230,16 @@ module BSSScriptedSpeakerComposition
   def bss_scripted_restore_trainer_actor
     snapshot=@bss_scripted_trainer_restore || {}
     snapshot.each_value do |row|
-      trainer,visible,x,y,z=row
+      trainer,visible,x,y,z,opacity=row
       next unless trainer && !(trainer.disposed? rescue true)
       trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
       trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
       trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
+      trainer.opacity=opacity if !opacity.nil? && trainer.respond_to?(:opacity=)
       trainer.visible=visible if trainer.respond_to?(:visible=)
     end
     @bss_scripted_trainer_restore=nil
+    @bss_scripted_trainer_fade_started=nil
   end
 
   def pbUpdate(*args,&block)
