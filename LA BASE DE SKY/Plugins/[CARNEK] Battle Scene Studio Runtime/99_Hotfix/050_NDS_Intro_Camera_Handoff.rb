@@ -163,6 +163,11 @@ module VermeilBSSNDSIntroScene
         @battle.opponent.each_index do |i|
           trainer=@sprites["trainer_#{i+1}"]
           next unless trainer && !(trainer.disposed? rescue true) && trainer.respond_to?(:z=)
+          # 042_TrainerSpriteEditorShadowFix owns the XY offsets and shadow.
+          # Reapply its native pbSetPosition once, never replace the authored
+          # vertical coordinate with BSS/EBDX anchor or a magic screen Y.
+          trainer.pbSetPosition if trainer.respond_to?(:pbSetPosition)
+          trainer.to_first_frame if trainer.respond_to?(:to_first_frame)
           trainer.z=[trainer.z.to_i,49+i].max
         end
       end
@@ -246,7 +251,9 @@ module VermeilBSSNDSIntroScene
       grass.y=0
       grass.zoom_x=1.0
       grass.zoom_y=1.0
-      grass.opacity=255
+      # Fade/slide the biome graphic in from black; do not pop the full
+      # alpha strip into existence at full opacity on its first render.
+      grass.opacity=0
 
       flash=Sprite.new(viewport)
       flash_bitmap=Bitmap.new(1,1)
@@ -267,7 +274,6 @@ module VermeilBSSNDSIntroScene
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
-      trainer_frame_at=began
       frame=0
       loop do
         elapsed=[Time.now.to_f-began,0.0].max
@@ -283,11 +289,16 @@ module VermeilBSSNDSIntroScene
         cover.zoom_x=zoom
         cover.zoom_y=zoom
 
-        # The untouched original full-size transition strip drifts gently
-        # while its alpha reveals the real, already rendered EBDX room.
-        grass.x=(dx.to_f*(elapsed*60.0)*0.25).round
-        grass.y=(dy.to_f*(elapsed*60.0)*0.12).round
-        grass.opacity=(255.0*(1.0-[[p*1.35,1.0].min,0.0].max)).round
+        # ORAS-like choreography: the biome rushes in over black, holds
+        # briefly, then peels away as the world becomes visible. Start fully
+        # transparent, including the first Graphics.update after allocation.
+        entrance=[[elapsed/0.27,0.0].max,1.0].min
+        entrance=entrance*entrance*(3.0-2.0*entrance)
+        departure=[[(elapsed-(hold+duration*0.30))/(duration*0.67),0.0].max,1.0].min
+        departure=departure*departure*(3.0-2.0*departure)
+        grass.x=(-42.0*(1.0-entrance)+dx.to_f*elapsed*9.0).round
+        grass.y=(dy.to_f*elapsed*3.0).round
+        grass.opacity=(255.0*entrance*(1.0-departure)).round
         # Strong but brief impact flash as the GrassIntro tears away.
         flash_p=[[(elapsed-hold)/0.20,0.0].max,1.0].min
         flash.opacity=0 if flash  # No white flash to wash out the intro art.
@@ -303,14 +314,8 @@ module VermeilBSSNDSIntroScene
           dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
           darkness.opacity=(255.0*(1.0-dark_ease)).round
         end
-        if @battle.trainerBattle? && p>=0.24 && Time.now.to_f-trainer_frame_at>=0.045
-          (@battle.opponent || []).each_index do |i|
-            trainer=@sprites["trainer_#{i+1}"]
-            trainer.play if trainer && trainer.respond_to?(:play) &&
-                            trainer.respond_to?(:finished?) && !trainer.finished?
-          end
-          trainer_frame_at=Time.now.to_f
-        end
+        # Do not advance TrainerBitmapWrapper here. Only the native
+        # pbAnimateTrainerIntros owns trainer frame playback, after reveal.
         # DBK advances animated Pokemon from pbFrameUpdate; Graphics.update
         # alone makes them appear frozen for the whole encounter transition.
         Graphics.update
@@ -318,6 +323,15 @@ module VermeilBSSNDSIntroScene
         frame+=1
         break if elapsed>=hold+duration && frame>=2
         break if frame>=1000 # Never hang if a platform clock misbehaves.
+      end
+      # Native trainer animation must begin on its *first* frame after the
+      # scenery has been revealed, even when the graphics driver advanced an
+      # animated bitmap during an unrelated render pass.
+      if @battle.trainerBattle? && @battle.opponent
+        @battle.opponent.each_index do |i|
+          trainer=@sprites["trainer_#{i+1}"]
+          trainer.to_first_frame if trainer && trainer.respond_to?(:to_first_frame)
+        end
       end
       # Ensure the final frame is at exactly 100% even on early frame cap.
       cover.zoom_x=1.0
