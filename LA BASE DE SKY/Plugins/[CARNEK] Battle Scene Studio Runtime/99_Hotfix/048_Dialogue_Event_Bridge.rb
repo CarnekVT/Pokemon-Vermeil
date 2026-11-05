@@ -17,6 +17,10 @@ module BSSBlueprintDialogueDispatch
     begin
       triggers.each do |ev|
         next unless ev.is_a?(String) && ev.match?(BSS_EVENTS)
+        # The cinematic win message was presented before Essentials' default
+        # "Entrenador ha perdido" line. Do not present it a second time from
+        # DBK's later Scene#pbEndBattle callback.
+        next if @bss_scripted_pre_end_win && ev.casecmp("BattleEndWin").zero?
         engine.process_event(ev, user, target)
         # DBK currently emits TargetHP75 for every HP level below 75% due
         # to its elsif ordering. Relay the two stricter thresholds so scripted
@@ -67,6 +71,21 @@ module BSSScriptedTrainerDefeatCaption
   def pbHandleEndOfBattleOutcome(oldDecision)
     suppress=(oldDecision==Battle::Outcome::WIN && bss_scripted_cinematic_defeat?)
     previous=@bss_suppress_native_trainer_lose_text
+    if suppress && !@bss_scripted_pre_end_win
+      # Essentials prints "¡Joven Chano ha perdido!" before its normal
+      # lose_text. Play the authored cinematic speech *first*, then let the
+      # native result announcement proceed without repeating lose_text.
+      engine=(respond_to?(:bss_dialogue_engine) ? bss_dialogue_engine : nil)
+      if engine && engine.respond_to?(:enabled?) && engine.enabled?
+        begin
+          @bss_scripted_pre_end_win=true
+          @bss_scripted_pre_end_win=false unless engine.process_event("BattleEndWin",1,nil)
+        rescue StandardError => e
+          @bss_scripted_pre_end_win=false
+          BSS064.log("Pre-result cinematic dialogue: #{e.class}: #{e.message}") if defined?(BSS064)
+        end
+      end
+    end
     @bss_suppress_native_trainer_lose_text=true if suppress
     super
   ensure
