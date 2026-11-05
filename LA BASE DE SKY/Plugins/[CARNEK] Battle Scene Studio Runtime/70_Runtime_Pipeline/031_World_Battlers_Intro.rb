@@ -54,55 +54,63 @@ module BSS103WorldSpaceBattlers
     return if @bss087_end_battle_lock
     return if !@bss070_ebdx_room || !@battle || !@sprites
 
-    bss070_ebdx_recalibrate_if_needed if respond_to?(:bss070_ebdx_recalibrate_if_needed)
-    scale0=BSS103.room_scale
+    # DBK's Sprite Positioner writes species/form-specific metrics via
+    # BattlerSprite#pbSetPosition. The EBDX metric floor is *not* that final
+    # position: writing anchor.y directly discarded the positioner offsets
+    # and launched sprites far above their authored floor.
+    #
+    # Use the real DBK positions (read through BSS096's native probe) as the
+    # authoritative baseline. Only the shared EBDX camera's bounded pan is
+    # composed on top. BAS, sendout and other animations stay excluded above.
+    camera_dx=0.0
+    camera_dy=0.0
+    if @vector && defined?(BSS070EBDXCore) &&
+       respond_to?(:vermeil_cinema_active?) && vermeil_cinema_active?
+      current=@vector.get
+      main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+      if current.is_a?(Array) && main.is_a?(Array)
+        camera_dx=(current[0].to_f-main[0].to_f)*0.65
+        camera_dy=(current[1].to_f-main[1].to_f)*0.45
+      end
+    end
 
     @battle.battlers.each_index do |i|
       sp=(bss070_ebdx_native_sprite(i) rescue nil)
-      next if !sp || (sp.disposed? rescue true) || !(bss070_ebdx_sprite_loaded?(sp) rescue true)
-      anchor=(@bss070_ebdx_room.battler(i) rescue nil)
-      next if !anchor || (anchor.disposed? rescue false)
-
-      # The invisible EBDX metric anchor is authored from Essentials' real
-      # pbBattlerPosition and projected by the same room matrix as scenery.
+      next unless sp && !(sp.disposed? rescue true)
+      next unless (bss070_ebdx_sprite_loaded?(sp) rescue false)
+      # pbSetPosition invokes the project's configured DBK SpeciesMetrics.
+      native=(bss096_native_position(i) rescue nil)
+      native=(bss070_ebdx_native_position_for(i) rescue nil) unless native.is_a?(Array) && native.length>=5
+      next unless native.is_a?(Array) && native.length>=2
       offset_x=bss103_formation_spacing_x(i)
-      sp.x=anchor.x+offset_x if sp.respond_to?(:x=)
+      sp.x=native[0].to_f+camera_dx+offset_x if sp.respond_to?(:x=)
       locked_y=(sp.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-      if locked_y
-        sp.y=locked_y if sp.respond_to?(:y=)
-      else
-        sp.y=anchor.y if sp.respond_to?(:y=)
+      sp.y=locked_y || (native[1].to_f+camera_dy) if sp.respond_to?(:y=)
+      if native.length>=5
+        sp.zoom_x=native[3].to_f if sp.respond_to?(:zoom_x=) && native[3].to_f>0.02
+        sp.zoom_y=native[4].to_f if sp.respond_to?(:zoom_y=) && native[4].to_f>0.02
       end
-      base=(bss070_ebdx_anchor_scale(i) rescue [1.0,1.0])
-      factor=((anchor.zoom_x rescue scale0).to_f/scale0)
-      factor=1.0 if !factor.finite? || factor<=0
-      sp.zoom_x=base[0].to_f*factor if sp.respond_to?(:zoom_x=)
-      sp.zoom_y=base[1].to_f*factor if sp.respond_to?(:zoom_y=)
-      sp.z=[(anchor.z rescue 50).to_i,50+i].max if sp.respond_to?(:z=)
+      sp.z=[(sp.z rescue 50).to_i,50+i].max if sp.respond_to?(:z=)
 
       sh=(bss070_ebdx_native_shadow_sprite(i) rescue nil)
-      if sh && !(sh.disposed? rescue true) && (bss070_ebdx_sprite_loaded?(sh) rescue true)
-        if @bss070_ebdx_room.respond_to?(:shadows_enabled?) && !@bss070_ebdx_room.shadows_enabled?
-          sh.visible=false if sh.respond_to?(:visible=)
-        else
-          sa=(@bss070_ebdx_room.shadow(i) rescue nil)
-          if sa && !(sa.disposed? rescue false)
-            sh.x=sa.x+offset_x if sh.respond_to?(:x=)
-            locked_sha_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-            if locked_sha_y
-              sh.y=locked_sha_y if sh.respond_to?(:y=)
-            else
-              sh.y=sa.y if sh.respond_to?(:y=)
-            end
-            sb=(bss070_ebdx_shadow_anchor_scale(i) rescue [1.0,0.25])
-            sf=((sa.zoom_x rescue scale0).to_f/scale0)
-            sf=1.0 if !sf.finite? || sf<=0
-            sh.zoom_x=sb[0].to_f*sf if sh.respond_to?(:zoom_x=)
-            sh.zoom_y=sb[1].to_f*sf if sh.respond_to?(:zoom_y=)
-            sh.z=[(sa.z rescue 3).to_i,30+i].max if sh.respond_to?(:z=)
-          end
-        end
+      next unless sh && !(sh.disposed? rescue true)
+      next unless (bss070_ebdx_sprite_loaded?(sh) rescue false)
+      if @bss070_ebdx_room.respond_to?(:shadows_enabled?) &&
+         !@bss070_ebdx_room.shadows_enabled?
+        sh.visible=false if sh.respond_to?(:visible=)
+        next
       end
+      shadow=(bss096_native_shadow_position(i) rescue nil)
+      shadow=(bss070_ebdx_native_shadow_position_for(i) rescue nil) unless shadow.is_a?(Array) && shadow.length>=5
+      next unless shadow.is_a?(Array) && shadow.length>=2
+      sh.x=shadow[0].to_f+camera_dx+offset_x if sh.respond_to?(:x=)
+      locked_shadow_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
+      sh.y=locked_shadow_y || (shadow[1].to_f+camera_dy) if sh.respond_to?(:y=)
+      if shadow.length>=5
+        sh.zoom_x=shadow[3].to_f if sh.respond_to?(:zoom_x=) && shadow[3].to_f>0.02
+        sh.zoom_y=shadow[4].to_f if sh.respond_to?(:zoom_y=) && shadow[4].to_f>0.02
+      end
+      sh.z=[(sh.z rescue 3).to_i,30+i].max if sh.respond_to?(:z=)
     end
 
     # Animated Trainer Intros/DBK own real trainer sprite XY for the entire
