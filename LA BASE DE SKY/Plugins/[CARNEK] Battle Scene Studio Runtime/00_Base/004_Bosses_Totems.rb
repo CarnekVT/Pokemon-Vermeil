@@ -254,6 +254,10 @@ module BSS064
       if !klass.ancestors.include?(BSS064BASWorldSpriteCompat)
         klass.prepend(BSS064BASWorldSpriteCompat)
       end
+      if klass.method_defined?(:prepare_camera_render) &&
+         !klass.ancestors.include?(BSS064AuraLayerCameraSync)
+        klass.prepend(BSS064AuraLayerCameraSync)
+      end
       true
     rescue => e
       log("Boss BAS aura compat warning: #{e.class}: #{e.message}")
@@ -2058,6 +2062,36 @@ module BSS064BASWorldSpriteCompat
     return false if k.start_with?("bss_totem_intro_impact") || k.start_with?("bss_totem_intro_flash") || k.start_with?("bss_totem_intro_veil")
     return true if k.start_with?("bss_totem_")
     super
+  end
+end
+
+# During the Totem aura camera, BAS transforms the EBDX room's registered
+# sprites but the layered horizon and terrain are stored separately in
+# @bss_layered_extra. Apply the *same* temporary camera to these extra layers,
+# using BAS' own restore slots. No changes are written to the EBDX vector or
+# saved editor positions, and ordinary BAS animations are unaffected.
+module BSS064AuraLayerCameraSync
+  def prepare_camera_render(*args,&block)
+    result=super
+    return result unless @data.is_a?(Hash) && @data["id"]=="bss_totem_aura_camera"
+    return result unless @camera_restore_count.to_i>0
+    room=(@sprites["battlebg"] rescue nil)
+    room=(@sprites["battle_bg"] rescue nil) unless room && room.instance_variable_defined?(:@bss_layered_extra)
+    return result unless room && room.instance_variable_defined?(:@bss_layered_extra)
+    extras=room.instance_variable_get(:@bss_layered_extra)
+    return result unless extras.is_a?(Array) && !extras.empty?
+    state=camera_state
+    seen=@camera_seen || {}
+    extras.each do |part|
+      next unless part && !(part.disposed? rescue true)
+      next if seen[part.object_id]
+      seen[part.object_id]=true
+      apply_camera_to_sprite(part,state)
+    end
+    result
+  rescue StandardError => e
+    BSS064.log("Totem layered camera sync: #{e.class}: #{e.message}") if defined?(BSS064)
+    result
   end
 end
 
