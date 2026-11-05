@@ -416,20 +416,11 @@ class BSSDialogueEngine
   end
 
   def bss_align_cinematic_trainer_speaker(scene, speaker_type, display_idx)
-    return unless speaker_type=="trainer" && scene
-    sprites=(scene.instance_variable_get(:@sprites) rescue nil)
-    room=(scene.instance_variable_get(:@bss070_ebdx_room) rescue nil)
-    return unless sprites.is_a?(Hash) && room && room.respond_to?(:trainer)
-    sp=sprites["midbattle_speaker"]
-    return unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:y=)
-    trainer_index=display_idx.to_i.odd? ? display_idx.to_i : 1
-    anchor=room.trainer(trainer_index)
-    return unless anchor && !(anchor.disposed? rescue true)
-    # Use the SAME projected trainer floor as the EBDX scenery; the separate
-    # DBK IconSprite otherwise stays at unprojected vanilla screen Y.
-    sp.y=anchor.y if anchor.respond_to?(:y)
-  rescue StandardError => e
-    BSS064.log("BSS trainer speaker alignment: #{e.class}: #{e.message}") if defined?(BSS064)
+    # DBK owns the dialogue speaker's XY. The room.trainer metric is a
+    # world-space anchor, not the native IconSprite's screen position.
+    # Reassigning y from that anchor lifted the Youngster's scripted speaker.
+    # Keep this hook for authored BSS dialogue compatibility, without writes.
+    nil
   end
 
   def bss_close_owned_speech
