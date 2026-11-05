@@ -41,3 +41,54 @@ end
 if defined?(Battle) && !Battle.ancestors.include?(BSSBlueprintDialogueDispatch)
   Battle.prepend(BSSBlueprintDialogueDispatch)
 end
+
+# Essentials always prints trainer.lose_text after "X ha perdido", even if a
+# BSS Blueprint authors the same moment as a cinematic BattleEndWin dialogue.
+# Suppress only the duplicate *native* lose_text in that one BSS context;
+# never alter an ordinary trainer battle's win/lose messages or other display.
+module BSSScriptedTrainerDefeatCaption
+  def bss_scripted_cinematic_defeat?
+    return false unless respond_to?(:trainerBattle?) && trainerBattle?
+    bp=(respond_to?(:bss_blueprint) ? bss_blueprint : nil)
+    return false unless bp.is_a?(Hash)
+    cfg=bp["dialogues"]
+    return false unless cfg.is_a?(Hash) && cfg["enabled"]!=false
+    triggers=cfg["triggers"]
+    triggers.is_a?(Array) && triggers.any? do |t|
+      next false unless t.is_a?(Hash)
+      event=(t["event"] || t["rawEvent"]).to_s
+      (t["style"]=="cinematic" || ["cinematic","speech"].include?(t["textboxType"])) &&
+        event.casecmp("BattleEndWin").zero?
+    end
+  rescue StandardError
+    false
+  end
+
+  def pbHandleEndOfBattleOutcome(oldDecision)
+    suppress=(oldDecision==Battle::Outcome::WIN && bss_scripted_cinematic_defeat?)
+    previous=@bss_suppress_native_trainer_lose_text
+    @bss_suppress_native_trainer_lose_text=true if suppress
+    super
+  ensure
+    @bss_suppress_native_trainer_lose_text=previous
+  end
+
+  def pbDisplayPaused(message,*args,&block)
+    if @bss_suppress_native_trainer_lose_text && @opponent
+      text=message.to_s
+      opponent_names=@opponent.respond_to?(:each) ? @opponent : []
+      native=opponent_names.any? do |trainer|
+        lose=(trainer.lose_text rescue "").to_s
+        lose="..." if lose.empty?
+        lose=lose.gsub(/\\[Pp][Nn]/,(pbPlayer.name rescue "")).gsub(/\\[Nn]/,"\n")
+        text==lose
+      end
+      return nil if native
+    end
+    super
+  end
+end
+
+if defined?(Battle) && !Battle.ancestors.include?(BSSScriptedTrainerDefeatCaption)
+  Battle.prepend(BSSScriptedTrainerDefeatCaption)
+end
