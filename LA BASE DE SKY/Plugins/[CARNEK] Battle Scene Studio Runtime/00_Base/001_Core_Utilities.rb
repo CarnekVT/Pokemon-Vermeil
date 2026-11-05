@@ -142,6 +142,7 @@ module BSS064
   VERSION = "0.8.6"
   FORMAT_VERSION = 68
   DATA_FILE = "Data/BattleSceneStudio/battles.json"
+  SCRIPTED_DATA_FILE = "Data/BattleSceneStudio/scripted_battles.json"
   RECOVERY_DATA_FILE = "Data/BattleSceneStudio/battles.recovery.json"
   SOS_GLOBAL_FILE = "Data/BattleSceneStudio/sos_global.json"
   SOS_CATALOG_DIR = "Data/BattleSceneStudio/SOS"
@@ -204,6 +205,33 @@ module BSS064
       @sos_catalog_cache={}
     end
 
+    # Sidecar Blueprints are added, never used to overwrite authored battles.
+    # A user-edited battle in battles.json / recovery always takes precedence.
+    def merge_scripted_blueprints!(target)
+      return target unless target.is_a?(Hash)
+      extra=read_json_file(SCRIPTED_DATA_FILE,{})
+      return target unless extra.is_a?(Hash)
+      target["groups"]=[] unless target["groups"].is_a?(Array)
+      target["blueprints"]=[] unless target["blueprints"].is_a?(Array)
+      groups=extra["groups"].is_a?(Array) ? extra["groups"] : []
+      groups.each do |row|
+        next unless row.is_a?(Hash) && row["id"]
+        next if target["groups"].any? { |existing| existing.is_a?(Hash) && existing["id"]==row["id"] }
+        target["groups"] << row
+      end
+      blueprints=extra["blueprints"].is_a?(Array) ? extra["blueprints"] : []
+      blueprints.each do |row|
+        next unless row.is_a?(Hash) && row["key"]
+        next if target["blueprints"].any? { |old| old.is_a?(Hash) &&
+          (old["key"]==row["key"] || old["id"]==row["id"]) }
+        target["blueprints"] << row
+      end
+      target
+    rescue StandardError => e
+      log("Scripted Blueprint import: #{e.class}: #{e.message}")
+      target
+    end
+
     def data
       return @cache if @cache
       fallback={"blueprints"=>[],"global"=>{}}
@@ -234,6 +262,7 @@ module BSS064
       else
         @cache=main
       end
+      merge_scripted_blueprints!(@cache)
     end
 
     def find(key)
