@@ -81,11 +81,15 @@ module BSSScriptedTrainerDefeatCaption
           # Scene#pbTrainerBattleSuccess starts the actual victory BGM.
           # Run it BEFORE cinematic speech; the one-shot Scene hook below
           # prevents the later native call from restarting the track.
-          if @scene && @scene.respond_to?(:pbTrainerBattleSuccess)
-            @scene.pbTrainerBattleSuccess
-          end
           @bss_scripted_pre_end_win=true
-          @bss_scripted_pre_end_win=false unless engine.process_event("BattleEndWin",1,nil)
+          if @scene
+            @scene.pbTrainerBattleSuccess if @scene.respond_to?(:pbTrainerBattleSuccess)
+            # Native Essentials normally shows the defeated trainer AFTER
+            # the loss announcement. The cinematic dialogue comes BEFORE it,
+            # so run the SAME 042-aware TrainerAppear animation here first.
+            @scene.pbShowOpponent(0) if @scene.respond_to?(:pbShowOpponent)
+          end
+          engine.process_event("BattleEndWin",1,nil)
         rescue StandardError => e
           @bss_scripted_pre_end_win=false
           BSS064.log("Pre-result cinematic dialogue: #{e.class}: #{e.message}") if defined?(BSS064)
@@ -122,6 +126,23 @@ end
 # already started the music before its cinematic line, do not play it twice.
 # The native battle end cleanup still runs normally.
 module BSSScriptedVictoryAudioOnce
+  def pbShowOpponent(idxTrainer,*args,&block)
+    battle=(@battle rescue nil)
+    if idxTrainer.to_i==0 && battle &&
+       battle.instance_variable_get(:@bss_scripted_pre_end_win) &&
+       @bss_scripted_result_trainer_shown
+      # Already animated the actual trainer on-screen for its earlier speech.
+      # Suppress the second, identical native slide after the win notice.
+      return nil
+    end
+    result=super
+    if idxTrainer.to_i==0 && battle &&
+       battle.instance_variable_get(:@bss_scripted_pre_end_win)
+      @bss_scripted_result_trainer_shown=true
+    end
+    result
+  end
+
   def pbTrainerBattleSuccess(*args,&block)
     battle=(@battle rescue nil)
     scripted=battle && battle.respond_to?(:bss_scripted_cinematic_defeat?) &&
