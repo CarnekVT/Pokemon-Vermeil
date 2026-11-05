@@ -161,18 +161,23 @@ end
 module BSSScriptedSpeakerComposition
   def bss_scripted_foe_deployed?
     return false unless @bss_dialogue_cinema_active && @battle && @sprites.is_a?(Hash)
-    shown=@bss106_presented_pokemon
-    return false unless shown.is_a?(Hash)
-    shown.any? do |idx,token|
-      next false unless idx.is_a?(Integer) && idx.odd?
-      b=(@battle.battlers[idx] rescue nil)
-      sp=@sprites["pokemon_#{idx}"]
+    shown=@bss106_presented_pokemon || {}
+    @battle.battlers.each_with_index.any? do |b,idx|
+      next false unless idx.odd? && b && !(b.fainted? rescue true)
       mon=(b.pokemon rescue nil)
-      # A completed native sendout remains authoritative even when a
-      # transient DBK frame has hidden the sprite for this exact update.
-      b && !(b.fainted? rescue true) && mon && mon.object_id==token &&
-        sp && !(sp.disposed? rescue true)
+      sp=@sprites["pokemon_#{idx}"]
+      next false unless mon && sp && !(sp.disposed? rescue true)
+      # AfterLastSendOut can fire DURING the native sendout, before the
+      # BSS106 completion registry is committed. Accept either its token or
+      # a currently displayed Pokemon, never a merely allocated empty slot.
+      completed=shown.is_a?(Hash) && shown[idx]==mon.object_id
+      active=(sp.visible rescue false) &&
+             (sp.opacity rescue 0).to_i>0 &&
+             (sp.respond_to?(:pkmn) ? !!sp.pkmn : true)
+      completed || active
     end
+  rescue StandardError
+    false
   end
 
   def pbShowSpeaker(*args,&block)
