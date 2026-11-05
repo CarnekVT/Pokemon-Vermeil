@@ -134,10 +134,21 @@ module VermeilBSSNDSIntroScene
     cover=nil
     grass=nil
     flash=nil
+    darkness=nil
     bitmap=nil
     flash_bitmap=nil
     saved_vector=(@vector.get.clone rescue nil)
     begin
+      # On trainer encounters establish a TRUE black foreground before any
+      # Graphics.update/snapshot. The earlier snapshot-based reveal exposed
+      # a bright empty background for a frame before the trainer popped in.
+      if @battle.trainerBattle?
+        viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
+        viewport.z=999_900
+        darkness=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[0,0,0,255])
+        darkness.z=8
+        darkness.opacity=255
+      end
       # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
       # Hiding them for the capture caused a visible pop at the reveal edge.
       # Do not reveal unreleased party Pokemon; respect native scene state.
@@ -181,7 +192,14 @@ module VermeilBSSNDSIntroScene
           sp.visible=false
         end
         Graphics.update
-        bitmap=Graphics.snap_to_bitmap
+        # Capture the authored stage, not our temporary black curtain.
+        # The curtain remains opaque on-screen throughout the operation.
+        begin
+          darkness.visible=false if darkness
+          bitmap=Graphics.snap_to_bitmap
+        ensure
+          darkness.visible=true if darkness
+        end
       ensure
         captured.each do |sp,was_visible|
           sp.visible=was_visible if sp && !(sp.disposed? rescue true)
@@ -191,7 +209,7 @@ module VermeilBSSNDSIntroScene
       # Underlying TrainerSprite and DBK animated Pokemon keep playing while
       # this environment-only snapshot zooms and fades.
 
-      viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
+      viewport ||= Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
       cover=Sprite.new(viewport)
       cover.bitmap=bitmap
@@ -244,6 +262,12 @@ module VermeilBSSNDSIntroScene
       VermeilBSSNDSHandoff.play_sound(tag)
       hold=VermeilBSSNDSHandoff::HOLD_SECONDS
       duration=VermeilBSSNDSHandoff::REVEAL_SECONDS
+      # Trainer: a longer black-to-scene reveal, with the animated trainer
+      # advancing unseen beneath it. Wild introductions keep original timing.
+      if darkness
+        hold=0.20
+        duration=1.05
+      end
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
@@ -270,11 +294,20 @@ module VermeilBSSNDSIntroScene
         grass.opacity=(255.0*(1.0-[[p*1.35,1.0].min,0.0].max)).round
         # Strong but brief impact flash as the GrassIntro tears away.
         flash_p=[[(elapsed-hold)/0.20,0.0].max,1.0].min
-        flash.opacity=elapsed<hold ? 0 : (132.0*(1.0-(2.0*flash_p-1.0).abs)).round
-        # Hold the atmospheric cover until native trainer animation starts.
-        # Fade with smoothstep; never switch or reposition the real sprite.
-        reveal=[[(p-0.48)/0.52,0.0].max,1.0].min
-        cover.opacity=(255.0*(1.0-reveal*reveal*(3.0-2.0*reveal))).round
+        flash.opacity=darkness ? 0 :
+          (elapsed<hold ? 0 : (132.0*(1.0-(2.0*flash_p-1.0).abs)).round)
+        # The snapshot clears while the opaque black curtain still covers it,
+        # then BLACK fades slowly into the live, animated trainer + terrain.
+        # No background-only frame is exposed during the handoff.
+        reveal=darkness ? [[(p-0.36)/0.54,0.0].max,1.0].min :
+                          [[(p-0.48)/0.52,0.0].max,1.0].min
+        smooth_reveal=reveal*reveal*(3.0-2.0*reveal)
+        cover.opacity=(255.0*(1.0-smooth_reveal)).round
+        if darkness
+          dark_p=[[(p-0.47)/0.53,0.0].max,1.0].min
+          dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
+          darkness.opacity=(255.0*(1.0-dark_ease)).round
+        end
         if @battle.trainerBattle? && p>=0.24 && Time.now.to_f-trainer_frame_at>=0.045
           (@battle.opponent || []).each_index do |i|
             trainer=@sprites["trainer_#{i+1}"]
@@ -297,6 +330,7 @@ module VermeilBSSNDSIntroScene
       grass.opacity=0
       flash.opacity=0
       cover.opacity=0
+      darkness.opacity=0 if darkness
       Graphics.update
       true
     rescue StandardError => e
@@ -309,6 +343,15 @@ module VermeilBSSNDSIntroScene
         # Native trainer sendout must inherit the same MAIN shot the reveal
         # settled on, not a stale overview shot saved before the transition.
         @vector.snap(main || saved_vector) if main || saved_vector
+      end
+      if darkness
+        begin
+          bmp=darkness.bitmap
+          darkness.bitmap=nil
+          darkness.dispose unless darkness.disposed?
+          bmp.dispose if bmp && !(bmp.disposed? rescue true)
+        rescue StandardError
+        end
       end
       if flash
         begin;flash.bitmap=nil;flash.dispose unless flash.disposed?;rescue StandardError;end
