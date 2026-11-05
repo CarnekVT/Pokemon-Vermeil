@@ -180,18 +180,47 @@ module BSSScriptedSpeakerComposition
     false
   end
 
+  # The display choice belongs to each BSS dialogue, not DBK's global
+  # defaults. Keep the trainer beneath every active enemy Pokemon, while
+  # retaining its own displayed coordinates and the cinematic HUD above it.
+  def bss_scripted_apply_speaker_priority
+    return unless @bss_dialogue_cinema_active && @sprites.is_a?(Hash)
+    return unless bss_scripted_foe_deployed?
+    sp=@sprites["midbattle_speaker"]
+    return unless sp && !(sp.disposed? rescue true)
+    mode=@bss_scripted_trainer_portrait_mode.to_s
+    if mode=="behind"
+      foes=@battle.battlers.each_with_index.filter_map do |b,idx|
+        next unless idx.odd? && b && !(b.fainted? rescue true)
+        mon=@sprites["pokemon_#{idx}"]
+        next if !mon || (mon.disposed? rescue true)
+        (mon.z rescue nil)
+      end
+      if !foes.empty? && sp.respond_to?(:z=)
+        # Room terrain is z~0-27; battlers are >=50. No 99980 foreground.
+        sp.z=foes.map(&:to_i).min-1
+      end
+    else
+      sp.visible=false if sp.respond_to?(:visible=)
+    end
+  rescue StandardError => e
+    BSS064.log("BSS trainer speaker depth: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
   def pbShowSpeaker(*args,&block)
-    if bss_scripted_foe_deployed?
-      # pbStartSpeech has already established the cinematic textbox/bars.
-      # Don't invoke DBK's SlideSpriteAppear on an occupied battlefield.
+    if bss_scripted_foe_deployed? &&
+       @bss_scripted_trainer_portrait_mode.to_s!="behind"
       @showSpeaker=false
       sprite=@sprites["midbattle_speaker"]
       sprite.visible=false if sprite && !(sprite.disposed? rescue true) &&
                              sprite.respond_to?(:visible=)
       return nil
     end
-    super
+    result=super
+    bss_scripted_apply_speaker_priority
+    result
   end
+
 end
 
 if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSSScriptedSpeakerComposition)
