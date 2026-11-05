@@ -168,8 +168,10 @@ module BSSScriptedSpeakerComposition
       b=(@battle.battlers[idx] rescue nil)
       sp=@sprites["pokemon_#{idx}"]
       mon=(b.pokemon rescue nil)
+      # A completed native sendout remains authoritative even when a
+      # transient DBK frame has hidden the sprite for this exact update.
       b && !(b.fainted? rescue true) && mon && mon.object_id==token &&
-        sp && !(sp.disposed? rescue true) && (sp.visible rescue false)
+        sp && !(sp.disposed? rescue true)
     end
   end
 
