@@ -271,6 +271,8 @@ class BSSDialogueEngine
       style: style,
       textboxType: tb_type,
       showNamebox: (t["showNamebox"] != false && t[:showNamebox] != false),
+      trainerPortraitMode: (["hidden","behind"].include?((t["trainerPortraitMode"] || t[:trainerPortraitMode]).to_s) ?
+        (t["trainerPortraitMode"] || t[:trainerPortraitMode]).to_s : "hidden"),
       choices: choices,
       choiceResponses: choice_resp,
       choiceEffects: choice_effects,
@@ -533,6 +535,10 @@ class BSSDialogueEngine
     cinematic_owner = false
     pending_effect = nil
     pending_effect_recipient = nil
+    prior_portrait_mode=(scene.instance_variable_get(:@bss_scripted_trainer_portrait_mode) rescue nil)
+    if scene && t[:speaker]=="trainer"
+      scene.instance_variable_set(:@bss_scripted_trainer_portrait_mode,t[:trainerPortraitMode])
+    end
     begin
       if is_cinematic && scene && scene.respond_to?(:pbProcessText)
         # A nested Choice_1/Choice_2 branch inherits the parent's cinematic
@@ -544,6 +550,7 @@ class BSSDialogueEngine
         bss_cinematic_ui_enter if cinematic_owner
         scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech) && !already_speaking
         bss_align_cinematic_trainer_speaker(scene,t[:speaker],display_idx)
+        scene.bss_scripted_apply_speaker_priority if scene.respond_to?(:bss_scripted_apply_speaker_priority)
         if speaker_label && !speaker_label.empty?
           scene.pbUpdateSpeakerWindows(speaker_label) if scene.respond_to?(:pbUpdateSpeakerWindows)
           name_window.visible = true if name_window
@@ -599,6 +606,7 @@ class BSSDialogueEngine
       if @bss_dialogue_event_depth.to_i <= 1 && (!t[:_keep_cinematic_to_next] || pending_effect)
         bss_close_owned_speech
       end
+      scene.instance_variable_set(:@bss_scripted_trainer_portrait_mode,prior_portrait_mode) if scene
     end
     if pending_effect
       begin
