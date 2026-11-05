@@ -139,16 +139,14 @@ module VermeilBSSNDSIntroScene
     flash_bitmap=nil
     saved_vector=(@vector.get.clone rescue nil)
     begin
-      # On trainer encounters establish a TRUE black foreground before any
-      # Graphics.update/snapshot. The earlier snapshot-based reveal exposed
-      # a bright empty background for a frame before the trainer popped in.
-      if @battle.trainerBattle?
-        viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
-        viewport.z=999_900
-        darkness=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[0,0,0,255])
-        darkness.z=8
-        darkness.opacity=255
-      end
+      # All encounters start behind a real black curtain. The Intro NDS
+      # biome strip is drawn ABOVE this curtain (z=4), so the black never
+      # hides the authored intro graphic; it only covers the live battlefield.
+      viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
+      viewport.z=999_900
+      darkness=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[0,0,0,255])
+      darkness.z=2
+      darkness.opacity=255
       # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
       # Hiding them for the capture caused a visible pop at the reveal edge.
       # Do not reveal unreleased party Pokemon; respect native scene state.
@@ -262,12 +260,10 @@ module VermeilBSSNDSIntroScene
       VermeilBSSNDSHandoff.play_sound(tag)
       hold=VermeilBSSNDSHandoff::HOLD_SECONDS
       duration=VermeilBSSNDSHandoff::REVEAL_SECONDS
-      # Trainer: a longer black-to-scene reveal, with the animated trainer
-      # advancing unseen beneath it. Wild introductions keep original timing.
-      if darkness
-        hold=0.20
-        duration=1.05
-      end
+      # Both trainer and wild encounters use a slower black-to-live reveal.
+      # The biome intro graphic remains above the curtain at all times.
+      hold=0.20
+      duration=1.05
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
@@ -294,8 +290,7 @@ module VermeilBSSNDSIntroScene
         grass.opacity=(255.0*(1.0-[[p*1.35,1.0].min,0.0].max)).round
         # Strong but brief impact flash as the GrassIntro tears away.
         flash_p=[[(elapsed-hold)/0.20,0.0].max,1.0].min
-        flash.opacity=darkness ? 0 :
-          (elapsed<hold ? 0 : (132.0*(1.0-(2.0*flash_p-1.0).abs)).round)
+        flash.opacity=0 if flash  # No white flash to wash out the intro art.
         # The snapshot clears while the opaque black curtain still covers it,
         # then BLACK fades slowly into the live, animated trainer + terrain.
         # No background-only frame is exposed during the handoff.
