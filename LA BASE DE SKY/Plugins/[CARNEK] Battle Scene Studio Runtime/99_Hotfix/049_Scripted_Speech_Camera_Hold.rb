@@ -65,12 +65,13 @@ module BSSScriptedActiveBattlerVisibility
     false
   end
 
-  def bss_scripted_remember_visible(completed_sendout=false)
+  def bss_scripted_remember_visible(completed_sendout=false, sent_indices=nil)
     return unless bss_scripted_visible_scene?
     @bss_scripted_revealed ||= {}
     @battle.battlers.each do |b|
       next unless b && !(b.fainted? rescue true)
       idx=b.index
+      next if sent_indices && !sent_indices.include?(idx)
       mon=(b.pokemon rescue nil)
       sp=@sprites["pokemon_#{idx}"]
       next unless mon && sp && !(sp.disposed? rescue true)
@@ -106,7 +107,15 @@ module BSSScriptedActiveBattlerVisibility
 
   def pbSendOutBattlers(*args,&block)
     result=super
-    bss_scripted_remember_visible(true)
+    # Only slots included in this completed native sendout may be marked
+    # revealed; other active battlers may still be intentionally hidden.
+    rows=args[0].is_a?(Array) ? args[0] : []
+    indices=rows.filter_map do |row|
+      value=row.is_a?(Array) ? row[0] : row
+      value.respond_to?(:index) ? value.index : (value.is_a?(Integer) ? value : nil)
+    end
+    bss_scripted_remember_visible(false) if indices.empty?
+    bss_scripted_remember_visible(true,indices) unless indices.empty?
     result
   end
 
