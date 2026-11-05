@@ -52,7 +52,7 @@ export function installTrainerPortraitChoice(ctx,host){
       select.dataset.dialogueIdx=idx;
       select.dataset.dialogueField="trainerPortraitMode";
       for(const [value,text] of [
-        ["hidden","Oculto · solo barras y nombre"],
+        ["hidden","Oculto si ya hay Pokémon rival en el campo"],
         ["behind","Visible · detrás de los Pokémon"]
       ]){
         const option=document.createElement("option");
@@ -63,7 +63,7 @@ export function installTrainerPortraitChoice(ctx,host){
       select.value=saved.get(id.value)||"hidden";
       const help=document.createElement("small");
       help.className="bss-note";
-      help.textContent="Conserva la posición del retrato DBK y sitúa su capa por debajo de los Pokémon enemigos.";
+      help.textContent="Visible coloca el retrato DBK detrás de los Pokémon rivales; oculto evita duplicarlo cuando ya están en el campo.";
       field.append(label,select,help);
       const parent=speaker.closest(".bss-field");
       if(parent)parent.insertAdjacentElement("afterend",field);
