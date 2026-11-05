@@ -99,6 +99,7 @@ export function makeDialogueTrigger(event, target, speaker, text, style, playCry
     style: String(style || "").toLowerCase() === "narrative" ? "narrative" : "cinematic",
     textboxType: tbType,
     showNamebox: showNamebox !== false,
+    trainerPortraitMode: "hidden",
     choices: Array.isArray(choices) ? choices.map(String) : (typeof choices === "string" ? choices.split(/[,\n]/).map(s=>s.trim()).filter(Boolean) : []),
     choiceResponses: Array.isArray(choiceResponses) ? choiceResponses.map(String) : (typeof choiceResponses === "string" ? choiceResponses.split("\n").map(s=>s.trim()) : []),
     choiceEffects: Array.isArray(choiceEffects) ? choiceEffects : [],
@@ -156,6 +157,7 @@ export function normalizeDialogueTrigger(raw){
     style: style,
     textboxType: tbType,
     showNamebox: raw.showNamebox !== false,
+    trainerPortraitMode: String(raw.trainerPortraitMode||"hidden")==="behind" ? "behind" : "hidden",
     choices: choices,
     choiceResponses: choiceResponses,
     choiceEffects: choiceEffects,
@@ -170,6 +172,7 @@ export function makeMidbattleTrigger(event, text, speaker, target){
   return {
     id: dt.id, event: dt.event, text: dt.text, speaker: dt.speaker, target: dt.target,
     style: dt.style, textboxType: dt.textboxType, showNamebox: dt.showNamebox,
+    trainerPortraitMode:dt.trainerPortraitMode,
     choices: dt.choices, choiceResponses: dt.choiceResponses, choiceEffects: dt.choiceEffects,
     playCry: dt.playCry, screenShake: dt.screenShake, repeat: dt.repeat, turn: dt.turn
   };
@@ -212,7 +215,7 @@ export function normalizeBlueprint(raw){
   var oldSOS=obj(raw.sos);if(!Object.keys(oldSOS).length)oldSOS=obj(obj(raw.mechanics).sos);base.sos=Object.assign({},makeBlueprint("x").sos,oldSOS);
   base.sos.pool=arr(base.sos.pool).map(normalizePoolEntry).filter(x=>x.species);if(!base.sos.pool.length){[base.sos.primary,base.sos.secondary].forEach(x=>{x=String(x||"").toUpperCase();if(x&&!base.sos.pool.some(p=>p.species===x))base.sos.pool.push({species:x,form:0,weight:100,requirements:[]});});}
   base.sos.allowAdditionalCalls=base.sos.allowAdditionalCalls===true;base.sos.allowRecursiveCalls=base.sos.allowRecursiveCalls===true;base.sos.maxSimultaneousSOS=clamp(base.sos.maxSimultaneousSOS,1,2,1);base.sos.summonsPerCall=Math.min(base.sos.maxSimultaneousSOS,clamp(base.sos.summonsPerCall,1,2,1));base.sos.allySelectionMode=["random","fixed"].includes(String(base.sos.allySelectionMode||""))?String(base.sos.allySelectionMode):"random";base.sos.callRate=(base.sos.callRate==null||base.sos.callRate==="")?null:clamp(base.sos.callRate,0,100,9);base.sos.answerRate=(base.sos.answerRate==null||base.sos.answerRate==="")?null:clamp(base.sos.answerRate,0,100,100);var lm=String(base.sos.levelMode||"");if(lm==="custom")lm="range";base.sos.levelMode=["zone","range","fixed"].includes(lm)?lm:"range";base.sos.levelMin=(base.sos.levelMin==null||base.sos.levelMin==="")?null:clamp(base.sos.levelMin,1,100,1);base.sos.levelMax=(base.sos.levelMax==null||base.sos.levelMax==="")?null:clamp(base.sos.levelMax,1,100,100);base.sos.levelFixed=(base.sos.levelFixed==null||base.sos.levelFixed==="")?null:clamp(base.sos.levelFixed,1,100,1);if(base.sos.levelMin!=null&&base.sos.levelMax!=null&&base.sos.levelMax<base.sos.levelMin){var tmp=base.sos.levelMin;base.sos.levelMin=base.sos.levelMax;base.sos.levelMax=tmp;}base.sos.messages=Object.assign({},makeBlueprint("x").sos.messages,obj(base.sos.messages));["call","wait","success","fail"].forEach(k=>base.sos.messages[k]=String(base.sos.messages[k]||""));
-  var diaRaw=obj(raw.dialogues);var dialogues=Object.assign({},makeBlueprint("x").dialogues,diaRaw);dialogues.enabled=dialogues.enabled!==false;dialogues.midbattleScript=String(diaRaw.midbattleScript||(raw.boss&&raw.boss.midbattleScript)||base.boss.midbattleScript||"");var rawTriggers=arr(diaRaw.triggers&&diaRaw.triggers.length?diaRaw.triggers:((raw.boss&&raw.boss.midbattleTriggers)||base.boss.midbattleTriggers));dialogues.triggers=rawTriggers.map(normalizeDialogueTrigger).filter(Boolean);base.dialogues=dialogues;base.boss.midbattleScript=dialogues.midbattleScript;base.boss.midbattleTriggers=dialogues.triggers.map(function(t){var suffix=t.target==="player"?"_player":(t.target==="sos"?"_sos":"_foe");var ev=t.event.includes("_")?t.event:(t.event+suffix);return {id:t.id,event:ev,text:t.text,speaker:t.speaker==="narrator"?"narrator":"opponent",target:t.target,style:t.style,textboxType:t.textboxType,showNamebox:t.showNamebox,choices:t.choices,choiceResponses:t.choiceResponses,choiceEffects:t.choiceEffects,playCry:t.playCry,screenShake:t.screenShake,repeat:t.repeat,turn:t.turn};});
+  var diaRaw=obj(raw.dialogues);var dialogues=Object.assign({},makeBlueprint("x").dialogues,diaRaw);dialogues.enabled=dialogues.enabled!==false;dialogues.midbattleScript=String(diaRaw.midbattleScript||(raw.boss&&raw.boss.midbattleScript)||base.boss.midbattleScript||"");var rawTriggers=arr(diaRaw.triggers&&diaRaw.triggers.length?diaRaw.triggers:((raw.boss&&raw.boss.midbattleTriggers)||base.boss.midbattleTriggers));dialogues.triggers=rawTriggers.map(normalizeDialogueTrigger).filter(Boolean);base.dialogues=dialogues;base.boss.midbattleScript=dialogues.midbattleScript;base.boss.midbattleTriggers=dialogues.triggers.map(function(t){var suffix=t.target==="player"?"_player":(t.target==="sos"?"_sos":"_foe");var ev=t.event.includes("_")?t.event:(t.event+suffix);return {id:t.id,event:ev,text:t.text,speaker:t.speaker==="narrator"?"narrator":"opponent",target:t.target,style:t.style,textboxType:t.textboxType,showNamebox:t.showNamebox,trainerPortraitMode:t.trainerPortraitMode,choices:t.choices,choiceResponses:t.choiceResponses,choiceEffects:t.choiceEffects,playCry:t.playCry,screenShake:t.screenShake,repeat:t.repeat,turn:t.turn};});
   base.layout=Object.assign({battlers:{}},obj(raw.layout));base.layout.battlers=obj(base.layout.battlers);base.updatedAt=Number(raw.updatedAt)||Date.now();return base;
 }
 
