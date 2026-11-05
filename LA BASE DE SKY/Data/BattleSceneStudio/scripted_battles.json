@@ -354,7 +354,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 0,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "hidden"
           },
           {
             "id": "chano_turn1",
@@ -374,7 +375,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 1,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "hidden"
           },
           {
             "id": "chano_turn2",
@@ -394,7 +396,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 2,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "behind"
           },
           {
             "id": "chano_last",
@@ -414,7 +417,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 0,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "behind"
           },
           {
             "id": "chano_win",
@@ -434,7 +438,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 0,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "hidden"
           },
           {
             "id": "chano_loss",
@@ -454,7 +459,8 @@
             "screenShake": false,
             "repeat": false,
             "turn": 0,
-            "barTransition": "reenter"
+            "barTransition": "reenter",
+            "trainerPortraitMode": "hidden"
           }
         ]
       },
