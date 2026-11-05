@@ -12,7 +12,7 @@ function withScriptedBlueprints(ctx){
   if(!ctx||!ctx.fs||typeof ctx.fs.readProjectFile!=="function")return ctx;
   const scoped=Object.create(ctx);
   const fs=Object.create(ctx.fs);
-  fs.readProjectFile=async function(path,...args){
+  Object.defineProperty(fs,"readProjectFile",{value:async function(path,...args){
     const value=await ctx.fs.readProjectFile(path,...args);
     const name=String(path||"").replace(/\\/g,"/");
     if(name!==BSS_DATA+"battles.json" && name!==BSS_DATA+"battles.recovery.json")return value;
@@ -36,8 +36,8 @@ function withScriptedBlueprints(ctx){
       ctx.log?.warn?.("BSS additional scripted battles: "+String(err&&err.message||err));
       return value;
     }
-  };
-  scoped.fs=fs;
+  }, configurable:true});
+  Object.defineProperty(scoped,"fs",{value:fs,configurable:true});
   return scoped;
 }
 
