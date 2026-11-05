@@ -159,75 +159,93 @@ end
 # Pokeball sendout: preserve the author's battler placement and show the name
 # plate + black bars without a second full trainer sprite covering the foe.
 module BSSScriptedSpeakerComposition
-  def bss_scripted_foe_deployed?
-    return false unless @bss_dialogue_cinema_active && @battle && @sprites.is_a?(Hash)
-    shown=@bss106_presented_pokemon || {}
-    @battle.battlers.each_with_index.any? do |b,idx|
-      next false unless idx.odd? && b && !(b.fainted? rescue true)
-      mon=(b.pokemon rescue nil)
-      sp=@sprites["pokemon_#{idx}"]
-      next false unless mon && sp && !(sp.disposed? rescue true)
-      # AfterLastSendOut can fire DURING the native sendout, before the
-      # BSS106 completion registry is committed. Accept either its token or
-      # a currently displayed Pokemon, never a merely allocated empty slot.
-      completed=shown.is_a?(Hash) && shown[idx]==mon.object_id
-      active=(sp.visible rescue false) &&
-             (sp.opacity rescue 0).to_i>0 &&
-             (sp.respond_to?(:pkmn) ? !!sp.pkmn : true)
-      completed || active
-    end
-  rescue StandardError
-    false
+  # BSS has a *real* DBK TrainerSprite ("trainer_1") and a separate DBK
+  # dialogue portrait ("midbattle_speaker"). Showing both made Chano appear
+  # twice; the portrait also ignored 042_TrainerSpriteEditorShadowFix.
+  def bss_scripted_trainer_actor
+    return nil unless @battle && @battle.respond_to?(:trainerBattle?) && @battle.trainerBattle?
+    return nil unless @sprites.is_a?(Hash)
+    sp=@sprites["trainer_1"]
+    sp && !(sp.disposed? rescue true) ? sp : nil
   end
 
-  # The display choice belongs to each BSS dialogue, not DBK's global
-  # defaults. Keep the trainer beneath every active enemy Pokemon, while
-  # retaining its own displayed coordinates and the cinematic HUD above it.
+  def bss_scripted_trainer_dialogue?
+    @bss_dialogue_cinema_active &&
+      ["behind","hidden"].include?(@bss_scripted_trainer_portrait_mode.to_s) &&
+      !!bss_scripted_trainer_actor
+  end
+
   def bss_scripted_apply_speaker_priority
-    return unless @bss_dialogue_cinema_active && @sprites.is_a?(Hash)
-    return unless bss_scripted_foe_deployed?
-    sp=@sprites["midbattle_speaker"]
-    return unless sp && !(sp.disposed? rescue true)
+    return unless bss_scripted_trainer_dialogue?
+    # The speaker duplicate is never used for trainer-authored BSS dialogue:
+    # use the *same* real sprite that 042 positioned and native sendout owns.
+    portrait=@sprites["midbattle_speaker"]
+    portrait.visible=false if portrait && !(portrait.disposed? rescue true) &&
+                              portrait.respond_to?(:visible=)
+    trainer=bss_scripted_trainer_actor
+    return unless trainer
     mode=@bss_scripted_trainer_portrait_mode.to_s
     if mode=="behind"
+      @bss_scripted_trainer_restore ||= {}
+      if !@bss_scripted_trainer_restore.key?(trainer.object_id)
+        @bss_scripted_trainer_restore[trainer.object_id]=[
+          trainer,(trainer.visible rescue false),(trainer.x rescue nil),
+          (trainer.y rescue nil),(trainer.z rescue nil)
+        ]
+        # A native slide/sendout may have moved the trainer offscreen.
+        # This project patch applies GameData::TrainerType#SpriteOffset to
+        # both X and Y and owns matching shadow coordinates.
+        trainer.pbSetPosition if trainer.respond_to?(:pbSetPosition)
+      end
+      trainer.visible=true if trainer.respond_to?(:visible=)
       foes=@battle.battlers.each_with_index.filter_map do |b,idx|
         next unless idx.odd? && b && !(b.fainted? rescue true)
-        mon=@sprites["pokemon_#{idx}"]
-        next if !mon || (mon.disposed? rescue true)
-        (mon.z rescue nil)
+        foe=@sprites["pokemon_#{idx}"]
+        next unless foe && !(foe.disposed? rescue true)
+        foe.z if foe.respond_to?(:z)
       end
-      if !foes.empty? && sp.respond_to?(:z=)
-        # Room terrain is z~0-27; battlers are >=50. No 99980 foreground.
-        sp.z=foes.map(&:to_i).min-1
-      end
-    else
-      sp.visible=false if sp.respond_to?(:visible=)
+      trainer.z=foes.map(&:to_i).min-1 if !foes.empty? && trainer.respond_to?(:z=)
+    elsif @bss_scripted_trainer_restore && @bss_scripted_trainer_restore.key?(trainer.object_id)
+      bss_scripted_restore_trainer_actor
     end
   rescue StandardError => e
-    BSS064.log("BSS trainer speaker depth: #{e.class}: #{e.message}") if defined?(BSS064)
+    BSS064.log("BSS real trainer depth: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
-  # Battle::Scene#pbUpdate renders BEFORE advancing PictureEx. Enforce depth
-  # just before Graphics.update, including the 8-frame DBK entrance tween.
+  def bss_scripted_restore_trainer_actor
+    snapshot=@bss_scripted_trainer_restore || {}
+    snapshot.each_value do |row|
+      trainer,visible,x,y,z=row
+      next unless trainer && !(trainer.disposed? rescue true)
+      trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
+      trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
+      trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
+      trainer.visible=visible if trainer.respond_to?(:visible=)
+    end
+    @bss_scripted_trainer_restore=nil
+  end
+
   def pbUpdate(*args,&block)
     bss_scripted_apply_speaker_priority if @bss_dialogue_cinema_active
     super
   end
 
   def pbShowSpeaker(*args,&block)
-    if bss_scripted_foe_deployed? &&
-       @bss_scripted_trainer_portrait_mode.to_s!="behind"
+    if bss_scripted_trainer_dialogue?
       @showSpeaker=false
-      sprite=@sprites["midbattle_speaker"]
-      sprite.visible=false if sprite && !(sprite.disposed? rescue true) &&
-                             sprite.respond_to?(:visible=)
+      bss_scripted_apply_speaker_priority
       return nil
     end
-    result=super
-    bss_scripted_apply_speaker_priority
-    result
+    super
   end
 
+  def pbForceEndSpeech(*args,&block)
+    result=super
+    bss_scripted_restore_trainer_actor
+    result
+  ensure
+    bss_scripted_restore_trainer_actor if @bss_scripted_trainer_restore
+  end
 end
 
 if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSSScriptedSpeakerComposition)
