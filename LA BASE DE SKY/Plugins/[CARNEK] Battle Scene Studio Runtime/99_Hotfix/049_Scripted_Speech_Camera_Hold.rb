@@ -207,6 +207,13 @@ module BSSScriptedSpeakerComposition
     BSS064.log("BSS trainer speaker depth: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
+  # Battle::Scene#pbUpdate renders BEFORE advancing PictureEx. Enforce depth
+  # just before Graphics.update, including the 8-frame DBK entrance tween.
+  def pbUpdate(*args,&block)
+    bss_scripted_apply_speaker_priority if @bss_dialogue_cinema_active
+    super
+  end
+
   def pbShowSpeaker(*args,&block)
     if bss_scripted_foe_deployed? &&
        @bss_scripted_trainer_portrait_mode.to_s!="behind"
