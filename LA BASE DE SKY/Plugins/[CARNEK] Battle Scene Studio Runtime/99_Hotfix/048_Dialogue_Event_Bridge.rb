@@ -78,6 +78,12 @@ module BSSScriptedTrainerDefeatCaption
       engine=(respond_to?(:bss_dialogue_engine) ? bss_dialogue_engine : nil)
       if engine && engine.respond_to?(:enabled?) && engine.enabled?
         begin
+          # Scene#pbTrainerBattleSuccess starts the actual victory BGM.
+          # Run it BEFORE cinematic speech; the one-shot Scene hook below
+          # prevents the later native call from restarting the track.
+          if @scene && @scene.respond_to?(:pbTrainerBattleSuccess)
+            @scene.pbTrainerBattleSuccess
+          end
           @bss_scripted_pre_end_win=true
           @bss_scripted_pre_end_win=false unless engine.process_event("BattleEndWin",1,nil)
         rescue StandardError => e
@@ -111,3 +117,25 @@ end
 if defined?(Battle) && !Battle.ancestors.include?(BSSScriptedTrainerDefeatCaption)
   Battle.prepend(BSSScriptedTrainerDefeatCaption)
 end
+
+# Native success is also called after "Trainer has lost". When BSS has
+# already started the music before its cinematic line, do not play it twice.
+# The native battle end cleanup still runs normally.
+module BSSScriptedVictoryAudioOnce
+  def pbTrainerBattleSuccess(*args,&block)
+    battle=(@battle rescue nil)
+    scripted=battle && battle.respond_to?(:bss_scripted_cinematic_defeat?) &&
+              battle.bss_scripted_cinematic_defeat?
+    return nil if scripted && @bss_scripted_victory_audio_started
+    result=super
+    @bss_scripted_victory_audio_started=true if scripted
+    result
+  end
+end
+
+if defined?(Battle::Scene) &&
+   !Battle::Scene.ancestors.include?(BSSScriptedVictoryAudioOnce)
+  Battle::Scene.prepend(BSSScriptedVictoryAudioOnce)
+end
+
+
