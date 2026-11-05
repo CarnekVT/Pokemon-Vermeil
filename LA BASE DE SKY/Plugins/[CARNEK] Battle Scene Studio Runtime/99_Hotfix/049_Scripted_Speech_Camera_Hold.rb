@@ -26,33 +26,8 @@ module BSSScriptedDialogueCameraHold
 end
 
 module BSSDBKSpeechCameraHold
-  # Native trainer floor is a screen coordinate. EBDX trainer metric anchors
-  # are not a replacement for the real Animated Trainer Sprite's Y.
-  # Correct only after the intro finishes, without changing its X, zoom or
-  # its native animation frames.
-  def bss_scripted_correct_trainer_height
-    return unless @battle && @sprites.is_a?(Hash)
-    return unless @battle.respond_to?(:trainerBattle?) && @battle.trainerBattle?
-    return unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
-    return if @bss_nds_intro_active || @bss070_ebdx_bas_frame ||
-              @bas_runtime_playback_depth.to_i>0 || @bss096_battler_anim_depth.to_i>0
-    opponents=(@battle.opponent rescue nil)
-    return unless opponents && opponents.respond_to?(:length)
-    count=opponents.length
-    count.times do |i|
-      sp=@sprites["trainer_#{i+1}"]
-      next unless sp && !(sp.disposed? rescue true) && (sp.visible rescue false)
-      next unless sp.respond_to?(:y=)
-      floor=Battle::Scene.pbTrainerPosition(1,i,count) rescue nil
-      next unless floor.is_a?(Array) && floor.length>=2
-      target_y=floor[1].to_f
-      current_y=sp.y.to_f
-      sp.y=target_y if (target_y-current_y).abs>0.5
-    end
-  rescue StandardError => e
-    BSS064.log("Trainer floor correction: #{e.class}: #{e.message}") if defined?(BSS064)
-  end
-
+  # Animated Trainer Intros and authored sprite metrics retain their native
+  # coordinates. Do not restore a hard-coded pbTrainerPosition at intro exit.
   def pbProcessText(*args, &block)
     depth=@vermeil_cinema_script_depth.to_i
     if depth==0 && @vector
@@ -67,9 +42,7 @@ module BSSDBKSpeechCameraHold
 
   def pbAnimateTrainerIntros(*args, &block)
     @vermeil_cinema_trainer_intro_depth=@vermeil_cinema_trainer_intro_depth.to_i+1
-    result=super
-    bss_scripted_correct_trainer_height
-    result
+    super
   ensure
     @vermeil_cinema_trainer_intro_depth=[@vermeil_cinema_trainer_intro_depth.to_i-1,0].max
   end
@@ -179,4 +152,41 @@ end
 
 if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSSScriptedActiveBattlerVisibility)
   Battle::Scene.prepend(BSSScriptedActiveBattlerVisibility)
+end
+
+# DBK's SlideSpriteAppear intentionally places a duplicate trainer on top of
+# pokemon_1. In BSS scripted dialogue the real actor has already completed its
+# Pokeball sendout: preserve the author's battler placement and show the name
+# plate + black bars without a second full trainer sprite covering the foe.
+module BSSScriptedSpeakerComposition
+  def bss_scripted_foe_deployed?
+    return false unless @bss_dialogue_cinema_active && @battle && @sprites.is_a?(Hash)
+    shown=@bss106_presented_pokemon
+    return false unless shown.is_a?(Hash)
+    shown.any? do |idx,token|
+      next false unless idx.is_a?(Integer) && idx.odd?
+      b=(@battle.battlers[idx] rescue nil)
+      sp=@sprites["pokemon_#{idx}"]
+      mon=(b.pokemon rescue nil)
+      b && !(b.fainted? rescue true) && mon && mon.object_id==token &&
+        sp && !(sp.disposed? rescue true) && (sp.visible rescue false)
+    end
+  end
+
+  def pbShowSpeaker(*args,&block)
+    if bss_scripted_foe_deployed?
+      # pbStartSpeech has already established the cinematic textbox/bars.
+      # Don't invoke DBK's SlideSpriteAppear on an occupied battlefield.
+      @showSpeaker=false
+      sprite=@sprites["midbattle_speaker"]
+      sprite.visible=false if sprite && !(sprite.disposed? rescue true) &&
+                             sprite.respond_to?(:visible=)
+      return nil
+    end
+    super
+  end
+end
+
+if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSSScriptedSpeakerComposition)
+  Battle::Scene.prepend(BSSScriptedSpeakerComposition)
 end
