@@ -25,12 +25,22 @@ files.each do |name,path|
   src[name]=source
 end
 verify.call("cinematic trainer option is normalized",src["dialogues"].include?("trainerPortraitMode:"))
-verify.call("trainer remains behind battlers",src["speaker"].include?("sp.z=foes.map(&:to_i).min-1"))
+verify.call("trainer remains behind battlers",src["speaker"].include?("trainer.z=foes.map(&:to_i).min-1"))
 verify.call("portrait depth reapplied before rendering",src["speaker"].include?("bss_scripted_apply_speaker_priority if @bss_dialogue_cinema_active"))
+verify.call("only the native trainer is used",src["speaker"].include?("bss_scripted_trainer_actor") && src["speaker"].include?("portrait.visible=false"))
+verify.call("042 trainer metrics control dialogue height",src["speaker"].include?("trainer.pbSetPosition"))
+verify.call("real trainer state restored after cinematic",src["speaker"].include?("def bss_scripted_restore_trainer_actor"))
+verify.call("victory music starts with scripted speech",src["events"].include?("@scene.pbTrainerBattleSuccess"))
+verify.call("victory audio plays once",src["events"].include?("BSSScriptedVictoryAudioOnce"))
 verify.call("scripted win presented before native result",src["events"].include?('engine.process_event("BattleEndWin",1,nil)'))
 verify.call("late win event is not repeated",src["events"].include?('next if @bss_scripted_pre_end_win'))
 verify.call("black curtain exists",src["intro"].include?("darkness.z=2"))
 verify.call("intro graphic above curtain",src["intro"].include?("grass.z=4"))
+verify.call("intro graphic starts transparent",src["intro"].include?("grass.opacity=0"))
+verify.call("intro artwork eases in and out",src["intro"].include?("entrance=[[elapsed/0.27") && src["intro"].include?("departure=[["))
+verify.call("trainer bitmap not manually played during intro",!src["intro"].include?("trainer.play if trainer"))
+verify.call("trainer animation resets for native intro",src["intro"].include?("trainer.to_first_frame"))
+verify.call("native 042 trainer coordinates applied to BSS prelude",src["intro"].include?("trainer.pbSetPosition"))
 verify.call("wild receives the curtain",!src["intro"].include?("if @battle.trainerBattle?\n        viewport=Viewport.new"))
 verify.call("aura layers use BAS camera restore slots",src["aura"].include?("BSS064AuraLayerCameraSync") && src["aura"].include?("apply_camera_to_sprite(part,state)"))
 
@@ -39,4 +49,6 @@ chano=addon.fetch("blueprints").find { |b| b["key"]=="joven_chano_guionizado" }
 verify.call("scripted Chano still available",!chano.nil?)
 verify.call("portrait mode playable",chano["dialogues"]["triggers"].any? { |t| t["trainerPortraitMode"]=="behind" })
 verify.call("Studio has portrait option",read.call(File.join(editor,"index.js")).include?("installTrainerPortraitChoice"))
+fix042=read.call(File.join(root,"LA BASE DE SKY","Plugins","Carnek Project Settings","patches","042_TrainerSpriteEditorShadowFix.rb"))
+verify.call("042 applies both horizontal and vertical offset",fix042.include?("self.x += offset[0]") && fix042.include?("self.y += offset[1]"))
 puts "BSS SCRIPTED DEPTH/AURA SOURCE CONTRACTS PASS (visual game test still required)"
