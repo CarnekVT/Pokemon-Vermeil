@@ -137,6 +137,7 @@ module VermeilBSSNDSIntroScene
     darkness=nil
     bitmap=nil
     flash_bitmap=nil
+    trainer_states=[]
     saved_vector=(@vector.get.clone rescue nil)
     begin
       # All encounters start behind a real black curtain. The Intro NDS
@@ -155,20 +156,25 @@ module VermeilBSSNDSIntroScene
       # trainer sendout use one baseline. No competing per-frame zoom writers.
       main=(BSS070EBDXCore.get_vector(:MAIN,@battle) rescue nil)
       @vector.snap(main) if main && @vector && @vector.respond_to?(:snap)
-      # EBDX foliage/terrain uses room z up to ~27. Native DBK TrainerSprite
-      # begins at z=10 and can therefore look absent during the reveal,
-      # only popping in when later battle animations raise its depth.
-      # Keep the ORIGINAL sprite and original XY, but put it above scenery.
+      # Authoritative trainer height is computed ONCE by 042 and cached.
+      # EBDX/DBK cutscenes use these exact coordinates without repeatedly
+      # calling pbSetPosition (which caused a one-frame height pop).
+      @bss_nds_trainer_anchor={}
       if @battle.trainerBattle? && @battle.opponent
         @battle.opponent.each_index do |i|
           trainer=@sprites["trainer_#{i+1}"]
-          next unless trainer && !(trainer.disposed? rescue true) && trainer.respond_to?(:z=)
-          # 042_TrainerSpriteEditorShadowFix owns the XY offsets and shadow.
-          # Reapply its native pbSetPosition once, never replace the authored
-          # vertical coordinate with BSS/EBDX anchor or a magic screen Y.
+          next unless trainer && !(trainer.disposed? rescue true)
           trainer.pbSetPosition if trainer.respond_to?(:pbSetPosition)
           trainer.to_first_frame if trainer.respond_to?(:to_first_frame)
-          trainer.z=[trainer.z.to_i,49+i].max
+          @bss_nds_trainer_anchor[i+1]=[(trainer.x rescue nil),(trainer.y rescue nil),
+                                       (trainer.z rescue nil)]
+          was_visible=(trainer.visible rescue false)
+          original_opacity=(trainer.opacity rescue 255)
+          trainer_states << [trainer,was_visible,original_opacity]
+          # The first frame can appear late, but never instantly. It fades
+          # into the already aligned scene as the temporary camera settles.
+          trainer.opacity=0 if was_visible && trainer.respond_to?(:opacity=)
+          trainer.z=[trainer.z.to_i,49+i].max if trainer.respond_to?(:z=)
         end
       end
       room=@bss070_ebdx_room
@@ -267,10 +273,11 @@ module VermeilBSSNDSIntroScene
       VermeilBSSNDSHandoff.play_sound(tag)
       hold=VermeilBSSNDSHandoff::HOLD_SECONDS
       duration=VermeilBSSNDSHandoff::REVEAL_SECONDS
-      # Both trainer and wild encounters use a slower black-to-live reveal.
-      # The biome intro graphic remains above the curtain at all times.
-      hold=0.20
-      duration=1.05
+      # A compact three-beat reveal: graphic enters over black, scenery
+      # sweeps from the opponent/right and zooms OUT, then the live actors
+      # appear on the final stable camera. This is not a second battle intro.
+      hold=0.16
+      duration=1.46
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
@@ -278,10 +285,20 @@ module VermeilBSSNDSIntroScene
       loop do
         elapsed=[Time.now.to_f-began,0.0].max
         p=[[(elapsed-hold)/duration,0.0].max,1.0].min
-        smooth=p*p*(3.0-2.0*p)
-        zoom=2.0-smooth
-        sx=cx+(cx-fx)*zoom
-        sy=cy+(cy-fy)*zoom
+        # Right-side close-up -> deliberate pullback to a full-scene frame.
+        # The last camera coordinates are EXACTLY (cx,cy,zoom 1.0); the
+        # screenshot cannot snap when switching to the live EBDX backdrop.
+        pull=[[(p-0.08)/0.86,0.0].max,1.0].min
+        ease=pull*pull*(3.0-2.0*pull)
+        zoom=1.82-0.82*ease
+        sweep=[[(p-0.08)/0.78,0.0].max,1.0].min
+        sweep=sweep*sweep*(3.0-2.0*sweep)
+        lead_x=[[fx+Graphics.width*0.12,Graphics.width*0.88].min,
+                Graphics.width*0.42].max
+        close_x=cx+(cx-lead_x)*zoom
+        close_y=cy+(cy-fy)*zoom
+        sx=close_x*(1.0-sweep)+cx*sweep
+        sy=close_y*(1.0-sweep)+cy*sweep
         halfw=bitmap.width.to_f*zoom/2.0
         halfh=bitmap.height.to_f*zoom/2.0
         cover.x=[[sx,Graphics.width-halfw].max,halfw].min
@@ -302,17 +319,25 @@ module VermeilBSSNDSIntroScene
         # Strong but brief impact flash as the GrassIntro tears away.
         flash_p=[[(elapsed-hold)/0.20,0.0].max,1.0].min
         flash.opacity=0 if flash  # No white flash to wash out the intro art.
-        # The snapshot clears while the opaque black curtain still covers it,
-        # then BLACK fades slowly into the live, animated trainer + terrain.
-        # No background-only frame is exposed during the handoff.
-        reveal=darkness ? [[(p-0.36)/0.54,0.0].max,1.0].min :
-                          [[(p-0.48)/0.52,0.0].max,1.0].min
+        # Reveal the *moving scenery* early, then dissolve its screenshot
+        # only when the camera is nearly on the final (1x, MAIN) frame.
+        # Prevents two differently aligned terrain copies from ghosting.
+        reveal=[[(p-0.77)/0.23,0.0].max,1.0].min
         smooth_reveal=reveal*reveal*(3.0-2.0*reveal)
         cover.opacity=(255.0*(1.0-smooth_reveal)).round
         if darkness
-          dark_p=[[(p-0.47)/0.53,0.0].max,1.0].min
+          dark_p=[[(p-0.20)/0.57,0.0].max,1.0].min
           dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
           darkness.opacity=(255.0*(1.0-dark_ease)).round
+        end
+        # The native trainer sprite is already at its 042-authorized floor,
+        # with its bitmap still on frame zero. Fade visibility in without
+        # moving it, then let pbAnimateTrainerIntros play from the beginning.
+        appear=[[(p-0.82)/0.18,0.0].max,1.0].min
+        appear=appear*appear*(3.0-2.0*appear)
+        trainer_states.each do |trainer,was_visible,old_opacity|
+          next unless was_visible && trainer && !(trainer.disposed? rescue true)
+          trainer.opacity=(old_opacity.to_f*appear).round if trainer.respond_to?(:opacity=)
         end
         # Do not advance TrainerBitmapWrapper here. Only the native
         # pbAnimateTrainerIntros owns trainer frame playback, after reveal.
@@ -349,9 +374,14 @@ module VermeilBSSNDSIntroScene
       # Never force an old trainer position or leave the scene behind a
       # full-screen temporary sprite, even on error.
       if @vector && @vector.respond_to?(:snap)
-        # Native trainer sendout must inherit the same MAIN shot the reveal
-        # settled on, not a stale overview shot saved before the transition.
+        # Native sendout inherits the exact MAIN camera used for the final
+        # screenshot, independent of intro focus pan/zoom.
         @vector.snap(main || saved_vector) if main || saved_vector
+      end
+      trainer_states.each do |trainer,was_visible,old_opacity|
+        next unless trainer && !(trainer.disposed? rescue true)
+        trainer.opacity=old_opacity if trainer.respond_to?(:opacity=)
+        trainer.visible=was_visible if trainer.respond_to?(:visible=)
       end
       if darkness
         begin
