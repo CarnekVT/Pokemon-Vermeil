@@ -1,4 +1,5 @@
 import { renderBattleSceneStudio } from "./app.js";
+import { installTrainerPortraitChoice } from "./portrait_choice_ui.js";
 
 var PANEL_ID="battle-scene-studio.main";
 const BSS_DATA="Data/BattleSceneStudio/";
@@ -43,7 +44,12 @@ function withScriptedBlueprints(ctx){
 
 export function activate(ctx){
   ctx.log.info("Battle Scene Studio v0.8.36 activated");
-  ctx.ui.registerPanel({id:PANEL_ID,title:"Battle Scene Studio",icon:"video",defaultPosition:"right",defaultSize:{width:1500,height:960},showInMenu:false,render:function(host){return renderBattleSceneStudio(withScriptedBlueprints(ctx),host);}});
+  ctx.ui.registerPanel({id:PANEL_ID,title:"Battle Scene Studio",icon:"video",defaultPosition:"right",defaultSize:{width:1500,height:960},showInMenu:false,render:function(host){
+    const scoped=withScriptedBlueprints(ctx);
+    const destroyApp=renderBattleSceneStudio(scoped,host);
+    const destroyPortraitUI=installTrainerPortraitChoice(scoped,host);
+    return function(){destroyPortraitUI();destroyApp();};
+  }});
   ctx.menu.registerMenuItem({menu:"Mods",label:"Battle Scene Studio",icon:"video",shortcut:"Ctrl+Shift+B",handler:function(){return ctx.ui.openPanel(PANEL_ID);}});
   ctx.commands.register("battle-scene-studio.open",function(){return ctx.ui.openPanel(PANEL_ID);});
 }
