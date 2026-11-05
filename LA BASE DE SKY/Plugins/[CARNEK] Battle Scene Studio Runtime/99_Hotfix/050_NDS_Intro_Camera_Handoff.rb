@@ -133,6 +133,8 @@ module VermeilBSSNDSIntroScene
     viewport=nil
     cover=nil
     grass=nil
+    mosaic=nil
+    mosaic_bitmap=nil
     flash=nil
     darkness=nil
     bitmap=nil
@@ -261,6 +263,25 @@ module VermeilBSSNDSIntroScene
       # alpha strip into existence at full opacity on its first render.
       grass.opacity=0
 
+      # Short diagonal square fragment wipe, as in the supplied reference
+      # video. It remains UNDER the original biome graphic (z 3 vs 4),
+      # does not obscure its pixels and disappears before the live handoff.
+      mosaic_bitmap=Bitmap.new(Graphics.width,Graphics.height)
+      14.times do |i|
+        px=i*55-54
+        py=i*35-35
+        size=[18,28,22,36,25][i%5]
+        next if px+size<=0 || py+size<=0 ||
+                px>=Graphics.width || py>=Graphics.height
+        mosaic_bitmap.fill_rect(px,py,size,size,Color.new(150,200,152,105))
+        mosaic_bitmap.fill_rect(px+2,py+2,[size-4,1].max,[size-4,1].max,
+                                Color.new(0,0,0,248))
+      end
+      mosaic=Sprite.new(viewport)
+      mosaic.bitmap=mosaic_bitmap
+      mosaic.z=3
+      mosaic.opacity=0
+
       flash=Sprite.new(viewport)
       flash_bitmap=Bitmap.new(1,1)
       flash_bitmap.fill_rect(0,0,1,1,Color.new(255,255,255,255))
@@ -316,6 +337,12 @@ module VermeilBSSNDSIntroScene
         grass.x=(-42.0*(1.0-entrance)+dx.to_f*elapsed*9.0).round
         grass.y=(dy.to_f*elapsed*3.0).round
         grass.opacity=(255.0*entrance*(1.0-departure)).round
+        if mosaic
+          fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
+          mosaic.x=(-38.0+100.0*fragment).round
+          mosaic.y=(-12.0+24.0*fragment).round
+          mosaic.opacity=(172.0*Math.sin(Math::PI*fragment)).round
+        end
         # Strong but brief impact flash as the GrassIntro tears away.
         flash_p=[[(elapsed-hold)/0.20,0.0].max,1.0].min
         flash.opacity=0 if flash  # No white flash to wash out the intro art.
@@ -362,6 +389,7 @@ module VermeilBSSNDSIntroScene
       cover.zoom_x=1.0
       cover.zoom_y=1.0
       grass.opacity=0
+      mosaic.opacity=0 if mosaic
       flash.opacity=0
       cover.opacity=0
       darkness.opacity=0 if darkness
@@ -399,6 +427,10 @@ module VermeilBSSNDSIntroScene
       if grass
         begin;grass.bitmap=nil;grass.dispose unless grass.disposed?;rescue StandardError;end
       end
+      if mosaic
+        begin;mosaic.bitmap=nil;mosaic.dispose unless mosaic.disposed?;rescue StandardError;end
+      end
+      begin;mosaic_bitmap.dispose if mosaic_bitmap && !mosaic_bitmap.disposed?;rescue StandardError;end
       if cover
         begin;cover.bitmap=nil;cover.dispose unless cover.disposed?;rescue StandardError;end
       end
