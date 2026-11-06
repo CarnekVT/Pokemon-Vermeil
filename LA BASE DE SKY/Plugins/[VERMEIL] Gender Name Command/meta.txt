@@ -1,0 +1,5 @@
+Name = [VERMEIL] Gender Name Command
+Version = 1.0.0
+Essentials = 21.1
+Credits = CarnekVT
+Description = Comando de dialogo \AN con nombre fijo segun el genero del protagonista.
