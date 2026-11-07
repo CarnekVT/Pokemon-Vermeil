@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "3.1.0"
+  VERSION = "3.2.0"
   # Deliberate real-time eyeline sweeps rather than one-frame retargets.
   SWEEP_SECONDS = 3.0
   SWEEP_HOLD_SECONDS = 0.52
@@ -14,9 +14,10 @@ module VermeilBSSCinema
   IDLE_PAN_Y = 3.6
   DEFAULTS = {
     "cinematicCamera" => true,
-    "cinematicIdleZoom" => 1.0,
-    "cinematicCommandZoom" => 1.0,
-    "cinematicFightZoom" => 1.0,
+    "cinematicIdleZoom" => 0.94,
+    "cinematicCommandZoom" => 0.98,
+    "cinematicFightZoom" => 1.10,
+    "cinematicTargetZoom" => 1.14,
     "cinematicSmooth" => 0.045,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
@@ -103,12 +104,9 @@ module VermeilBSSCinemaScene
     VermeilBSSCinema.config(self)
   end
 
-  # Preserve the scene's authored horizon, angle, perspective and scale. The
-  # presentation director only pans the existing world; changing [2..5] every
-  # menu frame inflated Pokemon sprites and warped the EBDX background.
-  # EBDX remains the only world-vector writer. Animate the composition with
-  # bounded pans; moving zoom1/zoom2 here would resize the backdrop without
-  # resizing Essentials/DBK battlers and produce the old warped-camera bug.
+  # Preserve the authored angle/perspective. Zoom only the two uniform
+  # EBDX camera scale components and project DBK battlers/shadows in BSS103
+  # with the same ratio; otherwise scenery and actors would drift apart.
   def vermeil_cinema_vector
     main = BSS070EBDXCore.get_vector(:MAIN, @battle)
     return nil unless main.is_a?(Array) && main.length >= 6
@@ -129,6 +127,17 @@ module VermeilBSSCinemaScene
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
+    # Wide establishing shot; modest focus shots on either team. Values are
+    # relative to MAIN so authored EBDX perspective remains intact.
+    zoom_key = case phase
+               when :command then "cinematicCommandZoom"
+               when :fight then "cinematicFightZoom"
+               when :target then "cinematicTargetZoom"
+               else "cinematicIdleZoom"
+               end
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.88,1.18)
+    target[4]=main[4]*zoom
+    target[5]=main[5]*zoom
     if phase == :idle || phase == :command
       # Both idle AND command menus must visibly drift; the user spends most
       # of a turn in the command menu, not the idle phase.
@@ -172,6 +181,11 @@ module VermeilBSSCinemaScene
     return nil unless pos
     dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.13,-17.0,17.0)
     main[0]+=dx
+    cfg=vermeil_cinema_config
+    zoom_key=vermeil_cinema_phase==:target ? "cinematicTargetZoom" : "cinematicFightZoom"
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.88,1.18)
+    main[4]*=zoom
+    main[5]*=zoom
     main
   rescue StandardError
     nil
@@ -279,10 +293,10 @@ module VermeilBSSCinemaScene
     x, y = vermeil_cinema_project_point(native[0], native[1], vector, main, scale, weight)
     sprite.x = x if sprite.respond_to?(:x=)
     sprite.y = y if sprite.respond_to?(:y=)
-    # Never multiply these by the world zoom. Zoom belongs to BAS only during
-    # attacks; normal BSS camera movement may not change Pokemon/shadow sizes.
-    sprite.zoom_x = native[3].to_f if sprite.respond_to?(:zoom_x=)
-    sprite.zoom_y = native[4].to_f if sprite.respond_to?(:zoom_y=)
+    # The native EBDX matrix is also applied by BSS103's single
+    # battler/shadow alignment path.
+    sprite.zoom_x = native[3].to_f * scale.to_f if sprite.respond_to?(:zoom_x=)
+    sprite.zoom_y = native[4].to_f * scale.to_f if sprite.respond_to?(:zoom_y=)
   end
 
   def bss070_ebdx_apply_world_alignment(*args, &block)
