@@ -186,6 +186,8 @@ module BSSScriptedSpeakerComposition
     return unless trainer
     mode=@bss_scripted_trainer_portrait_mode.to_s
     if mode=="behind"
+      # Defeat's native TrainerAppear already owns the real trainer.
+      # Never reset its alpha/XY during that animation or fade it again.
       @bss_scripted_trainer_restore ||= {}
       if !@bss_scripted_trainer_restore.key?(trainer.object_id)
         was_visible=(trainer.visible rescue false)
