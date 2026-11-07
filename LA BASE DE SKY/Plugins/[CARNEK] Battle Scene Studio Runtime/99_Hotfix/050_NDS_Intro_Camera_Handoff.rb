@@ -14,8 +14,8 @@ module VermeilBSSNDSHandoff
   START_ZOOM = 2.0
   # Seconds, not frames: 20 iterations at 110+ FPS were a blink.
   # Keep the scene anchored during hold and ease to 100% over the reveal.
-  HOLD_SECONDS = 0.12
-  REVEAL_SECONDS = 0.82
+  HOLD_SECONDS = 0.10
+  REVEAL_SECONDS = 0.78
   TAGS = {
     :grass => ["Graphics/Transitions/GrassIntro", ["Anim/Wind8",40,110], [-7,3]],
     :water => ["Graphics/Transitions/WaterIntro", ["Anim/Water1",40,115], [-4,4]],
@@ -130,6 +130,7 @@ module VermeilBSSNDSIntroScene
     path=VermeilBSSNDSHandoff.asset(@battle,tag)
     return false unless path
     @bss_nds_intro_active=true
+    @bss_nds_trainer_slide_pending=false
     viewport=nil
     cover=nil
     grass=nil
@@ -173,8 +174,8 @@ module VermeilBSSNDSIntroScene
           was_visible=(trainer.visible rescue false)
           original_opacity=(trainer.opacity rescue 255)
           trainer_states << [trainer,was_visible,original_opacity]
-          # The first frame can appear late, but never instantly. It fades
-          # into the already aligned scene as the temporary camera settles.
+          # The sprite must NOT fade in at a stationary XY during the NDS
+          # overlay. A separate slide will reveal the actual DBK actor.
           trainer.opacity=0 if was_visible && trainer.respond_to?(:opacity=)
           trainer.z=[trainer.z.to_i,49+i].max if trainer.respond_to?(:z=)
         end
@@ -297,8 +298,8 @@ module VermeilBSSNDSIntroScene
       # A compact three-beat reveal: graphic enters over black, scenery
       # sweeps from the opponent/right and zooms OUT, then the live actors
       # appear on the final stable camera. This is not a second battle intro.
-      hold=0.16
-      duration=1.46
+      # Keep the NDS rush short and energetic rather than lingering over
+      # the screen like a slow background pan.
       drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
       dx,dy=drift
       began=Time.now.to_f
@@ -330,12 +331,17 @@ module VermeilBSSNDSIntroScene
         # ORAS-like choreography: the biome rushes in over black, holds
         # briefly, then peels away as the world becomes visible. Start fully
         # transparent, including the first Graphics.update after allocation.
-        entrance=[[elapsed/0.27,0.0].max,1.0].min
+        entrance=[[elapsed/0.13,0.0].max,1.0].min
         entrance=entrance*entrance*(3.0-2.0*entrance)
         departure=[[(elapsed-(hold+duration*0.30))/(duration*0.67),0.0].max,1.0].min
         departure=departure*departure*(3.0-2.0*departure)
-        grass.x=(-42.0*(1.0-entrance)+dx.to_f*elapsed*9.0).round
-        grass.y=(dy.to_f*elapsed*3.0).round
+        # A Pokemon rustling in tall grass: fast, damped lateral shakes
+        # with a short vertical kick. Clock-based for mkxp's variable FPS.
+        damping=Math.exp(-elapsed*4.5)
+        rustle_x=(Math.sin(elapsed*49.0)*17.0 + Math.sin(elapsed*73.0)*4.0)*damping
+        rustle_y=Math.sin(elapsed*59.0)*5.0*damping
+        grass.x=(-30.0*(1.0-entrance)+dx.to_f*elapsed*3.5+rustle_x).round
+        grass.y=(dy.to_f*elapsed*1.5+rustle_y).round
         grass.opacity=(255.0*entrance*(1.0-departure)).round
         if mosaic
           fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
@@ -357,17 +363,8 @@ module VermeilBSSNDSIntroScene
           dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
           darkness.opacity=(255.0*(1.0-dark_ease)).round
         end
-        # The native trainer sprite is already at its 042-authorized floor,
-        # with its bitmap still on frame zero. Fade visibility in without
-        # moving it, then let pbAnimateTrainerIntros play from the beginning.
-        appear=[[(p-0.82)/0.18,0.0].max,1.0].min
-        appear=appear*appear*(3.0-2.0*appear)
-        trainer_states.each do |trainer,was_visible,old_opacity|
-          next unless was_visible && trainer && !(trainer.disposed? rescue true)
-          trainer.opacity=(old_opacity.to_f*appear).round if trainer.respond_to?(:opacity=)
-        end
-        # Do not advance TrainerBitmapWrapper here. Only the native
-        # pbAnimateTrainerIntros owns trainer frame playback, after reveal.
+        # Keep trainers hidden until their separate right-to-left entrance.
+        # Do not advance TrainerBitmapWrapper during this snapshot transition.
         # DBK advances animated Pokemon from pbFrameUpdate; Graphics.update
         # alone makes them appear frozen for the whole encounter transition.
         Graphics.update
@@ -393,6 +390,8 @@ module VermeilBSSNDSIntroScene
       flash.opacity=0
       cover.opacity=0
       darkness.opacity=0 if darkness
+      # The native trainer intro slides in only after the overlay is gone.
+      @bss_nds_trainer_slide_pending=@battle.trainerBattle? && !trainer_states.empty?
       Graphics.update
       true
     rescue StandardError => e
@@ -408,8 +407,13 @@ module VermeilBSSNDSIntroScene
       end
       trainer_states.each do |trainer,was_visible,old_opacity|
         next unless trainer && !(trainer.disposed? rescue true)
-        trainer.opacity=old_opacity if trainer.respond_to?(:opacity=)
-        trainer.visible=was_visible if trainer.respond_to?(:visible=)
+        if @bss_nds_trainer_slide_pending
+          trainer.opacity=0 if trainer.respond_to?(:opacity=)
+          trainer.visible=false if trainer.respond_to?(:visible=)
+        else
+          trainer.opacity=old_opacity if trainer.respond_to?(:opacity=)
+          trainer.visible=was_visible if trainer.respond_to?(:visible=)
+        end
       end
       if darkness
         begin
@@ -440,6 +444,52 @@ module VermeilBSSNDSIntroScene
     end
   end
 
+  # Reuse the real Animated Trainer Intros sprite. Do not call Animation::Intro
+  # (which would reintroduce a second black-background transition), and do
+  # not use TrainerAppear's hard-coded base XY (which ignores trainer metrics).
+  def bss_nds_slide_trainers
+    return unless @battle && @battle.trainerBattle? && @battle.opponent
+    rows=[]
+    @battle.opponent.each_index do |i|
+      actor=@sprites["trainer_#{i+1}"]
+      next unless actor && !(actor.disposed? rescue true)
+      saved=(@bss_nds_trainer_anchor || {})[i+1]
+      target_x=saved && saved[0] ? saved[0].to_f : actor.x.to_f
+      target_y=saved && saved[1] ? saved[1].to_f : actor.y.to_f
+      start_x=target_x+Graphics.width*0.44
+      actor.to_first_frame if actor.respond_to?(:to_first_frame)
+      actor.x=start_x
+      actor.y=target_y
+      actor.opacity=255 if actor.respond_to?(:opacity=)
+      actor.visible=true if actor.respond_to?(:visible=)
+      rows << [actor,start_x,target_x,target_y]
+    end
+    return if rows.empty?
+    began=Time.now.to_f
+    duration=0.28
+    frames=0
+    loop do
+      t=[[((Time.now.to_f-began)/duration),0.0].max,1.0].min
+      eased=1.0-(1.0-t)**3
+      rows.each do |actor,start_x,target_x,target_y|
+        next if actor.disposed? rescue false
+        actor.x=start_x+(target_x-start_x)*eased
+        actor.y=target_y
+      end
+      pbUpdate
+      frames+=1
+      break if t>=1.0 && frames>=2
+      break if frames>=300
+    end
+    rows.each do |actor,_start_x,target_x,target_y|
+      next if actor.disposed? rescue false
+      actor.x=target_x
+      actor.y=target_y
+    end
+  ensure
+    @bss_nds_trainer_slide_pending=false
+  end
+
   def pbBattleIntroAnimation(*args, &block)
     engaged=false
     return super unless bss_nds_intro_active?
@@ -457,6 +507,7 @@ module VermeilBSSNDSIntroScene
       # TrainerBitmapWrapper animation (not Pokemon Intro2) is the one that
       # should run in a scripted trainer battle. Resume any unplayed frames
       # from the reveal before native PokeballTrainerSendOut takes over.
+      bss_nds_slide_trainers if @bss_nds_trainer_slide_pending
       pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
