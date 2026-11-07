@@ -41,6 +41,7 @@ class Mode7Renderer
     @walls_known = true
     @need_build = true
     @need_ground_redraw = true
+    @last_autotile_frames = {}
     @last_cam_x = nil
     @last_cam_y = nil
     @last_ms_fog_cam_x = nil
@@ -116,10 +117,14 @@ class Mode7Renderer
   def refresh
     @need_build = true
     @need_ground_redraw = true
+    @last_priority_projection_key = nil
+    @last_walls_projection_key = nil
   end
 
   def invalidate_ground
     @need_ground_redraw = true
+    @last_priority_projection_key = nil
+    @last_walls_projection_key = nil
   end
 
   def update
@@ -127,9 +132,20 @@ class Mode7Renderer
     @autotiles.update
     if @need_build || @map_id != $game_map.map_id
       build
-    elsif @autotiles.changed && !@autotile_cells.empty?
-      recomposite_autotiles
-      @need_ground_redraw = true
+      @last_autotile_frames = @autotiles.current_frames.dup
+    else
+      # La marca global :changed puede corresponder a cualquier autotile.
+      # Solo recompone las fuentes cuyo frame realmente ha cambiado.
+      changed_autotiles = []
+      @autotiles.current_frames.each do |filename, frame|
+        previous = @last_autotile_frames[filename]
+        changed_autotiles << filename if !previous.nil? && previous != frame
+        @last_autotile_frames[filename] = frame
+      end
+      unless changed_autotiles.empty?
+        recomposite_autotiles(changed_autotiles)
+        @need_ground_redraw = true
+      end
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
@@ -159,6 +175,16 @@ class Mode7Renderer
     ensure_extended_data
     @ground&.dispose
     @shadow_ground&.dispose
+    # Las fuentes filtradas pertenecen al mapa anterior; liberar sus bitmaps.
+    if @tile_bake_cache
+      @tile_bake_cache.each_value do |cached|
+        bitmap = cached[0]
+        bitmap.dispose if bitmap && !bitmap.disposed?
+      end
+      @tile_bake_cache.clear
+    end
+    @last_priority_projection_key = nil
+    @last_walls_projection_key = nil
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
     @shadow_ground = Bitmap.new(@ground.width, @ground.height)
     @shadow_ground.clear
@@ -183,6 +209,7 @@ class Mode7Renderer
     end
     @priority_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
+    @autotile_cell_seen = Hash.new { |h, k| h[k] = {} }
     @entry_cache = {}
     @terrain_tag_cache = {}
     @wall_visual_components = nil
@@ -236,6 +263,7 @@ class Mode7Renderer
     build_wall_columns
     build_indoor_prop_blocks if respond_to?(:build_indoor_prop_blocks, true)
     build_priority_surfaces
+    cache_animated_sources
 
     @need_build = false
     @need_ground_redraw = true
@@ -423,10 +451,14 @@ class Mode7Renderer
     entries.sort_by { |e| e[:unify] }.each do |e|
       next if !e[:bitmap]
       blt_entry_into(target, tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e, e[:opacity] || 255)
-      if e[:animated]
-        @autotile_cells[e[:filename]] ||= []
-        cells = @autotile_cells[e[:filename]]
-        cells.push([tx, ty]) if !cells.include?([tx, ty])
+      if e[:animated] && e[:filename]
+        # O(1), en lugar de recorrer todas las celdas animadas con include?.
+        key = ty * @map.width + tx
+        seen = @autotile_cell_seen[e[:filename]]
+        unless seen[key]
+          seen[key] = true
+          @autotile_cells[e[:filename]] << [tx, ty]
+        end
       end
     end
   end

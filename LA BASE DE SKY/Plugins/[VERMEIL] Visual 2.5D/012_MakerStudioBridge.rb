@@ -195,7 +195,10 @@ class Mode7Renderer
     l = e[:lighting] || 0
     return [e[:bitmap], e[:src_rect]] if h == 0 && s == 100 && l == 0
     @tile_bake_cache ||= {}
-    key = "#{e[:filename] || e[:tid]}:#{e[:tileset_id] || @map.tileset_id}:#{h}:#{s}:#{l}"
+    # Una misma entry animada usa distintos rectangulos fuente a lo largo del
+    # tiempo. El cache anterior no distinguia frames y congelaba los filtros.
+    rect = e[:src_rect]
+    key = [e[:bitmap].object_id, rect.x, rect.y, rect.width, rect.height, h, s, l]
     hit = @tile_bake_cache[key]
     return hit if hit
     tmp = Bitmap.new(Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)

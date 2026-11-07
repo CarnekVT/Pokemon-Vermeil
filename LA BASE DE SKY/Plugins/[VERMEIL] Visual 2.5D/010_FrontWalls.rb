@@ -1070,6 +1070,9 @@ class Mode7Renderer
     true
   end
   def update_priority_surfaces
+    camera_key = [Mode7.cam_x, Mode7.projection_cam_y, Mode7.projection_revision]
+    return if @last_priority_projection_key == camera_key
+    @last_priority_projection_key = camera_key
     update_priority_strips
     update_priority_objects
   end
@@ -1189,32 +1192,78 @@ class Mode7Renderer
       sprite.visible = true
     end
   end
-  def recomposite_autotiles
+  # Indices de animacion: se calculan una vez al construir el mapa y evitan
+  # recorrer todos los objetos estaticos cada vez que avanza un autotile.
+  def cache_animated_sources
+    @animated_wall_data = @wall_data.select do |data|
+      entries = data[4]
+      entries.is_a?(Hash) && entries.values.any? do |group|
+        group.any? { |entry| entry[:animated] }
+      end
+    end
+    @animated_priority_strips = @priority_strips.select do |data|
+      cells = data[7]
+      cells.is_a?(Hash) && cells.values.any? do |group|
+        group.any? { |entry| entry[:animated] }
+      end
+    end
+    @animated_priority_data = @priority_data.select do |data|
+      data[3] && data[3][:animated]
+    end
+    # Los P1 integrados en el raster tambien pueden ser animados, aunque no
+    # figuren en @autotile_cells (que indexa las entradas del suelo).
+    @animated_priority_raster_rows = {}
+    if @priority_raster_cells
+      @priority_raster_cells.each do |ty, strips|
+        strips.each do |cells|
+          cells.each_value do |entries|
+            entries.each do |entry|
+              next if !entry[:animated] || !entry[:filename]
+              (@animated_priority_raster_rows[entry[:filename]] ||= {})[ty] = true
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def recomposite_autotiles(changed_filenames)
+    changed = {}
+    changed_filenames.each do |filename|
+      changed[filename] = true if @autotiles.animated?(filename)
+    end
+    return if changed.empty?
+
+    # Cada celda se repinta una sola vez, incluso si comparte varios autotiles.
     seen = {}
-    @autotile_cells.each do |filename, cells|
-      next if !@autotiles.animated?(filename)
-      cells.each do |tx, ty|
-        key = "#{tx},#{ty}"
+    changed.each_key do |filename|
+      (@autotile_cells[filename] || []).each do |tx, ty|
+        key = ty * @map.width + tx
         next if seen[key]
         seen[key] = true
         redraw_ground_cell(tx, ty)
       end
     end
 
-    @wall_data.each do |data|
+    (@animated_wall_data || []).each do |data|
       sprite, _wx, _wyb, _h, entries, _z_behavior, _base_unify, _depth,
-      _shadow_opacity, min_tx, min_ty = data
+        _shadow_opacity, min_tx, min_ty = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
-      next if !entries.is_a?(Hash)
-      next if entries.values.flatten.none? { |entry| entry[:animated] }
+      next unless entries.values.any? do |group|
+        group.any? { |entry| changed[entry[:filename]] }
+      end
+      entries.each_value { |group| refresh_animated_entry_frames(group) }
       draw_rigid_component_source(sprite.bitmap, min_tx, min_ty, entries)
     end
 
-    @priority_strips.each do |data|
+    (@animated_priority_strips || []).each do |data|
       _sprite, source, min_tx, ty, _priority, _unify, _elevation,
-      cells, mountain_shadow = data
+        cells, mountain_shadow = data
       next if !source || source.disposed?
-      next if cells.values.flatten.none? { |entry| entry[:animated] }
+      next unless cells.values.any? do |group|
+        group.any? { |entry| changed[entry[:filename]] }
+      end
+      cells.each_value { |group| refresh_animated_entry_frames(group) }
       if mountain_shadow == :entries_only
         source.clear
         cells.each do |tx, entries|
@@ -1229,16 +1278,19 @@ class Mode7Renderer
     end
 
     if @priority_raster_cells && @ground && !@ground.disposed?
-      affected_tys = []
-      @autotile_cells.each do |filename, cells|
-        next if !@autotiles.animated?(filename)
-        cells.each do |_tx, ty|
-          affected_tys << ty if @priority_raster_cells[ty]
+      affected_tys = {}
+      changed.each_key do |filename|
+        (@autotile_cells[filename] || []).each do |_tx, ty|
+          affected_tys[ty] = true if @priority_raster_cells[ty]
+        end
+        (@animated_priority_raster_rows[filename] || {}).each_key do |ty|
+          affected_tys[ty] = true
         end
       end
-      affected_tys.uniq.each do |ty|
+      affected_tys.each_key do |ty|
         @priority_raster_cells[ty].each do |strip_cells|
           strip_cells.each do |tx, entries|
+            refresh_animated_entry_frames(entries)
             x = tx * Game_Map::TILE_WIDTH
             y = ty * Game_Map::TILE_HEIGHT
             sorted = entries.sort_by { |e| [e[:unify].to_i, e[:priority].to_i] }
@@ -1250,11 +1302,12 @@ class Mode7Renderer
       end
     end
 
-    @priority_data.each do |data|
+    (@animated_priority_data || []).each do |data|
       _sprite, _wx, _wyb, entry, _priority, _elevation, _depth,
-      _tx, _ty, source = data
+        _tx, _ty, source = data
       next if !source || source.disposed?
-      next if !entry || !entry[:animated]
+      next if !entry || !changed[entry[:filename]]
+      refresh_animated_entry_frames([entry])
       source.clear
       blt_entry_into(source, 0, 0, entry, entry[:opacity] || 255)
       data[10] = nil
@@ -1276,6 +1329,9 @@ class Mode7Renderer
   # Bloques rigidos (walls + objetos P2+)
   # ---------------------------------------------------------------------------
   def update_walls
+    camera_key = [Mode7.cam_x, Mode7.projection_cam_y, Mode7.projection_revision]
+    return if @last_walls_projection_key == camera_key
+    @last_walls_projection_key = camera_key
     cam_tx = Mode7.cam_x / Game_Map::TILE_WIDTH
     cam_ty = Mode7.cam_y / Game_Map::TILE_HEIGHT
 
