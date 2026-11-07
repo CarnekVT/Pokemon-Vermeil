@@ -537,7 +537,12 @@ class BSSDialogueEngine
     pending_effect_recipient = nil
     prior_portrait_mode=(scene.instance_variable_get(:@bss_scripted_trainer_portrait_mode) rescue nil)
     if scene && t[:speaker]=="trainer"
-      scene.instance_variable_set(:@bss_scripted_trainer_portrait_mode,t[:trainerPortraitMode])
+      # A defeat speech runs after the native trainer victory reveal. The
+      # foreground duplicate stays disabled, but the REAL trainer must remain
+      # visible even when the Blueprint's normal speeches use "hidden".
+      portrait_mode=(t[:event].to_s.casecmp("BattleEndWin").zero? &&
+                     (@battle.trainerBattle? rescue false)) ? "behind" : t[:trainerPortraitMode]
+      scene.instance_variable_set(:@bss_scripted_trainer_portrait_mode,portrait_mode)
     end
     begin
       if is_cinematic && scene && scene.respond_to?(:pbProcessText)
