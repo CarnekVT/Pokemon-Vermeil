@@ -55,6 +55,13 @@ module BSSCameraTrainerDepth
               @bss_nds_intro_active
     opponents = (@battle.opponent rescue nil)
     return unless opponents && opponents.respond_to?(:length)
+    # Dialogue composition explicitly owns the trainer's foreground/behind
+    # placement. Do not force the trainer above the foe every pbUpdate:
+    # 049's behind mode would otherwise be undone and visibly flicker.
+    if @bss_dialogue_cinema_active &&
+       @bss_scripted_trainer_portrait_mode.to_s == "behind"
+      return
+    end
     opponents.length.times do |i|
       # DBK/Essentials index trainer sprites FROM ONE. Earlier BSS world
       # projection used trainer_0 for the first trainer, which was incorrect.
