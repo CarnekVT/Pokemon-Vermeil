@@ -126,6 +126,40 @@ end
 # already started the music before its cinematic line, do not play it twice.
 # The native battle end cleanup still runs normally.
 module BSSScriptedVictoryAudioOnce
+  # Reveal the exact DBK actor and the 042-authored floor position. Essentials'
+  # stock TrainerAppear uses pbTrainerPosition(1), losing customized Y offsets.
+  # This applies only to the pre-result scripted victory, not vanilla battles.
+  def bss_scripted_reveal_defeated_trainer(idxTrainer)
+    actor=(@sprites["trainer_#{idxTrainer.to_i+1}"] rescue nil)
+    return false unless actor && !(actor.disposed? rescue true)
+    anchor=(@bss_nds_trainer_anchor || {})[idxTrainer.to_i+1]
+    target_x=anchor && anchor[0] ? anchor[0].to_f : actor.x.to_f
+    target_y=anchor && anchor[1] ? anchor[1].to_f : actor.y.to_f
+    from_x=target_x+Graphics.width.to_f/4.0
+    actor.x=from_x
+    actor.y=target_y
+    actor.opacity=255 if actor.respond_to?(:opacity=)
+    actor.visible=true if actor.respond_to?(:visible=)
+    began=Time.now.to_f
+    frames=0
+    duration=0.28
+    loop do
+      t=[[((Time.now.to_f-began)/duration),0.0].max,1.0].min
+      eased=t*t*(3.0-2.0*t)
+      actor.x=from_x+(target_x-from_x)*eased
+      pbUpdate
+      frames+=1
+      break if t>=1.0 && frames>=2
+      break if frames>=300
+    end
+    actor.x=target_x
+    actor.y=target_y
+    true
+  rescue StandardError => e
+    BSS064.log("Scripted trainer reveal: #{e.class}: #{e.message}") if defined?(BSS064)
+    false
+  end
+
   def pbShowOpponent(idxTrainer,*args,&block)
     battle=(@battle rescue nil)
     if idxTrainer.to_i==0 && battle &&
@@ -135,7 +169,12 @@ module BSSScriptedVictoryAudioOnce
       # Suppress the second, identical native slide after the win notice.
       return nil
     end
-    result=super
+    scripted_reveal=idxTrainer.to_i==0 && battle &&
+      battle.instance_variable_get(:@bss_scripted_pre_end_win) &&
+      respond_to?(:bss070_ebdx_active?) && (bss070_ebdx_active? rescue false)
+    # If the real actor is not available, fall back to Essentials' animation.
+    result=scripted_reveal && bss_scripted_reveal_defeated_trainer(idxTrainer)
+    result=super unless result
     if idxTrainer.to_i==0 && battle &&
        battle.instance_variable_get(:@bss_scripted_pre_end_win)
       @bss_scripted_result_trainer_shown=true
