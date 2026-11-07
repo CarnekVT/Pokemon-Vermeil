@@ -64,6 +64,7 @@ module BSS103WorldSpaceBattlers
     # composed on top. BAS, sendout and other animations stay excluded above.
     camera_dx=0.0
     camera_dy=0.0
+    camera_zoom=1.0
     if @vector && defined?(BSS070EBDXCore) &&
        respond_to?(:vermeil_cinema_active?) && vermeil_cinema_active?
       current=@vector.get
@@ -71,6 +72,11 @@ module BSS103WorldSpaceBattlers
       if current.is_a?(Array) && main.is_a?(Array)
         camera_dx=(current[0].to_f-main[0].to_f)*0.65
         camera_dy=(current[1].to_f-main[1].to_f)*0.45
+        # Both EBDX backdrop and DBK battlers use the SAME zoom ratio.
+        # Never accumulate scaling from an already-transformed sprite.
+        if main[4].to_f.abs>0.001
+          camera_zoom=[[current[4].to_f/main[4].to_f,0.88].max,1.18].min
+        end
       end
     end
 
@@ -83,12 +89,16 @@ module BSS103WorldSpaceBattlers
       native=(bss070_ebdx_native_position_for(i) rescue nil) unless native.is_a?(Array) && native.length>=5
       next unless native.is_a?(Array) && native.length>=2
       offset_x=bss103_formation_spacing_x(i)
-      sp.x=native[0].to_f+camera_dx+offset_x if sp.respond_to?(:x=)
+      native_x=native[0].to_f+offset_x
+      native_y=native[1].to_f
+      cx=Graphics.width.to_f/2.0
+      cy=Graphics.height.to_f/2.0
+      sp.x=cx+(native_x-cx)*camera_zoom+camera_dx if sp.respond_to?(:x=)
       locked_y=(sp.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-      sp.y=locked_y || (native[1].to_f+camera_dy) if sp.respond_to?(:y=)
+      sp.y=locked_y || (cy+(native_y-cy)*camera_zoom+camera_dy) if sp.respond_to?(:y=)
       if native.length>=5
-        sp.zoom_x=native[3].to_f if sp.respond_to?(:zoom_x=) && native[3].to_f>0.02
-        sp.zoom_y=native[4].to_f if sp.respond_to?(:zoom_y=) && native[4].to_f>0.02
+        sp.zoom_x=native[3].to_f*camera_zoom if sp.respond_to?(:zoom_x=) && native[3].to_f>0.02
+        sp.zoom_y=native[4].to_f*camera_zoom if sp.respond_to?(:zoom_y=) && native[4].to_f>0.02
       end
       sp.z=[(sp.z rescue 50).to_i,50+i].max if sp.respond_to?(:z=)
 
@@ -103,12 +113,12 @@ module BSS103WorldSpaceBattlers
       shadow=(bss096_native_shadow_position(i) rescue nil)
       shadow=(bss070_ebdx_native_shadow_position_for(i) rescue nil) unless shadow.is_a?(Array) && shadow.length>=5
       next unless shadow.is_a?(Array) && shadow.length>=2
-      sh.x=shadow[0].to_f+camera_dx+offset_x if sh.respond_to?(:x=)
+      sh.x=cx+(shadow[0].to_f+offset_x-cx)*camera_zoom+camera_dx if sh.respond_to?(:x=)
       locked_shadow_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-      sh.y=locked_shadow_y || (shadow[1].to_f+camera_dy) if sh.respond_to?(:y=)
+      sh.y=locked_shadow_y || (cy+(shadow[1].to_f-cy)*camera_zoom+camera_dy) if sh.respond_to?(:y=)
       if shadow.length>=5
-        sh.zoom_x=shadow[3].to_f if sh.respond_to?(:zoom_x=) && shadow[3].to_f>0.02
-        sh.zoom_y=shadow[4].to_f if sh.respond_to?(:zoom_y=) && shadow[4].to_f>0.02
+        sh.zoom_x=shadow[3].to_f*camera_zoom if sh.respond_to?(:zoom_x=) && shadow[3].to_f>0.02
+        sh.zoom_y=shadow[4].to_f*camera_zoom if sh.respond_to?(:zoom_y=) && shadow[4].to_f>0.02
       end
       sh.z=[(sh.z rescue 3).to_i,30+i].max if sh.respond_to?(:z=)
     end
