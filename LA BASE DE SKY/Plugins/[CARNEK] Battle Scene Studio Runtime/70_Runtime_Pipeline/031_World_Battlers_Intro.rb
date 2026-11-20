@@ -75,7 +75,7 @@ module BSS103WorldSpaceBattlers
         # Both EBDX backdrop and DBK battlers use the SAME zoom ratio.
         # Never accumulate scaling from an already-transformed sprite.
         if main[4].to_f.abs>0.001
-          camera_zoom=[[current[4].to_f/main[4].to_f,0.88].max,1.18].min
+          camera_zoom=[[current[4].to_f/main[4].to_f,0.82].max,1.12].min
         end
       end
     end
