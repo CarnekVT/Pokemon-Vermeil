@@ -42,7 +42,7 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
   end
   root = File.expand_path("../Plugins/[VERMEIL] Input Studio", __dir__)
   load File.join(root, "001_Core.rb")
-  assert!(InputStudio::VERSION == "1.0.1", "version")
+  assert!(InputStudio::VERSION == "1.1.0", "version")
   Input.physical["UP"] = true
   assert!(Input.dir4(true) == 8 && Input.dir4(false) == 8 && Input.dir4 == 8,
           "dir4 supports Essentials last-frame argument (true/false/omitted)")
@@ -114,5 +114,12 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
           "overlay applies confirmed assignment")
   assert!(overlay.instance_variable_get(:@pending).nil?, "confirmation modal cleared")
   Input.physical["RETURN"] = false
+  assert!(InputStudio.assign("confirm", "keyboard", "V", 1), "secondary binding replaces independently")
+  assert!(InputStudio.bindings("confirm", "keyboard") == ["C", "V"], "primary binding preserved")
+  assert!(InputStudio.clear_slot("confirm", "keyboard", 1), "secondary binding removed independently")
+  assert!(InputStudio.bindings("confirm", "keyboard") == ["C"], "primary survives removing secondary")
+  assert!(InputStudio.assign("confirm", "keyboard", "RETURN", 1), "restore secondary binding")
+  assert!(InputStudio.assign("confirm", "keyboard", "RETURN", 0), "existing secondary moves to primary")
+  assert!(InputStudio.bindings("confirm", "keyboard") == ["RETURN", "C"], "moving slot swaps without losing original primary")
   puts "Input Studio isolated regression checks passed"
 end
