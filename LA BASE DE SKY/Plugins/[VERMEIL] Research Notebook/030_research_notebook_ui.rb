@@ -732,10 +732,12 @@ module ResearchNotebook
         active = (i == @section_index)
         color = entry[0] == :arcane ? ARCANE : GOLDEN
         tab_key = entry[0] == :arcane ? :tab_arcane : :tab_golden
-        tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, 8))
-        bmp.fill_rect(xx, 8, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
-        bmp.fill_rect(xx, 42, w - 4, 3, color) if active
-        draw_text(bmp, xx + 4, 24, w - 12, 17, label, 12, WHITE, 1, true)
+        xx = layout_position(tab_key.to_s, "x", xx)
+        ty = layout_position(tab_key.to_s, "y", 8)
+        tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, ty))
+        bmp.fill_rect(xx, ty, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
+        bmp.fill_rect(xx, ty + 34, w - 4, 3, color) if active
+        draw_text(bmp, xx + 4, ty + 16, w - 12, 17, label, 12, WHITE, 1, true)
       end
       subtitle = current_section == :arcane ? ResearchNotebook.t("Notas sobre energía arcana") : ResearchNotebook.t("Notas sobre energía áurea")
       draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
@@ -797,9 +799,15 @@ module ResearchNotebook
       custom_golden = current_section == :golden &&
                       ResearchNotebook::Repository.golden_form_sprite_path(entry)
       if custom_golden
-        show_custom_golden_silhouette(base, custom_golden, layout_position("focus_panel", "x", FOCUS_X) + FOCUS_W / 2, layout_position("focus_panel", "y", FOCUS_Y) + 161, 214, 200, silhouette)
+        show_custom_golden_silhouette(base, custom_golden,
+          layout_position("focus_sprite", "x", layout_position("focus_panel", "x", FOCUS_X) + FOCUS_W / 2),
+          layout_position("focus_sprite", "y", layout_position("focus_panel", "y", FOCUS_Y) + 161),
+          214, 200, silhouette)
       else
-        show_pokemon(base, display_form, silhouette, layout_position("focus_panel", "x", FOCUS_X) + FOCUS_W / 2, layout_position("focus_panel", "y", FOCUS_Y) + 161, 214, 200)
+        show_pokemon(base, display_form, silhouette,
+          layout_position("focus_sprite", "x", layout_position("focus_panel", "x", FOCUS_X) + FOCUS_W / 2),
+          layout_position("focus_sprite", "y", layout_position("focus_panel", "y", FOCUS_Y) + 161),
+          214, 200)
       end
       if current_section == :golden && display_form.to_i > 0 &&
          ResearchNotebook::Repository.golden_form_index(entry) == display_form.to_i &&
