@@ -72,7 +72,7 @@ module BSSCameraTrainerDepth
       # after a switch the foe can be logically hidden for a frame, and the
       # previous code skipped the trainer entirely, burying it in EBDX terrain.
       foe_z=(battler && !(battler.disposed? rescue true)) ? (battler.z rescue 50).to_i : 50
-      trainer.z=[trainer.z.to_i,foe_z+2,52+i].max
+      trainer.z=[trainer.z.to_i,foe_z+2,150+i].max
       # DBK alone owns TrainerSprite#visible and its animated X/Y positions.
     end
   rescue StandardError => e
