@@ -1,15 +1,15 @@
-# Input Studio 1.1.0 · Pokémon Vermeil
+# Input Studio 1.1.1 · Pokémon Vermeil
 
 ## Qué aporta
 - Teclado y mando gestionados por acciones lógicas independientes de los ocho botones RGSS.
-- Editor ingame con **F1** y edición de las dos primeras asignaciones por acción.
+- Editor ingame con **F1**, casillas primarias/secundarias individuales, accesos a casillas adicionales y barra inferior sin solapamiento.
 - Overrides por jugador fuera del proyecto: `System.data_directory/InputStudio/controls.json`.
 - Acción de diseño en Maker Studio: Mods → Input Studio o Tools → Input Studio.
 - Configuración por proyecto: `Plugins/[VERMEIL] Input Studio/actions.json`, escrita **solo** por el editor Maker Studio.
 - Los archivos fuente de Pokémon Essentials y la base de keybindings de MKXP no se reemplazan.
 
 ## Entrada y compatibilidad
-El runtime consulta las teclas físicas con `Input.pressex?/:triggerex?/:repeatex?/:releaseex?`, los botones del mando mediante `Input::Controller` y el stick izquierdo mediante `axes_left`. Un adaptador responde a `Input.press?/trigger?/repeat?/release?` para los botones lógicos de Essentials y proporciona `dir4/dir8` independientes durante el overworld. En el resto de contextos conserva la dirección nativa. El botón de menú original sigue funcionando con BACK, y se mantiene el F8 de capturas de pantalla.
+El runtime consulta las teclas físicas con `Input.pressex?/:triggerex?/:repeatex?/:releaseex?`, los botones del mando mediante `Input::Controller` y el stick izquierdo mediante `axes_left`. Un adaptador responde a `Input.press?/trigger?/repeat?/release?` para los botones lógicos de Essentials y proporciona `dir4/dir8` independientes durante el overworld. En el resto de contextos conserva la dirección nativa. El sistema **Smooth Movement de 8 direcciones** consulta `Input.press?(Input::UP/DOWN/LEFT/RIGHT)` en el mapa: estas llamadas ahora pasan también por las asignaciones de Input Studio, por lo que las flechas físicas antiguas dejan de mover al personaje tras reasignarlas. Los menús y el combate siguen pudiendo usar los controles direccionales nativos de MKXP. El botón de menú original sigue funcionando con BACK, y se mantiene el F8 de capturas de pantalla.
 
 ### Para integraciones nuevas
 ```ruby
@@ -25,11 +25,18 @@ Para una escena Bifröst persistente, puede ofrecer `InputStudio.context = ...` 
 
 ### Teclas del F1
 - `F1` abrir/cerrar, `Escape` cancelar/cerrar, `Tab` teclado/mando.
-- Flechas arriba/abajo: acción; cambia de categoría haciendo clic en la pestaña correspondiente.
+- Flechas arriba/abajo: acción; cambia de categoría haciendo clic en la pestaña correspondiente. La lista se desplaza sin tapar controles con el cuadro inferior.
 - `Enter`: editar casilla seleccionada; clic directamente en la casilla principal o secundaria para capturar. `1`/`2` acceden a las primeras casillas; `3`/`4` a asignaciones adicionales. Flechas izquierda/derecha: elegir casilla.
 - `Supr`: eliminar solo la asignación seleccionada (sin borrar la principal ni las demás). `R`: restablecer la acción.
+- **Restaurar todo** (botón superior, `Shift+R` o botón `Y` del mando): muestra confirmación antes de restablecer todas las acciones de ambos dispositivos a los valores por defecto de `actions.json` o, si no existe, del catálogo del plugin. No modifica los keybindings de MKXP.
 - Teclas reservadas: F1, F8, F9 y F12. Capturar F1/Escape cancela sin guardar.
 - El F1 es un modal de sprites en `Graphics.update`: no ejecuta el mapa o combate en segundo plano.
+
+## Correcciones 1.1.1 (20-11-2026)
+- Tabla de controles y contador reubicados para que ninguna fila quede oculta bajo las instrucciones en 640×480.
+- Las direcciones nativas de MKXP dejan de colarse en el movimiento de mapa al usar el modo de 8 direcciones de Smooth Movement.
+- Restablecimiento general de teclado y mando con confirmación visual y alternativa de teclado/mando.
+- Pruebas de regresión ampliadas para los tres cambios.
 
 ## Limitaciones y siguiente integración
 - Las acciones personalizadas se registran pero deben ser utilizadas por los scripts consumidores.
