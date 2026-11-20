@@ -1563,6 +1563,12 @@ module ResearchNotebook
       fx.zoom_x = 1.0
       frames = [ResearchNotebook::Settings::PAGE_TURN_FRAMES.to_i,
                 ResearchNotebook::Settings::PAGE_TURN_MIN_FRAMES.to_i, 6].max
+      # Page transition speed is editable alongside the pane in MakerStudio.
+      if defined?(VermeilInterfaceLayout)
+        page_id = @detail_open ? 'detail_panel' : 'grid_panel'
+        frames = VermeilInterfaceLayout.frames(@interface_layout, page_id, frames,
+                                               ResearchNotebook::Settings::PAGE_TURN_MIN_FRAMES.to_i)
+      end
       half = [frames / 2, 3].max
       half.times do |i|
         t = (i + 1).to_f / half
