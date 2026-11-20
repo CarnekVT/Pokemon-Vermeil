@@ -132,7 +132,7 @@ module ResearchNotebook
 
     BOOK_X = 6
     BOOK_Y = HEADER_H
-    BOOK_W = WIDTH - (layout_position("cover", "x", BOOK_X) * 2)
+    BOOK_W = WIDTH - (BOOK_X * 2)
     BOOK_H = FOOTER_Y - HEADER_H
 
     PAPER      = Color.new(246, 239, 217)
