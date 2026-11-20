@@ -46,15 +46,15 @@ module Interfaces
   #-----------------------------------------------------------------------------
   # Lienzo.
   #-----------------------------------------------------------------------------
-  # OJO: este juego corre a 512x384, no a los 640x480 de Essentials de serie
+  # Este proyecto corre a 640x480 como define mkxp.json
   # (Settings::SCREEN_WIDTH/HEIGHT y defScreenW/H de mkxp.json). El editor usa
   # este mismo tamaño de lienzo; si algun dia cambia la resolucion, los diseños
   # viejos quedan descolocados y hay que reabrirlos en el editor.
   #
   # No se leen de aqui en tiempo de ejecucion: la escena usa Graphics.width y
   # Graphics.height directamente. Esto es solo la referencia documentada.
-  LIENZO_ANCHO = 512
-  LIENZO_ALTO  = 384
+  LIENZO_ANCHO = 640
+  LIENZO_ALTO  = 480
 
   #-----------------------------------------------------------------------------
   # Valores por defecto de los elementos.
