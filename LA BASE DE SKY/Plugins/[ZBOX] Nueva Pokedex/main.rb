@@ -820,7 +820,7 @@ class PokemonPokedexNueva_Scene
       @bounce_scale_y += (1.0 - @bounce_scale_y) * 0.15
     end
     if @panel_alpha < 255
-      @panel_alpha += (255 - @panel_alpha) * 0.18
+      @panel_alpha += (255 - @panel_alpha) * (@page_entrance_speed || 0.18)
       if (@panel_alpha - 255).abs < 2
         @panel_alpha = 255
       end
@@ -881,7 +881,7 @@ class PokemonPokedexNueva_Scene
                when NuevaPokedex::STATE_FORMS then "forms_page"
                else "list_panel"
                end
-    @page_entrance_speed = 0.18 / [NuevaPokedex.layout_frames(entry_id, 12), 1].max * 60.0
+    @page_entrance_speed = [[0.15 * 12.0 / [NuevaPokedex.layout_frames(entry_id, 12), 1].max, 0.04].max, 0.5].min
   end
 
   def pbStartScene
