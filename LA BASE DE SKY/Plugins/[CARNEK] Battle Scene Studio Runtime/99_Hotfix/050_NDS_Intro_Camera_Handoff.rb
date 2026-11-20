@@ -454,7 +454,7 @@ module VermeilBSSNDSIntroScene
       # animated DBK actor over the battle backdrop and enemy battler.
       foe=@sprites["pokemon_#{2*i+1}"]
       foe_z=foe && !(foe.disposed? rescue true) ? foe.z.to_i : 50
-      actor.z=[actor.z.to_i,foe_z+2,52+i].max
+      actor.z=[actor.z.to_i,foe_z+2,150+i].max
       actor.opacity=255 if actor.respond_to?(:opacity=)
       actor.visible=true if actor.respond_to?(:visible=)
       rows << [actor,start_x,target_x,target_y]
