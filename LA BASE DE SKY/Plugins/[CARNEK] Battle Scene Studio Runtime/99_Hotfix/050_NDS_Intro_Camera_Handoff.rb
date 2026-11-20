@@ -226,6 +226,19 @@ module VermeilBSSNDSIntroScene
       cover.oy=bitmap.height/2
       cover.z=0
       cover.opacity=255
+      # A stage snapshot above wild sprites would dissolve over them and make
+      # even full-opacity Pokemon look like translucent ghosts. Only trainer
+      # battles need that environment-only snapshot during the handoff.
+      cover.visible=false if @battle.wildBattle?
+      if @battle.wildBattle?
+        @battle.sideSizes[1].times do |i|
+          idx=(2*i)+1
+          sp=@sprites["pokemon_#{idx}"]
+          next unless sp && !(sp.disposed? rescue true)
+          sp.visible=true if sp.respond_to?(:visible=)
+          sp.opacity=255 if sp.respond_to?(:opacity=)
+        end
+      end
       cx=Graphics.width/2.0
       cy=Graphics.height/2.0
       focus=if @battle.trainerBattle?
