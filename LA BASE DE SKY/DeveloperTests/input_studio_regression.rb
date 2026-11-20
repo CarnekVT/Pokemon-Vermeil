@@ -17,10 +17,11 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
     JUMPDOWN = 15; SPECIAL = 16; AUX1 = 17; AUX2 = 18
     MOUSELEFT = 19
     @physical = {}
+    @native_pressed = {}
     @raw_keys = Array.new(512, false)
     class << self
-      attr_accessor :physical, :raw_keys
-      def press?(_key); false; end
+      attr_accessor :physical, :raw_keys, :native_pressed
+      def press?(key); !!@native_pressed[key]; end
       def trigger?(_key); false; end
       def repeat?(_key); false; end
       def release?(_key); false; end
@@ -42,7 +43,7 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
   end
   root = File.expand_path("../Plugins/[VERMEIL] Input Studio", __dir__)
   load File.join(root, "001_Core.rb")
-  assert!(InputStudio::VERSION == "1.1.0", "version")
+  assert!(InputStudio::VERSION == "1.1.1", "version")
   Input.physical["UP"] = true
   assert!(Input.dir4(true) == 8 && Input.dir4(false) == 8 && Input.dir4 == 8,
           "dir4 supports Essentials last-frame argument (true/false/omitted)")
@@ -59,9 +60,20 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
   assert!(File.file?(InputStudio.profile_file), "player profile saved externally")
   InputStudio.load!
   assert!(InputStudio.bindings("move_up","keyboard") == ["W"], "profile survives reload")
+  Input.native_pressed[Input::UP] = true # mkxp still thinks the original arrow is bound
+  Input.physical["UP"] = true
+  assert!(!Input.press?(Input::UP), "native mkxp up key blocked in map after remap")
+  assert!(Input.dir4 == 0 && Input.dir8 == 0, "old physical arrow cannot move the player")
+  Input.physical["UP"] = false
   Input.physical["W"] = true
   assert!(Input.dir4(true) == 8, "movement reads remapped key")
+  assert!(Input.press?(Input::UP), "Smooth Movement eight-way direct press uses new binding")
   Input.physical["W"] = false
+  $game_temp = Struct.new(:in_battle, :in_menu, :message_window_showing).new(false, true, false)
+  assert!(Input.press?(Input::UP), "menu retains native directional key navigation")
+  $game_temp = nil
+  assert!(!Input.press?(Input::UP), "native arrow blocked again after leaving menu")
+  Input.native_pressed.clear
   assert!(InputStudio.reset("move_up"), "reset action")
   assert!(InputStudio.bindings("move_up","keyboard") == ["UP"], "reset falls back to original")
   assert!(InputStudio.reset("aux2"), "restore conflicting auxiliary action")
@@ -100,6 +112,14 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
   end
   load File.join(root, "002_Overlay.rb")
   overlay = InputStudio::Overlay.new
+  overlay.paint
+  top = overlay.instance_variable_get(:@table_top)
+  height = overlay.instance_variable_get(:@row_height)
+  bottom = overlay.instance_variable_get(:@list_bottom)
+  footer = overlay.instance_variable_get(:@footer_top)
+  assert!(top + overlay.available * height <= bottom,
+          "visible input rows never overlap lower counter")
+  assert!(bottom < footer, "counter and help panel never overlap")
   overlay.instance_variable_set(:@category,"Movimiento")
   overlay.send(:capture_start,0)
   # SDL scancode for W is 26; W conflicts with AUX2 in map context.
@@ -121,5 +141,23 @@ Dir.mktmpdir("vermeil-input-studio") do |dir|
   assert!(InputStudio.assign("confirm", "keyboard", "RETURN", 1), "restore secondary binding")
   assert!(InputStudio.assign("confirm", "keyboard", "RETURN", 0), "existing secondary moves to primary")
   assert!(InputStudio.bindings("confirm", "keyboard") == ["RETURN", "C"], "moving slot swaps without losing original primary")
+  assert!(InputStudio.assign("confirm", "gamepad", "Y", 0, true), "custom gamepad binding stored")
+  overlay.send(:begin_reset)
+  assert!(overlay.instance_variable_get(:@reset_pending), "factory reset requires confirmation")
+  Input.physical["ESCAPE"] = true
+  overlay.send(:reset_tick)
+  Input.physical["ESCAPE"] = false
+  assert!(!overlay.instance_variable_get(:@reset_pending), "factory reset can be cancelled")
+  assert!(InputStudio.bindings("confirm", "keyboard") == ["RETURN", "C"],
+          "cancelling reset preserves bindings")
+  overlay.send(:begin_reset)
+  Input.physical["RETURN"] = true
+  overlay.send(:reset_tick)
+  Input.physical["RETURN"] = false
+  assert!(!overlay.instance_variable_get(:@reset_pending), "reset confirmation exits dialog")
+  assert!(InputStudio.bindings("confirm", "keyboard") == ["C", "RETURN"], "factory reset restores keyboard")
+  assert!(InputStudio.bindings("confirm", "gamepad") == ["A"], "factory reset restores controller")
+  assert!(InputStudio.bindings("move_up", "keyboard") == ["UP"], "factory reset restores movement")
+  assert!(InputStudio.profile.empty?, "factory reset clears every personal override")
   puts "Input Studio isolated regression checks passed"
 end
