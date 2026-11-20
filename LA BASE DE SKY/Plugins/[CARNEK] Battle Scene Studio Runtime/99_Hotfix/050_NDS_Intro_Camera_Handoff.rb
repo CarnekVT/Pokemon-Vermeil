@@ -264,24 +264,11 @@ module VermeilBSSNDSIntroScene
       # alpha strip into existence at full opacity on its first render.
       grass.opacity=0
 
-      # Short diagonal square fragment wipe, as in the supplied reference
-      # video. It remains UNDER the original biome graphic (z 3 vs 4),
-      # does not obscure its pixels and disappears before the live handoff.
-      mosaic_bitmap=Bitmap.new(Graphics.width,Graphics.height)
-      14.times do |i|
-        px=i*55-54
-        py=i*35-35
-        size=[18,28,22,36,25][i%5]
-        next if px+size<=0 || py+size<=0 ||
-                px>=Graphics.width || py>=Graphics.height
-        mosaic_bitmap.fill_rect(px,py,size,size,Color.new(150,200,152,105))
-        mosaic_bitmap.fill_rect(px+2,py+2,[size-4,1].max,[size-4,1].max,
-                                Color.new(0,0,0,248))
-      end
-      mosaic=Sprite.new(viewport)
-      mosaic.bitmap=mosaic_bitmap
-      mosaic.z=3
-      mosaic.opacity=0
+      # The earlier fragment wipe used black-filled rectangles; they were
+      # visible as accidental dark squares during grass/water/cave transitions.
+      # Keep the biome strip/scene zoom, but omit that extra artifact layer.
+      mosaic = nil
+      mosaic_bitmap = nil
 
       flash=Sprite.new(viewport)
       flash_bitmap=Bitmap.new(1,1)
@@ -456,10 +443,15 @@ module VermeilBSSNDSIntroScene
       saved=(@bss_nds_trainer_anchor || {})[i+1]
       target_x=saved && saved[0] ? saved[0].to_f : actor.x.to_f
       target_y=saved && saved[1] ? saved[1].to_f : actor.y.to_f
-      start_x=target_x+Graphics.width*0.44
+      start_x=Graphics.width.to_f+[(actor.bitmap.width.to_f / 2.0),48.0].max
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
       actor.x=start_x
       actor.y=target_y
+      # TrainerSprite#pbSetPosition resets z to 10-index. Keep the real
+      # animated DBK actor over the battle backdrop and enemy battler.
+      foe=@sprites["pokemon_#{2*i+1}"]
+      foe_z=foe && !(foe.disposed? rescue true) ? foe.z.to_i : 50
+      actor.z=[actor.z.to_i,foe_z+2,52+i].max
       actor.opacity=255 if actor.respond_to?(:opacity=)
       actor.visible=true if actor.respond_to?(:visible=)
       rows << [actor,start_x,target_x,target_y]
@@ -476,7 +468,13 @@ module VermeilBSSNDSIntroScene
         actor.x=start_x+(target_x-start_x)*eased
         actor.y=target_y
       end
-      pbUpdate
+      # pbUpdate runs camera and battler alignment hooks that may move the
+      # actor back to its endpoint during the slide. Render this frame with
+      # Graphics.update and tick DBK's animated bitmap without reanchoring.
+      Graphics.update
+      rows.each do |actor,_,_,_|
+        actor.play if actor.respond_to?(:play) && !(actor.finished? rescue false)
+      end
       frames+=1
       break if t>=1.0 && frames>=2
       break if frames>=300
