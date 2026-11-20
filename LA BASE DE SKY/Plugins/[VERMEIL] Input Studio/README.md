@@ -1,4 +1,4 @@
-# Input Studio 1.0.1 · Pokémon Vermeil
+# Input Studio 1.1.0 · Pokémon Vermeil
 
 ## Qué aporta
 - Teclado y mando gestionados por acciones lógicas independientes de los ocho botones RGSS.
@@ -25,9 +25,9 @@ Para una escena Bifröst persistente, puede ofrecer `InputStudio.context = ...` 
 
 ### Teclas del F1
 - `F1` abrir/cerrar, `Escape` cancelar/cerrar, `Tab` teclado/mando.
-- Flechas izquierda/derecha: categoría; arriba/abajo: acción.
-- `Enter` o clic: capturar asignación principal. `2`: capturar secundaria.
-- `Supr`: limpiar bindings de ese dispositivo. `R`: restablecer la acción.
+- Flechas arriba/abajo: acción; cambia de categoría haciendo clic en la pestaña correspondiente.
+- `Enter`: editar casilla seleccionada; clic directamente en la casilla principal o secundaria para capturar. `1`/`2` acceden a las primeras casillas; `3`/`4` a asignaciones adicionales. Flechas izquierda/derecha: elegir casilla.
+- `Supr`: eliminar solo la asignación seleccionada (sin borrar la principal ni las demás). `R`: restablecer la acción.
 - Teclas reservadas: F1, F8, F9 y F12. Capturar F1/Escape cancela sin guardar.
 - El F1 es un modal de sprites en `Graphics.update`: no ejecuta el mapa o combate en segundo plano.
 
