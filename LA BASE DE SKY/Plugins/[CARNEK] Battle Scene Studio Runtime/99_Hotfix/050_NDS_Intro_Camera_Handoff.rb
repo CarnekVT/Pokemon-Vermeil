@@ -143,14 +143,11 @@ module VermeilBSSNDSIntroScene
     trainer_states=[]
     saved_vector=(@vector.get.clone rescue nil)
     begin
-      # All encounters start behind a real black curtain. The Intro NDS
-      # biome strip is drawn ABOVE this curtain (z=4), so the black never
-      # hides the authored intro graphic; it only covers the live battlefield.
+      # No black matte: the authored EBDX world is already present. The
+      # grass/water/cave wipe plays above the live environment directly.
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
-      darkness=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[0,0,0,255])
-      darkness.z=2
-      darkness.opacity=255
+      darkness=nil
       # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
       # Hiding them for the capture caused a visible pop at the reveal edge.
       # Do not reveal unreleased party Pokemon; respect native scene state.
@@ -446,6 +443,10 @@ module VermeilBSSNDSIntroScene
       # A TrainerSprite bitmap may be an animation strip rather than one
       # visible frame: cap the offscreen margin to prevent a late pop-in.
       offscreen=actor.bitmap ? [[actor.bitmap.width.to_f / 2.0,48.0].max,160.0].min : 64.0
+      if respond_to?(:bss_camera_trainer_side_x)
+        side_x=bss_camera_trainer_side_x(actor,i)
+        target_x=side_x if side_x
+      end
       start_x=Graphics.width.to_f+offscreen
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
       actor.x=start_x
@@ -461,7 +462,7 @@ module VermeilBSSNDSIntroScene
     end
     return if rows.empty?
     began=Time.now.to_f
-    duration=0.28
+    duration=0.46
     frames=0
     loop do
       t=[[((Time.now.to_f-began)/duration),0.0].max,1.0].min
@@ -519,7 +520,17 @@ module VermeilBSSNDSIntroScene
       next unless @battle.battlers[idx]
       @animations.push(Battle::Scene::Animation::DataBoxAppear.new(@sprites,@viewport,idx))
     end
-    @animations.push(Battle::Scene::Animation::Intro2.new(@sprites,@viewport,@battle.sideSizes[1]))
+    # Wild Pokemon should already be standing on the stage; the vanilla
+    # Intro2 alpha/zoom reveal was making them appear progressively as ghosts.
+    @battle.sideSizes[1].times do |i|
+      idx=(2*i)+1
+      sp=@sprites["pokemon_#{idx}"]
+      next unless sp && !(sp.disposed? rescue true)
+      sp.opacity=255 if sp.respond_to?(:opacity=)
+      sp.visible=true if sp.respond_to?(:visible=)
+      shadow=@sprites["shadow_#{idx}"]
+      shadow.opacity=255 if shadow && shadow.respond_to?(:opacity=)
+    end
     while inPartyAnimation?
       pbUpdate
     end
