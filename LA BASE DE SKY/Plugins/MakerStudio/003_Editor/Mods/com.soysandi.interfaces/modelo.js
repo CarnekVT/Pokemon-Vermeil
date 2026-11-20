@@ -12,8 +12,8 @@
 //=============================================================================
 
 // ---- Constantes, espejo de [000] Settings.rb ----
-export const LIENZO_ANCHO = 512;
-export const LIENZO_ALTO = 384;
+export const LIENZO_ANCHO = 640;
+export const LIENZO_ALTO = 480;
 export const VERSION_DISENO = 2;
 export const REJILLA = 8;
 export const TEXTO_TAMANO = 14;
