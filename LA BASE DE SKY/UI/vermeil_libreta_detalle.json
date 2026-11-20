@@ -14,26 +14,6 @@
   "aperturas": {},
   "elementos": [
     {
-      "id": "background",
-      "tipo": "imagen",
-      "capa": 0,
-      "x": 0,
-      "y": 0,
-      "ancho": 640,
-      "alto": 480,
-      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/background"
-    },
-    {
-      "id": "focus_panel",
-      "tipo": "imagen",
-      "capa": 1,
-      "x": 14,
-      "y": 62,
-      "ancho": 294,
-      "alto": 368,
-      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/focus_panel"
-    },
-    {
       "id": "detail_panel",
       "tipo": "imagen",
       "capa": 2,
