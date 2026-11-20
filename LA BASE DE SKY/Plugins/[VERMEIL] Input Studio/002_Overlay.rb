@@ -12,10 +12,11 @@ module InputStudio
       @category = "Todos"
       @row = 0
       @offset = 0
+      @slot = 0
       @capture = nil
       @pending = nil
       @previous = []
-      @message = "Flechas: navegar | Enter: cambiar | 2: segunda tecla"
+      @message = "Selecciona una casilla y pulsa Enter para asignar"
       @open = true
       @sprite = Sprite.new
       @sprite.z = 999_999
@@ -45,7 +46,7 @@ module InputStudio
       rows.select { |r| r["category"] == @category }
     end
     def available
-      [((@height - 172) / 33).to_i, 4].max
+      [((@height - 194) / 37).to_i, 3].max
     end
     def current
       rows[@row]
@@ -60,54 +61,72 @@ module InputStudio
       resize if Graphics.width != @width || Graphics.height != @height
       b = @sprite.bitmap
       b.clear
-      w = @width
-      h = @height
+      w, h = @width, @height
       rect(0, 0, w, h, Color.new(8, 13, 25, 245))
-      rect(18, 14, w - 36, 51, Color.new(21, 34, 54))
-      rect(18, 14, 5, 51, ACCENT)
-      draw_text(34, 22, w - 230, "INPUT STUDIO", 23)
-      draw_text(w - 205, 27, 174, @device == "keyboard" ? "TECLADO  |  TAB" : "MANDO  |  TAB", 13, ACCENT, 2)
-      draw_text(24, 70, w - 45, "Editor de controles  -  F1 para cerrar", 14, MUTED)
-      left = [150, (w * 0.27).to_i].min
-      rect(18, 99, left - 9, h - 166, Color.new(19, 29, 45))
-      categories.each_with_index do |cat, index|
-        y = 105 + index * 32
-        next if y > h - 100
-        if @category == cat
-          rect(23, y, left - 19, 29, Color.new(38, 78, 114))
-        end
-        draw_text(31, y + 2, left - 28, cat, 14, @category == cat ? TEXT : MUTED)
+      rect(12, 10, w - 24, 54, Color.new(21, 34, 54))
+      rect(12, 10, 5, 54, ACCENT)
+      draw_text(27, 16, w - 200, "INPUT STUDIO", 22)
+      draw_text(w - 172, 22, 148, @device == "keyboard" ? "TECLADO [TAB]" : "MANDO [TAB]", 13, ACCENT, 2)
+      draw_text(17, 65, w - 34, "Selecciona una accion y su casilla. Enter: editar | 1-4: ir a casilla", 13, MUTED)
+
+      # A full-width action table leaves both bindings individually readable.
+      cats = categories
+      tab_x = 13
+      tab_y = 91
+      usable = w - 26
+      cat_w = [usable / [cats.size, 1].max, 57].max
+      @category_hitboxes = []
+      cats.each_with_index do |cat, index|
+        x = tab_x + index * cat_w
+        break if x + 35 > w - 10
+        width = [cat_w - 3, w - x - 12].min
+        rect(x, tab_y, width, 29, @category == cat ? Color.new(43, 85, 124) : Color.new(25, 39, 58))
+        draw_text(x + 3, tab_y + 2, width - 6, cat, 12, @category == cat ? TEXT : MUTED, 1)
+        @category_hitboxes << [x, tab_y, width, 29, cat]
       end
-      x = left + 20
-      listw = w - x - 19
-      rect(x, 99, listw, h - 166, Color.new(19, 29, 45))
-      draw_text(x + 9, 100, listw - 15, "ACCIONES", 13, ACCENT)
+
+      left = 13
+      table_w = w - 26
+      label_w = [(table_w * 0.46).to_i, 150].max
+      key_w = (table_w - label_w - 12) / 2
+      key_w = [key_w, 45].max
+      @table_top = 150
+      rect(left, 125, table_w, h - 224, Color.new(19, 29, 45))
+      draw_text(left + 10, 125, label_w - 12, "ACCION", 12, ACCENT)
+      draw_text(left + label_w, 125, key_w - 3, "PRINCIPAL [1]", 12, ACCENT, 1)
+      draw_text(left + label_w + key_w, 125, key_w - 3, "SECUNDARIA [2]", 12, ACCENT, 1)
       rows[@offset, available].to_a.each_with_index do |action, i|
         j = i + @offset
-        y = 128 + i * 33
+        y = @table_top + i * 37
         selected = j == @row
-        rect(x + 5, y, listw - 10, 30, selected ? Color.new(43, 73, 105) : Color.new(25, 37, 54))
-        label = action["label"].to_s
-        binding = InputStudio.bindings(action["id"], @device)
-        labelw = [listw * 0.54, 110].max
-        draw_text(x + 12, y + 3, labelw - 12, label, 14, selected ? TEXT : MUTED)
-        keys = binding.empty? ? "(sin asignar)" : binding.join(" / ")
-        draw_text(x + labelw, y + 3, listw - labelw - 13, keys, 13, selected ? ACCENT : TEXT, 2)
+        rect(left + 4, y, table_w - 8, 34, selected ? Color.new(40, 69, 100) : Color.new(25, 37, 54))
+        draw_text(left + 10, y + 4, label_w - 16, action["label"], 14, selected ? TEXT : MUTED)
+        bindings = InputStudio.bindings(action["id"], @device)
+        2.times do |slot|
+          cx = left + label_w + key_w * slot
+          focused = selected && @slot == slot
+          rect(cx + 2, y + 3, key_w - 5, 28, focused ? Color.new(65, 108, 146) : Color.new(35, 53, 75))
+          key = bindings[slot] || "+ ASIGNAR"
+          draw_text(cx + 4, y + 4, key_w - 9, key, 13, focused ? TEXT : (bindings[slot] ? ACCENT : MUTED), 1)
+        end
       end
-      if rows.length > available
-        draw_text(x + 12, h - 96, listw - 25, "#{@row+1} / #{rows.length} acciones", 12, MUTED, 2)
+      if rows.size > available
+        draw_text(left + 8, h - 110, table_w - 14, "Accion #{@row + 1} / #{rows.size}    Arriba/Abajo: navegar", 12, MUTED, 2)
       end
-      rect(18, h - 63, w - 36, 49, Color.new(24, 36, 53))
+
+      rect(13, h - 97, w - 26, 84, Color.new(24, 36, 53))
       if @capture
-        label = @capture[:slot] == 0 ? "PRINCIPAL" : "SECUNDARIA"
-        draw_text(28, h - 57, w - 56, "Pulsa una tecla / botón para #{label} · Esc cancela", 14, ACCENT)
-        draw_text(28, h - 33, w - 56, @message, 12, MUTED)
+        name = @capture[:slot] == 0 ? "PRINCIPAL" : "SECUNDARIA #{@capture[:slot]}"
+        draw_text(23, h - 94, w - 45, "ESPERANDO: #{name}", 15, ACCENT)
+        draw_text(23, h - 72, w - 45, "Pulsa una tecla o boton. Esc / F1: cancelar", 13, TEXT)
+        draw_text(23, h - 47, w - 45, @message, 12, MUTED)
       elsif @pending
-        draw_text(28, h - 57, w - 56, "¿Mover asignación? Enter/A: confirmar · Esc/B: cancelar", 13, ACCENT)
-        draw_text(28, h - 33, w - 56, @message, 11, MUTED)
+        draw_text(23, h - 94, w - 45, "CONFLICTO: Enter/A confirma, Esc/B cancela", 13, ACCENT)
+        draw_text(23, h - 71, w - 45, @message, 12, TEXT)
       else
-        draw_text(28, h - 57, w - 56, @message, 13, TEXT)
-        draw_text(28, h - 33, w - 56, "Tab: dispositivo   |   Supr: quitar   |   R: restaurar   |   F1: cerrar", 11, MUTED)
+        draw_text(23, h - 94, w - 45, "Enter: asignar  |  Izq/Der: casilla  |  Supr: quitar casilla", 13, TEXT)
+        draw_text(23, h - 72, w - 45, "1-4: elegir casilla  |  R: restaurar  |  Tab: dispositivo", 12, MUTED)
+        draw_text(23, h - 49, w - 45, @message, 12, ACCENT)
       end
     end
     def raw
@@ -200,22 +219,28 @@ module InputStudio
       return unless Input.input_studio_native_trigger?(Input::MOUSELEFT)
       mx, my = Input.mouse_x, Input.mouse_y
       return unless mx && my
-      left = [150, (@width * 0.27).to_i].min
-      if mx >= 23 && mx < left && my >= 105
-        index = (my - 105) / 32
-        if index >= 0 && index < categories.size
-          @category = categories[index]
-          @row = 0
-          @offset = 0
-          clamp
-        end
-      elsif mx > left && my >= 128 && my < [@height - 99, 128 + available * 33].min
-        index = (my - 128) / 33 + @offset
-        if index >= 0 && index < rows.size
-          @row = index
-          capture_start(0)
-        end
+      (@category_hitboxes || []).each do |x, y, width, height, cat|
+        next unless mx >= x && mx < x + width && my >= y && my < y + height
+        @category = cat
+        @row = 0
+        @offset = 0
+        clamp
+        return
       end
+      return unless my >= @table_top && my < @table_top + available * 37
+      left = 13
+      table_w = @width - 26
+      return unless mx >= left && mx < left + table_w
+      index = (my - @table_top) / 37 + @offset
+      return unless index >= 0 && index < rows.size
+      @row = index
+      label_w = [(table_w * 0.46).to_i, 150].max
+      key_w = (table_w - label_w - 12) / 2
+      if mx >= left + label_w
+        @slot = (mx >= left + label_w + key_w) ? 1 : 0
+        capture_start(@slot)
+      end
+      clamp
     end
     def normal_tick
       return pending_tick if @pending
@@ -231,20 +256,32 @@ module InputStudio
       elsif trigger_key("DOWN") || pad_trigger("DPAD_DOWN")
         navigate(1)
       elsif trigger_key("LEFT") || pad_trigger("DPAD_LEFT")
-        choose_category(-1)
+        @slot = [@slot - 1, 0].max
       elsif trigger_key("RIGHT") || pad_trigger("DPAD_RIGHT")
-        choose_category(1)
-      elsif trigger_key("RETURN") || pad_trigger("A")
-        capture_start(0)
+        @slot = [@slot + 1, 3].min
+      elsif trigger_key("1")
+        @slot = 0
+        capture_start(@slot)
       elsif trigger_key("2")
-        capture_start(1)
+        @slot = 1
+        capture_start(@slot)
+      elsif trigger_key("3")
+        @slot = 2
+        capture_start(@slot)
+      elsif trigger_key("4")
+        @slot = 3
+        capture_start(@slot)
+      elsif trigger_key("RETURN") || pad_trigger("A")
+        capture_start(@slot)
       elsif trigger_key("DELETE") || trigger_key("BACKSPACE")
-        if current && InputStudio.clear(current["id"], @device)
-          @message = "Asignaciones retiradas"
+        if current && InputStudio.clear_slot(current["id"], @device, @slot)
+          @message = "Casilla quitada; las demas teclas se conservan"
+        else
+          @message = InputStudio.status.to_s
         end
       elsif trigger_key("R")
         if current && InputStudio.reset(current["id"])
-          @message = "Acción restaurada"
+          @message = "Accion restaurada"
         end
       end
       mouse_tick unless @capture
