@@ -1,0 +1,89 @@
+{
+  "version": 2,
+  "nombre": "vermeil_pokedex_lista",
+  "titulo": "Pokédex · listado",
+  "lienzo": {
+    "ancho": 640,
+    "alto": 480,
+    "scale_mode": "pixel_perfect",
+    "pixel_perfect": true,
+    "integer_scaling": true,
+    "safe_area": false
+  },
+  "oscurecer_mapa": 0,
+  "aperturas": {},
+  "elementos": [
+    {
+      "id": "background",
+      "tipo": "imagen",
+      "capa": 0,
+      "x": 0,
+      "y": 0,
+      "ancho": 640,
+      "alto": 480,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/background"
+    },
+    {
+      "id": "header",
+      "tipo": "imagen",
+      "capa": 1,
+      "x": 24,
+      "y": 12,
+      "ancho": 256,
+      "alto": 44,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/header"
+    },
+    {
+      "id": "list_panel",
+      "tipo": "imagen",
+      "capa": 1,
+      "x": 286,
+      "y": 24,
+      "ancho": 326,
+      "alto": 420,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/list_panel"
+    },
+    {
+      "id": "portrait_panel",
+      "tipo": "imagen",
+      "capa": 1,
+      "x": 24,
+      "y": 56,
+      "ancho": 256,
+      "alto": 256,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/portrait_panel"
+    },
+    {
+      "id": "portrait_pokemon",
+      "tipo": "panel",
+      "capa": 3,
+      "x": 152,
+      "y": 184,
+      "ancho": 48,
+      "alto": 48,
+      "color": "#ED404055",
+      "borde": "#FFFFFF88",
+      "borde_grosor": 1
+    },
+    {
+      "id": "counter_panel",
+      "tipo": "imagen",
+      "capa": 2,
+      "x": 24,
+      "y": 320,
+      "ancho": 256,
+      "alto": 48,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/counter_panel"
+    },
+    {
+      "id": "scrollbar_track",
+      "tipo": "imagen",
+      "capa": 2,
+      "x": 615,
+      "y": 32,
+      "ancho": 6,
+      "alto": 420,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/scrollbar_track"
+    }
+  ]
+}
