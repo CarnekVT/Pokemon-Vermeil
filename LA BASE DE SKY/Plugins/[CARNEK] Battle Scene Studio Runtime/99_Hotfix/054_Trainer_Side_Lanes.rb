@@ -74,7 +74,12 @@ module VermeilTrainerSideLanes
     return result if respond_to?(:inPartyAnimation?) && (inPartyAnimation? rescue false)
     if @battle && @battle.respond_to?(:opponent) && @battle.opponent
       @battle.opponent.each_index do |i|
-        bss_camera_park_trainer(@sprites["trainer_#{i+1}"],i)
+        actor=@sprites["trainer_#{i+1}"]
+        bss_camera_park_trainer(actor,i)
+        next unless actor && (actor.visible rescue false)
+        foe=@sprites["pokemon_#{2*i+1}"]
+        foe_z=(foe && !(foe.disposed? rescue true)) ? foe.z.to_i : 50
+        actor.z=[actor.z.to_i,foe_z+2,150+i].max if actor.respond_to?(:z=)
       end
     end
     result
