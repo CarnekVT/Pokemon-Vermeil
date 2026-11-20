@@ -5,7 +5,7 @@ require "json"
 require "fileutils"
 
 module InputStudio
-  VERSION = "1.1.0"
+  VERSION = "1.1.1"
   ROOT = "Plugins/[VERMEIL] Input Studio"
   CONFIG = ROOT + "/actions.json"
   CONTEXTS = %w[global map menu battle bifrost]
@@ -398,14 +398,30 @@ InputStudio.load!
 # Preserve raw physical Input.pressex?/triggerex? etc and all other buttons.
 module Input
   LEGACY_STUDIO_ACTIONS = {
-    # Directional UI and battle navigation must always use native mkxp input.
-    # Move remapping is applied in Game_Player only, not in Input.press?/repeat?.
+    # UI and battle keep native directional navigation. Map movement is
+    # resolved below through the same physical binds as InputStudio.dir4/dir8.
     USE => "confirm", BACK => "back", ACTION => "action",
     JUMPUP => "jump_up", JUMPDOWN => "jump_down",
     SPECIAL => "special", AUX1 => "aux1", AUX2 => "aux2"
   }.freeze
 
+  STUDIO_MAP_DIRECTIONS = {
+    UP => "move_up", DOWN => "move_down",
+    LEFT => "move_left", RIGHT => "move_right"
+  }.freeze
+
   class << self
+    def input_studio_mapped_action(button)
+      # Smooth Movement 8-way mode reads Input.press?(Input::UP etc.) instead
+      # of Input.dir8. Do NOT let mkxp's original arrow bindings leak into
+      # that path after the user remaps the physical movement keys.
+      directional = STUDIO_MAP_DIRECTIONS[button]
+      return directional if directional && InputStudio.map_movement_allowed?
+      action = LEGACY_STUDIO_ACTIONS[button]
+      return action if action && InputStudio.active?(action)
+      nil
+    end
+
     alias input_studio_native_press? press? unless method_defined?(:input_studio_native_press?)
     alias input_studio_native_trigger? trigger? unless method_defined?(:input_studio_native_trigger?)
     alias input_studio_native_repeat? repeat? unless method_defined?(:input_studio_native_repeat?)
@@ -414,20 +430,20 @@ module Input
     alias input_studio_native_dir8 dir8 unless method_defined?(:input_studio_native_dir8)
     alias input_studio_native_update update unless method_defined?(:input_studio_native_update)
     def press?(button)
-      id = LEGACY_STUDIO_ACTIONS[button]
-      id && InputStudio.active?(id) ? InputStudio.press?(id) : input_studio_native_press?(button)
+      id = input_studio_mapped_action(button)
+      id ? InputStudio.press?(id) : input_studio_native_press?(button)
     end
     def trigger?(button)
-      id = LEGACY_STUDIO_ACTIONS[button]
-      id && InputStudio.active?(id) ? InputStudio.trigger?(id) : input_studio_native_trigger?(button)
+      id = input_studio_mapped_action(button)
+      id ? InputStudio.trigger?(id) : input_studio_native_trigger?(button)
     end
     def repeat?(button)
-      id = LEGACY_STUDIO_ACTIONS[button]
-      id && InputStudio.active?(id) ? InputStudio.repeat?(id) : input_studio_native_repeat?(button)
+      id = input_studio_mapped_action(button)
+      id ? InputStudio.repeat?(id) : input_studio_native_repeat?(button)
     end
     def release?(button)
-      id = LEGACY_STUDIO_ACTIONS[button]
-      id && InputStudio.active?(id) ? InputStudio.release?(id) : input_studio_native_release?(button)
+      id = input_studio_mapped_action(button)
+      id ? InputStudio.release?(id) : input_studio_native_release?(button)
     end
     # Essentials' Game_Player and Smooth Movement pass @moved_last_frame to
     # dir4, while the native mkxp API often receives zero arguments.
