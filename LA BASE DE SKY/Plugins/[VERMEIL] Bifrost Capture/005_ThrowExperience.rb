@@ -1,0 +1,481 @@
+# frozen_string_literal: true
+# Bifrost Capture - map-space aim, real Sprite_Character bounds, projectile/HUD.
+module BifrostCapture
+  # Compact 3-slot ball wheel; aiming feedback is separate from capture result.
+  # Map-space HUD. One restrained strip; no opaque window over the trainer.
+  class ThrowHUD
+    TEMPERAMENT_COLORS = {
+      :neutral=>Color.new(158,224,191),
+      :timid=>Color.new(126,191,248),
+      :aggressive=>Color.new(247,154,122)
+    }.freeze
+
+    def initialize
+      @vp = Viewport.new(0,0,Graphics.width,Graphics.height)
+      @vp.z = 999992
+      @aim = Sprite.new(@vp)
+      @aim.bitmap = Bitmap.new(64,64)
+      @aim.ox = @aim.oy = 32
+      @panel = Sprite.new(@vp)
+      @panel.bitmap = Bitmap.new([[Graphics.width-16,392].min,278].max,116)
+      position_panel(BifrostCapture.options)
+      @skin = {}
+      @last_status = nil
+      @pulse = 0
+      @icons = {}
+      @ball_list = []
+      @selected = 0
+      @selection_key = nil
+      @selection_frame = 0
+      @help_age = 0
+      @help_signature = nil
+    end
+
+    # Real PNG layers in Graphics/UI/Bifrost (also supplied as editable SVGs).
+    # Missing assets safely fall back to the original procedural shapes.
+    def skin(name)
+      return @skin[name] if @skin.key?(name)
+      path = pbResolveBitmap("Graphics/UI/Bifrost/#{name}")
+      @skin[name] = path ? Bitmap.new(path) : nil
+    rescue StandardError
+      @skin[name] = nil
+    end
+
+    def skin_draw(bmp,name,x,y,w,h)
+      image = skin(name)
+      return false if !image || image.disposed?
+      bmp.stretch_blt(Rect.new(x,y,w,h),image,
+        Rect.new(0,0,image.width,image.height))
+      true
+    end
+
+    def position_panel(cfg)
+      scale = cfg["hud_scale"].to_i.clamp(70,140)/100.0
+      scale = [scale,(Graphics.width-12).to_f/@panel.bitmap.width,
+                     (Graphics.height-12).to_f/@panel.bitmap.height].min
+      @panel.zoom_x = @panel.zoom_y = scale
+      @panel.opacity = (255*cfg["hud_opacity"].to_i.clamp(30,100)/100.0).round
+      width = (@panel.bitmap.width*scale).round
+      height = (@panel.bitmap.height*scale).round
+      where = cfg["hud_position"].to_s
+      x = where.end_with?("_left") ? 8 : Graphics.width-width-8
+      y = where.start_with?("top_") ? 8 : Graphics.height-height-8
+      x += cfg["hud_offset_x"].to_i.clamp(-240,240)
+      y += cfg["hud_offset_y"].to_i.clamp(-180,180)
+      @panel.x = x.clamp(2,[Graphics.width-width-2,2].max)
+      @panel.y = y.clamp(2,[Graphics.height-height-2,2].max)
+    end
+
+    def equip(list,selected)
+      @ball_list = list || []
+      @selected = selected.to_i
+    end
+
+    def icon(item)
+      return nil unless item
+      return @icons[item] if @icons.key?(item)
+      filename = pbResolveBitmap("Graphics/Items/#{item}")
+      @icons[item] = filename ? Bitmap.new(filename) : nil
+    end
+
+    def team_icon(pokemon)
+      return nil unless pokemon && pokemon.respond_to?(:species)
+      species = pokemon.species
+      form = pokemon.respond_to?(:form) ? pokemon.form.to_i : 0
+      key = [:pokemon_icon,species,form]
+      return @icons[key] if @icons.key?(key)
+      paths = []
+      paths << "Graphics/Pokemon/Icons/#{species}_#{form}" if form > 0
+      paths << "Graphics/Pokemon/Icons/#{species}"
+      filename = paths.map { |p| pbResolveBitmap(p) }.compact.first
+      @icons[key] = filename ? Bitmap.new(filename) : nil
+    rescue StandardError
+      @icons[key] = nil
+    end
+
+    def reticle(x,y,status,mood=:neutral)
+      @aim.x = x.to_i
+      @aim.y = y.to_i
+      @pulse = (@pulse + 1) % 48
+      zoom = [:ready,:backstrike].include?(status) ? 1.0+Math.sin(@pulse*Math::PI/24)*0.035 : 1.0
+      @aim.zoom_x = @aim.zoom_y = zoom
+      stamp = [status,mood]
+      return if stamp == @last_status
+      @last_status = stamp
+      bmp = @aim.bitmap
+      bmp.clear
+      color = [:blocked,:max_alert].include?(status) ? Color.new(255,134,135) :
+              status == :backstrike ? Color.new(255,216,105) :
+              status == :ready ? (TEMPERAMENT_COLORS[mood] ||
+                                    TEMPERAMENT_COLORS[:neutral]) :
+              Color.new(218,230,240)
+      # Four separated arcs plus crossbars: readable against long grass.
+      80.times do |i|
+        next if (i / 10).odd? && i % 10 >= 5
+        theta = i*2*Math::PI/80
+        px = (32+Math.cos(theta)*19).round
+        py = (32+Math.sin(theta)*19).round
+        bmp.fill_rect(px,py,2,2,color)
+      end
+      bmp.fill_rect(31,5,2,8,color)
+      bmp.fill_rect(31,51,2,8,color)
+      bmp.fill_rect(5,31,8,2,color)
+      bmp.fill_rect(51,31,8,2,color)
+      bmp.fill_rect(30,30,4,4,color)
+    end
+
+    # Keys shown here are the keys which are ACTUALLY accepted by Bifröst:
+    # F1-mapped actions resolve through the project's runtime key reader,
+    # while direct Tab/E shortcuts resolve from Bifröst's live configuration.
+    def hint_key(cfg,role)
+      case role
+      when :target
+        physical = cfg["keyboard_target_key"].to_s.downcase
+        if physical != "none" && cfg["keyboard_target_key"] !=
+           cfg["keyboard_mode_key"] && Input.respond_to?(:triggerex?) &&
+           %w[tab e r f t g].include?(physical)
+          return physical == "tab" ? "Tab" : physical.upcase
+        end
+        BifrostCapture.binding_name(cfg,"target_key")
+      when :select
+        BifrostCapture.binding_name(cfg,"ball_key")
+      when :mode
+        physical = cfg["keyboard_mode_key"].to_s.downcase
+        if Input.respond_to?(:triggerex?) &&
+           %w[tab e r f t g].include?(physical)
+          return physical == "tab" ? "Tab" : physical.upcase
+        end
+        BifrostCapture.binding_name(cfg,"mode_key")
+      when :bait
+        physical = cfg["keyboard_bait_key"].to_s.downcase
+        %w[r f t g].include?(physical) ? physical.upcase : nil
+      when :aim
+        BifrostCapture.binding_name(cfg,"hotkey")
+      when :throw
+        BifrostCapture.hud_action_key("throw")
+      when :cancel
+        BifrostCapture.hud_action_key("cancel")
+      end
+    end
+
+    def prompt_entries(cfg,mode)
+      label = mode == :ball ? "Ball" : (mode == :bait ? "Baya" : "Equipo")
+      {
+        :target=>[hint_key(cfg,:target),"Objet."],
+        :select=>[hint_key(cfg,:select),label],
+        :mode=>[hint_key(cfg,:mode),"Modo"],
+        :bait=>[hint_key(cfg,:bait),"Cebo"],
+        :throw=>[hint_key(cfg,:throw),"Lanzar"],
+        :cancel=>[hint_key(cfg,:cancel),"Salir"],
+        :aim=>[hint_key(cfg,:aim),"Apuntar"]
+      }
+    end
+
+    # In a 278px panel, measure each keycap and its caption rather than
+    # clipping long remapped key names. Less important prompts are omitted
+    # from one row when the available width is exhausted.
+    def draw_prompt_row(bmp,y,entries)
+      x = 11
+      right = bmp.width-9
+      bmp.font.size = 12
+      bmp.font.bold = false
+      entries.each do |entry|
+        key,label = entry
+        next if key.nil? || key.to_s.empty? || key.to_s == "--"
+        key = key.to_s
+        key_width = bmp.text_size(key).width.ceil+10
+        label_width = bmp.text_size(label).width.ceil+4
+        total = key_width+label_width+9
+        next if x+total > right
+        unless skin_draw(bmp,"keycap",x,y+1,key_width,17)
+          bmp.fill_rect(x,y+1,key_width,17,Color.new(65,92,107,192))
+          bmp.fill_rect(x,y+1,key_width,1,Color.new(139,190,203,184))
+        end
+        bmp.font.color = Color.new(245,249,255)
+        bmp.draw_text(x+4,y,key_width-6,18,key)
+        bmp.font.color = Color.new(178,206,217)
+        bmp.draw_text(x+key_width+3,y,label_width,18,label)
+        x += total
+      end
+    end
+
+    # Transient two-line guide, compact single-line reminders afterward.
+    # Everything remains within the EXISTING inventory/party panel.
+    def draw_context_controls(bmp,cfg,mode,notice)
+      if cfg["hud_controls"] == "off"
+        bmp.font.bold = false
+        bmp.font.size = 13
+        bmp.font.color = Color.new(241,216,171)
+        bmp.draw_text(11,79,bmp.width-22,20,notice.to_s)
+        return
+      end
+      controls = prompt_entries(cfg,mode)
+      signature = [mode,controls.values].inspect
+      if signature != @help_signature
+        @help_signature = signature
+        @help_age = 0
+      end
+      @help_age += 1
+      duration = cfg["hud_controls_intro_frames"].to_i.clamp(30,360)
+      generic_notice = notice.nil? || notice.to_s.empty? ||
+                       notice.to_s == _INTL("Listo para lanzar")
+      expanded = (cfg["hud_controls"] == "always" ||
+                 @help_age <= duration) && generic_notice
+
+      bmp.fill_rect(9,74,bmp.width-17,1,Color.new(92,121,139,120))
+      if expanded
+        draw_prompt_row(bmp,78,[:target,:select,:mode].map { |key| controls[key] })
+        draw_prompt_row(bmp,97,[:throw,:cancel,:bait].map { |key| controls[key] })
+      else
+        bmp.font.bold = false
+        bmp.font.size = 13
+        bmp.font.color = Color.new(241,216,171)
+        bmp.draw_text(11,77,bmp.width-22,18,notice.to_s)
+        draw_prompt_row(bmp,97,[:target,:mode,:bait,:throw].map { |key| controls[key] })
+      end
+    end
+
+    def draw(mode,item,count,focus,notice,party=nil,party_index=0)
+      cfg = BifrostCapture.options
+      position_panel(cfg)
+      bmp = @panel.bitmap
+      bmp.clear
+      unless skin_draw(bmp,"panel",0,0,bmp.width,bmp.height)
+        bmp.fill_rect(0,0,bmp.width,bmp.height,Color.new(13,21,32,205))
+        bmp.fill_rect(0,0,3,bmp.height,Color.new(139,199,221))
+      end
+      bmp.font.size = 11
+      bmp.font.bold = false
+      bmp.font.color = Color.new(190,205,222)
+      selection_key = [:ball,:bait].include?(mode) ? [mode,item] :
+        [:battle,item && item.object_id]
+      if @selection_key != selection_key
+        @selection_key = selection_key
+        @selection_frame = 0
+      end
+      @selection_frame = [@selection_frame+1,9].min
+      bmp.draw_text(11,2,190,19,mode == :ball ? "BALL EQUIPADA" :
+        (mode == :bait ? "CEBO / BAYA" : "EQUIPO POKÉMON"))
+      if [:ball,:bait].include?(mode)
+        [-1,0,1].each_with_index do |offset,i|
+          next if @ball_list.empty?
+          idx = (@selected+offset) % @ball_list.length
+          selected_ball = @ball_list[idx][0]
+          left = 10+i*47
+          slot = i == 1 ? "slot_selected" : "slot"
+          unless skin_draw(bmp,slot,left,19,44,41)
+            bmp.fill_rect(left,19,44,41,
+              Color.new(43,66,78,i==1 ? 218 : 112))
+            bmp.fill_rect(left,58,44,2,i==1 ?
+              Color.new(146,234,189) : Color.new(77,102,118))
+          end
+          source = icon(selected_ball)
+          if source && source.width > 0 && source.height > 0
+            bmp.stretch_blt(Rect.new(left+10,23,24,26),source,
+              Rect.new(0,0,source.width,source.height))
+          else
+            bmp.fill_rect(left+17,30,11,11,Color.new(218,232,240))
+          end
+          bmp.font.color = Color.new(238,244,249)
+          bmp.draw_text(left+2,47,40,13,"x#{$bag.quantity(selected_ball)}",1)
+        end
+      else
+        # Z-A-style compact team selection: Pokémon icon and readable name.
+        # Slide the selected icon in over 9 map frames without blocking input.
+        bmp.fill_rect(11,20,138,43,Color.new(40,62,83,205))
+        bmp.fill_rect(11,59,138,2,Color.new(134,217,196))
+        if item
+          icon = team_icon(item)
+          offset = ((9-@selection_frame)*1.4).round
+          if icon && icon.width > 0 && icon.height > 0
+            frame_width = icon.width > icon.height ? icon.width/2 : icon.width
+            bmp.stretch_blt(Rect.new(13-offset,23,35,35),icon,
+              Rect.new(0,0,frame_width,icon.height))
+          else
+            bmp.fill_rect(19,29,23,23,Color.new(119,180,220))
+          end
+          bmp.font.color = Color.new(245,249,255)
+          bmp.font.size = 15
+          bmp.font.bold = true
+          bmp.draw_text(53,25,92,19,item.name.to_s)
+          bmp.font.bold = false
+          bmp.font.size = 11
+          bmp.font.color = Color.new(174,220,237)
+          level = item.respond_to?(:level) ? item.level : "-"
+          position = party ? "#{party_index.to_i+1}/#{party.length}" : ""
+          bmp.draw_text(54,44,90,16,"Nv.#{level}  #{position}")
+          if item.respond_to?(:hp) && item.respond_to?(:totalhp) &&
+             item.totalhp.to_i > 0
+            hp_fraction = (item.hp.to_f/item.totalhp).clamp(0.0,1.0)
+            bmp.fill_rect(54,58,88,2,Color.new(35,47,60))
+            bmp.fill_rect(54,58,(88*hp_fraction).round,2,
+              Color.new(142,230,187))
+          end
+        end
+      end
+      spec = focus && BifrostCapture.event_spec(focus)
+      if spec
+        mood = BifrostCapture.temperament_for(focus)
+        hue = TEMPERAMENT_COLORS[mood] || TEMPERAMENT_COLORS[:neutral]
+        state = focus.instance_variable_get(:@bifrost_mood_state)
+        local = BifrostCapture.options($game_map.map_id,spec[0],focus.id)
+        state_label = if defined?(BifrostCapture::Pressure) &&
+          BifrostCapture::Pressure.locked?(focus,local)
+          "¡ALERTA MÁXIMA!"
+        else
+          case state
+        when :alert then "¡ALERTA!"
+        when :charge then "¡EMBISTE!"
+        when :chase then "¡PERSIGUE!"
+        when :threat then "¡PREPARA ATAQUE!"
+        when :flee then "¡HUYE!"
+          else BifrostCapture.temperament_label(mood)
+          end
+        end
+        skin_draw(bmp,"target",157,18,bmp.width-164,47) ||
+          bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,215))
+        bmp.fill_rect(157,18,3,47,hue)
+        bmp.font.color = hue
+        bmp.font.size = 12
+        bmp.draw_text(165,20,bmp.width-174,22,state_label)
+        bmp.font.color = Color.new(235,241,250)
+        bmp.draw_text(165,41,bmp.width-174,20,"#{spec[0]}  Nv.#{spec[1]}")
+      else
+        skin_draw(bmp,"target",157,18,bmp.width-164,47) ||
+          bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,190))
+        bmp.font.color = Color.new(191,200,214)
+        bmp.font.size = 12
+        bmp.draw_text(166,29,bmp.width-174,22,"Sin objetivo")
+      end
+      # The launch cadence is shown on the HUD, not just enforced in code.
+      if [:ball,:bait].include?(mode)
+        remaining = defined?(BifrostCapture::LiveAim) ?
+          BifrostCapture::LiveAim.cooldown_remaining.to_i : 0
+        total = [cfg["throw_cooldown_frames"].to_i,1].max
+        x = 13; y = 66; width = 134
+        bmp.fill_rect(x,y,width,5,Color.new(11,24,36,200))
+        color = remaining > 0 ? Color.new(245,186,102) :
+                                Color.new(136,221,177)
+        bmp.fill_rect(x,y,(width*(1.0-remaining.to_f/total)).clamp(0,width).round,
+                      5,color)
+        bmp.font.size = 11
+        bmp.font.bold = true
+        bmp.font.color = color
+        bmp.draw_text(bmp.width-127,2,116,16,
+          remaining > 0 ? "RECARGA #{remaining}f" :
+            (mode == :bait ? "CEBO LISTO" : "BALL LISTA"),2)
+        bmp.font.bold = false
+      end
+      draw_context_controls(bmp,cfg,mode,notice)
+    end
+
+    def dispose
+      (@skin || {}).each_value { |bmp|
+        bmp.dispose if bmp && !bmp.disposed?
+      }
+      @icons.each_value do |bitmap|
+        bitmap.dispose if bitmap && !bitmap.disposed?
+      end
+      [@aim,@panel].each do |sprite|
+        bitmap = sprite.bitmap
+        sprite.dispose unless sprite.disposed?
+        bitmap.dispose if bitmap && !bitmap.disposed?
+      end
+      @vp.dispose unless @vp.disposed?
+    end
+  end
+
+  # Actual onscreen area from Sprite_Character (including camera zoom).
+  def self.target_rect(event)
+    if $scene.is_a?(Scene_Map) && $scene.respond_to?(:spriteset)
+      spriteset = $scene.spriteset($game_map.map_id)
+      sprites = spriteset && spriteset.instance_variable_get(:@character_sprites)
+      sprite = sprites && sprites.find { |sp| sp && sp.character.equal?(event) }
+      if sprite && !sprite.disposed? && sprite.visible
+        w = [sprite.src_rect.width*sprite.zoom_x.abs,8].max
+        h = [sprite.src_rect.height*sprite.zoom_y.abs,8].max
+        return [sprite.x-sprite.ox*sprite.zoom_x,
+                sprite.y-sprite.oy*sprite.zoom_y,w,h]
+      end
+    end
+    size = event.respond_to?(:sprite_size) ? event.sprite_size : [32,32]
+    w = [size[0].to_f,20].max
+    h = [size[1].to_f,20].max
+    [event.screen_x-w/2,event.screen_y-h,w,h]
+  end
+
+  def self.screen_position(event)
+    x,y,w,h = target_rect(event)
+    [x+w/2,y+h*0.55]
+  end
+
+  def self.rect_distance(px,py,rect)
+    x,y,w,h = rect
+    dx = [x-px,0,px-x-w].max
+    dy = [y-py,0,py-y-h].max
+    dx*dx+dy*dy
+  end
+
+  def self.visible_targets
+    return [] unless $game_map
+    $game_map.events.values.select do |event|
+      next false unless eligible_event?(event)
+      next false if event.instance_variable_get(:@bifrost_projectile_lock) ||
+                    event.instance_variable_get(:@bifrost_capture_lock)
+      next false if respond_to?(:emerging?) && emerging?(event)
+      x,y,w,h = target_rect(event)
+      x < Graphics.width && y < Graphics.height && x+w > 0 && y+h > 0
+    end
+  end
+
+  def self.focus_at(point,cfg)
+    return nil unless point
+    radius = cfg["aim_target_radius"].to_i.clamp(4,120)
+    nearest = visible_targets.map { |event|
+      [event,rect_distance(point[0],point[1],target_rect(event))]
+    }.min_by { |row| row[1] }
+    nearest && nearest[1] <= radius*radius ? nearest[0] : nil
+  end
+
+  def self.closest_target
+    all = visible_targets
+    ready = all.select do |event|
+      spec = event_spec(event)
+      local = options($game_map.map_id,spec[0],event.id)
+      geo = geometry($game_player.x,$game_player.y,event.x,event.y,local)
+      geo[:in_range] && (local["line_of_sight"] != "1" ||
+        line_clear?($game_player.x,$game_player.y,event.x,event.y))
+    end
+    (ready.empty? ? all : ready).min_by do |event|
+      [($game_player.x-event.x).abs+($game_player.y-event.y).abs,event.id]
+    end
+  end
+
+  def self.update_frame
+    $scene.updateMaps
+    $scene.updateSpritesets
+  end
+
+  def self.ball_bitmap(item)
+    filename = pbResolveBitmap("Graphics/Items/#{item}")
+    filename ||= pbResolveBitmap("Graphics/Items/POKEBALL")
+    return Bitmap.new(filename) if filename
+    bmp = Bitmap.new(18,18)
+    bmp.fill_rect(2,2,14,7,Color.new(220,80,84))
+    bmp.fill_rect(2,9,14,7,Color.new(244,241,225))
+    bmp.fill_rect(2,8,14,2,Color.new(33,35,42))
+    bmp.fill_rect(7,7,4,4,Color.new(247,247,247))
+    bmp
+  end
+
+  # Engine input is processed by the normal Scene_Map update loop;
+  # no extra Graphics.update or Input.update and no blocked player movement.
+  def self.update_input
+    LiveAim.update if defined?(LiveAim)
+  end
+
+  def self.aim
+    return false unless defined?(LiveAim)
+    LiveAim.start
+  end
+end

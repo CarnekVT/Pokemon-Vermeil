@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="392" height="116" viewBox="0 0 392 116">
+<title>Bifröst UI editable panel.svg</title>
+<g id="shell"><rect x="1" y="1" width="390" height="114" rx="12" fill="#0b121b" fill-opacity=".85"/><rect x="4" y="4" width="384" height="108" rx="10" fill="#1a3040" fill-opacity=".88"/><rect x="7" y="7" width="378" height="102" rx="8" fill="#0e1b2a" fill-opacity=".95"/></g><g id="engraved-border"><path d="M11 10H381 M11 106H381" fill="none" stroke="#6b98a1" stroke-opacity=".65" stroke-width="2"/><path d="M11 11V105" fill="none" stroke="#9adcd9" stroke-width="3" stroke-opacity=".8"/><path d="M379 11V105" fill="none" stroke="#496d7a" stroke-width="3" stroke-opacity=".65"/><path d="M10 73H382" stroke="#809da9" stroke-opacity=".48"/></g><g id="target-well"><rect x="155" y="18" width="225" height="48" rx="5" fill="#081925" opacity=".75"/><path d="M158 23V59" stroke="#4d8a97" stroke-width="2"/></g><g id="status-glyphs" fill="#a2c3c8" opacity=".6"><path d="M15 14h4m3 0h4m3 0h4"/><path d="M357 14v5m7-5v5m7-5v5" stroke="#91bfcb" stroke-width="3"/></g>
+</svg>

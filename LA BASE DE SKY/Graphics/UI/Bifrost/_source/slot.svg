@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="46" height="42" viewBox="0 0 46 42">
+<title>Bifröst UI editable slot.svg</title>
+<g id="slot"><rect x="0.5" y="0.5" width="45" height="41" rx="6" fill="#264458" stroke="#7398aa"/><rect x="2" y="2" width="42" height="38" rx="5" fill="#102536"/><rect x="4" y="4" width="38" height="34" rx="4" fill="#345366" opacity=".55"/><path d="M7 37h32" stroke="#6eabb1" stroke-width="2"/><path d="M6 6h34" stroke="#a6bcc9" opacity=".45"/></g>
+</svg>
