@@ -14,10 +14,11 @@ module VermeilBSSCinema
   IDLE_PAN_Y = 3.6
   DEFAULTS = {
     "cinematicCamera" => true,
-    "cinematicIdleZoom" => 0.94,
-    "cinematicCommandZoom" => 0.98,
-    "cinematicFightZoom" => 1.10,
-    "cinematicTargetZoom" => 1.14,
+    "cinematicIdleZoom" => 0.88,
+    "cinematicCommandZoom" => 0.88,
+    "cinematicFightZoom" => 1.00,
+    "cinematicTargetZoom" => 1.04,
+    "cinematicWideZoom" => 0.86,
     "cinematicSmooth" => 0.045,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
@@ -135,7 +136,7 @@ module VermeilBSSCinemaScene
                when :target then "cinematicTargetZoom"
                else "cinematicIdleZoom"
                end
-    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.88,1.18)
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.82,1.12)
     target[4]=main[4]*zoom
     target[5]=main[5]*zoom
     if phase == :idle || phase == :command
@@ -183,7 +184,7 @@ module VermeilBSSCinemaScene
     main[0]+=dx
     cfg=vermeil_cinema_config
     zoom_key=vermeil_cinema_phase==:target ? "cinematicTargetZoom" : "cinematicFightZoom"
-    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.88,1.18)
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.82,1.12)
     main[4]*=zoom
     main[5]*=zoom
     main
@@ -198,11 +199,23 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_ambient_due=120
   end
 
+  # Wide framing is an actual camera profile, not the zoomed-in MAIN
+  # snapshot. Never alter authored horizon/perspective or battleback metrics.
+  def vermeil_cinema_wide_vector
+    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    return main unless main.is_a?(Array) && main.length>=6
+    wide=main.clone
+    scale=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicWideZoom"],0.82,1.0)
+    wide[4]=main[4].to_f*scale
+    wide[5]=main[5].to_f*scale
+    wide
+  end
+
   def vermeil_cinema_return_main(frames=9)
     return unless vermeil_cinema_active? && @vector
     # Never animate to MAIN while DBK/BSS owns scripted speech.
     return if vermeil_cinema_script_locked?
-    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    main=vermeil_cinema_wide_vector
     # Ease the SINGLE shared world vector instead of using a too-fast fixed
     # @vector.inc and snapping 8%-20% of the remaining distance at the end.
     # A true ease-out reaches MAIN exactly without an abrupt last frame.
@@ -238,7 +251,7 @@ module VermeilBSSCinemaScene
   end
 
   def vermeil_cinema_home_tick
-    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    main=vermeil_cinema_wide_vector
     return unless main.is_a?(Array) && @vector
     began=@vermeil_cinema_home_started
     if began
@@ -335,7 +348,7 @@ module VermeilBSSCinemaScene
     # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
     if advance_camera
-      if @vermeil_cinema_home_hold && phase==:idle
+      if @vermeil_cinema_home_hold && (phase==:idle || phase==:command)
         vermeil_cinema_home_tick
       elsif phase==:idle || phase==:command
         vermeil_cinema_sweep_tick(phase)
@@ -408,7 +421,13 @@ module VermeilBSSCinemaScene
   ensure
     @vermeil_cinema_fight_depth = [@vermeil_cinema_fight_depth.to_i - 1, 0].max if @vermeil_cinema_fight_depth
     @bss_fight_actor_index=nil if @vermeil_cinema_fight_depth.to_i<=0
-    vermeil_cinema_queue_home if @vermeil_cinema_fight_depth.to_i==0
+    # Even cancelling Fight back to the command menu restores the wide shot.
+    if @vermeil_cinema_fight_depth.to_i==0 && @bss_target_select_depth.to_i==0
+      vermeil_cinema_queue_home
+      # The command screen can be shown in this same frame. Return to the
+      # wider establishing shot before any Bag/Party/out-of-scene UI opens.
+      vermeil_cinema_return_main(16) if vermeil_cinema_active? && !vermeil_cinema_locked?
+    end
   end
 
   # Legacy callbacks attempted to return to MAIN or choose random EBDX shots.
