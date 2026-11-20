@@ -973,10 +973,23 @@ end
     # Scrollbar track
     bmp.fill_rect(NuevaPokedex.layout_position("scrollbar_track", "x", NuevaPokedex::SCROLLBAR_X), NuevaPokedex.layout_position("scrollbar_track", "y", NuevaPokedex::SCROLLBAR_Y), NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
     draw_counters
-    # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
-    pbDrawShadowText(bmp, 24, 450, 592, 20,
-      NuevaPokedex.t("C: Ficha  ·  D: Orden  ·  Z: Buscar  ·  X: Salir"),
-      NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    # Help is readable on a dark panel, rather than one overlong legend.
+    draw_navigation_hint(bmp, "↑↓ Elegir  ·  ←→ Saltar 5  ·  C Ficha",
+                              "D Ordenar  ·  Z Buscar  ·  X Salir")
+  end
+
+  def draw_navigation_hint(bmp, first, second)
+    y=NuevaPokedex::SCREEN_HEIGHT-38
+    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,38,NuevaPokedex::COLOR_PANEL)
+    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,2,NuevaPokedex::COLOR_ACCENT)
+    previous=(bmp.font.size rescue nil)
+    bmp.font.size=16 if previous && bmp.font.respond_to?(:size=)
+    pbDrawShadowText(bmp,16,y+3,NuevaPokedex::SCREEN_WIDTH-32,16,first,
+                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
+    pbDrawShadowText(bmp,16,y+20,NuevaPokedex::SCREEN_WIDTH-32,16,second,
+                     NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
+  ensure
+    bmp.font.size=previous if previous && bmp && bmp.font
   end
 
   def draw_counters
@@ -1318,8 +1331,11 @@ end
                      NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
-    pbDrawShadowText(bmp, 304, 280, 300, 19, NuevaPokedex.t("← Área     → Formas"),
-                     NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    pbDrawShadowText(bmp, 304, 280, 300, 19,
+                      collect_form_list.length>1 ? "← Área   → Formas" : "← / → Área",
+                      NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    draw_navigation_hint(bmp, "↑↓ Pokémon  ·  ← Área  ·  → Formas",
+                              "C Continuar  ·  D Color  ·  X Lista")
   end
 
   def draw_ball(bmp, cx, cy, r, owned, seen)
@@ -1517,19 +1533,28 @@ end
   end
 
   def draw_area_footer(bmp, map_name, names, has_points)
-    footer_y = NuevaPokedex::SCREEN_HEIGHT - 40
-    bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 40, NuevaPokedex::COLOR_PANEL)
-    bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
-    if has_points
-      text = names.empty? ? map_name.to_s : names.join(" · ")
-      text = NuevaPokedex.t("Localizaciones: {1}", text)
-    elsif names.empty?
-      text = NuevaPokedex.t("Ubicación: desconocida")
-    else
-      text = NuevaPokedex.t("Localizaciones: {1}", names.join(" · "))
+    y=NuevaPokedex::SCREEN_HEIGHT-62
+    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,62,NuevaPokedex::COLOR_PANEL)
+    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,2,NuevaPokedex::COLOR_ACCENT)
+    text=if has_points
+           names.empty? ? map_name.to_s : names.join(" · ")
+         elsif names.empty?
+           NuevaPokedex.t("Ubicación: desconocida")
+         else
+           names.join(" · ")
+         end
+    previous=(bmp.font.size rescue nil)
+    bmp.font.size=16 if previous && bmp.font.respond_to?(:size=)
+    while text.length>2 && bmp.text_size(text).width>NuevaPokedex::SCREEN_WIDTH-36
+      text=text[0...-2]+"…"
     end
-    pbDrawShadowText(bmp, 16, footer_y + 10, NuevaPokedex::SCREEN_WIDTH - 32, 20, text,
-                     NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    pbDrawShadowText(bmp,16,y+5,NuevaPokedex::SCREEN_WIDTH-32,19,text,
+                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
+    pbDrawShadowText(bmp,16,y+36,NuevaPokedex::SCREEN_WIDTH-32,18,
+                     "← Ficha  ·  → Formas  ·  C / X Volver",
+                     NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
+  ensure
+    bmp.font.size=previous if previous && bmp && bmp.font
   end
 
   def encounter_locations_for(species)
@@ -1671,6 +1696,8 @@ end
     end
     # Panel izquierda-abajo: datos de la forma seleccionada
     draw_forms_detail(bmp, entry, form_ids)
+    draw_navigation_hint(bmp, "↑↓ Elegir forma  ·  ← Área  ·  → Ficha",
+                              "Z Color  ·  D Grito  ·  X Volver")
   end
 
   def draw_forms_detail(bmp, entry, form_ids)
