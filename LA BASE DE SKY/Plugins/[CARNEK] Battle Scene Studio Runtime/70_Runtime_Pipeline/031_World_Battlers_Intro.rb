@@ -68,7 +68,8 @@ module BSS103WorldSpaceBattlers
     if @vector && defined?(BSS070EBDXCore) &&
        respond_to?(:vermeil_cinema_active?) && vermeil_cinema_active?
       current=@vector.get
-      main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+      main=respond_to?(:vermeil_cinema_base_vector) ?
+           vermeil_cinema_base_vector : BSS070EBDXCore.get_vector(:MAIN,@battle)
       if current.is_a?(Array) && main.is_a?(Array)
         camera_dx=(current[0].to_f-main[0].to_f)*0.65
         camera_dy=(current[1].to_f-main[1].to_f)*0.45
