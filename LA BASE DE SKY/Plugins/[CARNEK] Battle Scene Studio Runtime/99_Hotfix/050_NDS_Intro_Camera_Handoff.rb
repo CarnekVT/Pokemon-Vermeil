@@ -443,7 +443,10 @@ module VermeilBSSNDSIntroScene
       saved=(@bss_nds_trainer_anchor || {})[i+1]
       target_x=saved && saved[0] ? saved[0].to_f : actor.x.to_f
       target_y=saved && saved[1] ? saved[1].to_f : actor.y.to_f
-      start_x=Graphics.width.to_f+[(actor.bitmap.width.to_f / 2.0),48.0].max
+      # A TrainerSprite bitmap may be an animation strip rather than one
+      # visible frame: cap the offscreen margin to prevent a late pop-in.
+      offscreen=actor.bitmap ? [[actor.bitmap.width.to_f / 2.0,48.0].max,160.0].min : 64.0
+      start_x=Graphics.width.to_f+offscreen
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
       actor.x=start_x
       actor.y=target_y
