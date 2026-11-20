@@ -78,6 +78,28 @@ module NuevaPokedex
   ENTRY_DESC_W   = 592
   ENTRY_DESC_H   = 118
 
+  # Read the same 640x480 layout files edited in MakerStudio. No changes
+  # to Pokédex save data, species lists or form discovery rules.
+  def self.use_layout_for(state)
+    names = [:list, :entry, :area, :forms]
+    index = [[state.to_i, 0].max, names.length - 1].min
+    @interface_layout = if defined?(VermeilInterfaceLayout)
+                          VermeilInterfaceLayout.load(:pokedex)
+                        else
+                          {}
+                        end
+  end
+
+  def self.layout_position(id, axis, fallback)
+    return fallback unless defined?(VermeilInterfaceLayout)
+    VermeilInterfaceLayout.position(@interface_layout, id, axis, fallback)
+  end
+
+  def self.layout_frames(id, fallback)
+    return fallback unless defined?(VermeilInterfaceLayout)
+    VermeilInterfaceLayout.frames(@interface_layout, id, fallback)
+  end
+
   module_function
 
   # Localización por idioma del juego sin duplicar gráficos ni registros.
@@ -670,30 +692,30 @@ class NuevaPokedexView
     @sprites["list"] = Sprite.new(@viewport)
     @bitmaps["list"] = Bitmap.new(NuevaPokedex::LIST_WINDOW_W, NuevaPokedex::LIST_WINDOW_H)
     @sprites["list"].bitmap = @bitmaps["list"]
-    @sprites["list"].x = NuevaPokedex::LIST_WINDOW_X
-    @sprites["list"].y = NuevaPokedex::LIST_WINDOW_Y
+    @sprites["list"].x = NuevaPokedex::NuevaPokedex.layout_position("list_panel", "x", LIST_WINDOW_X)
+    @sprites["list"].y = NuevaPokedex::NuevaPokedex.layout_position("list_panel", "y", LIST_WINDOW_Y)
     @sprites["list"].z = 1
 
     # Scrollbar
     @sprites["scrollbar"] = Sprite.new(@viewport)
     @bitmaps["scrollbar"] = Bitmap.new(NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H)
     @sprites["scrollbar"].bitmap = @bitmaps["scrollbar"]
-    @sprites["scrollbar"].x = NuevaPokedex::SCROLLBAR_X
-    @sprites["scrollbar"].y = NuevaPokedex::SCROLLBAR_Y
+    @sprites["scrollbar"].x = NuevaPokedex::NuevaPokedex.layout_position("scrollbar_track", "x", SCROLLBAR_X)
+    @sprites["scrollbar"].y = NuevaPokedex::NuevaPokedex.layout_position("scrollbar_track", "y", SCROLLBAR_Y)
     @sprites["scrollbar"].z = 2
 
     # Pokémon icon sprite
     @sprites["icon"] = PokemonSprite.new(@viewport)
-    @sprites["icon"].x = NuevaPokedex::SPRITE_X
-    @sprites["icon"].y = NuevaPokedex::SPRITE_Y
+    @sprites["icon"].x = NuevaPokedex::NuevaPokedex.layout_position("portrait_pokemon", "x", SPRITE_X)
+    @sprites["icon"].y = NuevaPokedex::NuevaPokedex.layout_position("portrait_pokemon", "y", SPRITE_Y)
     @sprites["icon"].z = 3
 
     # Sprite background (for type coloring)
     @sprites["sprite_bg"] = Sprite.new(@viewport)
     @bitmaps["sprite_bg"] = Bitmap.new(NuevaPokedex::SPRITE_BG_W, NuevaPokedex::SPRITE_BG_H)
     @sprites["sprite_bg"].bitmap = @bitmaps["sprite_bg"]
-    @sprites["sprite_bg"].x = NuevaPokedex::SPRITE_BG_X
-    @sprites["sprite_bg"].y = NuevaPokedex::SPRITE_BG_Y
+    @sprites["sprite_bg"].x = NuevaPokedex::NuevaPokedex.layout_position("portrait_panel", "x", SPRITE_BG_X)
+    @sprites["sprite_bg"].y = NuevaPokedex::NuevaPokedex.layout_position("portrait_panel", "y", SPRITE_BG_Y)
     @sprites["sprite_bg"].z = 2
 
 
@@ -716,8 +738,8 @@ class NuevaPokedexView
 
   # Optional quick‑search bar (shown when config flag is true)
   def draw_search_bar(bmp)
-    bar_x = NuevaPokedex::HEADER_X
-    bar_y = NuevaPokedex::HEADER_Y + NuevaPokedex::HEADER_H + 4
+    bar_x = NuevaPokedex::NuevaPokedex.layout_position("header", "x", HEADER_X)
+    bar_y = NuevaPokedex::NuevaPokedex.layout_position("header", "y", HEADER_Y) + NuevaPokedex::HEADER_H + 4
     bar_w = NuevaPokedex::HEADER_W
     bar_h = 24
     bmp.fill_rect(bar_x, bar_y, bar_w, bar_h, Color.new(30, 30, 40, 200))
@@ -804,7 +826,7 @@ class PokemonPokedexNueva_Scene
       end
     end
     if @panel_x > 0
-      @panel_x += (0 - @panel_x) * 0.15
+      @panel_x += (0 - @panel_x) * (@page_entrance_speed || 0.15)
       @panel_x = 0.0 if @panel_x < 0.5
     end
     if @view
@@ -820,9 +842,9 @@ class PokemonPokedexNueva_Scene
       overlay.x = @panel_x.round
       icon = @view.sprites["icon"]
       sprite_bg = @view.sprites["sprite_bg"]
-      icon.x = NuevaPokedex::SPRITE_X + offset
+      icon.x = NuevaPokedex::NuevaPokedex.layout_position("portrait_pokemon", "x", SPRITE_X) + offset
       icon.opacity = alpha
-      sprite_bg.x = NuevaPokedex::SPRITE_BG_X + offset
+      sprite_bg.x = NuevaPokedex::NuevaPokedex.layout_position("portrait_panel", "x", SPRITE_BG_X) + offset
       sprite_bg.opacity = alpha
     end
     @anim_timer -= 1 if @anim_timer > 0
@@ -836,9 +858,18 @@ class PokemonPokedexNueva_Scene
   def start_crossfade
     @panel_alpha = 0
     @panel_x = 48.0
+    # The active page's entrance duration can be edited in the UI editor.
+    entry_id = case @state
+               when NuevaPokedex::STATE_INFO then "entry_page"
+               when NuevaPokedex::STATE_AREA then "area_page"
+               when NuevaPokedex::STATE_FORMS then "forms_page"
+               else "list_panel"
+               end
+    @page_entrance_speed = 0.18 / [NuevaPokedex.layout_frames(entry_id, 12), 1].max * 60.0
   end
 
   def pbStartScene
+    NuevaPokedex.use_layout_for(@state)
     @viewport = Viewport.new(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT)
     @viewport.z = 99999
     @view = NuevaPokedexView.new(@viewport)
@@ -885,11 +916,11 @@ class PokemonPokedexNueva_Scene
     bmp.fill_rect(0, NuevaPokedex::SCREEN_HEIGHT - 4, NuevaPokedex::SCREEN_WIDTH, 4, NuevaPokedex::COLOR_PANEL_DARK)
 
 # Header panel (top-left) - use placeholder if enabled
-unless @view.skin.draw(bmp, :header, NuevaPokedex::HEADER_X, NuevaPokedex::HEADER_Y)
-  bmp.fill_rect(NuevaPokedex::HEADER_X, NuevaPokedex::HEADER_Y, NuevaPokedex::HEADER_W, NuevaPokedex::HEADER_H, NuevaPokedex::COLOR_PANEL)
-  bmp.fill_rect(NuevaPokedex::HEADER_X, NuevaPokedex::HEADER_Y + 40, NuevaPokedex::HEADER_W, 4, NuevaPokedex::COLOR_ACCENT)
+unless @view.skin.draw(bmp, :header, NuevaPokedex::NuevaPokedex.layout_position("header", "x", HEADER_X), NuevaPokedex::NuevaPokedex.layout_position("header", "y", HEADER_Y))
+  bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("header", "x", HEADER_X), NuevaPokedex::NuevaPokedex.layout_position("header", "y", HEADER_Y), NuevaPokedex::HEADER_W, NuevaPokedex::HEADER_H, NuevaPokedex::COLOR_PANEL)
+  bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("header", "x", HEADER_X), NuevaPokedex::NuevaPokedex.layout_position("header", "y", HEADER_Y) + 40, NuevaPokedex::HEADER_W, 4, NuevaPokedex::COLOR_ACCENT)
 end
-    pbDrawShadowText(bmp, NuevaPokedex::HEADER_X + 8, NuevaPokedex::HEADER_Y + 4, 240, 18,
+    pbDrawShadowText(bmp, NuevaPokedex::NuevaPokedex.layout_position("header", "x", HEADER_X) + 8, NuevaPokedex::NuevaPokedex.layout_position("header", "y", HEADER_Y) + 4, 240, 18,
                      NuevaPokedex.dex_name_for(@region),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     # Show quick‑search bar only when multiple dexes are enabled and config permits
@@ -898,19 +929,19 @@ end
     end
 
     # Counters panel (bottom-left)
-    unless @view.skin.draw(bmp, :counter_panel, NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y)
-      bmp.fill_rect(NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y, NuevaPokedex::COUNT_W, 48, NuevaPokedex::COLOR_PANEL)
-      bmp.fill_rect(NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y, 3, 48, NuevaPokedex::COLOR_ACCENT)
+    unless @view.skin.draw(bmp, :counter_panel, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y))
+      bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y), NuevaPokedex::COUNT_W, 48, NuevaPokedex::COLOR_PANEL)
+      bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y), 3, 48, NuevaPokedex::COLOR_ACCENT)
     end
 
     # List background
-    unless @view.skin.draw(bmp, :list_panel, NuevaPokedex::LIST_WINDOW_X, NuevaPokedex::LIST_WINDOW_Y)
-      bmp.fill_rect(NuevaPokedex::LIST_WINDOW_X, NuevaPokedex::LIST_WINDOW_Y, NuevaPokedex::LIST_WINDOW_W, NuevaPokedex::LIST_WINDOW_H, NuevaPokedex::COLOR_PANEL)
-      bmp.fill_rect(NuevaPokedex::LIST_WINDOW_X, NuevaPokedex::LIST_WINDOW_Y, NuevaPokedex::LIST_WINDOW_W, 2, NuevaPokedex::COLOR_PANEL_DARK)
+    unless @view.skin.draw(bmp, :list_panel, NuevaPokedex::NuevaPokedex.layout_position("list_panel", "x", LIST_WINDOW_X), NuevaPokedex::NuevaPokedex.layout_position("list_panel", "y", LIST_WINDOW_Y))
+      bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("list_panel", "x", LIST_WINDOW_X), NuevaPokedex::NuevaPokedex.layout_position("list_panel", "y", LIST_WINDOW_Y), NuevaPokedex::LIST_WINDOW_W, NuevaPokedex::LIST_WINDOW_H, NuevaPokedex::COLOR_PANEL)
+      bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("list_panel", "x", LIST_WINDOW_X), NuevaPokedex::NuevaPokedex.layout_position("list_panel", "y", LIST_WINDOW_Y), NuevaPokedex::LIST_WINDOW_W, 2, NuevaPokedex::COLOR_PANEL_DARK)
     end
 
     # Scrollbar track
-    bmp.fill_rect(NuevaPokedex::SCROLLBAR_X, NuevaPokedex::SCROLLBAR_Y, NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
+    bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("scrollbar_track", "x", SCROLLBAR_X), NuevaPokedex::NuevaPokedex.layout_position("scrollbar_track", "y", SCROLLBAR_Y), NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
     draw_counters
     # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
     pbDrawShadowText(bmp, 24, 450, 592, 20,
@@ -921,10 +952,10 @@ end
   def draw_counters
     cnt_bmp = @view.bitmaps["master"]
     # Borrar las cifras anteriores antes de un nuevo refresco.
-    cnt_bmp.clear_rect(NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y, NuevaPokedex::COUNT_W, 48)
-    unless @view.skin.draw(cnt_bmp, :counter_panel, NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y)
-      cnt_bmp.fill_rect(NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y, NuevaPokedex::COUNT_W, 48, NuevaPokedex::COLOR_PANEL)
-      cnt_bmp.fill_rect(NuevaPokedex::COUNT_X, NuevaPokedex::COUNT_Y, 3, 48, NuevaPokedex::COLOR_ACCENT)
+    cnt_bmp.clear_rect(NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y), NuevaPokedex::COUNT_W, 48)
+    unless @view.skin.draw(cnt_bmp, :counter_panel, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y))
+      cnt_bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y), NuevaPokedex::COUNT_W, 48, NuevaPokedex::COLOR_PANEL)
+      cnt_bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X), NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y), 3, 48, NuevaPokedex::COLOR_ACCENT)
     end
     total = @model.species_count
     seen = 0
@@ -934,10 +965,10 @@ end
       seen += 1 if NuevaPokedex.slot_seen?(sp)
       owned += 1 if NuevaPokedex.slot_owned?(sp)
     end
-    pbDrawShadowText(cnt_bmp, NuevaPokedex::COUNT_X + 8, NuevaPokedex::COUNT_Y + 4, 240, 18,
+    pbDrawShadowText(cnt_bmp, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X) + 8, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y) + 4, 240, 18,
                      NuevaPokedex.t("VISTOS: {1}/{2}", seen, total),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
-    pbDrawShadowText(cnt_bmp, NuevaPokedex::COUNT_X + 8, NuevaPokedex::COUNT_Y + 24, 240, 18,
+    pbDrawShadowText(cnt_bmp, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "x", COUNT_X) + 8, NuevaPokedex::NuevaPokedex.layout_position("counter_panel", "y", COUNT_Y) + 24, 240, 18,
                      NuevaPokedex.t("OBTENIDOS: {1}/{2}", owned, total),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
   end
@@ -1197,8 +1228,8 @@ end
     return if !entry
     # Página completa a parte: fondo opaco salvo el hueco del sprite del Pokémon
     bg = NuevaPokedex::COLOR_BG
-    sx = NuevaPokedex::ENTRY_SPRITE_X
-    sy = NuevaPokedex::ENTRY_SPRITE_Y
+    sx = NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X)
+    sy = NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y)
     sw = NuevaPokedex::ENTRY_SPRITE_W
     sh = NuevaPokedex::ENTRY_SPRITE_H
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, sy, bg)
@@ -1208,12 +1239,12 @@ end
     @view.skin.draw(bmp, :entry_page, 0, 0)
     border_c = NuevaPokedex::COLOR_PANEL_DARK
     # Marco del hueco del sprite (deja el interior transparente)
-    bmp.fill_rect(NuevaPokedex::ENTRY_SPRITE_X - 4, NuevaPokedex::ENTRY_SPRITE_Y - 4,
+    bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X) - 4, NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y) - 4,
                   NuevaPokedex::ENTRY_SPRITE_W + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(NuevaPokedex::ENTRY_SPRITE_X - 4, NuevaPokedex::ENTRY_SPRITE_Y + NuevaPokedex::ENTRY_SPRITE_H + 1,
+    bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X) - 4, NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y) + NuevaPokedex::ENTRY_SPRITE_H + 1,
                   NuevaPokedex::ENTRY_SPRITE_W + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(NuevaPokedex::ENTRY_SPRITE_X - 4, NuevaPokedex::ENTRY_SPRITE_Y - 4, 3, NuevaPokedex::ENTRY_SPRITE_H + 8, border_c)
-    bmp.fill_rect(NuevaPokedex::ENTRY_SPRITE_X + NuevaPokedex::ENTRY_SPRITE_W + 1, NuevaPokedex::ENTRY_SPRITE_Y - 4, 3,
+    bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X) - 4, NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y) - 4, 3, NuevaPokedex::ENTRY_SPRITE_H + 8, border_c)
+    bmp.fill_rect(NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X) + NuevaPokedex::ENTRY_SPRITE_W + 1, NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y) - 4, 3,
                   NuevaPokedex::ENTRY_SPRITE_H + 8, border_c)
     # Barra superior: Nº + nombre (+ forma al lado)
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, 56, NuevaPokedex::COLOR_PANEL)
@@ -1253,7 +1284,7 @@ end
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     # Ficha de descripción (ancho completo)
 
-    pbDrawShadowText(bmp, 24, NuevaPokedex::ENTRY_DESC_Y - 22, 120, 18, NuevaPokedex.t("POKÉDEX"),
+    pbDrawShadowText(bmp, 24, NuevaPokedex::NuevaPokedex.layout_position("entry_description", "y", ENTRY_DESC_Y) - 22, 120, 18, NuevaPokedex.t("POKÉDEX"),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
@@ -1346,13 +1377,13 @@ end
     total_pages = [(lines.length.to_f / lines_per_page).ceil, 1].max
     page_lines = lines.slice(@page * lines_per_page, lines_per_page) || []
     page_lines.each_with_index do |line, i|
-      pbDrawShadowText(bmp, 28, NuevaPokedex::ENTRY_DESC_Y + 12 + i * 20,
+      pbDrawShadowText(bmp, 28, NuevaPokedex::NuevaPokedex.layout_position("entry_description", "y", ENTRY_DESC_Y) + 12 + i * 20,
                        text_w, 20, line,
                        NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     end
     if total_pages > 1
       pg = NuevaPokedex.t("{1}/{2}", @page + 1, total_pages)
-      pbDrawShadowText(bmp, 24 + 8, NuevaPokedex::ENTRY_DESC_Y + NuevaPokedex::ENTRY_DESC_H - 16,
+      pbDrawShadowText(bmp, 24 + 8, NuevaPokedex::NuevaPokedex.layout_position("entry_description", "y", ENTRY_DESC_Y) + NuevaPokedex::ENTRY_DESC_H - 16,
                        200, 16, pg, NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     end
   end
@@ -1553,8 +1584,8 @@ end
     return if form_ids.length <= 1
     base = entry[:base_species]
     # Fondo opaco completo dejando solo transparente el hueco del sprite
-    sx = NuevaPokedex::ENTRY_SPRITE_X
-    sy = NuevaPokedex::ENTRY_SPRITE_Y
+    sx = NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "x", ENTRY_SPRITE_X)
+    sy = NuevaPokedex::NuevaPokedex.layout_position("entry_sprite", "y", ENTRY_SPRITE_Y)
     sw = NuevaPokedex::ENTRY_SPRITE_W
     sh = NuevaPokedex::ENTRY_SPRITE_H
     bg = NuevaPokedex::COLOR_BG
