@@ -28,18 +28,6 @@
         "suavizado": "suave",
         "distancia": 48
       }
-    },
-    {
-      "id": "entry_sprite",
-      "tipo": "panel",
-      "capa": 1,
-      "x": 24,
-      "y": 56,
-      "ancho": 256,
-      "alto": 256,
-      "color": "#E8C76B55",
-      "borde": "#FFFFFF88",
-      "borde_grosor": 1
     }
   ]
 }
