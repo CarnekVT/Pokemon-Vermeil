@@ -10,15 +10,15 @@ module VermeilBSSCinema
   # Deliberate real-time eyeline sweeps rather than one-frame retargets.
   SWEEP_SECONDS = 3.0
   SWEEP_HOLD_SECONDS = 0.52
-  IDLE_PAN_X = 19.0
-  IDLE_PAN_Y = 3.6
+  IDLE_PAN_X = 0.0
+  IDLE_PAN_Y = 0.0
   DEFAULTS = {
     "cinematicCamera" => true,
-    "cinematicIdleZoom" => 0.88,
-    "cinematicCommandZoom" => 0.88,
+    "cinematicIdleZoom" => 0.96,
+    "cinematicCommandZoom" => 0.96,
     "cinematicFightZoom" => 1.00,
-    "cinematicTargetZoom" => 1.04,
-    "cinematicWideZoom" => 0.86,
+    "cinematicTargetZoom" => 1.00,
+    "cinematicWideZoom" => 0.96,
     "cinematicSmooth" => 0.045,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
@@ -105,13 +105,20 @@ module VermeilBSSCinemaScene
     VermeilBSSCinema.config(self)
   end
 
+  # Cache an ABSOLUTE canonical camera anchor per battle. Other runtimes can
+  # update their mutable MAIN vector during SOS/reloads: never multiply a
+  # previously scaled frame into the next idle or attack framing.
+  def vermeil_cinema_base_vector
+    @vermeil_cinema_base_vector ||= BSS070EBDXCore.get_vector(:MAIN, @battle)[0, 6].map { |v| v.to_f }
+    @vermeil_cinema_base_vector.clone
+  end
+
   # Preserve the authored angle/perspective. Zoom only the two uniform
   # EBDX camera scale components and project DBK battlers/shadows in BSS103
   # with the same ratio; otherwise scenery and actors would drift apart.
   def vermeil_cinema_vector
-    main = BSS070EBDXCore.get_vector(:MAIN, @battle)
+    main = vermeil_cinema_base_vector
     return nil unless main.is_a?(Array) && main.length >= 6
-    main = main[0, 6].map { |v| v.to_f }
     cfg = vermeil_cinema_config
     strength = VermeilBSSCinema.clamp(cfg["idleStrength"] || 40, 0, 100) / 100.0
     pan_x = VermeilBSSCinema.clamp(cfg["panX"] || 100, 0, 200) / 100.0
@@ -123,8 +130,8 @@ module VermeilBSSCinemaScene
     cfg_strength = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
     strength = 0.85 + cfg_strength / 40.0
     # Noticeably different eyelines without overshooting the EBDX overscan.
-    phase_pan_x = (phase == :command ? 9.0 : (phase == :fight ? 0.0 : 0.0))
-    phase_pan_y = (phase == :command ? -2.0 : (phase == :fight ? 0.0 : 0.0))
+    phase_pan_x = 0.0
+    phase_pan_y = 0.0
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
@@ -173,14 +180,14 @@ module VermeilBSSCinemaScene
     sprite=@sprites.is_a?(Hash) ? @sprites["pokemon_#{index}"] : nil
     return nil unless sprite && !(sprite.disposed? rescue true)
     return nil unless (sprite.visible rescue false)
-    main=BSS070EBDXCore.get_vector(:MAIN,@battle).clone.map{|v|v.to_f}
+    main=vermeil_cinema_base_vector
     # Read the canonical screen-space/native formation, NEVER the already
     # projected sprite. Using sprite.x made successive shots chase their own
     # previous offset and drift across the screen.
     native=(bss070_ebdx_neutral_battler_position(index) rescue nil)
     pos=native.is_a?(Array) ? native[0] : nil
     return nil unless pos
-    dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.13,-17.0,17.0)
+    dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.07,-9.0,9.0)
     main[0]+=dx
     cfg=vermeil_cinema_config
     zoom_key=vermeil_cinema_phase==:target ? "cinematicTargetZoom" : "cinematicFightZoom"
@@ -202,7 +209,7 @@ module VermeilBSSCinemaScene
   # Wide framing is an actual camera profile, not the zoomed-in MAIN
   # snapshot. Never alter authored horizon/perspective or battleback metrics.
   def vermeil_cinema_wide_vector
-    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    main=vermeil_cinema_base_vector
     return main unless main.is_a?(Array) && main.length>=6
     wide=main.clone
     scale=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicWideZoom"],0.82,1.0)
@@ -211,59 +218,39 @@ module VermeilBSSCinemaScene
     wide
   end
 
-  def vermeil_cinema_return_main(frames=9)
+  def vermeil_cinema_return_main(_frames=9)
     return unless vermeil_cinema_active? && @vector
-    # Never animate to MAIN while DBK/BSS owns scripted speech.
     return if vermeil_cinema_script_locked?
     main=vermeil_cinema_wide_vector
-    # Ease the SINGLE shared world vector instead of using a too-fast fixed
-    # @vector.inc and snapping 8%-20% of the remaining distance at the end.
-    # A true ease-out reaches MAIN exactly without an abrupt last frame.
-    initial=(@vector.get.clone rescue main.clone)
-    duration=[[frames.to_i,12].max,26].min
-    duration.times do |i|
-      t=(i+1).to_f/duration
-      eased=t*t*(3.0-2.0*t)
-      vector=6.times.map{|k| initial[k].to_f+(main[k].to_f-initial[k].to_f)*eased}
-      @vector.snap(vector) if @vector.respond_to?(:snap)
-      @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-      if defined?(BSS103WorldSpaceBattlers)
-        BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
-      end
-      # Do not call Input.update here. Those extra polling frames consumed
-      # arrows/confirm presses while Essentials was changing menus.
-      Graphics.update
-    end
+    # One deterministic home shot, instead of two competing tweens (frame
+    # interpolation and Time.now). UI and SOS never inherit a partial zoom.
+    @vector.snap(main) if @vector.respond_to?(:snap)
     @vermeil_cinema_last_shot=nil
+    @vermeil_cinema_sweep_phase=nil
+    room=@bss070_ebdx_room
+    room.update if room && !(room.disposed? rescue true)
+    if defined?(BSS103WorldSpaceBattlers)
+      BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+    end
   rescue StandardError => e
-    BSS064.log("BSS camera main: #{e.class}: #{e.message}") if defined?(BSS064)
+    BSS064.log("BSS camera home: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
   # Bag/party/cancel are not focus shots. Interpolate back to the
   # NORMAL EBDX MAIN composition and hold it until another command is shown.
   def vermeil_cinema_queue_home
     return unless vermeil_cinema_active? && @vector
-    @vermeil_cinema_home_from=@vector.get.clone
-    @vermeil_cinema_home_started=Time.now.to_f
     @vermeil_cinema_home_hold=true
     @vermeil_cinema_sweep_phase=nil
     @vermeil_cinema_last_shot=nil
+    @vermeil_cinema_home_started=nil
+    @vermeil_cinema_home_from=nil
+    @vector.snap(vermeil_cinema_wide_vector) if @vector.respond_to?(:snap)
   end
 
   def vermeil_cinema_home_tick
-    main=vermeil_cinema_wide_vector
-    return unless main.is_a?(Array) && @vector
-    began=@vermeil_cinema_home_started
-    if began
-      t=[[((Time.now.to_f-began)/0.42),0.0].max,1.0].min
-      smooth=t*t*(3.0-2.0*t)
-      from=@vermeil_cinema_home_from || @vector.get
-      @vector.snap(6.times.map{|i| from[i].to_f+(main[i].to_f-from[i].to_f)*smooth})
-      @vermeil_cinema_home_started=nil if t>=1.0
-    else
-      # Keep the Bag/Party view at the normalized full-field baseline.
-      @vector.snap(main)
-    end
+    return unless @vector
+    @vector.snap(vermeil_cinema_wide_vector) if @vector.respond_to?(:snap)
   end
 
   # A single absolute EBDX world-vector tween: smoothstep begins/ends at
@@ -383,6 +370,7 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_sweep_started = nil
     @vermeil_cinema_home_started = nil
     @vermeil_cinema_home_hold = false
+    @vermeil_cinema_base_vector = nil
     @bss_fight_actor_index=nil
     @bss_selected_target_index=nil
     @bss_target_select_depth=0
@@ -392,7 +380,7 @@ module VermeilBSSCinemaScene
   def pbCommandMenu(*args, &block)
     return super unless vermeil_cinema_active?
     @vermeil_cinema_first_command_reached = true
-    @vermeil_cinema_home_hold=false
+    @vermeil_cinema_home_hold=true
     @vermeil_cinema_home_started=nil
     @vermeil_cinema_last_shot = nil  # new turn / reacquire Command
     @vermeil_cinema_command_depth = @vermeil_cinema_command_depth.to_i + 1
