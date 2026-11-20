@@ -14,11 +14,11 @@ module VermeilBSSCinema
   IDLE_PAN_Y = 0.0
   DEFAULTS = {
     "cinematicCamera" => true,
-    "cinematicIdleZoom" => 0.96,
-    "cinematicCommandZoom" => 0.96,
+    "cinematicIdleZoom" => 1.00,
+    "cinematicCommandZoom" => 1.00,
     "cinematicFightZoom" => 1.00,
     "cinematicTargetZoom" => 1.00,
-    "cinematicWideZoom" => 0.96,
+    "cinematicWideZoom" => 1.00,
     "cinematicSmooth" => 0.045,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
@@ -143,7 +143,7 @@ module VermeilBSSCinemaScene
                when :target then "cinematicTargetZoom"
                else "cinematicIdleZoom"
                end
-    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.82,1.12)
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],1.0,1.06)
     target[4]=main[4]*zoom
     target[5]=main[5]*zoom
     if phase == :idle || phase == :command
@@ -191,7 +191,7 @@ module VermeilBSSCinemaScene
     main[0]+=dx
     cfg=vermeil_cinema_config
     zoom_key=vermeil_cinema_phase==:target ? "cinematicTargetZoom" : "cinematicFightZoom"
-    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],0.82,1.12)
+    zoom=VermeilBSSCinema.clamp(cfg[zoom_key],1.0,1.06)
     main[4]*=zoom
     main[5]*=zoom
     main
@@ -212,7 +212,9 @@ module VermeilBSSCinemaScene
     main=vermeil_cinema_base_vector
     return main unless main.is_a?(Array) && main.length>=6
     wide=main.clone
-    scale=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicWideZoom"],0.82,1.0)
+    # A smaller-than-MAIN zoom exposes uncovered black stage borders on
+    # camera moves. Until the room guarantees overscan, MAIN is the wide shot.
+    scale=1.0
     wide[4]=main[4].to_f*scale
     wide[5]=main[5].to_f*scale
     wide
