@@ -5,7 +5,7 @@ require "json"
 require "fileutils"
 
 module InputStudio
-  VERSION = "1.0.1"
+  VERSION = "1.1.0"
   ROOT = "Plugins/[VERMEIL] Input Studio"
   CONFIG = ROOT + "/actions.json"
   CONTEXTS = %w[global map menu battle bifrost]
@@ -151,6 +151,9 @@ module InputStudio
 
     # If force is true, remove the same physical key from other actions in the
     # shared context. The overlay requests explicit confirmation first.
+    # Assigning an existing key to another occupied slot swaps the slots.
+    # A new key replaces the selected slot, or appends when earlier slots
+    # are empty. No holes are written into the persistent array.
     def assign(id, device, key, slot = 0, force = false)
       id = id.to_s
       return false unless definitions[id] && %w[keyboard gamepad].include?(device)
@@ -165,18 +168,50 @@ module InputStudio
         profile[other] ||= {}
         profile[other][device] = bindings(other, device).reject { |value| value == key }
       end
-      slot = slot.to_i.clamp(0, 3)
       current = bindings(id, device).dup
-      current.delete(key)
-      current[slot] = key
+      target = [[slot.to_i, 0].max, 3].min
+      target = [target, current.length].min
+      previous = current.index(key)
+      if previous
+        if target < current.length && previous != target
+          current[previous], current[target] = current[target], current[previous]
+        end
+      elsif target == current.length
+        current << key
+      else
+        current[target] = key
+      end
       profile[id] ||= {}
-      profile[id][device] = current.compact.uniq.take(4)
+      profile[id][device] = current.uniq.take(4)
       return true if persist!
       @profile = old
       false
     rescue StandardError => e
       @profile = old if defined?(old) && old
       @status = "No se pudo reasignar: #{e.message}"
+      false
+    end
+
+    # Remove only one physical binding. Remaining slots shift left; this
+    # preserves the compact binding arrays used by the player profile.
+    def clear_slot(id, device, slot)
+      return false unless definitions[id.to_s] && %w[keyboard gamepad].include?(device)
+      current = bindings(id.to_s, device).dup
+      target = slot.to_i
+      unless target.between?(0, current.length - 1)
+        @status = "Esa casilla ya está vacía"
+        return false
+      end
+      old = Marshal.load(Marshal.dump(profile))
+      current.delete_at(target)
+      profile[id.to_s] ||= {}
+      profile[id.to_s][device] = current
+      return true if persist!
+      @profile = old
+      false
+    rescue StandardError => e
+      @profile = old if defined?(old) && old
+      @status = "No se pudo quitar la asignación: #{e.message}"
       false
     end
 
