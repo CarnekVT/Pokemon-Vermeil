@@ -201,7 +201,10 @@ module BSSScriptedSpeakerComposition
           # dialogue: that reset caused the trainer to jump/flicker.
           authored=(@bss_nds_trainer_anchor || {})[1]
           if authored && authored.length>=2
-            trainer.x=authored[0] if trainer.respond_to?(:x=)
+            # 'behind' is the old configured mode name. Visually place the
+            # real trainer beside the enemy group, not behind Lucario/Meowth.
+            side=respond_to?(:bss_camera_trainer_side_x) ? bss_camera_trainer_side_x(trainer,0) : nil
+            trainer.x=side || authored[0] if trainer.respond_to?(:x=)
             trainer.y=authored[1] if trainer.respond_to?(:y=)
           end
           trainer.opacity=0 if trainer.respond_to?(:opacity=)
@@ -221,7 +224,7 @@ module BSSScriptedSpeakerComposition
         next unless foe && !(foe.disposed? rescue true)
         foe.z if foe.respond_to?(:z)
       end
-      trainer.z=foes.map(&:to_i).min-1 if !foes.empty? && trainer.respond_to?(:z=)
+      trainer.z=[foes.map(&:to_i).max+2,150].max if !foes.empty? && trainer.respond_to?(:z=)
     elsif @bss_scripted_trainer_restore && @bss_scripted_trainer_restore.key?(trainer.object_id)
       bss_scripted_restore_trainer_actor
     end
