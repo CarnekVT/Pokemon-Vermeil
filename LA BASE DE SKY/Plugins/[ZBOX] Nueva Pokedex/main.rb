@@ -842,9 +842,20 @@ class PokemonPokedexNueva_Scene
       overlay.x = @panel_x.round
       icon = @view.sprites["icon"]
       sprite_bg = @view.sprites["sprite_bg"]
-      icon.x = NuevaPokedex.layout_position("portrait_pokemon", "x", NuevaPokedex::SPRITE_X) + offset
+      # List and detail pages can position the visible Pokemon separately.
+      # The detail marker represents the transparent 256x256 portrait hole.
+      if @state == NuevaPokedex::STATE_INFO || @state == NuevaPokedex::STATE_FORMS
+        icon_x = NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X) + (NuevaPokedex::ENTRY_SPRITE_W / 2)
+        icon_y = NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y) + (NuevaPokedex::ENTRY_SPRITE_H / 2)
+      else
+        icon_x = NuevaPokedex.layout_position("portrait_pokemon", "x", NuevaPokedex::SPRITE_X)
+        icon_y = NuevaPokedex.layout_position("portrait_pokemon", "y", NuevaPokedex::SPRITE_Y)
+      end
+      icon.x = icon_x + offset
+      icon.y = icon_y
       icon.opacity = alpha
       sprite_bg.x = NuevaPokedex.layout_position("portrait_panel", "x", NuevaPokedex::SPRITE_BG_X) + offset
+      sprite_bg.y = NuevaPokedex.layout_position("portrait_panel", "y", NuevaPokedex::SPRITE_BG_Y)
       sprite_bg.opacity = alpha
     end
     @anim_timer -= 1 if @anim_timer > 0
