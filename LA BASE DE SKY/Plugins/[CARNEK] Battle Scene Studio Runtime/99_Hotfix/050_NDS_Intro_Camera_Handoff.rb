@@ -384,7 +384,7 @@ module VermeilBSSNDSIntroScene
         end
         # Stage the REAL trainer while still hidden behind the opaque mask.
         # DBK's animation starts only after the NDS presentation finishes.
-        if @battle.trainerBattle? && p>=0.67 && !@bss_nds_trainer_staged
+        if @battle.trainerBattle? && p>=0.32 && !@bss_nds_trainer_staged
           @bss_nds_trainer_slide_pending=!trainer_states.empty?
           bss_nds_stage_trainers if @bss_nds_trainer_slide_pending
         end
