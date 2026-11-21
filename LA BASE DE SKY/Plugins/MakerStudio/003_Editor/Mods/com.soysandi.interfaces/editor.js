@@ -645,6 +645,9 @@ export class EditorInterfaces {
   }
 
   async nuevo() {
+    // A new screen belongs to the interface folder currently being edited.
+    const folder=(this.nombre||"").includes("/")?this.nombre.split("/")[0]:null;
+    if(folder)return this.nuevoEnCarpeta(folder);
     if (this.sucio && !(await this.confirmar("Hay cambios sin guardar. ¿Los descarto?"))) return;
     const n = await this.pedirNombre("Nombre del diseño nuevo");
     if (!n) return;
@@ -655,11 +658,16 @@ export class EditorInterfaces {
 
   async duplicar() {
     if (!this.diseno) return;
-    const n = await this.pedirNombre("Nombre de la copia", this.nombre ? this.nombre + "_copia" : "");
-    if (!n) return;
-    const copia = JSON.parse(M.escribirJSON(this.diseno));
-    copia.nombre = n;
-    this.cargarDiseno(copia, n);
+    const parts=(this.nombre||"").split("/");
+    const folder=parts.length>1?parts[0]:null;
+    const last=parts[parts.length-1];
+    const basename=await this.pedirNombre("Nombre de la copia",last+"_copia");
+    if(!basename)return;
+    const n=folder?folder+"/"+basename:basename;
+    if(this.disponibles.includes(n)){this.toast("Ya existe esta pantalla.","warning");return;}
+    const copia=JSON.parse(M.escribirJSON(this.diseno));
+    copia.nombre=n;
+    this.cargarDiseno(copia,n);
     await this.guardar();
   }
 
