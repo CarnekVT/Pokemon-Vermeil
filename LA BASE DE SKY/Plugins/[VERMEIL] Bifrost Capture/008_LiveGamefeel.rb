@@ -41,6 +41,31 @@ module BifrostCapture
         BifrostCapture.capture_action(cfg,field)
       end
 
+      # Input Studio owns Bifrost's physical hotkey when installed.
+      # Set the Bifrost context even before aiming (the scene is still map).
+      def studio_aim_available?
+        defined?(InputStudio) && InputStudio.respond_to?(:with_context) &&
+          InputStudio.respond_to?(:trigger?) && InputStudio.respond_to?(:press?)
+      end
+
+      def aim_trigger?(legacy_key=nil)
+        if studio_aim_available?
+          return InputStudio.with_context("bifrost") {
+            InputStudio.trigger?("bifrost_aim")
+          }
+        end
+        !!(legacy_key && Input.trigger?(legacy_key))
+      end
+
+      def aim_pressed?(legacy_key=nil)
+        if studio_aim_available?
+          return InputStudio.with_context("bifrost") {
+            InputStudio.press?("bifrost_aim")
+          }
+        end
+        !!(legacy_key && Input.press?(legacy_key))
+      end
+
       def debug_reserved?(cfg)
         BifrostCapture.respond_to?(:debug_input_blocked?) &&
           BifrostCapture.debug_input_blocked?(cfg)
@@ -85,7 +110,7 @@ module BifrostCapture
           :mode=>mode,
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
-          :held=>!!(key && Input.press?(key)), :frames=>0,
+          :held=>aim_pressed?(key), :frames=>0,
           :shot_during_hold=>false
         }
         @hud = BifrostCapture::ThrowHUD.new
@@ -250,7 +275,7 @@ module BifrostCapture
           cfg = BifrostCapture.options
           return if debug_reserved?(cfg)
           key = BifrostCapture.hotkey
-          return if !key || !Input.trigger?(key)
+          return unless aim_trigger?(key)
           return unless ["always","nearby"].include?(cfg["access_mode"])
           return unless BifrostCapture.aim_allowed?
           return if cfg["access_mode"] == "nearby" &&
@@ -394,11 +419,11 @@ module BifrostCapture
         @hud.draw(s[:mode],item,amount,focus,hint,
                   s[:party],s[:party_index])
 
-        s[:held] = true if key && Input.press?(key)
+        s[:held] = true if aim_pressed?(key)
         click = cfg["aim_mouse"] == "1" && defined?(Input::MOUSELEFT) &&
                 Input.trigger?(Input::MOUSELEFT)
-        release = cfg["control_mode"] == "hold" && key &&
-                  s[:held] && s[:frames] > 1 && !Input.press?(key)
+        release = cfg["control_mode"] == "hold" &&
+                  s[:held] && s[:frames] > 1 && !aim_pressed?(key)
         use = Input.trigger?(Input::USE)
         if release
           fire unless s[:shot_during_hold]
@@ -407,8 +432,8 @@ module BifrostCapture
           claim_map_input("use") if use
           success = fire
           close if cfg["aim_chain"] == "0" && (success || use)
-        elsif cfg["control_mode"] != "hold" && key &&
-              s[:frames] > 5 && Input.trigger?(key)
+        elsif cfg["control_mode"] != "hold" &&
+              s[:frames] > 5 && aim_trigger?(key)
           close
         end
       end
