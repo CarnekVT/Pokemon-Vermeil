@@ -5,9 +5,9 @@ export function montarEspacio(editor, M) {
   const disposers = [];
   const state = { focus:false, layers:true, inspector:true, timeline:false };
   const sceneGroups=[
-    {name:"Libreta",pages:[["vermeil_libreta","Catálogo"],["vermeil_libreta_detalle","Ficha"]]},
-    {name:"Pokédex",pages:[["vermeil_pokedex_lista","Listado"],["vermeil_pokedex_ficha","Ficha"],
-                           ["vermeil_pokedex_area","Área"],["vermeil_pokedex_formas","Formas"]]}
+    {name:"Libreta",pages:[["Libreta/Catalogo","Catálogo"],["Libreta/Ficha","Ficha"]]},
+    {name:"Pokédex",pages:[["Pokedex/Lista","Listado"],["Pokedex/Ficha","Ficha"],
+                           ["Pokedex/Area","Área"],["Pokedex/Formas","Formas"]]}
   ];
   const node = (tag, cls, text) => {
     const n = document.createElement(tag);
@@ -261,9 +261,70 @@ export function montarEspacio(editor, M) {
   navTop.append(node("strong",null,"PANTALLAS"),searchScreens,datalist,prev,next);
   nav.append(navTop,groupsRow,helpLabel);
   root.insertBefore(nav,bar);
+
+  // Full library in the left sidebar: physical UI/<folder>/<screen>.json.
+  // Each folder is one interface, containing all the screens required.
+  const library=node("section","ui-interface-library");
+  const libraryTitle=node("div","ui-library-title");
+  const newFolder=action("+ Carpeta",()=>editor.nuevaCarpeta(),"Crear una nueva interfaz y su carpeta UI/");
+  libraryTitle.append(node("strong",null,"BIBLIOTECA"),newFolder);
+  const tree=node("div","ui-library-tree");
+  library.append(libraryTitle,tree);
+  editor.capas.el.insertBefore(library,editor.capas.buscar);
+  let treeSignature="";
+  const openedFolders=new Set(["Libreta","Pokedex"]);
+  const syncLibrary=names=>{
+    const signature=names.join("|");
+    if(signature!==treeSignature){
+      treeSignature=signature;
+      tree.replaceChildren();
+      const byFolder=new Map();
+      for(const full of names){
+        const slash=full.indexOf("/");
+        const folder=slash<0?(full.startsWith("vermeil_")?"Compatibilidad":"Sin carpeta"):
+          full.slice(0,slash);
+        const page=slash<0?full:full.slice(slash+1);
+        if(!byFolder.has(folder))byFolder.set(folder,[]);
+        byFolder.get(folder).push({id:full,label:page});
+      }
+      for(const [folder,entries] of [...byFolder.entries()].sort((a,b)=>a[0].localeCompare(b[0],"es"))){
+        const group=node("details","ui-library-folder");
+        const current=entries.some(x=>x.id===editor.nombre);
+        group.open=openedFolders.has(folder)||current;
+        const title=node("summary","ui-library-folder-title");
+        title.append(node("span",null,folder==="Pokedex"?"Pokédex":folder),
+                     node("small",null,String(entries.length)));
+        group.append(title);
+        const body=node("div","ui-library-folder-content");
+        for(const item of entries){
+          const button=action(item.label,()=>goScreen(item.id),"Abrir "+item.id);
+          button.classList.add("ui-library-screen");
+          button.dataset.screen=item.id;
+          body.append(button);
+        }
+        if(folder!=="Compatibilidad"&&folder!=="Sin carpeta"){
+          const add=action("+ Pantalla",()=>editor.nuevoEnCarpeta(folder),
+                           "Crear otra pantalla en UI/"+folder);
+          add.classList.add("ui-library-add-page");
+          body.append(add);
+        }
+        group.append(body);
+        group.addEventListener("toggle",()=>{
+          if(group.open)openedFolders.add(folder);else openedFolders.delete(folder);
+        });
+        tree.append(group);
+      }
+    }
+    tree.querySelectorAll(".ui-library-screen").forEach(b=>{
+      const active=b.dataset.screen===editor.nombre;
+      b.classList.toggle("ui-native-active",active);
+      b.setAttribute("aria-current",active?"page":"false");
+    });
+  };
   let lastNames="";
   const navUpdate=()=>{
     const names=editor.disponibles||[],signature=names.join("|");
+    syncLibrary(names);
     if(signature!==lastNames){
       lastNames=signature;
       datalist.replaceChildren(...names.map(name=>{
@@ -279,9 +340,9 @@ export function montarEspacio(editor, M) {
       b.classList.toggle("ui-native-active",active);
       b.setAttribute("aria-current",active?"page":"false");
     });
-    groupsRow.hidden=!names.some(n=>n.startsWith("vermeil_"));
+    groupsRow.hidden=!names.some(n=>n.startsWith("Libreta/")||n.startsWith("Pokedex/"));
     helpLabel.textContent=currentGroup()?
-      "Conectado al juego. Guarda y vuelve a abrir la pantalla. El arte, posiciones y elementos extra proceden de este JSON.":
+      "Interfaz nativa conectada: los cambios del JSON se aplican al reabrir el juego.":
       "Selecciona una capa, edítala en Propiedades y guarda con Ctrl+S.";
     copy.hidden=!!currentGroup();
   };
