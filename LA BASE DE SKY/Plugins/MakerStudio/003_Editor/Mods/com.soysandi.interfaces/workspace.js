@@ -201,6 +201,7 @@ export function montarEspacio(editor, M) {
     "Ajustar el canvas sin modificar su resolución"));
   const help=action("Atajos ?",async()=>{
     const content=[
+      "Alt+← / Alt+→: navegar entre pantallas.  Ctrl+J: buscar pantalla.",
       "Ctrl+K: buscar y añadir elemento.  F6: lienzo amplio.  F7: mostrar/ocultar animaciones.",
       "Ctrl+S: guardar.  Ctrl+D: duplicar.  Ctrl+Z / Ctrl+Mayús+Z: deshacer / rehacer.",
       "Ctrl/Mayús+clic: selección múltiple.  Arrastrar hueco: selección rectangular.",
