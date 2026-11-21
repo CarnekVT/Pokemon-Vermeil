@@ -546,6 +546,11 @@ module VermeilBSSNDSIntroScene
       next unless sp && !(sp.disposed? rescue true)
       sp.opacity=255 if sp.respond_to?(:opacity=)
       sp.visible=true if sp.respond_to?(:visible=)
+      # Essentials starts wild sprites at Tone(-80,-80,-80) and its removed
+      # native Intro2 normally restores it. Keep the Pokemon fully lit after
+      # the custom NDS intro, not only during the transition frames.
+      sp.tone=Tone.new(0,0,0,0) if defined?(Tone) && sp.respond_to?(:tone=)
+      sp.color=Color.new(0,0,0,0) if sp.respond_to?(:color=)
       shadow=@sprites["shadow_#{idx}"]
       shadow.opacity=255 if shadow && shadow.respond_to?(:opacity=)
     end
