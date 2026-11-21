@@ -2,6 +2,7 @@
 # Gráficos opcionales de la Nueva Pokédex, siempre a resolución nativa 640x480.
 # No se crean Bitmap nuevos por frame; se cargan una vez por escena.
 class VermeilPokedexSkin
+  attr_accessor :editor_layout
   ROOT = "Graphics/UI/Vermeil/NewPokedex"
   SIZES = {
     :background        => [640, 480],
@@ -51,6 +52,9 @@ class VermeilPokedexSkin
   end
 
   def draw(canvas, key, x, y)
+    if defined?(VermeilInterfaceLayout) && @editor_layout
+      return true if VermeilInterfaceLayout.paint_native(canvas,@editor_layout,key,x,y)
+    end
     bmp = bitmap(key)
     return false if !bmp || !canvas || canvas.disposed?
     canvas.blt(x.to_i, y.to_i, bmp, Rect.new(0, 0, bmp.width, bmp.height))
