@@ -45,11 +45,13 @@ sustituyes por un PNG, o puede tapar al Pokémon.
 gráficos de las escenas originales de Libreta y Pokédex.
 
 Los nombres antiguos `vermeil_libreta*.json` y
-`vermeil_pokedex*.json` siguen disponibles en la biblioteca bajo
-**Compatibilidad**. El runtime elige para cada pantalla la versión
-más recientemente modificada entre el perfil antiguo y el de carpeta.
-No borres tus perfiles anteriores sin comprobar que el nuevo contiene
-tus modificaciones.
+`vermeil_pokedex*.json` siguen disponibles en **Compatibilidad**,
+pero **no se aplican si existe el archivo dentro de su carpeta**.
+La fuente de verdad es siempre `UI/Libreta/...` o `UI/Pokedex/...`;
+el JSON antiguo solo se utiliza como respaldo si falta el nuevo.
+Así los cambios que haces en la biblioteca no pueden quedar anulados
+por una fecha de modificación más reciente del perfil antiguo.
+No borres los diseños viejos hasta trasladar cualquier edición pendiente.
 
 ## Qué sigue generado desde Ruby
 
@@ -75,7 +77,7 @@ capas adicionales**, sin copiar ni falsificar el estado del juego.
 
 Si un cambio no aparece, verifica el **proyecto abierto en MakerStudio**,
 que se esté escribiendo `LA BASE DE SKY/UI/`, que Game.exe tenga
-los Ruby actualizados y que no haya un JSON antiguo más reciente.
+los Ruby actualizados y que estés modificando el JSON nuevo dentro de su carpeta.
 En debug, la consola identifica errores de perfil como
 `[Vermeil Interface Studio]`.
 
@@ -96,3 +98,26 @@ En debug, la consola identifica errores de perfil como
 Los controles pasan una comprobación estática de sintaxis de JS y JSON;
 para declarar una corrección visual como confirmada hay que reproducir
 estas pruebas en MakerStudio y Game.exe.
+
+## Pruebas de regresión prioritarias (20/11/2026)
+
+1. **Entrenador:** debe estar a la derecha, completamente dentro del
+   encuadre, inmóvil antes del primer fotograma de la animación DBK; el
+   escenario se abre mediante el wipe opaco NDS (no fundido translúcido).
+2. **Cámara:** el encuadre derecho debe mantenerse hasta terminar la
+   intervención del entrenador. Al cerrar un diálogo o entrar al menú de
+   comandos, el actor debe desaparecer con un fade y la cámara volver con
+   un solo tween; no debe ejecutarse un snap de vuelta a MAIN en medio.
+3. **Salvaje:** textura NDS completamente opaca hasta el wipe, nada de
+   snapshot congelado, Pokemon siempre en color normal tras la aparición,
+   zoom breve compartido con el fondo EBDX y cry una única vez.
+4. **Editor:** cambia `Pokedex/Lista > list_row_selected`, `seen_counter`
+   y `Pokedex/Ficha > detail_name` (color/tamaño/posición); guarda, cierra
+   y abre la Pokédex real. Cambia `Libreta/Catalogo > focus_panel` y
+   `focus_name` y comprueba que no aparezcan dos paneles o dos textos.
+5. **Animación de UI:** la apertura nativa y el `entrada` de elementos
+   extra ocurren en el mismo intervalo. No debe reproducirse una segunda
+   entrada decorativa después de abrirse la pantalla.
+
+La sintaxis de JavaScript y JSON se verifica de forma estática; **estas
+pruebas de render en Game.exe todavía deben ejecutarse en Windows**.
