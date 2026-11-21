@@ -6,7 +6,7 @@ const root=new URL("../",import.meta.url);
 const names=["animation_catalogs.js","model.js","category_starters.js","multi_system.js","nitro_script_bridge.js"];
 const src=(await Promise.all(names.map(name=>readFile(new URL(name,root),"utf8"))))
     .map(code=>code.replace(/^import [^\n]+;$/gm,"").replace(/^export /gm,"")).join("\n");
-const lib=vm.runInNewContext("(()=>{\n"+src+"\nreturn {BAS_ANIMATION_CATALOGS,normalizeBasCatalogType,createAnimation,normalizeProject,applyBasCategoryStarter,buildMultiSystemRegistry,parseNitroAnimationText,createBasFromNitroText};})()",{
+const lib=vm.runInNewContext("(()=>{\n"+src+"\nreturn {BAS_ANIMATION_CATALOGS,normalizeBasCatalogType,createAnimation,normalizeProject,applyBasCategoryStarter,buildMultiSystemRegistry,parseNitroAnimationText,parseNitroResourceMap,createBasFromNitroText};})()",{
     structuredClone:globalThis.structuredClone
 });
 const catalog=lib.BAS_ANIMATION_CATALOGS;
@@ -16,9 +16,15 @@ const animations=catalog.map(type=>{
     lib.applyBasCategoryStarter(a);
     assert.equal(a.source.catalogType,type.type);
     if(!["move","common","custom"].includes(type.type)){
-        assert.equal(a.tracks[0].clips.length,1);
-        assert.equal(a.tracks[0].clips[0].graphic.source,"procedural");
-        assert.match(a.tracks[0].clips[0].graphic.proceduralColor,/^rgba\(/);
+        assert(a.tracks[0].clips.length>=1);
+        assert(a.tracks[0].clips.every(c=>c.graphic.source==="procedural"));
+        assert(a.tracks[0].clips.every(c=>/^rgba\(/.test(c.graphic.proceduralColor)));
+        if(["weather","terrain","field","transition"].includes(type.type)) {
+            assert(a.tracks[0].clips.some(c=>c.positionKeys.some(p=>
+                p.point.anchor==="screen" && p.point.x===256 && p.point.y===192)));
+        }
+        if(type.type!=="transition")assert(a.tracks[0].clips.length>=2);
+
     }
     return a;
 });
@@ -43,6 +49,18 @@ assert.equal(parsed.particleSpawns,1);
 assert.equal(parsed.seReferences[0].pan,-117);
 assert(parsed.issues.some(i=>i.code==="asynchronous-wait"));
 const result=lib.createBasFromNitroText(script,{id:"NITRO_486",placeholders:true});
+const mapped=lib.createBasFromNitroText(script,{id:"NITRO_MAPPED",placeholders:true,
+    graphicsMap:"499:2=Graphics/Animations/Converted.png",audioMap:"1911=Anim/ConvertedSound"});
+assert.equal(mapped.animation.tracks[0].clips[0].graphic.projectPath,"Graphics/Animations/Converted.png");
+assert.equal(mapped.animation.events.length,1);
+assert.equal(mapped.animation.events[0].name,"Anim/ConvertedSound");
+assert.equal(mapped.animation.events[0].frame,0);
+assert.equal(mapped.animation.events[0].nitroPan,-117);
+assert.equal(mapped.animation.source.nitroUnresolvedAudio.length,0);
+assert.equal(mapped.animation.source.nitroUnresolvedGraphics.length,0);
+assert.throws(()=>lib.parseNitroResourceMap("499=../secret.png","graphics"));
+assert.throws(()=>lib.parseNitroResourceMap("1911=https://invalid.example/sound","audio"));
+assert.throws(()=>lib.parseNitroResourceMap("1911=Anim/foo\\n1911=Anim/dup","audio"));
 assert.equal(result.animation.source.catalogType,"subanimation");
 assert.equal(result.animation.source.runtimeEnabled,false);
 assert.equal(result.animation.tracks[0].clips.length,1);
@@ -51,4 +69,4 @@ assert.equal(original.animations.length,22);
 const normalizedOriginal=lib.normalizeProject(original);
 assert.equal(normalizedOriginal.animations.length,22);
 assert(original.animations.every((a,i)=>a.source.catalogType===normalizedOriginal.animations[i].source.catalogType));
-console.log("13 catalogs, 10 procedural starters, Nitro script timing/slots, and legacy project: PASS");
+console.log("13 catalogs, 10 differentiated procedural starters, Nitro scripts and mapped project resources, and legacy data: PASS");
