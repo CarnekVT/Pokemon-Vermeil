@@ -803,8 +803,10 @@ module ResearchNotebook
           color=VermeilInterfaceLayout.color(data["color"],color)
           # Fixed captions are authored in the editor; dynamic species text
           # always takes its actual value from game state.
-          if ["notebook_title","cover_title","cover_subtitle",
-              "cover_brand"].include?(id) && data["texto"].to_s!=""
+          if (["notebook_title","cover_title","cover_subtitle","cover_brand",
+                "tab_arcane_label","tab_golden_label"].include?(id) ||
+              (id.start_with?("detail_") && id.end_with?("_title"))) &&
+             data["texto"].to_s!=""
             content=data["texto"].to_s
           end
           alignment=case data["alineacion"]
@@ -816,6 +818,23 @@ module ResearchNotebook
         end
       end
       draw_text(bmp,x,y,w,h,content,size,color,alignment,bold)
+    end
+
+    def draw_editor_wrapped(bmp,id,x,y,w,text,size,color,line_height,max_lines)
+      if defined?(VermeilInterfaceLayout)
+        data=VermeilInterfaceLayout.element(@interface_layout,id)
+        if data && data["tipo"]=="texto"
+          return if data["visible"]==false
+          x=VermeilInterfaceLayout.position(@interface_layout,id,"x",x)
+          y=VermeilInterfaceLayout.position(@interface_layout,id,"y",y)
+          w=VermeilInterfaceLayout.number(@interface_layout,id,"ancho",w).to_i
+          size=VermeilInterfaceLayout.number(@interface_layout,id,"tamano",size).to_i
+          color=VermeilInterfaceLayout.color(data["color"],color)
+          h=VermeilInterfaceLayout.number(@interface_layout,id,"alto",line_height*max_lines)
+          max_lines=[[h.to_i/line_height,1].max,10].min
+        end
+      end
+      draw_wrapped(bmp,x,y,w,text,size,color,line_height,max_lines)
     end
 
     def draw_focus_panel(bmp)
@@ -1029,12 +1048,13 @@ module ResearchNotebook
       used = ResearchNotebook.progress.arcane_used?(base)
       potential = ResearchNotebook.progress.arcane_potential_known?(base)
       ability = notebook_arcane_ability(base)
-      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Habilidad Arcana"), 18, ARCANE_2, 0, true)
+      draw_editor_text(bmp,"detail_arcane_title",x,y,w,25,
+          ResearchNotebook.t("Habilidad Arcana"),18,ARCANE_2,0,true)
       state = used ? ResearchNotebook.t("PROBADA") : (unlocked ? ResearchNotebook.t("DESPERTADA") : ResearchNotebook.t("BLOQUEADA"))
       draw_status_chip(bmp, x + w - 106, y + 2, 106, 21, state, ARCANE)
       draw_text(bmp, x, y + 34, w, 17, ResearchNotebook.t("HABILIDAD"), 10, MUTED, 0, true)
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
-      draw_text(bmp, x, y + 50, w, 27, name, 18, INK, 0, true)
+      draw_editor_text(bmp,"detail_ability_name",x,y+50,w,27,name,18,INK,0,true)
       draw_text(bmp, x, y + 84, w, 16, ResearchNotebook.t("APUNTE"), 10, ARCANE_2, 0, true)
       draw_card(bmp, x, y + 101, w, 104, PAPER)
       if unlocked
@@ -1045,7 +1065,8 @@ module ResearchNotebook
       else
         desc = ResearchNotebook.t("No he observado todavía ninguna manifestación arcana en esta especie.")
       end
-      draw_wrapped(bmp, x + 10, y + 113, w - 20, desc, 13, unlocked ? INK : MUTED, 18, 4)
+      draw_editor_wrapped(bmp,"detail_arcane_note",x+10,y+113,w-20,desc,
+                          13,unlocked ? INK : MUTED,18,4)
       draw_text(bmp, x, y + 218, w, 16, ResearchNotebook.t("DESPERTAR"), 10, ARCANE_2, 0, true)
       half = (w - 7) / 2
       draw_card(bmp, x, y + 236, half, 33, PAPER)
@@ -1074,7 +1095,8 @@ module ResearchNotebook
       moves = golden_move_records(entry)
       page = [@detail_page - 2, 0].max
       total = [(moves.length.to_f / 4).ceil, 1].max
-      draw_text(bmp, x, y, w - 72, 24, ResearchNotebook.t("Técnicas doradas"), 17, GOLDEN_2, 0, true)
+      draw_editor_text(bmp,"detail_moves_title",x,y,w-72,24,
+          ResearchNotebook.t("Técnicas doradas"),17,GOLDEN_2,0,true)
       draw_text(bmp, x + w - 66, y + 3, 66, 18,
                 ResearchNotebook.t("{1}/{2}", page + 1, total), 11, MUTED, 2, true)
       unless used
@@ -1107,7 +1129,8 @@ module ResearchNotebook
     def draw_golden_power_detail(bmp, base, x, y, w, h)
       potential = ResearchNotebook.progress.golden_potential_known?(base)
       power_used = ResearchNotebook.progress.golden_power_used?(base)
-      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Poder Dorado"), 18, GOLDEN_2, 0, true)
+      draw_editor_text(bmp,"detail_power_title",x,y,w,25,
+          ResearchNotebook.t("Poder Dorado"),18,GOLDEN_2,0,true)
       state = power_used ? ResearchNotebook.t("UTILIZADO") : (potential ? ResearchNotebook.t("IDENTIFICADO") : ResearchNotebook.t("SIN OBSERVAR"))
       draw_status_chip(bmp, x + w - 108, y + 2, 108, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS NATURALES"), 10, MUTED, 0, true)
@@ -1125,11 +1148,12 @@ module ResearchNotebook
       if desc.empty?
         desc = potential ? ResearchNotebook.t("El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.") : ResearchNotebook.t("Todavía no he logrado identificar la afinidad áurea de esta especie.")
       end
-      draw_wrapped(bmp, x + 10, y + 160, w - 20, desc, 13, potential ? INK : MUTED, 18, 4)
+      draw_editor_wrapped(bmp,"detail_power_note",x+10,y+160,w-20,desc,
+                          13,potential ? INK : MUTED,18,4)
       draw_text(bmp, x, y + 252, w, 16, ResearchNotebook.t("CATALIZADOR"), 10, GOLDEN_2, 0, true)
       draw_item_card(bmp, x, y + 270, w, 43, ResearchNotebook::Settings::GOLDEN_FRAGMENT_ITEM, GOLDEN, ResearchNotebook.t("Fragmento Dorado"))
       if ResearchNotebook::Repository.golden_form_configured?(selected_species)
-        draw_text(bmp, x, y + 321, w, 17, ResearchNotebook.t("← Poder        Forma →"), 10, GOLDEN_2, 1, true)
+        draw_text(bmp, x, y + 321, w, 17, ResearchNotebook.t("IZQ: Poder        DER: Forma"), 10, GOLDEN_2, 1, true)
       end
     end
 
@@ -1138,7 +1162,8 @@ module ResearchNotebook
       seen = ResearchNotebook.progress.golden_form_seen?(base)
       used = ResearchNotebook.progress.golden_form_used?(base)
       reveal_details = used || !ResearchNotebook::Settings::GOLDEN_DETAILS_REQUIRE_USE
-      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Forma Dorada"), 18, GOLDEN_2, 0, true)
+      draw_editor_text(bmp,"detail_form_title",x,y,w,25,
+          ResearchNotebook.t("Forma Dorada"),18,GOLDEN_2,0,true)
       state = used ? ResearchNotebook.t("UTILIZADA") : (seen ? ResearchNotebook.t("OBSERVADA") : ResearchNotebook.t("POR VER"))
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS DE LA FORMA DORADA"), 10, MUTED, 0, true)
@@ -1149,7 +1174,9 @@ module ResearchNotebook
       end
       draw_text(bmp, x, y + 81, w, 16, ResearchNotebook.t("HABILIDAD"), 10, MUTED, 0, true)
       ability = reveal_details ? ResearchNotebook::Repository.golden_ability(entry) : nil
-      draw_text(bmp, x, y + 97, w, 25, reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????", 16, INK, 0, true)
+      draw_editor_text(bmp,"detail_form_ability",x,y+97,w,25,
+          reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????",
+          16,INK,0,true)
       draw_text(bmp, x, y + 128, w, 16, ResearchNotebook.t("ESTADÍSTICAS · BASE / DORADA"), 10, GOLDEN_2, 0, true)
       if reveal_details
         stats = ResearchNotebook::Repository.golden_stats(entry)
@@ -1161,7 +1188,8 @@ module ResearchNotebook
         draw_card(bmp, x, y + 145, w, 92, PAPER)
         draw_text(bmp, x + 10, y + 154, w - 20, 15, ResearchNotebook.t("APUNTE"), 9, GOLDEN_2, 0, true)
         text = seen ? ResearchNotebook.t("He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características.") : ResearchNotebook.t("Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente.")
-        draw_wrapped(bmp, x + 10, y + 174, w - 20, text, 13, MUTED, 18, 3)
+        draw_editor_wrapped(bmp,"detail_form_note",x+10,y+174,w-20,text,
+                            13,MUTED,18,3)
       end
       draw_text(bmp, x, y + 247, w, 15, ResearchNotebook.t("COSTE"), 10, RED, 0, true)
       draw_wrapped(bmp, x, y + 264, w, ResearchNotebook::Repository.golden_form_drain_text, 10, RED, 16, 2)
