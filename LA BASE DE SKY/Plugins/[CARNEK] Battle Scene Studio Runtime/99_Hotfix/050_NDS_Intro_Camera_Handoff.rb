@@ -436,9 +436,12 @@ module VermeilBSSNDSIntroScene
       # Never force an old trainer position or leave the scene behind a
       # full-screen temporary sprite, even on error.
       if @vector && @vector.respond_to?(:snap)
-        # Native sendout inherits the exact MAIN camera used for the final
-        # screenshot, independent of intro focus pan/zoom.
-        @vector.snap(main || saved_vector) if main || saved_vector
+        # Wild encounters return to MAIN. Trainer battles MUST keep the
+        # right-hand EBDX camera lease after the curtain has left; snapping
+        # to MAIN here was the precise cause of trainer overlap/pop.
+        unless @battle.trainerBattle? && @bss_right_camera_active
+          @vector.snap(main || saved_vector) if main || saved_vector
+        end
       end
       trainer_states.each do |trainer,was_visible,old_opacity|
         next unless trainer && !(trainer.disposed? rescue true)
