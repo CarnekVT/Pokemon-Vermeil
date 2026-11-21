@@ -8,6 +8,35 @@ Referencias técnicas:
 - [Origin HeartGold EN — barrido de animaciones player/foe](https://github.com/originheartgold/origin-heart-gold-EN-translation/blob/main/work/tools/emu_move_sweep.py)
 - [Licencias y procedencia (Origin HG EN)](https://github.com/originheartgold/origin-heart-gold-EN-translation#license).
 
+## Actualización BAS: ramas, callbacks y texturas locales (2026-11-21)
+
+La importación Nitro ahora distingue la rama Player/Foe mediante **jumpifside**, en lugar de mezclar dos ramas. Asimismo, **addparticle ... 3** se ancla al User y **addparticle ... 4** al Target. Los orígenes distintos de 3 y 4 siguen siendo referencias para comprobar manualmente.
+
+**playsepanmod** conserva la secuencia DS, pan inicial/final, paso y periodo. BAS puede reproducir el sonido si asignas un SE real, pero su runtime Ruby **no implementa** la panorámica automatizada de DS.
+
+Los callbacks 33 (flash), 34 (tono), 36 (shake del Pokémon), 57 (slide) y 68 (shake de pantalla) se reconocen. La opción **Adaptar claves HGSS** permite crear una aproximación editable para los callbacks/macros reconocibles; comienza desactivada. Las duraciones por defecto (8 frames en movimientos y flashes) no representan los tiempos del hardware DS, especialmente con waitstate/waitparticle.
+
+### Vinculación opcional de recursos gráficos y audio en el editor
+
+Abre **Biblioteca → Importar → Importar script Nitro (texto) → Vincular recursos convertidos**. Formatos de entrada:
+
+- Gráficos: **499:2=Graphics/Animations/mi_particula.png** (SPA 499, emisor 2).
+- Gráficos de respaldo: **499=Graphics/Animations/mi_particula.png** (solo si verificaste que todos los emisores comparten el recurso).
+- Sonidos: **1911=Anim/MiSonido**, donde MiSonido corresponde a un archivo existente en Audio/SE/Anim.
+
+Los gráficos no mapeados conservan placeholders procedurales explícitos. Los IDs SDAT sin mapa se mantienen como referencia, no como eventos de audio ficticios. La importación Nitro inicia con **runtimeEnabled=false** hasta que valides los archivos y actives la animación.
+
+### Conversión privada de iSPA/TGA a PNG
+
+Con una copia de ROM que hayas obtenido legítimamente, extrae su archivo SPA y usa **Nitro Effect Maker → Unpack** para obtener iSPA y texturas TGA. Después ejecuta desde la raíz de tu repositorio:
+
+    python -m pip install Pillow
+    python BAS_SOURCE_REFERENCES/OriginHeartGold/tools/import_ispa_textures.py --input "C:/MiSPA/Unpacked" --spa 499 --project "LA BASE DE SKY"
+
+Los PNG se guardan con transparencia en **Graphics/Animations/OriginHG_local/SPA_0499/**. Se generan también SHA-256 y dimensiones en manifest.json, una plantilla de mapeo para BAS y un .gitignore que evita publicar esos archivos locales. Si una SPA contiene varias texturas, el conversor no inventa cuál corresponde a cada emisor: debe verificarse en iSPA/Nitro Effect Maker.
+
+**Restricción comprobada:** el repositorio público de traducción de Origin HeartGold no incluye los NARC y SPA de todos los ataques como pack. Por ello no se distribuyen recursos extraídos de ROM de terceros ni se afirma una conversión visual completa sin los datos propios.
+
 ## Qué funciona en la ROM y dónde están sus archivos
 
 | Familia DS | Nitro FS / formato | Función y correspondencia BAS |
