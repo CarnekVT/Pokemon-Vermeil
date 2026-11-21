@@ -711,7 +711,8 @@ module ResearchNotebook
       bmp.fill_rect(0, FOOTER_Y, WIDTH, HEIGHT - FOOTER_Y, COVER)
       # Arte de cuaderno editable: 640x480, detrás de todos los datos.
       @skin.draw(bmp, :background, 0, 0) if @skin
-      draw_text(bmp, 18, 10, 286, 30, ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"), 19, WHITE, 0, true)
+      draw_editor_text(bmp,"notebook_title",18,10,286,30,
+                       ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"),19,WHITE,0,true)
     end
 
     def refresh
@@ -790,19 +791,51 @@ module ResearchNotebook
       draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 24, layout_position("grid_panel", "y", GRID_Y) + 78, GRID_W - 48, 25, ResearchNotebook.t("Quedan páginas por llenar…"), 16, color, 1, true)
     end
 
+    # Bound game data remains native (species, forms, progress), but the
+    # actual text style/box is controlled by MakerStudio's JSON. ID is a
+    # reserved native binding, so no duplicate static text sprite is created.
+    def draw_editor_text(bmp,id,x,y,w,h,content,size,color,alignment=0,bold=false)
+      if defined?(VermeilInterfaceLayout)
+        data=VermeilInterfaceLayout.element(@interface_layout,id)
+        if data && data["tipo"]=="texto"
+          x=VermeilInterfaceLayout.position(@interface_layout,id,"x",x)
+          y=VermeilInterfaceLayout.position(@interface_layout,id,"y",y)
+          w=VermeilInterfaceLayout.number(@interface_layout,id,"ancho",w).to_i
+          h=VermeilInterfaceLayout.number(@interface_layout,id,"alto",h).to_i
+          size=VermeilInterfaceLayout.number(@interface_layout,id,"tamano",size).to_i
+          color=VermeilInterfaceLayout.color(data["color"],color)
+          # Fixed captions are authored in the editor; dynamic species text
+          # always takes its actual value from game state.
+          if id=="notebook_title" && data["texto"].to_s!=""
+            content=data["texto"].to_s
+          end
+        end
+      end
+      draw_text(bmp,x,y,w,h,content,size,color,alignment,bold)
+    end
+
     def draw_focus_panel(bmp)
       entry = selected_species
       base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       known = species_identity_known?(entry)
       color = section_color
-      draw_card(bmp, layout_position("focus_panel", "x", FOCUS_X), layout_position("focus_panel", "y", FOCUS_Y), FOCUS_W, FOCUS_H, PAPER_2)
-      @skin.draw(bmp, :focus_panel, layout_position("focus_panel", "x", FOCUS_X), layout_position("focus_panel", "y", FOCUS_Y)) if @skin
+      # One authority for this panel: authored MakerStudio geometry OR the
+      # legacy Ruby fallback, never both drawn on top of each other.
+      fx=layout_position("focus_panel","x",FOCUS_X)
+      fy=layout_position("focus_panel","y",FOCUS_Y)
+      unless @skin && @skin.draw(bmp,:focus_panel,fx,fy)
+        draw_card(bmp,fx,fy,FOCUS_W,FOCUS_H,PAPER_2)
+      end
 
       num = dex_number(entry)
       number = num > 0 ? format("#%03d", num) : "#---"
       name = known ? ResearchNotebook::Repository.species_name(entry) : "???"
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 14, layout_position("focus_panel", "y", FOCUS_Y) + 10, 62, 20, number, 12, MUTED, 0, true)
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 72, layout_position("focus_panel", "y", FOCUS_Y) + 7, FOCUS_W - 88, 28, name, 21, INK, 0, true)
+      draw_editor_text(bmp,"focus_number",
+        layout_position("focus_panel","x",FOCUS_X)+14,
+        layout_position("focus_panel","y",FOCUS_Y)+10,62,20,number,12,MUTED,0,true)
+      draw_editor_text(bmp,"focus_name",
+        layout_position("focus_panel","x",FOCUS_X)+72,
+        layout_position("focus_panel","y",FOCUS_Y)+7,FOCUS_W-88,28,name,21,INK,0,true)
 
       # Determinar la forma a mostrar
       display_form = form
@@ -918,7 +951,12 @@ module ResearchNotebook
 
     def draw_grid_panel(bmp)
       color = section_color
-      @skin.draw(bmp, :grid_panel, layout_position("grid_panel", "x", GRID_X), layout_position("grid_panel", "y", GRID_Y)) if @skin
+      unless @skin && @skin.draw(bmp,:grid_panel,
+             layout_position("grid_panel","x",GRID_X),
+             layout_position("grid_panel","y",GRID_Y))
+        draw_card(bmp,layout_position("grid_panel","x",GRID_X),
+                      layout_position("grid_panel","y",GRID_Y),GRID_W,GRID_H,PAPER_2)
+      end
       bmp.fill_rect(layout_position("grid_panel", "x", GRID_X), 59, GRID_W, 1, Color.new(255, 255, 255, 45))
       draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 3, 59, 134, 18, ResearchNotebook.t("Especies: {1}", @species.length), 11, MUTED, 0, false)
       draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 138, 59, 103, 18, ResearchNotebook.t("Orden: {1}", ResearchNotebook.t(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
@@ -969,8 +1007,9 @@ module ResearchNotebook
       y = layout_position("detail_panel", "y", 61)
       w = GRID_W
       h = 365
-      draw_card(bmp, x, y, w, h, PAPER_2)
-      @skin.draw(bmp, :detail_panel, x, y) if @skin
+      unless @skin && @skin.draw(bmp,:detail_panel,x,y)
+        draw_card(bmp,x,y,w,h,PAPER_2)
+      end
       color = section_color
       bmp.fill_rect(x, y, 4, h, color)
       entry = selected_species
