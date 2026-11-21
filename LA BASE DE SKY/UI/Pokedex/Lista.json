@@ -15,43 +15,51 @@
   "elementos": [
     {
       "id": "background",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 0,
       "x": 0,
       "y": 0,
       "ancho": 640,
       "alto": 480,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/background"
+      "color": "#101824FF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     },
     {
       "id": "header",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 1,
       "x": 24,
       "y": 12,
       "ancho": 256,
       "alto": 44,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/header"
+      "color": "#1C293BFF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     },
     {
       "id": "list_panel",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 1,
       "x": 286,
       "y": 24,
       "ancho": 326,
       "alto": 420,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/list_panel"
+      "color": "#1C2A3CFF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     },
     {
       "id": "portrait_panel",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 1,
       "x": 24,
       "y": 56,
       "ancho": 256,
       "alto": 256,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/portrait_panel"
+      "color": "#1C2A3CFF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     },
     {
       "id": "portrait_pokemon",
@@ -67,23 +75,49 @@
     },
     {
       "id": "counter_panel",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 2,
       "x": 24,
       "y": 320,
       "ancho": 256,
       "alto": 48,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/counter_panel"
+      "color": "#1C293BFF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     },
     {
       "id": "scrollbar_track",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 2,
       "x": 615,
       "y": 32,
       "ancho": 6,
       "alto": 420,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/scrollbar_track"
+      "color": "#394D67FF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
+    },
+    {
+      "id": "list_row",
+      "tipo": "panel",
+      "capa": 2,
+      "x": 0,
+      "y": 0,
+      "ancho": 326,
+      "alto": 36,
+      "color": "#243349FF"
+    },
+    {
+      "id": "list_row_selected",
+      "tipo": "panel",
+      "capa": 3,
+      "x": 0,
+      "y": 0,
+      "ancho": 326,
+      "alto": 36,
+      "color": "#344A68FF",
+      "borde": "#F46A72AA",
+      "borde_grosor": 2
     }
   ],
   "biblioteca": {
