@@ -147,7 +147,17 @@ module VermeilBSSNDSIntroScene
       # grass/water/cave wipe plays above the live environment directly.
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
-      darkness=nil
+      # Opaque biome-colored curtain: no see-through strip and no black BG.
+      # The underlying battlefield is revealed only at the END of the wipe.
+      shade=case tag
+            when :water then Color.new(24,48,65,255)
+            when :cave then Color.new(53,43,52,255)
+            else Color.new(26,49,37,255)
+            end
+      darkness=VermeilBSSNDSHandoff.full_screen_sprite(viewport,
+          [shade.red,shade.green,shade.blue,255])
+      darkness.z=2
+      darkness.opacity=255
       # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
       # Hiding them for the capture caused a visible pop at the reveal edge.
       # Do not reveal unreleased party Pokemon; respect native scene state.
@@ -269,9 +279,9 @@ module VermeilBSSNDSIntroScene
       grass.y=0
       grass.zoom_x=1.0
       grass.zoom_y=1.0
-      # Fade/slide the biome graphic in from black; do not pop the full
-      # alpha strip into existence at full opacity on its first render.
-      grass.opacity=0
+      # The actual NDS artwork is fully opaque over the biome matte.
+      # No translucent backdrop that reveals Pokemon before the encounter.
+      grass.opacity=255
 
       # The earlier fragment wipe used black-filled rectangles; they were
       # visible as accidental dark squares during grass/water/cave transitions.
@@ -336,7 +346,10 @@ module VermeilBSSNDSIntroScene
         # transparent, including the first Graphics.update after allocation.
         entrance=[[elapsed/0.13,0.0].max,1.0].min
         entrance=entrance*entrance*(3.0-2.0*entrance)
-        departure=[[(elapsed-(hold+duration*0.30))/(duration*0.67),0.0].max,1.0].min
+        # Two shots, not two fades: the biome is opaque until the final
+        # reveal, so the wild/trainer never appears as a translucent ghost.
+        out_at=@battle.wildBattle? ? 0.57 : 0.84
+        departure=[[(p-out_at)/(1.0-out_at),0.0].max,1.0].min
         departure=departure*departure*(3.0-2.0*departure)
         # A Pokemon rustling in tall grass: fast, damped lateral shakes
         # with a short vertical kick. Clock-based for mkxp's variable FPS.
@@ -347,7 +360,7 @@ module VermeilBSSNDSIntroScene
         grass.y=(dy.to_f*elapsed*1.5+rustle_y).round
         # Native grass texture may contain dark pixels; cap its opacity on
         # wild encounters so it cannot black out the Pokemon or battle sky.
-        grass.opacity=((@battle.wildBattle? ? 175.0 : 255.0)*entrance*(1.0-departure)).round
+        grass.opacity=(255.0*(1.0-departure)).round
         if mosaic
           fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
           mosaic.x=(-38.0+100.0*fragment).round
@@ -364,10 +377,19 @@ module VermeilBSSNDSIntroScene
         smooth_reveal=reveal*reveal*(3.0-2.0*reveal)
         cover.opacity=(255.0*(1.0-smooth_reveal)).round
         if darkness
-          dark_p=[[(p-0.20)/0.57,0.0].max,1.0].min
-          dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
-          darkness.opacity=(255.0*(1.0-dark_ease)).round
+          reveal_at=@battle.wildBattle? ? 0.45 : 0.85
+          fade=[[(p-reveal_at)/(1.0-reveal_at),0.0].max,1.0].min
+          fade=fade*fade*(3.0-2.0*fade)
+          darkness.opacity=(255.0*(1.0-fade)).round
         end
+        # Stage the REAL trainer while still hidden behind the opaque mask.
+        # DBK's animation starts only after the NDS presentation finishes.
+        if @battle.trainerBattle? && p>=0.67 && !@bss_nds_trainer_staged
+          @bss_nds_trainer_slide_pending=!trainer_states.empty?
+          bss_nds_stage_trainers if @bss_nds_trainer_slide_pending
+        end
+        bss_camera_right_focus_tick if @battle.trainerBattle? &&
+                                         respond_to?(:bss_camera_right_focus_tick)
         # Update first, then restore full wild visibility before drawing.
         # Native animation scripts may otherwise re-apply ghost opacity.
         pbFrameUpdate if respond_to?(:pbFrameUpdate)
@@ -418,8 +440,9 @@ module VermeilBSSNDSIntroScene
       flash.opacity=0
       cover.opacity=0
       darkness.opacity=0 if darkness
-      # The native trainer intro slides in only after the overlay is gone.
-      @bss_nds_trainer_slide_pending=@battle.trainerBattle? && !trainer_states.empty?
+      # The trainer was already staged behind the mask, never reinserted
+      # with a new slide/alpha or a second camera choreography.
+      @bss_nds_trainer_slide_pending=false if @bss_nds_trainer_staged
       Graphics.update
       true
     rescue StandardError => e
@@ -435,7 +458,10 @@ module VermeilBSSNDSIntroScene
       end
       trainer_states.each do |trainer,was_visible,old_opacity|
         next unless trainer && !(trainer.disposed? rescue true)
-        if @bss_nds_trainer_slide_pending
+        if @bss_nds_trainer_staged
+          trainer.opacity=255 if trainer.respond_to?(:opacity=)
+          trainer.visible=true if trainer.respond_to?(:visible=)
+        elsif @bss_nds_trainer_slide_pending
           trainer.opacity=0 if trainer.respond_to?(:opacity=)
           trainer.visible=false if trainer.respond_to?(:visible=)
         else
@@ -518,7 +544,8 @@ module VermeilBSSNDSIntroScene
       pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
-      bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
+      # Keep the framing until DBK finishes the trainer/send-out or scripted
+      # speech hides the same actor; an immediate release caused camera pop.
       return
     end
     @battle.sideSizes[1].times do |i|
@@ -531,9 +558,8 @@ module VermeilBSSNDSIntroScene
     unless @bss_nds_wild_cry_played
       @bss_nds_wild_cry_played=true
       pokemon=(@battle.battlers[1].pokemon rescue nil)
-      if pokemon && defined?(GameData::Species) &&
-         GameData::Species.respond_to?(:play_cry_from_pokemon)
-        GameData::Species.play_cry_from_pokemon(pokemon)
+      if pokemon && pokemon.respond_to?(:play_cry)
+        pokemon.play_cry
       elsif pokemon && defined?(pbPlayCry)
         pbPlayCry(pokemon)
       end
