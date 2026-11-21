@@ -1016,7 +1016,7 @@ end
     draw_counters
     # Help is readable on a dark panel, rather than one overlong legend.
     draw_navigation_hint(bmp, "ARR/ABA: Elegir     IZQ/DER: Saltar 5",
-                              "ACEPTAR: Ficha    CAMBIAR: Orden    ATRAS: Salir")
+                              "ACEPTAR: Ficha  ESPECIAL: Orden  ACCION: Buscar  ATRAS: Salir")
   end
 
   # Plain ASCII navigation. The game font lacks several Unicode arrows.
