@@ -976,9 +976,11 @@ unless @view.skin.draw(bmp, :header, NuevaPokedex.layout_position("header", "x",
   bmp.fill_rect(NuevaPokedex.layout_position("header", "x", NuevaPokedex::HEADER_X), NuevaPokedex.layout_position("header", "y", NuevaPokedex::HEADER_Y), NuevaPokedex::HEADER_W, NuevaPokedex::HEADER_H, NuevaPokedex::COLOR_PANEL)
   bmp.fill_rect(NuevaPokedex.layout_position("header", "x", NuevaPokedex::HEADER_X), NuevaPokedex.layout_position("header", "y", NuevaPokedex::HEADER_Y) + 40, NuevaPokedex::HEADER_W, 4, NuevaPokedex::COLOR_ACCENT)
 end
-    pbDrawShadowText(bmp, NuevaPokedex.layout_position("header", "x", NuevaPokedex::HEADER_X) + 8, NuevaPokedex.layout_position("header", "y", NuevaPokedex::HEADER_Y) + 4, 240, 18,
-                     NuevaPokedex.dex_name_for(@region),
-                     NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(bmp,"pokedex_title",
+                     NuevaPokedex.layout_position("header","x",NuevaPokedex::HEADER_X)+8,
+                     NuevaPokedex.layout_position("header","y",NuevaPokedex::HEADER_Y)+4,
+                     240,24,NuevaPokedex.dex_name_for(@region),
+                     NuevaPokedex::COLOR_ACCENT,NuevaPokedex::COLOR_SHADOW)
     # Show quick‑search bar only when multiple dexes are enabled and config permits
     if NewPokedexConfig::CONFIG[:show_search_bar] && NuevaPokedex.enabled_dexes.size > 1
       draw_search_bar(bmp)
@@ -1018,6 +1020,35 @@ end
     bmp.font.size=previous if previous && bmp && bmp.font
   end
 
+  # Dynamic text is still generated from the real Pokédex data, but its box,
+  # size, color and visibility are authored by the active MakerStudio page.
+  # Reserved native IDs do not create a second static Elemento text sprite.
+  def draw_editor_label(bmp,id,x,y,w,h,value,color,shadow,align=0)
+    original_size=(bmp.font.size rescue nil)
+    if defined?(VermeilInterfaceLayout)
+      layout=NuevaPokedex.interface_layout
+      data=VermeilInterfaceLayout.element(layout,id)
+      if data && data["tipo"]=="texto"
+        return if data["visible"]==false
+        x=VermeilInterfaceLayout.position(layout,id,"x",x)
+        y=VermeilInterfaceLayout.position(layout,id,"y",y)
+        w=VermeilInterfaceLayout.number(layout,id,"ancho",w).to_i
+        h=VermeilInterfaceLayout.number(layout,id,"alto",h).to_i
+        size=VermeilInterfaceLayout.number(layout,id,"tamano",original_size || 18).to_i
+        bmp.font.size=size if bmp.font && size>0
+        color=VermeilInterfaceLayout.color(data["color"],color)
+        align=case data["alineacion"]
+              when "centro" then 1
+              when "derecha" then 2
+              else 0
+              end
+      end
+    end
+    pbDrawShadowText(bmp,x,y,w,h,value.to_s,color,shadow,align) if w.to_i>0 && h.to_i>0
+  ensure
+    bmp.font.size=original_size if original_size && bmp && bmp.font
+  end
+
   def draw_counters
     cnt_bmp = @view.bitmaps["master"]
     # Borrar las cifras anteriores antes de un nuevo refresco.
@@ -1034,12 +1065,16 @@ end
       seen += 1 if NuevaPokedex.slot_seen?(sp)
       owned += 1 if NuevaPokedex.slot_owned?(sp)
     end
-    pbDrawShadowText(cnt_bmp, NuevaPokedex.layout_position("counter_panel", "x", NuevaPokedex::COUNT_X) + 8, NuevaPokedex.layout_position("counter_panel", "y", NuevaPokedex::COUNT_Y) + 4, 240, 18,
-                     NuevaPokedex.t("VISTOS: {1}/{2}", seen, total),
-                     NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
-    pbDrawShadowText(cnt_bmp, NuevaPokedex.layout_position("counter_panel", "x", NuevaPokedex::COUNT_X) + 8, NuevaPokedex.layout_position("counter_panel", "y", NuevaPokedex::COUNT_Y) + 24, 240, 18,
-                     NuevaPokedex.t("OBTENIDOS: {1}/{2}", owned, total),
-                     NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(cnt_bmp,"seen_counter",
+        NuevaPokedex.layout_position("counter_panel","x",NuevaPokedex::COUNT_X)+8,
+        NuevaPokedex.layout_position("counter_panel","y",NuevaPokedex::COUNT_Y)+4,
+        240,18,NuevaPokedex.t("VISTOS: {1}/{2}",seen,total),
+        NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(cnt_bmp,"caught_counter",
+        NuevaPokedex.layout_position("counter_panel","x",NuevaPokedex::COUNT_X)+8,
+        NuevaPokedex.layout_position("counter_panel","y",NuevaPokedex::COUNT_Y)+24,
+        240,18,NuevaPokedex.t("OBTENIDOS: {1}/{2}",owned,total),
+        NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
   end
 
   def draw_list
@@ -1323,8 +1358,9 @@ end
     pbDrawShadowText(bmp, 20, 3, 160, 16, NuevaPokedex.t("Nº {1}", sprintf("%03d", entry[:number])),
                      NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
     name_w = bmp.text_size(entry[:name]).width
-    pbDrawShadowText(bmp, 20, 20, name_w + 8, 32, entry[:name],
-                     NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(bmp,"detail_name",20,20,
+                     [name_w+8,265].min,32,entry[:name],
+                     NuevaPokedex::COLOR_ACCENT,NuevaPokedex::COLOR_SHADOW)
     if entry[:form].to_i > 0 && entry[:form_name]
       form_x = 20 + name_w + 12
       if form_x + bmp.text_size(entry[:form_name]).width < 500
@@ -1344,13 +1380,16 @@ end
     status_color = owned ? Color.new(150, 220, 150, 255) : (seen ? NuevaPokedex::COLOR_ACCENT : NuevaPokedex::COLOR_TEXT_DIM)
     status_text = owned ? NuevaPokedex.t("OBTENIDO") : (seen ? NuevaPokedex.t("VISTO") : NuevaPokedex.t("NO VISTO"))
     pbDrawShadowText(bmp, 304, 70, 300, 20, status_text, status_color, NuevaPokedex::COLOR_SHADOW)
-    pbDrawShadowText(bmp, 304, 100, 300, 20, NuevaPokedex.t("Categoría: {1}", entry[:category]),
-                     NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(bmp,"detail_category",304,100,300,20,
+                     NuevaPokedex.t("Categoría: {1}",entry[:category]),
+                     NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
     draw_entry_types(bmp, entry[:types], 304, 132)
-    pbDrawShadowText(bmp, 304, 178, 200, 20, NuevaPokedex.t("Altura: {1} m", entry[:height] / 10.0),
-                     NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
-    pbDrawShadowText(bmp, 304, 202, 200, 20, NuevaPokedex.t("Peso: {1} kg", entry[:weight] / 10.0),
-                     NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(bmp,"detail_height",304,178,200,20,
+                     NuevaPokedex.t("Altura: {1} m",entry[:height]/10.0),
+                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
+    draw_editor_label(bmp,"detail_weight",304,202,200,20,
+                     NuevaPokedex.t("Peso: {1} kg",entry[:weight]/10.0),
+                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
     # Ficha de descripción (ancho completo): draw the actual MakerStudio
     # panel BEFORE the native dynamic text so colors/images can be customized.
     @view.skin.draw(bmp,:entry_description,
