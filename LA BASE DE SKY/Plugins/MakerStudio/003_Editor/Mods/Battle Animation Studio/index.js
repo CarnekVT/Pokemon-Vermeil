@@ -2904,6 +2904,9 @@ function renderStudio(ctx, host) {
                         if(!result.analysis.commands.length)return toast("No se reconocen comandos Nitro en el texto.","warn");
                         pushUndo("importar script Nitro");
                         project.animations.push(result.animation);
+                        libraryMode = basCatalogMode(result.animation.source.catalogType);
+                        librarySelectedMove = result.animation.source.move;
+                        librarySelectedAnimationId = result.animation.id;
                         updateDirtyUi();
                         scheduleAutosave();
                         dialog.close();
@@ -3025,6 +3028,9 @@ function renderStudio(ctx, host) {
                         animation.scene.referenceHeight = Number(refContext.height || 384);
                     }
                     project.animations.push(animation);
+                    libraryMode = basCatalogMode(catalogType);
+                    librarySelectedMove = registeredName;
+                    librarySelectedAnimationId = animation.id;
                     updateDirtyUi();
                     dialog.close();
                     activateAnimation(animation);
@@ -4135,6 +4141,10 @@ function renderStudio(ctx, host) {
             if (maps.moves.size) libraryMode = "moves";
             else if (maps.common.size) libraryMode = "common";
             else if (maps.custom.size) libraryMode = "custom";
+            else {
+                var firstKind = BAS_ANIMATION_CATALOGS.slice(3).find(function (kind) { return (maps[kind.mode] || new Map()).size > 0; });
+                if (firstKind) libraryMode = firstKind.mode;
+            }
             activeMap = maps[libraryMode] || maps.moves;
         }
         var signature = [project.animations.length, libraryMode, activeMap.size, Math.round(root.clientWidth || 0), Math.round(root.clientHeight || 0)].join('|');
