@@ -137,7 +137,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import { FORMAT_VERSION, SAVE_DIR, SAVE_FILE, CODE_CAPTURE_FILE, COMPILED_FILE, GAME_RUNTIME_DIR, GAME_RUNTIME_FILE, createAnimation, createProject, createProjectile, getAllClips, getEffectsTrack, getAnimatable, getAllAnimatables, getBattlerTrack, getCameraTrack, normalizeProject, uid, positionKeyAt, getPositionKeyById, setPositionKey, setPositionAxisKey, disablePositionKeyAxis, movePositionKey, removePositionKey, clampNumber, sortPositionKeys, setValueKey, setVisibleKey, sampleValue, sampleVisible, cloneClipForLibrary, instantiateReusableClip } from "./model.js";
 import { BattlePreview } from "./preview.js";
-import { createBasFromNitroText, parseNitroAnimationText } from "./nitro_script_bridge.js";
+import { createBasFromNitroText, parseNitroAnimationText, parseNitroResourceMap } from "./nitro_script_bridge.js";
 import { BAS_ANIMATION_CATALOGS, BAS_ANIMATION_CATALOG_MODES, normalizeBasCatalogType, basCatalogMode, basCatalogTypeFromMode, basCatalogMetadata, basCatalogOptionsHtml } from "./animation_catalogs.js";
 import { applyBasCategoryStarter } from "./category_starters.js";
 import { openAnimationForensicsDialog } from "./animation_forensics_ui.js";
@@ -2876,6 +2876,11 @@ function renderStudio(ctx, host) {
                     '<option value="subanimation">Subanimaciones (recomendado)</option>' +
                     '<option value="move">Moves (solo si usas el ID de un Move real)</option></select></label>' +
                     '<label class="bas-toggle"><input type="checkbox" data-nitro-placeholders checked> Crear clips procedurales editables para las partículas (no son los gráficos de DS)</label>' +
+                    '<details><summary>Vincular recursos convertidos de tu proyecto (opcional)</summary>' +
+                    '<p class="bas-help">Cada recurso debe existir en Vermeil. Sin mapa se conserva un placeholder; los IDs de audio DS no son archivos SE. No se importa contenido de una ROM.</p>' +
+                    '<label class="bas-field">PNG por SPA o SPA:emitter<textarea class="bas-input" data-nitro-graphics-map rows="3" spellcheck="false" placeholder="499:2=Graphics/Animations/mi_particula.png"></textarea></label>' +
+                    '<label class="bas-field">SE por número de secuencia DS<textarea class="bas-input" data-nitro-audio-map rows="3" spellcheck="false" placeholder="1911=Anim/MiSonido"></textarea></label>' +
+                    '</details>' +
                     '<label class="bas-field">Script de texto<textarea class="bas-input" data-nitro-text rows="12" spellcheck="false" ' +
                     'placeholder="a010_486:\\nloadparticlefromspa 0, 499\\nwaitparticle\\naddparticle 0, 2, 3\\nplaysepan 1911, -117\\nwait 2\\nunloadparticle 0\\nend"></textarea></label>' +
                     '<div class="bas-dialog-note" data-nitro-report>Escribe el script para ver los comandos reconocidos.</div>' +
@@ -2883,14 +2888,23 @@ function renderStudio(ctx, host) {
                     '<button class="bas-button primary" data-nitro-create>Importar timeline editable</button></div></div>';
                 var input=body.querySelector('[data-nitro-text]');
                 var info=body.querySelector('[data-nitro-report]');
-                input.oninput=function(){
+                var graphicsMap=body.querySelector('[data-nitro-graphics-map]');
+                var audioMap=body.querySelector('[data-nitro-audio-map]');
+                var refreshNitroReport=function(){
                     try {
+                        var mappedGraphics=parseNitroResourceMap(graphicsMap.value,"graphics");
+                        var mappedAudio=parseNitroResourceMap(audioMap.value,"audio");
                         var parsed=parseNitroAnimationText(input.value);
                         info.textContent=parsed.commands.length+' comandos · '+parsed.particleSpawns+' emisiones · '+
                             parsed.spaIds.length+' SPAs referenciadas · '+parsed.seReferences.length+' sonidos · '+
-                            parsed.issues.length+' avisos · duración parcial '+parsed.frameCount+' frames';
+                            parsed.issues.length+' avisos · duración parcial '+parsed.frameCount+' frames · '+
+                            Object.keys(mappedGraphics).length+' gráficos vinculados · '+
+                            Object.keys(mappedAudio).length+' SFX vinculados';
                     } catch(err){info.textContent=String(err.message||err);}
                 };
+                input.oninput=refreshNitroReport;
+                graphicsMap.oninput=refreshNitroReport;
+                audioMap.oninput=refreshNitroReport;
                 body.querySelector('[data-nitro-cancel]').onclick=function(){dialog.close();};
                 body.querySelector('[data-nitro-create]').onclick=function(){
                     if(!input.value.trim())return toast("Pega un script Nitro para importar.","warn");
@@ -2899,7 +2913,9 @@ function renderStudio(ctx, host) {
                             id:body.querySelector('[data-nitro-id]').value,
                             name:body.querySelector('[data-nitro-name]').value,
                             category:body.querySelector('[data-nitro-category]').value,
-                            placeholders:!!body.querySelector('[data-nitro-placeholders]').checked
+                            placeholders:!!body.querySelector('[data-nitro-placeholders]').checked,
+                            graphicsMap:graphicsMap.value,
+                            audioMap:audioMap.value
                         });
                         if(!result.analysis.commands.length)return toast("No se reconocen comandos Nitro en el texto.","warn");
                         pushUndo("importar script Nitro");
@@ -2911,7 +2927,7 @@ function renderStudio(ctx, host) {
                         scheduleAutosave();
                         dialog.close();
                         activateAnimation(result.animation);
-                        toast("Script importado como referencia editable. SPA/SFX deben verificarse antes de habilitar gameplay.","info");
+                        toast("Script importado: "+result.animation.tracks[0].clips.length+" clips, "+result.animation.events.length+" SFX mapeados. Verifica los recursos antes de activar gameplay.","info");
                     } catch(e){toast("No se pudo interpretar el script: "+String(e.message||e),"warn");}
                 };
             }
