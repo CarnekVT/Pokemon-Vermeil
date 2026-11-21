@@ -73,8 +73,11 @@ module BSS103WorldSpaceBattlers
       if current.is_a?(Array) && main.is_a?(Array)
         camera_dx=(current[0].to_f-main[0].to_f)*0.65
         camera_dy=(current[1].to_f-main[1].to_f)*0.45
-        # Never apply a second zoom to DBK's SpeciesMetrics sprites.
-        # SOS and movement animations can invalidate cached sprite transforms.
+        # Use the absolute EBDX zoom relative to the fixed MAIN shot.
+        # Cached native Pokemon/form scales below prevent compounding on SOS.
+        if main[4].to_f.abs>0.001
+          camera_zoom=[[current[4].to_f/main[4].to_f,1.0].max,1.20].min
+        end
       end
     end
 
@@ -106,8 +109,8 @@ module BSS103WorldSpaceBattlers
           @bss103_native_zoom.clear if @bss103_native_zoom.length>32
           @bss103_native_zoom[identity]=baseline
         end
-        sp.zoom_x=baseline[0] if sp.respond_to?(:zoom_x=) && baseline[0]>0.02
-        sp.zoom_y=baseline[1] if sp.respond_to?(:zoom_y=) && baseline[1]>0.02
+        sp.zoom_x=baseline[0]*camera_zoom if sp.respond_to?(:zoom_x=) && baseline[0]>0.02
+        sp.zoom_y=baseline[1]*camera_zoom if sp.respond_to?(:zoom_y=) && baseline[1]>0.02
       end
       sp.z=[(sp.z rescue 50).to_i,50+i].max if sp.respond_to?(:z=)
 
@@ -135,8 +138,8 @@ module BSS103WorldSpaceBattlers
           @bss103_native_shadow_zoom.clear if @bss103_native_shadow_zoom.length>32
           @bss103_native_shadow_zoom[identity]=baseline
         end
-        sh.zoom_x=baseline[0] if sh.respond_to?(:zoom_x=) && baseline[0]>0.02
-        sh.zoom_y=baseline[1] if sh.respond_to?(:zoom_y=) && baseline[1]>0.02
+        sh.zoom_x=baseline[0]*camera_zoom if sh.respond_to?(:zoom_x=) && baseline[0]>0.02
+        sh.zoom_y=baseline[1]*camera_zoom if sh.respond_to?(:zoom_y=) && baseline[1]>0.02
       end
       sh.z=[(sh.z rescue 3).to_i,30+i].max if sh.respond_to?(:z=)
     end
