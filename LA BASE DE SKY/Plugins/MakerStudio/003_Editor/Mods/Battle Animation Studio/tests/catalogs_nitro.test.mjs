@@ -102,6 +102,30 @@ end",{
 assert.equal(pan.animation.events.length,1);
 assert.equal(pan.animation.events[0].nitroPanEnd,117);
 assert(pan.analysis.issues.some(x=>x.code==="pan-sweep-not-emulated"));
+// Known HGSS macros are imported only on explicit opt-in. They create editable
+// approximations, not claims about true DS waitstate or interpolation.
+const nativeScript=`a010_487:
+slideattackingmon -16, 8
+wait 3
+shaketargetmon 3, 7
+shakescreen
+flashscreencolor 31, 0, 0
+shadetargetmon 0, 31, 0
+waitstate
+end`;
+const withNative=lib.createBasFromNitroText(nativeScript,{
+    id:"NATIVE",adaptNativeCues:true,placeholders:false
+});
+assert.equal(withNative.animation.source.nitroAdaptedNativeCues,5);
+assert(withNative.animation.events.some(x=>x.type==="screen_shake" && x.nitroApproximate===true));
+assert(withNative.animation.events.some(x=>x.type==="screen_flash"));
+assert(withNative.animation.battlers.user.positionKeys.some(x=>x.point.offsetX===-16));
+assert(withNative.animation.battlers.target.positionKeys.length>2);
+assert(withNative.animation.battlers.target.valueKeys.toneGreen.some(x=>x.value===255));
+const withoutNative=lib.createBasFromNitroText(nativeScript,{id:"NO_NATIVE"});
+assert.equal(withoutNative.animation.events.length,0);
+assert.equal(withoutNative.animation.battlers.user.positionKeys.length,1);
+
 const original=JSON.parse(await readFile(new URL("../../../../../PBS/AnimationStudio/animations.json",root),"utf8"));
 assert.equal(original.animations.length,22);
 const normalizedOriginal=lib.normalizeProject(original);
