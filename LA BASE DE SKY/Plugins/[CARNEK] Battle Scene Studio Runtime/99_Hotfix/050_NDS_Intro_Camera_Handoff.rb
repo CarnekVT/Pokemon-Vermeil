@@ -517,6 +517,18 @@ module VermeilBSSNDSIntroScene
       next unless @battle.battlers[idx]
       @animations.push(Battle::Scene::Animation::DataBoxAppear.new(@sprites,@viewport,idx))
     end
+    # Wild Intro2 normally triggers the species cry. Since the translucent
+    # animation is intentionally skipped, play that audio exactly once.
+    unless @bss_nds_wild_cry_played
+      @bss_nds_wild_cry_played=true
+      pokemon=(@battle.battlers[1].pokemon rescue nil)
+      if pokemon && defined?(GameData::Species) &&
+         GameData::Species.respond_to?(:play_cry_from_pokemon)
+        GameData::Species.play_cry_from_pokemon(pokemon)
+      elsif pokemon && defined?(pbPlayCry)
+        pbPlayCry(pokemon)
+      end
+    end
     # Wild Pokemon should already be standing on the stage; the vanilla
     # Intro2 alpha/zoom reveal was making them appear progressively as ghosts.
     @battle.sideSizes[1].times do |i|
