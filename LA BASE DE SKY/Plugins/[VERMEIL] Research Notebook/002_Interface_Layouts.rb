@@ -36,6 +36,7 @@ module VermeilInterfaceLayout
       next unless File.file?(filename)
       begin
         source = File.open(filename, "rb") { |f| f.read }
+        source = source.force_encoding("UTF-8")
         # Essentials' bundled JSON C extension does NOT match its Ruby ABI.
         # Its own pure-Ruby interface reader is the canonical, safe parser.
         data = if defined?(Interfaces::AnalizadorJSON)
