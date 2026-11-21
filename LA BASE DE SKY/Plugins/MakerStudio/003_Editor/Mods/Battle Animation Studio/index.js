@@ -2875,6 +2875,7 @@ function renderStudio(ctx, host) {
                     '<label class="bas-field">Categoría<select class="bas-select" data-nitro-category>' +
                     '<option value="subanimation">Subanimaciones (recomendado)</option>' +
                     '<option value="move">Moves (solo si usas el ID de un Move real)</option></select></label>' +
+                    '<label class="bas-field">Rama del script<select class="bas-select" data-nitro-side><option value="player">Player (usuario)</option><option value="foe">Foe (rival)</option></select></label>' +
                     '<label class="bas-toggle"><input type="checkbox" data-nitro-placeholders checked> Crear clips procedurales editables para las partículas (no son los gráficos de DS)</label>' +
                     '<details><summary>Vincular recursos convertidos de tu proyecto (opcional)</summary>' +
                     '<p class="bas-help">Cada recurso debe existir en Vermeil. Sin mapa se conserva un placeholder; los IDs de audio DS no son archivos SE. No se importa contenido de una ROM.</p>' +
@@ -2890,14 +2891,15 @@ function renderStudio(ctx, host) {
                 var info=body.querySelector('[data-nitro-report]');
                 var graphicsMap=body.querySelector('[data-nitro-graphics-map]');
                 var audioMap=body.querySelector('[data-nitro-audio-map]');
+                var sideSelect=body.querySelector('[data-nitro-side]');
                 var refreshNitroReport=function(){
                     try {
                         var mappedGraphics=parseNitroResourceMap(graphicsMap.value,"graphics");
                         var mappedAudio=parseNitroResourceMap(audioMap.value,"audio");
-                        var parsed=parseNitroAnimationText(input.value);
+                        var parsed=parseNitroAnimationText(input.value,{side:sideSelect.value});
                         info.textContent=parsed.commands.length+' comandos · '+parsed.particleSpawns+' emisiones · '+
                             parsed.spaIds.length+' SPAs referenciadas · '+parsed.seReferences.length+' sonidos · '+
-                            parsed.issues.length+' avisos · duración parcial '+parsed.frameCount+' frames · '+
+                            parsed.issues.length+' avisos · duración parcial '+parsed.frameCount+' frames · '+ (parsed.hasSideBranch?'rama '+parsed.side+' · ':'')+
                             Object.keys(mappedGraphics).length+' gráficos vinculados · '+
                             Object.keys(mappedAudio).length+' SFX vinculados';
                     } catch(err){info.textContent=String(err.message||err);}
@@ -2905,6 +2907,7 @@ function renderStudio(ctx, host) {
                 input.oninput=refreshNitroReport;
                 graphicsMap.oninput=refreshNitroReport;
                 audioMap.oninput=refreshNitroReport;
+                sideSelect.onchange=refreshNitroReport;
                 body.querySelector('[data-nitro-cancel]').onclick=function(){dialog.close();};
                 body.querySelector('[data-nitro-create]').onclick=function(){
                     if(!input.value.trim())return toast("Pega un script Nitro para importar.","warn");
@@ -2915,7 +2918,8 @@ function renderStudio(ctx, host) {
                             category:body.querySelector('[data-nitro-category]').value,
                             placeholders:!!body.querySelector('[data-nitro-placeholders]').checked,
                             graphicsMap:graphicsMap.value,
-                            audioMap:audioMap.value
+                            audioMap:audioMap.value,
+                            side:sideSelect.value
                         });
                         if(!result.analysis.commands.length)return toast("No se reconocen comandos Nitro en el texto.","warn");
                         pushUndo("importar script Nitro");
