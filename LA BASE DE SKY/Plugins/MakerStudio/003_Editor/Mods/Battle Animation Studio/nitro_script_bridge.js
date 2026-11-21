@@ -10,6 +10,38 @@ function number(text) {
     if(/^[-+]?\d+$/i.test(value))return Number(value);
     return null;
 }
+// Explicit user-provided path bindings after converting their own Nitro resources.
+// Nothing is fetched from a ROM automatically and no original assets are bundled.
+// Graphics: 499:2=Graphics/Animations/converted.png (or 499=... as fallback)
+// Audio:    1911=Anim/ConvertedSound
+export function parseNitroResourceMap(text, kind) {
+    const map={};
+    if(text && typeof text==="object" && !Array.isArray(text)) {
+        return parseNitroResourceMap(Object.entries(text).map(([k,v])=>k+"="+v).join("\n"),kind);
+    }
+    const mode=kind==="audio"?"audio":"graphics";
+    String(text||"").split(/\r?\n/).forEach((line,index)=>{
+        const trimmed=line.trim();
+        if(!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//"))return;
+        const ix=trimmed.indexOf("=");
+        if(ix<=0)throw Error("Map line "+(index+1)+": expected ID=path");
+        const key=trimmed.slice(0,ix).trim(), value=trimmed.slice(ix+1).trim().replace(/\\/g,"/");
+        const numberPattern=mode==="audio"?/^\d+$/:/^\d+(?::\d+)?$/;
+        if(!numberPattern.test(key))throw Error("Map line "+(index+1)+": invalid Nitro resource ID");
+        if(!value || value.startsWith("/") || /(?:^|\/)\.\.?\//.test(value) || /^\w+:/.test(value) ||
+           value.includes("\0") || value.includes("?") || value.includes("#"))
+            throw Error("Map line "+(index+1)+": unsafe or empty project path");
+        if(mode==="graphics" && !/^Graphics\/.+\.(?:png|webp|gif)$/i.test(value))
+            throw Error("Map line "+(index+1)+": graphic must be an existing Graphics/*.png/webp/gif project file");
+        if(mode==="audio" && !/^(?:Audio\/SE\/)?[\w .()\/-]+(?:\.(?:ogg|wav|mp3))?$/i.test(value))
+            throw Error("Map line "+(index+1)+": use an Audio/SE relative filename");
+        if(Object.prototype.hasOwnProperty.call(map,key))
+            throw Error("Map line "+(index+1)+": duplicate resource ID "+key);
+        map[key]=value;
+    });
+    return map;
+}
+
 export function parseNitroAnimationText(source) {
     const text=String(source||"").replace(/\r\n?/g,"\n");
     const slots=new Map(), commands=[],issues=[],references=new Set();
@@ -74,6 +106,8 @@ export function parseNitroAnimationText(source) {
 }
 export function createBasFromNitroText(text,config={}) {
     const analysis=parseNitroAnimationText(text);
+    const graphics=parseNitroResourceMap(config.graphicsMap||"", "graphics");
+    const audio=parseNitroResourceMap(config.audioMap||"", "audio");
     const catalog=String(config.category||"subanimation").toLowerCase();
     if(!["subanimation","move"].includes(catalog))throw Error("Unsupported Nitro bridge category");
     const id=String(config.id||"NITRO_REFERENCE").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_").slice(0,80);
@@ -84,6 +118,20 @@ export function createBasFromNitroText(text,config={}) {
     animation.source.runtimeEnabled=false; // User must explicitly activate an approximate reference.
     animation.source.nitroSpaIds=analysis.spaIds;
     animation.source.nitroAudioCues=analysis.seReferences;
+    animation.source.nitroMappedGraphics=graphics;
+    animation.source.nitroMappedAudio=audio;
+    animation.source.nitroUnresolvedGraphics=[];
+    animation.source.nitroUnresolvedAudio=[];
+    for(const cue of analysis.seReferences){
+        const filename=cue.seq===null?"":audio[String(cue.seq)];
+        if(!filename){
+            animation.source.nitroUnresolvedAudio.push({seq:cue.seq,frame:cue.frame});
+            continue;
+        }
+        const name=filename.replace(/^Audio\/SE\//i,"").replace(/\.(?:ogg|wav|mp3)$/i,"");
+        animation.events.push({id:uid("event"),type:"se",frame:cue.frame,name,
+            volume:100,pitch:100,nitroSeq:cue.seq,nitroPan:cue.pan});
+    }
     animation.source.nitroCommands=analysis.commands;
     animation.source.nitroSourceText=String(text||"");
     animation.source.unsupported=analysis.issues.map(x=>({id:x.code,detail:(x.line?"L"+x.line+": ":"")+x.message}));
@@ -92,13 +140,19 @@ export function createBasFromNitroText(text,config={}) {
     if(config.placeholders!==false){
         const track=animation.tracks[0],spawns=analysis.commands.filter(x=>x.op==="addparticle");
         for(const spawn of spawns.slice(0,100)){
+            const key=String(spawn.spa)+":"+String(spawn.emitter);
+            const mappedGraphic=graphics[key] || graphics[String(spawn.spa)] || "";
+            if(!mappedGraphic) animation.source.nitroUnresolvedGraphics.push({
+                spa:spawn.spa,emitter:spawn.emitter,frame:spawn.frame
+            });
             const f=Math.max(0,Math.min(animation.duration-1,spawn.frame));
             const clip=createProjectile({
                 name:"Nitro · SPA "+(spawn.spa??"?")+" · emitter "+(spawn.emitter??"?")+" (placeholder)",
                 startFrame:f,endFrame:Math.min(animation.duration,f+8),
                 graphic:{
-                    source:"procedural",projectPath:"",name:"Placeholder, no DS artwork",
-                    origin:"center",procedural:"circle",proceduralW:40,proceduralH:40,
+                    source:mappedGraphic?"new":"procedural",projectPath:mappedGraphic,
+                    folder:"Animations",name:mappedGraphic?mappedGraphic.split("/").pop().replace(/\.[^.]+$/,""):"Placeholder, no DS artwork",
+                    origin:"center",procedural:mappedGraphic?null:"circle",proceduralW:40,proceduralH:40,
                     proceduralHollow:true,proceduralLineWidth:4,proceduralColor:"rgba(208,189,255,0.9)"
                 },
                 positionKeys:[
@@ -113,6 +167,11 @@ export function createBasFromNitroText(text,config={}) {
             track.clips.push(clip);
         }
         if(spawns.length>100)animation.source.unsupported.push({id:"too-many-spawns",detail:"Se limitaron placeholders a 100 por seguridad"});
+    }
+    if(analysis.spaIds.length && !config.placeholders) {
+        animation.source.nitroUnresolvedGraphics=analysis.spaIds.filter(id=>
+            !graphics[String(id)] && !Object.keys(graphics).some(k=>k.startsWith(String(id)+":"))
+        ).map(id=>({spa:id,emitter:null,frame:0}));
     }
     return {animation,analysis};
 }
