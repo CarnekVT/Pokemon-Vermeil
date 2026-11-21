@@ -112,9 +112,38 @@ module VermeilTrainerSideLanes
     @bss_right_camera_active=false
   end
 
+  # A scripted trainer stays in the wide right-hand shot until its dialogue
+  # ends. If no speech takes over, retire the trainer at the first command
+  # with the SAME fade/return semantics; never leave the zoom stuck.
+  def bss_camera_trainer_cleanup_tick
+    return unless @bss_nds_trainer_staged
+    return if @bss_dialogue_cinema_active ||
+              @vermeil_cinema_script_depth.to_i>0 ||
+              @vermeil_cinema_trainer_intro_depth.to_i>0 ||
+              @bss087_end_battle_lock
+    return unless @vermeil_cinema_first_command_reached
+    unless @bss_trainer_cleanup_started
+      @bss_trainer_cleanup_started=Time.now.to_f
+      bss_camera_release_right_focus
+    end
+    t=[[(Time.now.to_f-@bss_trainer_cleanup_started)/0.30,0.0].max,1.0].min
+    ease=t*t*(3.0-2.0*t)
+    if @battle && @battle.respond_to?(:opponent) && @battle.opponent
+      @battle.opponent.each_index do |i|
+        sp=@sprites["trainer_#{i+1}"]
+        next unless sp && !(sp.disposed? rescue true)
+        sp.opacity=(255.0*(1.0-ease)).round if sp.respond_to?(:opacity=)
+        sp.visible=false if t>=1.0 && sp.respond_to?(:visible=)
+      end
+    end
+    @bss_trainer_cleanup_started=nil if t>=1.0
+    @bss_nds_trainer_staged=false if t>=1.0
+  end
+
   # The camera lease is applied before the generic cinematic director.
   # No second clock or camera sweep is allowed to fight this composition.
   def bss070_ebdx_tick(advance_camera=true,align=true)
+    bss_camera_trainer_cleanup_tick if @bss_nds_trainer_staged
     if @bss_right_camera_active
       bss_camera_right_focus_tick
       return super(false,align)
