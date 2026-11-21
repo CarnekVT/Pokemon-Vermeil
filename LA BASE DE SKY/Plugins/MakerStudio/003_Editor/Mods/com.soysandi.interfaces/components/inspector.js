@@ -86,9 +86,13 @@ export class Inspector {
   }
 
   refrescar() {
+    // Editing one field should not jump the whole inspector to the top.
+    const key = (this.seleccion || "_screen") + ":" + this._panelMode;
+    const scroll = this._lastScrollKey===key ? this.el.scrollTop : 0;
+    this._lastScrollKey=key;
     this.cuerpo.innerHTML = "";
     const el = this.elegido();
-    if (!el) { this.pintarSinSeleccion(); return; }
+    if (!el) { this.pintarSinSeleccion(); this.el.scrollTop=scroll; return; }
     if (!["diseno","logica","animacion"].includes(this._panelMode)) this._panelMode="diseno";
     const cabecera=h("div",{className:"ui-inspector-context"},
       h("strong",{textContent:el.id}),
@@ -121,6 +125,7 @@ export class Inspector {
         textContent:"↗ Mostrar línea de tiempo",
         onClick:()=>this.op.abrirAnimaciones?.()}));
     }
+    this.el.scrollTop=scroll;
   }
 
   pintarSinSeleccion() {
