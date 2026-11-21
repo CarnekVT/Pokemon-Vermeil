@@ -14,8 +14,8 @@ module VermeilBSSNDSHandoff
   START_ZOOM = 2.0
   # Seconds, not frames: 20 iterations at 110+ FPS were a blink.
   # Keep the scene anchored during hold and ease to 100% over the reveal.
-  HOLD_SECONDS = 0.10
-  REVEAL_SECONDS = 0.78
+  HOLD_SECONDS = 0.045
+  REVEAL_SECONDS = 0.315
   TAGS = {
     :grass => ["Graphics/Transitions/GrassIntro", ["Anim/Wind8",40,110], [-7,3]],
     :water => ["Graphics/Transitions/WaterIntro", ["Anim/Water1",40,115], [-4,4]],
@@ -138,6 +138,7 @@ module VermeilBSSNDSIntroScene
     mosaic_bitmap=nil
     flash=nil
     darkness=nil
+    tear_bands=[]
     bitmap=nil
     flash_bitmap=nil
     trainer_states=[]
@@ -158,6 +159,19 @@ module VermeilBSSNDSIntroScene
           [shade.red,shade.green,shade.blue,255])
       darkness.z=2
       darkness.opacity=255
+      # Fast opaque diagonal-ish cuts instead of the old uniform slide.
+      8.times do |i|
+        band=Sprite.new(viewport)
+        band.bitmap=darkness.bitmap
+        band.z=3
+        band.y=(Graphics.height*i/8.0).round
+        next_y=(Graphics.height*(i+1)/8.0).round
+        band.zoom_y=(next_y-band.y).to_f
+        band.zoom_x=Graphics.width.to_f
+        band.x=0
+        band.visible=false
+        tear_bands << band
+      end
       # Retain the *same* trainers/wild Pokemon under and inside the snapshot.
       # Hiding them for the capture caused a visible pop at the reveal edge.
       # Do not reveal unreleased party Pokemon; respect native scene state.
@@ -329,12 +343,9 @@ module VermeilBSSNDSIntroScene
         # transparent, including the first Graphics.update after allocation.
         entrance=[[elapsed/0.13,0.0].max,1.0].min
         entrance=entrance*entrance*(3.0-2.0*entrance)
-        # A literal opaque wipe, NOT an alpha dissolve. Reveal the actual
-        # EBDX scene from RIGHT to LEFT, after sprites are fully prepared.
-        reveal_at=@battle.wildBattle? ? 0.61 : 0.76
-        reveal=[[(p-reveal_at)/(1.0-reveal_at),0.0].max,1.0].min
-        reveal=reveal*reveal*(3.0-2.0*reveal)
-        remaining=(Graphics.width.to_f*(1.0-reveal)).round
+        # Very brief irregular reveal: nothing fades or slides as one rectangle.
+        reveal_at=0.61
+        tearing=p>=reveal_at
         # A Pokemon rustling in tall grass: fast, damped lateral shakes
         # with a short vertical kick. Clock-based for mkxp's variable FPS.
         damping=Math.exp(-elapsed*4.5)
@@ -346,10 +357,19 @@ module VermeilBSSNDSIntroScene
         # wild encounters so it cannot black out the Pokemon or battle sky.
         # The grass PNG can have alpha; the matching opaque matte below it
         # guarantees that no live battlefield leaks through transparent parts.
-        darkness.zoom_x=remaining.to_f if darkness
-        grass.x=0 if p>=reveal_at
-        grass.src_rect.set(0,0,remaining,Graphics.height) if grass.respond_to?(:src_rect)
-        grass.opacity=255
+        if tearing
+          grass.visible=false
+          darkness.visible=false if darkness
+          tear_bands.each_with_index do |band,i|
+            offset=(i%4)*0.055
+            phase=[[(p-reveal_at)/(1.0-reveal_at)-offset,0.0].max,1.0].min
+            snap=phase*phase*(3.0-2.0*phase)
+            width=[(Graphics.width*(1.0-snap)).round,0].max
+            band.zoom_x=width.to_f
+            band.x=i.even? ? 0 : Graphics.width-width
+            band.visible=width>0
+          end
+        end
         if mosaic
           fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
           mosaic.x=(-38.0+100.0*fragment).round
@@ -365,10 +385,10 @@ module VermeilBSSNDSIntroScene
         reveal=[[(p-0.77)/0.23,0.0].max,1.0].min
         smooth_reveal=reveal*reveal*(3.0-2.0*reveal)
         cover.opacity=0 # No frozen environment overlay
-        darkness.opacity=255 if darkness
+        darkness.opacity=255 if darkness && !tearing
         # Stage the REAL trainer while still hidden behind the opaque mask.
         # DBK's animation starts only after the NDS presentation finishes.
-        if @battle.trainerBattle? && p>=0.32 && !@bss_nds_trainer_staged
+        if @battle.trainerBattle? && p>=0.08 && !@bss_nds_trainer_staged
           @bss_nds_trainer_slide_pending=!trainer_states.empty?
           bss_nds_stage_trainers if @bss_nds_trainer_slide_pending
         end
@@ -420,6 +440,7 @@ module VermeilBSSNDSIntroScene
       cover.zoom_x=1.0
       cover.zoom_y=1.0
       grass.opacity=0
+      tear_bands.each { |band| band.visible=false if band && !(band.disposed? rescue true) }
       mosaic.opacity=0 if mosaic
       flash.opacity=0
       cover.opacity=0
@@ -455,6 +476,13 @@ module VermeilBSSNDSIntroScene
           trainer.opacity=old_opacity if trainer.respond_to?(:opacity=)
           trainer.visible=was_visible if trainer.respond_to?(:visible=)
         end
+      end
+      # All tear strips share the 1x1 matte bitmap; dispose sprites first.
+      tear_bands.each do |band|
+        next unless band && !(band.disposed? rescue true)
+        band.bitmap=nil
+        band.dispose
+      rescue StandardError
       end
       if darkness
         begin
