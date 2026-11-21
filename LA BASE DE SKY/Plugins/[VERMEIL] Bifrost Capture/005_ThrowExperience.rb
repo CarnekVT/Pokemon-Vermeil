@@ -150,7 +150,11 @@ module BifrostCapture
         physical = cfg["keyboard_bait_key"].to_s.downcase
         %w[r f t g].include?(physical) ? physical.upcase : nil
       when :aim
-        BifrostCapture.binding_name(cfg,"hotkey")
+        if defined?(InputStudio) && InputStudio.respond_to?(:label)
+          InputStudio.label("bifrost_aim")
+        else
+          BifrostCapture.binding_name(cfg,"hotkey")
+        end
       when :throw
         BifrostCapture.hud_action_key("throw")
       when :cancel
