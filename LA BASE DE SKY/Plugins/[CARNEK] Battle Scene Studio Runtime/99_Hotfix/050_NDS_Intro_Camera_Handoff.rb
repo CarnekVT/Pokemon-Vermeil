@@ -345,7 +345,9 @@ module VermeilBSSNDSIntroScene
         rustle_y=Math.sin(elapsed*59.0)*5.0*damping
         grass.x=(-30.0*(1.0-entrance)+dx.to_f*elapsed*3.5+rustle_x).round
         grass.y=(dy.to_f*elapsed*1.5+rustle_y).round
-        grass.opacity=(255.0*entrance*(1.0-departure)).round
+        # Native grass texture may contain dark pixels; cap its opacity on
+        # wild encounters so it cannot black out the Pokemon or battle sky.
+        grass.opacity=((@battle.wildBattle? ? 175.0 : 255.0)*entrance*(1.0-departure)).round
         if mosaic
           fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
           mosaic.x=(-38.0+100.0*fragment).round
@@ -372,8 +374,11 @@ module VermeilBSSNDSIntroScene
         if wild_focus && @vector && @vector.respond_to?(:snap)
           retreat=[[(p-0.43)/0.57,0.0].max,1.0].min
           eased=retreat*retreat*(3.0-2.0*retreat)
+          onset=[[elapsed/0.16,0.0].max,1.0].min
+          onset=onset*onset*(3.0-2.0*onset)
+          strength=onset*(1.0-eased)
           shot=main.each_index.map do |idx|
-            wild_focus[idx].to_f+(main[idx].to_f-wild_focus[idx].to_f)*eased
+            main[idx].to_f+(wild_focus[idx].to_f-main[idx].to_f)*strength
           end
           @vector.snap(shot)
           room.update if room && !(room.disposed? rescue true)
@@ -388,6 +393,7 @@ module VermeilBSSNDSIntroScene
             sp.visible=true if sp.respond_to?(:visible=)
             sp.opacity=255 if sp.respond_to?(:opacity=)
             sp.color=Color.new(0,0,0,0) if sp.respond_to?(:color=)
+            sp.tone=Tone.new(0,0,0,0) if sp.respond_to?(:tone=) && defined?(Tone)
           end
         end
         Graphics.update
