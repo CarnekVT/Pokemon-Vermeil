@@ -34,7 +34,7 @@ module BifrostCapture
     "ow_max_level"=>"0", "ow_spawn_probability"=>"100",
     "debug_force_shiny"=>"0",
     "range"=>"7", "width"=>"7", "optimal_range"=>"4", "alert_distance"=>"3",
-    "hit_near"=>"100", "hit_far"=>"60", "capture_floor"=>"10",
+    "hit_near"=>"90", "hit_far"=>"60", "capture_floor"=>"10",
     "back_multiplier"=>"175", "critical_front"=>"3", "critical_back"=>"35",
     "critical_multiplier"=>"250", "line_of_sight"=>"1",
     "reaction"=>"flee", "consume_on_miss"=>"1", "allow_empty_throw"=>"0",
