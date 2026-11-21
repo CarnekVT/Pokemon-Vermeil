@@ -96,6 +96,62 @@ module BifrostCapture
     end
   end
 
+  # Find a short walkable route around map walls and other Pokémon instead
+  # of repeatedly pushing against one blocked tile. Only the next step is
+  # applied, so moving targets and dynamic obstacles are re-evaluated.
+  CHASE_DIRECTIONS = [[2,0,1],[4,-1,0],[6,1,0],[8,0,-1]].freeze
+
+  def self.chase_direction(event,goal_range=1)
+    return nil unless $game_map && $game_player &&
+                      $game_map.respond_to?(:valid?) &&
+                      $game_map.respond_to?(:passable?)
+    goal = [$game_player.x,$game_player.y]
+    origin = [event.x,event.y]
+    queue = [[origin[0],origin[1],nil,0]]
+    seen = {origin=>true}
+    index = 0
+    while index < queue.length && index < 160
+      x,y,first,depth = queue[index]
+      index += 1
+      return first if first && (x-goal[0]).abs+(y-goal[1]).abs <= goal_range
+      next if depth >= 14
+      neighbors = CHASE_DIRECTIONS.sort_by do |_dir,dx,dy|
+        (x+dx-goal[0]).abs+(y+dy-goal[1]).abs
+      end
+      neighbors.each do |dir,dx,dy|
+        nx,ny = x+dx,y+dy
+        pos = [nx,ny]
+        next if seen[pos] || !$game_map.valid?(nx,ny)
+        next if pos == goal
+        next unless $game_map.passable?(x,y,dir) &&
+                    $game_map.passable?(nx,ny,10-dir)
+        occupied = $game_map.events.values.any? do |other|
+          next false if other.equal?(event) ||
+                        other.instance_variable_get(:@erased)
+          next false if other.respond_to?(:through) && other.through
+          other.x == nx && other.y == ny
+        end
+        next if occupied
+        seen[pos] = true
+        queue << [nx,ny,first || dir,depth+1]
+      end
+    end
+    nil
+  end
+
+  def self.chase_move(event,cfg)
+    before = [event.x,event.y]
+    if event.respond_to?(:move_generic)
+      goal = cfg["aggressive_attack_distance"].to_i.clamp(1,6)
+      direction = chase_direction(event,goal)
+      event.move_generic(direction) if direction
+    elsif event.respond_to?(:move_toward_player)
+      # Compatibility for alternative OW engines and headless tests.
+      event.move_toward_player
+    end
+    before != [event.x,event.y]
+  end
+
   def self.start_chase(event,cfg)
     return false unless eligible_event?(event)
     return false if fleeing?(event) || chasing?(event)
@@ -106,7 +162,7 @@ module BifrostCapture
       :original_type=>event.instance_variable_get(:@move_type),
       :stuck=>0, :phase=>:notice,
       :notice=>cfg["aggressive_notice_frames"].to_i.clamp(0,90),
-      :rest=>0, :attack=>0, :charge_steps=>0
+      :rest=>0, :attack=>0, :charge_steps=>0, :charged_once=>false
     }
     event.instance_variable_set(:@bifrost_chase_state,state)
     event.instance_variable_set(:@bifrost_mood_state,:alert)
@@ -158,13 +214,13 @@ module BifrostCapture
       state[:phase] = :watch
       event.instance_variable_set(:@bifrost_mood_state,:alert)
     end
-    # The outer sensing radius only warns. Actual pursuit starts within
-    # a separate inner radius, after the preparation completes.
-    if state[:phase] == :watch
-      event.turn_toward_player if event.respond_to?(:turn_toward_player) &&
-                                  !event.moving?
-      return if dist > cfg["aggressive_lunge_distance"].to_i.clamp(1,20)
+    # Outside the inner lunge radius, approach at normal chase speed after
+    # the warning. Charge only on entering the inner radius, at most once.
+    lunge_distance = cfg["aggressive_lunge_distance"].to_i.clamp(1,20)
+    if [:watch,:chase].include?(state[:phase]) &&
+       dist <= lunge_distance && !state[:charged_once]
       state[:phase] = :charge
+      state[:charged_once] = true
       state[:charge_steps] = cfg["aggressive_charge_steps"].to_i.clamp(1,5)
       state[:rest] = 0
       event.move_speed = cfg["aggressive_lunge_speed"].to_i.clamp(5,6)
@@ -172,6 +228,9 @@ module BifrostCapture
       event.jump(0,0) if event.respond_to?(:jump) &&
         (!event.respond_to?(:jumping?) || !event.jumping?)
       BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
+    elsif state[:phase] == :watch
+      state[:phase] = :chase
+      event.instance_variable_set(:@bifrost_mood_state,:chase)
     end
     if dist <= cfg["aggressive_attack_distance"].to_i.clamp(1,6)
       event.instance_variable_set(:@bifrost_mood_state,:threat)
@@ -198,12 +257,11 @@ module BifrostCapture
     return if event.moving? || event.move_route_forcing
     state[:rest] -= 1 if state[:rest] > 0
     return if state[:rest] > 0
-    before = [event.x,event.y]
-    event.move_toward_player if event.respond_to?(:move_toward_player)
+    moved = chase_move(event,cfg)
     # Keep a small breathing interval after each discrete tile movement.
     state[:rest] = state[:phase] == :charge ? 0 :
       cfg["aggressive_step_pause"].to_i.clamp(0,60)
-    if before == [event.x,event.y]
+    if !moved
       state[:stuck] += 1
       if state[:stuck] >= 45
         stop_chase(event)
