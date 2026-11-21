@@ -30,6 +30,20 @@
       "color": "#E9DBC0FF",
       "borde": "#536B8D4D",
       "borde_grosor": 1
+    },
+    {
+      "visible": true,
+      "opacidad": 255,
+      "id": "card_template",
+      "tipo": "panel",
+      "x": 0,
+      "y": 0,
+      "ancho": 140,
+      "alto": 35,
+      "capa": 2,
+      "color": "#F0E6D0FF",
+      "borde": "#A8936EBB",
+      "borde_grosor": 1
     }
   ],
   "biblioteca": {
