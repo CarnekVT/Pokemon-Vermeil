@@ -438,4 +438,34 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
   border-radius:7px;background:var(--bg-primary);border:1px solid var(--border);
   color:var(--text-secondary,var(--text-tertiary));font-size:11px;line-height:1.5}
 .ui-inspector-open-timeline{width:100%;padding:9px!important;margin-top:12px}
+
+/* 2.3 Native pages: persistent, calm navigation. No animated sliding menus. */
+.ui-native-navigation{
+  flex:0 0 auto;display:flex;flex-direction:column;gap:5px;
+  padding:8px 12px 9px;border-bottom:1px solid var(--border);
+  background:var(--bg-secondary,var(--ui-ux-panel));
+}
+.ui-native-navigation-top{display:flex;align-items:center;gap:8px;min-width:0}
+.ui-native-navigation-top strong{font-size:11px;letter-spacing:.07em;color:var(--text-secondary)}
+.ui-native-screen-search{flex:1 1 180px;min-width:90px;max-width:280px;min-height:31px}
+.ui-native-navigation .ui-workspace-btn{
+  min-height:30px!important;padding:6px 11px!important;border-radius:6px!important;
+}
+.ui-native-navigation .ui-workspace-btn:disabled{opacity:.35;cursor:default}
+.ui-native-page-groups{display:flex;flex-wrap:wrap;align-items:center;gap:15px}
+.ui-native-page-group{display:flex;align-items:center;gap:4px;min-width:0}
+.ui-native-page-caption{font-size:11px;font-weight:700;color:var(--text-tertiary);margin-right:4px}
+.ui-native-page{font-size:11px!important;min-height:29px!important}
+.ui-native-page.ui-native-active{
+  background:var(--accent,var(--bg-hover));color:#fff;border-color:var(--accent);
+  font-weight:700;
+}
+.ui-native-navigation-help{font-size:11px;color:var(--text-tertiary);line-height:1.35}
+.ui-native-navigation [hidden]{display:none!important}
+@media(max-width:900px){
+ .ui-native-navigation{padding:6px 8px}
+ .ui-native-screen-search{max-width:180px}
+ .ui-native-page-groups{gap:6px}
+ .ui-native-page-group{flex-wrap:wrap}
+}
 `;
