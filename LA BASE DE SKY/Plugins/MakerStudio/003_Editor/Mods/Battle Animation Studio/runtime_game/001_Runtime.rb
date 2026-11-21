@@ -5199,7 +5199,7 @@ module BattleAnimationStudioRuntime
       # treating the first argument as User.
       play_user = user
       play_target = raw_target
-      if common && common != :custom && common.to_s != "custom"
+      if common == true || common.to_s == "common"
         no_user = !!data["noUser"]
         no_target = !!data["noTarget"]
         affected = raw_target || user
