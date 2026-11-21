@@ -200,18 +200,11 @@ module BSSScriptedSpeakerComposition
           # calculated at intro setup. Never recompute pbSetPosition during
           # dialogue: that reset caused the trainer to jump/flicker.
           authored=(@bss_nds_trainer_anchor || {})[1]
-          # Use the real opponent formation even when this dialogue did not
-          # originate in the NDS battle intro (no cached trainer anchor).
-          side=respond_to?(:bss_camera_trainer_side_x) ? bss_camera_trainer_side_x(trainer,0) : nil
-          trainer.x=side if side && trainer.respond_to?(:x=)
           if authored && authored.length>=2
-            trainer.x=authored[0] if !side && authored[0] && trainer.respond_to?(:x=)
+            trainer.x=authored[0] if trainer.respond_to?(:x=)
             trainer.y=authored[1] if trainer.respond_to?(:y=)
           end
           trainer.opacity=0 if trainer.respond_to?(:opacity=)
-          # Drive camera and the REAL trainer together during speech. This
-          # prepares the strictly-right framing before the first visible fade.
-          bss_camera_begin_right_focus if respond_to?(:bss_camera_begin_right_focus)
           @bss_scripted_trainer_fade_started=Time.now.to_f
         end
       end
@@ -228,7 +221,7 @@ module BSSScriptedSpeakerComposition
         next unless foe && !(foe.disposed? rescue true)
         foe.z if foe.respond_to?(:z)
       end
-      trainer.z=[foes.map(&:to_i).max+2,150].max if !foes.empty? && trainer.respond_to?(:z=)
+      trainer.z=foes.map(&:to_i).min-1 if !foes.empty? && trainer.respond_to?(:z=)
     elsif @bss_scripted_trainer_restore && @bss_scripted_trainer_restore.key?(trainer.object_id)
       bss_scripted_restore_trainer_actor
     end
@@ -238,41 +231,17 @@ module BSSScriptedSpeakerComposition
 
   def bss_scripted_restore_trainer_actor
     snapshot=@bss_scripted_trainer_restore || {}
-    return if snapshot.empty? || @bss_scripted_trainer_restoring
-    @bss_scripted_trainer_restoring=true
-
-    # The same sprite (not a duplicate portrait) fades out at its current
-    # RIGHT-hand position. Only after alpha reaches zero is its old anchor
-    # restored, so there cannot be an in-frame teleport.
     snapshot.each_value do |row|
-      trainer,_was_visible,x,y,z,original_alpha=row
+      trainer,visible,x,y,z,opacity=row
       next unless trainer && !(trainer.disposed? rescue true)
-      initial=(trainer.opacity rescue 255).to_f
-      started=Time.now.to_f
-      frames=0
-      loop do
-        t=[[(Time.now.to_f-started)/0.28,0.0].max,1.0].min
-        eased=t*t*(3.0-2.0*t)
-        trainer.opacity=(initial*(1.0-eased)).round if trainer.respond_to?(:opacity=)
-        Graphics.update
-        frames+=1
-        break if (t>=1.0 && frames>=2) || frames>=120
-      end
-      trainer.visible=false if trainer.respond_to?(:visible=)
       trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
       trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
       trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
-      trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
+      trainer.opacity=opacity if !opacity.nil? && trainer.respond_to?(:opacity=)
+      trainer.visible=visible if trainer.respond_to?(:visible=)
     end
-    # Release the sole EBDX camera lease AFTER the actor has disappeared.
-    # The camera then interpolates home while the message box closes.
-    bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
-  rescue StandardError => e
-    BSS064.log("Trainer dialogue fade: #{e.class}: #{e.message}") if defined?(BSS064)
-  ensure
     @bss_scripted_trainer_restore=nil
     @bss_scripted_trainer_fade_started=nil
-    @bss_scripted_trainer_restoring=false
   end
 
   def pbUpdate(*args,&block)
