@@ -60,7 +60,7 @@ assert.equal(mapped.animation.source.nitroUnresolvedAudio.length,0);
 assert.equal(mapped.animation.source.nitroUnresolvedGraphics.length,0);
 assert.throws(()=>lib.parseNitroResourceMap("499=../secret.png","graphics"));
 assert.throws(()=>lib.parseNitroResourceMap("1911=https://invalid.example/sound","audio"));
-assert.throws(()=>lib.parseNitroResourceMap("1911=Anim/foo\\n1911=Anim/dup","audio"));
+assert.throws(()=>lib.parseNitroResourceMap("1911=Anim/foo\n1911=Anim/dup","audio"));
 assert.equal(result.animation.source.catalogType,"subanimation");
 assert.equal(result.animation.source.runtimeEnabled,false);
 assert.equal(result.animation.tracks[0].clips.length,1);
