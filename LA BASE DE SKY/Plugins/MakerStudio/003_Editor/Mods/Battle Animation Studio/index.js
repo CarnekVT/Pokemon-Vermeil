@@ -2968,6 +2968,10 @@ function renderStudio(ctx, host) {
                 };
                 var refreshMode = function () {
                     var isCommon = catalog.value === "common", isCustom = catalog.value !== "common" && catalog.value !== "move";
+                    var categoryHeading = body.querySelector('[data-new-custom-box] .bas-prop-title');
+                    if (categoryHeading) categoryHeading.textContent = catalog.value === "custom" ? "Custom / Standalone" : basCatalogMetadata(catalog.value).es;
+                    if (isCustom && catalog.value !== "custom" && !standaloneId.dataset.userEdited)
+                        standaloneId.value = "NEW_" + catalog.value.toUpperCase();
                     moveBox.style.display = (isCommon || isCustom) ? "none" : "";
                     commonBox.style.display = isCommon ? "" : "none";
                     customBox.style.display = isCustom ? "" : "none";
@@ -2987,7 +2991,9 @@ function renderStudio(ctx, host) {
                     if (match) moveQuery.value = match.name || match.id;
                     suggestName();
                 };
-                customId.oninput = suggestName; commonName.oninput = suggestName; standaloneId.oninput = suggestName;
+                customId.oninput = suggestName; commonName.oninput = suggestName;
+                standaloneId.oninput = function () { standaloneId.dataset.userEdited = "1"; suggestName(); };
+                catalog.value = basCatalogTypeFromMode(libraryMode);
                 refreshMode();
                 body.querySelector('[data-new-cancel]').onclick = function () { return dialog.close(); };
                 body.querySelector('[data-new-create]').onclick = function () {
