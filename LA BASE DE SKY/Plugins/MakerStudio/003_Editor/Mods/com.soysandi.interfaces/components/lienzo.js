@@ -637,7 +637,32 @@ export class Lienzo {
   // zoom_x y zoom_y por separado (ver Elemento#estirado), que es lo mismo.
   pintarImagen(c, el, ruta, m) {
     const dato = this.pedirImagen(ruta);
-    if (!dato) { this.pintarHueco(c, el, ruta ? "?" : "", m); return; }
+    if (!dato) {
+      // The shipped Vermeil profiles are slots of a PROCEDURAL live screen.
+      // A missing optional skin is not a broken picture: show its native
+      // component footprint instead of a wall of red ? placeholders.
+      const name=String(this.diseno?.nombre||"");
+      const native=name.startsWith("vermeil_libreta")||name.startsWith("vermeil_pokedex");
+      const defaultSlot=String(ruta||"").replace(/\.(png|jpg|jpeg)$/i,"").split("/").pop()===el.id;
+      if(native && defaultSlot) {
+        const book=name.startsWith("vermeil_libreta");
+        c.save();
+        c.fillStyle=book?"#E9DCC0":"#1E2A3C";
+        c.strokeStyle=book?"#AA926F":"#627994";
+        c.lineWidth=1;
+        c.fillRect(0,0,m.w,m.h);
+        c.strokeRect(.5,.5,m.w-1,m.h-1);
+        if(m.w>=72 && m.h>=20){
+          c.fillStyle=book?"#544436":"#E3EBF8";
+          c.textAlign="center";c.textBaseline="middle";c.font="10px sans-serif";
+          c.fillText(el.id.replace(/_/g," ").slice(0,22),m.w/2,m.h/2);
+        }
+        c.restore();
+        return;
+      }
+      this.pintarHueco(c, el, ruta ? "PNG" : "", m);
+      return;
+    }
     c.drawImage(dato.img, 0, 0, m.w, m.h);
   }
 
