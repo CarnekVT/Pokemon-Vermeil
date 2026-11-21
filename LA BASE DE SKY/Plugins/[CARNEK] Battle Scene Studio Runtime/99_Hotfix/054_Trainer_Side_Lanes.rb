@@ -109,6 +109,11 @@ module VermeilTrainerSideLanes
     end
     room=@bss070_ebdx_room
     room.update if room && !(room.disposed? rescue true)
+    # Project every opposing Pokemon and shadow through the SAME EBDX shot.
+    # Otherwise the backdrop moves but the battler stays behind for one frame.
+    if defined?(BSS103WorldSpaceBattlers) && @battle && @sprites
+      BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+    end
     if t>=1.0
       @bss_right_camera_to=nil
       @bss_right_camera_from=nil
