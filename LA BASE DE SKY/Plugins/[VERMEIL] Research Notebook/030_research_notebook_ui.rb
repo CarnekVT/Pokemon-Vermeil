@@ -980,8 +980,7 @@ module ResearchNotebook
 
     def draw_grid_cell(bmp, x, y, idx, selected)
       if idx >= @species.length
-        bmp.fill_rect(x, y, CELL_W, CELL_H, Color.new(218, 206, 180, 90))
-        bmp.fill_rect(x + 4, y + 4, CELL_W - 8, CELL_H - 8, Color.new(244, 238, 220, 80))
+        @skin.draw(bmp,:grid_cell,x,y) if @skin
         return
       end
       species = @species[idx]
@@ -1376,14 +1375,14 @@ module ResearchNotebook
     end
 
     def build_cursor_bitmap
-      bmp = @sprites["cursor"].bitmap
+      bmp=@sprites["cursor"].bitmap
       bmp.clear
-      color = Color.new(255, 255, 255, 210)
-      bmp.fill_rect(0, 0, CELL_W, 2, color)
-      bmp.fill_rect(0, CELL_H - 2, CELL_W, 2, color)
-      bmp.fill_rect(0, 0, 2, CELL_H, color)
-      bmp.fill_rect(CELL_W - 2, 0, 2, CELL_H, color)
-      bmp.fill_rect(3, 3, CELL_W - 6, CELL_H - 6, Color.new(255, 255, 255, 22))
+      return if @skin && @skin.draw(bmp,:grid_cursor,0,0)
+      # Only for old projects without the editable cursor component.
+      bmp.fill_rect(0,0,CELL_W,2,Color.new(255,255,255,220))
+      bmp.fill_rect(0,CELL_H-2,CELL_W,2,Color.new(255,255,255,220))
+      bmp.fill_rect(0,0,2,CELL_H,Color.new(255,255,255,220))
+      bmp.fill_rect(CELL_W-2,0,2,CELL_H,Color.new(255,255,255,220))
     end
 
     #===========================================================================
@@ -1695,8 +1694,14 @@ module ResearchNotebook
     end
 
     def draw_card(bmp, x, y, w, h, fill = PAPER_2)
-      bmp.fill_rect(x, y, w, h, Color.new(168, 147, 111, 110))
-      bmp.fill_rect(x + 1, y + 1, w - 2, h - 2, fill)
+      # A single editable card template styles every native detail card.
+      if defined?(VermeilInterfaceLayout) &&
+         VermeilInterfaceLayout.paint_native(bmp,@interface_layout,
+                                             "card_template",x,y,w,h)
+        return
+      end
+      bmp.fill_rect(x,y,w,h,Color.new(168,147,111,110))
+      bmp.fill_rect(x+1,y+1,w-2,h-2,fill)
     end
 
     def draw_status_chip(bmp, x, y, w, h, text, color)
@@ -1818,14 +1823,19 @@ module ResearchNotebook
     end
 
     def draw_footer(bmp)
-      if @sections.empty?
-        text = ResearchNotebook.t("Atrás · Cerrar")
-      elsif @detail_open
-        text = current_section == :golden && detail_page_count > 1 ? ResearchNotebook.t("Arr/Abj: Pokémon    Izq/Der: Página    C/X: Volver") : ResearchNotebook.t("Arr/Abj: Pokémon    C/X: Volver")
-      else
-        text = ResearchNotebook.t("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
-      end
-      draw_text(bmp, 12, FOOTER_Y + 13, WIDTH - 24, 18, text, 12, WHITE, 1, false)
+      # No special Unicode arrow/glyphs that the project's pixel font lacks,
+      # and no hard-coded C/Z/D/X keys overriding the player's bindings.
+      instruction=if @sections.empty?
+                    ResearchNotebook.t("ATRAS: Cerrar")
+                  elsif @detail_open
+                    current_section==:golden && detail_page_count>1 ?
+                      ResearchNotebook.t("ARR/ABA: Especie   IZQ/DER: Pagina   ATRAS: Volver") :
+                      ResearchNotebook.t("ARR/ABA: Especie   ATRAS: Volver")
+                  else
+                    ResearchNotebook.t("MOVER: Elegir   ACEPTAR: Ficha   ACCION: Seccion   ATRAS: Cerrar")
+                  end
+      draw_editor_text(bmp,"footer_hint",12,FOOTER_Y+13,WIDTH-24,18,
+                       instruction,12,WHITE,1,false)
     end
 
     def draw_text(bmp, x, y, w, h, string, size = 18, color = INK, align = 0, bold = false)
