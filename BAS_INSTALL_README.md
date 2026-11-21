@@ -1,4 +1,4 @@
-# Pokémon Vermeil · Battle Animation Studio v1.0.89
+# Pokémon Vermeil · Battle Animation Studio v1.0.91
 ## ¿Qué hace este programa?
 Battle Animation Studio es un **mod del editor Maker Studio** para crear y retocar animaciones de combate Pokémon sin editar directamente los parámetros Ruby/PBS. Incluye timeline con keyframes, gráficos, sonido, cámara y emitters/partículas (trayectoria, aparición, dispersión y vida).
 ## Contenido del paquete
@@ -30,3 +30,16 @@ Los 77 ejemplos de emitters existentes se han auditado en su conjunto: usan el r
 Los números del inspector cambian según la geometría escogida. Se conserva la pestaña Técnica/PBS.
 
 **Pruebas**: Se comprobó que los dos archivos JS editados son sintácticamente válidos tras retirar declaraciones de import/export para su análisis, y se contrastaron las 77 rutas gráficas con el árbol de GitHub. Aún no se ha ejecutado la interfaz ni el runtime en una sesión real de Maker Studio.
+
+## Familias de animación y scripts Nitro (v1.0.91)
+La biblioteca dispone de **13 familias**: Moves, Common, Custom, Subanimaciones, Estados, Clima, Terreno, Habilidades, Objetos, Entradas, Debilitamiento, Campo y Transiciones. La creación de una familia adicional puede incluir un starter procedural editable; no requiere imágenes externas ni cambia las animaciones antiguas.
+
+Al crear o importar se puede seleccionar la familia desde la biblioteca (selector «Más tipos»). Para invocar cualquier familia adicional en el juego usa la llamada explícita desde Battle::Scene:
+`@scene.pbPlayBattleAnimationStudioCategory(:weather, "RAIN_START", user, targets)`.
+No se agregan hooks automáticos para clima, entradas ni debilitamiento: su implementación debe coordinarse con el BSS y evitar duplicaciones de efectos.
+
+Menú **Biblioteca → Importar → Importar script Nitro (texto)** analiza comandos HGSS conocidos, conserva slots/SPA y referencias SFX y crea placeholders editables, pero **no** interpreta automáticamente el bytecode NDS ni reproduce sus texturas originales. Las animaciones importadas quedan deshabilitadas hasta que se revisen y activen deliberadamente.
+
+El extractor local de NARC/SPA y las instrucciones están en `BAS_SOURCE_REFERENCES/OriginHeartGold/ANIMATION_IMPORT_GUIDE.md`. Sus datos de salida deben mantenerse privados. No se incluyeron archivos gráficos, sonidos ni ROMs de Origin HeartGold: el repositorio público de traducción no contiene las animaciones binario completas y la licencia de las herramientas no libera esos materiales.
+
+Se corregió la ruta obsoleta de `Punch` a `Graphics/AnimationStudio/punches.png` (ya existente en el proyecto y en las animaciones compiladas). Se añadieron checks de JavaScript, sintaxis Ruby, catálogos, scripts y fixtures Nitro mediante `.github/workflows/bas-animations-check.yml`. Pendiente ejecución real en Maker Studio y en juego.
