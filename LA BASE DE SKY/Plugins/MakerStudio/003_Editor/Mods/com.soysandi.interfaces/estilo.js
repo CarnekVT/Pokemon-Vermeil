@@ -468,4 +468,34 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
  .ui-native-page-groups{gap:6px}
  .ui-native-page-group{flex-wrap:wrap}
 }
+
+/* Real interface library, organized as UI/<interface>/<screen>.json. */
+.ui-interface-library{
+ display:flex;flex-direction:column;gap:5px;flex:0 1 auto;min-height:70px;
+ max-height:235px;overflow:hidden;background:var(--bg-primary);
+ border-bottom:1px solid var(--border);
+}
+.ui-library-title{
+ display:flex;align-items:center;justify-content:space-between;padding:7px 9px 3px;
+ color:var(--text-tertiary);font-size:11px;letter-spacing:.04em;
+}
+.ui-library-title .ui-workspace-btn{min-height:27px!important;padding:3px 9px!important}
+.ui-library-tree{overflow-y:auto;overscroll-behavior:contain;min-height:30px;
+ padding:2px 6px 8px;scrollbar-gutter:stable}
+.ui-library-folder{border-radius:6px;margin:2px 0;background:transparent}
+.ui-library-folder[open]{background:var(--bg-secondary)}
+.ui-library-folder-title{
+ display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 9px;
+ font-size:12px;font-weight:650;color:var(--text-primary);user-select:none
+}
+.ui-library-folder-title small{color:var(--text-tertiary);font-size:11px;font-weight:400;margin-left:auto}
+.ui-library-folder-content{display:flex;flex-direction:column;gap:2px;padding:0 5px 6px 18px}
+.ui-library-screen,.ui-library-add-page{display:block;width:100%;text-align:left;
+ border:0;border-radius:5px;background:transparent;padding:6px 8px!important;
+ color:var(--text-secondary,var(--text-primary));font-size:11px;cursor:pointer
+}
+.ui-library-screen:hover,.ui-library-add-page:hover{background:var(--bg-hover,var(--bg-primary))}
+.ui-library-screen.ui-native-active{background:var(--accent);color:white;font-weight:700}
+.ui-library-add-page{font-style:italic;color:var(--text-tertiary)}
+.ui-library-folder:focus-within{outline:1px solid var(--border)}
 `;
