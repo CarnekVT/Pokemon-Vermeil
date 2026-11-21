@@ -16,6 +16,7 @@ import { animationFromCode, discoverCodeMetadata } from "./importers.js";
 // Internal compatibility layer inspired by Animation Multi-System Compat.
 // It keeps one Studio/Preview Bridge, but routes each source through a clearly
 // identified subsystem and preserves EBDX definition metadata such as species.
+import { BAS_ANIMATION_CATALOGS, basCatalogMode, basCatalogMetadata } from "./animation_catalogs.js";
 export var MULTI_SYSTEM_ORDER = ["studio", "vanilla", "pbs", "vermeil_ruby", "ebdx", "ruby"];
 export function detectCodeSystem(text, filename) {
     if (filename === void 0) {
@@ -314,84 +315,29 @@ export function importCodeVariant(text, filename, context, options) {
     return animation;
 }
 export function buildMultiSystemRegistry(animations) {
-    var e_9, _a, e_10, _b, e_11, _c;
-    var moves = new Map(), common = new Map(), custom = new Map();
-    try {
-        for (var _d = __values(animations || []), _e = _d.next(); !_e.done; _e = _d.next()) {
-            var a = _e.value;
-            var src = a.source || {};
-            var map = src.catalogType === "common" ? common : (src.catalogType === "custom" ? custom : moves);
-            var key = String(src.move || a.name || "Animation");
-            if (!map.has(key))
-                map.set(key, []);
-            map.get(key).push(a);
-        }
-    }
-    catch (e_9_1) {
-        e_9 = { error: e_9_1 };
-    }
-    finally {
-        try {
-            if (_e && !_e.done && (_a = _d.return))
-                _a.call(_d);
-        }
-        finally {
-            if (e_9)
-                throw e_9.error;
-        }
-    }
-    var systemRank = function (a) {
-        var src = a.source || {};
-        var sys = String(src.system || src.type || "studio");
-        var i = MULTI_SYSTEM_ORDER.indexOf(sys);
-        return i < 0 ? 99 : i;
+    const maps = Object.fromEntries(BAS_ANIMATION_CATALOGS.map(c=>[c.mode,new Map()]));
+    const order = new Map(MULTI_SYSTEM_ORDER.map((v,i)=>[v,i]));
+    const sorter=(a,b)=>{
+        const x=a.source||{},y=b.source||{};
+        return Number(!!x.opposing)-Number(!!y.opposing)||
+            Number(x.version||0)-Number(y.version||0)||
+            (order.has(x.system||x.type)?order.get(x.system||x.type):99)-
+            (order.has(y.system||y.type)?order.get(y.system||y.type):99)||
+            String(x.species||"").localeCompare(String(y.species||""),undefined,{numeric:true,sensitivity:"base"})||
+            String(a.name||"").localeCompare(String(b.name||""),undefined,{numeric:true,sensitivity:"base"});
     };
-    var sorter = function (a, b) {
-        var sa = a.source || {}, sb = b.source || {};
-        return Number(sa.opposing) - Number(sb.opposing) ||
-            Number(sa.version || 0) - Number(sb.version || 0) ||
-            systemRank(a) - systemRank(b) ||
-            String(sa.species || "").localeCompare(String(sb.species || ""), undefined, { numeric: true, sensitivity: "base" }) ||
-            String(a.name || "").localeCompare(String(b.name || ""), undefined, { numeric: true, sensitivity: "base" });
-    };
-    try {
-        for (var _f = __values([moves, common, custom]), _g = _f.next(); !_g.done; _g = _f.next()) {
-            var map = _g.value;
-            try {
-                for (var _h = (e_11 = void 0, __values(map.values())), _j = _h.next(); !_j.done; _j = _h.next()) {
-                    var arr = _j.value;
-                    arr.sort(sorter);
-                }
-            }
-            catch (e_11_1) {
-                e_11 = { error: e_11_1 };
-            }
-            finally {
-                try {
-                    if (_j && !_j.done && (_c = _h.return))
-                        _c.call(_h);
-                }
-                finally {
-                    if (e_11)
-                        throw e_11.error;
-                }
-            }
-        }
+    for(const animation of animations||[]){
+        if(!animation)continue;
+        const src=animation.source||{};
+        const mode=basCatalogMode(src.catalogType);
+        const map=maps[mode];
+        const key=String(src.move||animation.name||"Animation");
+        if(!map.has(key))map.set(key,[]);
+        map.get(key).push(animation);
     }
-    catch (e_10_1) {
-        e_10 = { error: e_10_1 };
-    }
-    finally {
-        try {
-            if (_g && !_g.done && (_b = _f.return))
-                _b.call(_f);
-        }
-        finally {
-            if (e_10)
-                throw e_10.error;
-        }
-    }
-    return { moves: moves, common: common, custom: custom };
+    for(const map of Object.values(maps))
+        for(const list of map.values())list.sort(sorter);
+    return maps; // Preserve .moves/.common/.custom for existing callers.
 }
 export function compatibilityReport(animation) {
     var e_12, _a;
@@ -401,7 +347,7 @@ export function compatibilityReport(animation) {
     var lines = [];
     var system = String(src.system || src.type || "studio");
     lines.push("Sistema: ".concat(system));
-    lines.push("Tipo: ".concat(src.catalogType === "common" ? "Common" : (src.catalogType === "custom" ? "Custom / Standalone" : "Move")));
+    lines.push("Tipo: ".concat(basCatalogMetadata(src.catalogType).es));
     if (src.move)
         lines.push("ID: ".concat(src.move));
     if (src.species)
