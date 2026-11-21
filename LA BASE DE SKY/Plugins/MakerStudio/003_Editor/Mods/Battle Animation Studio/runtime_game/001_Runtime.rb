@@ -217,7 +217,7 @@ module BattleAnimationStudioRuntime
   end
 
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 37
+  VERSION = 38
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
