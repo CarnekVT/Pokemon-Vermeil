@@ -693,29 +693,22 @@ module ResearchNotebook
     #===========================================================================
     # Dibujo general
     #===========================================================================
+    # The UI/Libreta/Catalogo profile owns all page chrome and backgrounds.
+    # Ruby supplies state and dynamic fields only, never a second paper layer.
     def draw_static
-      bmp = @sprites["paper"].bitmap
+      bmp=@sprites["paper"].bitmap
       bmp.clear
-      bmp.fill_rect(0, 0, WIDTH, HEIGHT, COVER)
-      # El bloque visible de páginas coincide con el bloque usado por la tapa.
-      # Así la animación revela la libreta que ya está debajo, no otra pantalla.
-      bmp.fill_rect(layout_position("cover", "x", BOOK_X) - 2, layout_position("cover", "y", BOOK_Y) - 2, BOOK_W + 4, BOOK_H + 4, Color.new(18, 13, 11, 110))
-      bmp.fill_rect(layout_position("cover", "x", BOOK_X), layout_position("cover", "y", BOOK_Y), BOOK_W, BOOK_H, PAPER)
-      bmp.fill_rect(layout_position("cover", "x", BOOK_X) + 3, layout_position("cover", "y", BOOK_Y) + 3, BOOK_W - 6, BOOK_H - 6, PAPER_2)
-      bmp.fill_rect(308, layout_position("cover", "y", BOOK_Y), 2, BOOK_H, Color.new(156, 135, 100))
-      bmp.fill_rect(310, layout_position("cover", "y", BOOK_Y), 3, BOOK_H, Color.new(90, 72, 55, 65))
-      bmp.fill_rect(313, layout_position("cover", "y", BOOK_Y) + 5, 1, BOOK_H - 10, Color.new(255, 255, 255, 70))
-      y = 83
-      while y < 420
-        bmp.fill_rect(20, y, 278, 1, Color.new(214, 201, 171, 70))
-        y += 31
-      end
-      bmp.fill_rect(0, 0, WIDTH, HEADER_H, COVER)
-      bmp.fill_rect(0, FOOTER_Y, WIDTH, HEIGHT - FOOTER_Y, COVER)
-      # Arte de cuaderno editable: 640x480, detrás de todos los datos.
-      @skin.draw(bmp, :background, 0, 0) if @skin
+      @skin.draw(bmp,:background,0,0) if @skin
+      @skin.draw(bmp,:pages,layout_position("pages","x",BOOK_X),
+                            layout_position("pages","y",BOOK_Y)) if @skin
+      @skin.draw(bmp,:book_spine,
+                 layout_position("book_spine","x",308),
+                 layout_position("book_spine","y",BOOK_Y)) if @skin
+      @skin.draw(bmp,:header_bar,0,0) if @skin
+      @skin.draw(bmp,:footer_bar,0,FOOTER_Y) if @skin
       draw_editor_text(bmp,"notebook_title",18,10,286,30,
-                       ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"),19,WHITE,0,true)
+                       ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"),
+                       19,WHITE,0,true)
     end
 
     def refresh
@@ -760,10 +753,11 @@ module ResearchNotebook
         tab_key = entry[0] == :arcane ? :tab_arcane : :tab_golden
         xx = layout_position(tab_key.to_s, "x", xx)
         ty = layout_position(tab_key.to_s, "y", 8)
-        tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, ty))
-        bmp.fill_rect(xx, ty, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
-        bmp.fill_rect(xx, ty + 34, w - 4, 3, color) if active
-        draw_text(bmp, xx + 4, ty + 16, w - 12, 17, label, 12, WHITE, 1, true)
+        tab_drawn=(@skin && @skin.draw(bmp,tab_key,xx,ty))
+        bmp.fill_rect(xx,ty,w-4,37,active ? color : Color.new(87,70,55)) if !tab_drawn
+        bmp.fill_rect(xx,ty+34,w-4,3,color) if active
+        draw_editor_text(bmp,"#{tab_key}_label",xx+4,ty+16,w-12,17,
+                         label,12,WHITE,1,true)
       end
       subtitle = current_section == :arcane ? ResearchNotebook.t("Notas sobre energía arcana") : ResearchNotebook.t("Notas sobre energía áurea")
       draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
@@ -809,9 +803,16 @@ module ResearchNotebook
           color=VermeilInterfaceLayout.color(data["color"],color)
           # Fixed captions are authored in the editor; dynamic species text
           # always takes its actual value from game state.
-          if id=="notebook_title" && data["texto"].to_s!=""
+          if ["notebook_title","cover_title","cover_subtitle",
+              "cover_brand"].include?(id) && data["texto"].to_s!=""
             content=data["texto"].to_s
           end
+          alignment=case data["alineacion"]
+                    when "centro" then 1
+                    when "derecha" then 2
+                    else alignment
+                    end
+          return if data["visible"]==false
         end
       end
       draw_text(bmp,x,y,w,h,content,size,color,alignment,bold)
@@ -1457,52 +1458,45 @@ module ResearchNotebook
     end
 
     def create_cover_sprites
-      @sprites["book_shadow"] = BitmapSprite.new(BOOK_W + 10, BOOK_H + 10, @viewport)
-      shadow = @sprites["book_shadow"]
-      shadow.z = 87
-      shadow.x = layout_position("cover", "x", BOOK_X) + 5
-      shadow.y = layout_position("cover", "y", BOOK_Y) + 6
-      shadow.bitmap.fill_rect(0, 0, BOOK_W + 10, BOOK_H + 10, Color.new(0, 0, 0, 135))
+      @sprites["book_shadow"]=BitmapSprite.new(BOOK_W+10,BOOK_H+10,@viewport)
+      shadow=@sprites["book_shadow"]
+      shadow.z=87
+      shadow.x=layout_position("cover","x",BOOK_X)+5
+      shadow.y=layout_position("cover","y",BOOK_Y)+6
+      shadow.bitmap.fill_rect(0,0,BOOK_W+10,BOOK_H+10,Color.new(0,0,0,135))
 
-      @sprites["book_pages"] = BitmapSprite.new(BOOK_W, BOOK_H, @viewport)
-      pages = @sprites["book_pages"]
-      pages.z = 88
-      pages.x = layout_position("cover", "x", BOOK_X)
-      pages.y = layout_position("cover", "y", BOOK_Y)
-      pages.bitmap.fill_rect(0, 0, BOOK_W, BOOK_H, PAPER_DARK)
-      pages.bitmap.fill_rect(4, 4, BOOK_W - 8, BOOK_H - 8, PAPER_2)
-      spine = 307
-      pages.bitmap.fill_rect(spine, 4, 2, BOOK_H - 8, Color.new(145, 124, 92, 150))
-      pages.bitmap.fill_rect(spine + 2, 5, 2, BOOK_H - 10, Color.new(255, 255, 255, 60))
-      @skin.draw(pages.bitmap, :pages, 0, 0) if @skin
-      4.times { |i| pages.bitmap.fill_rect(BOOK_W - 10 + i * 2, 8, 1, BOOK_H - 16, Color.new(170, 150, 118, 100)) }
+      @sprites["book_pages"]=BitmapSprite.new(BOOK_W,BOOK_H,@viewport)
+      pages=@sprites["book_pages"]
+      pages.z=88
+      pages.x=layout_position("cover","x",BOOK_X)
+      pages.y=layout_position("cover","y",BOOK_Y)
+      @skin.draw(pages.bitmap,:pages,0,0) if @skin
 
-      @sprites["front_cover"] = BitmapSprite.new(BOOK_W, BOOK_H, @viewport)
-      cover = @sprites["front_cover"]
-      cover.z = 90
-      cover.x = layout_position("cover", "x", BOOK_X)
-      cover.y = layout_position("cover", "y", BOOK_Y)
-      cover.ox = 0
-      cover.zoom_x = 1.0
+      @sprites["front_cover"]=BitmapSprite.new(BOOK_W,BOOK_H,@viewport)
+      cover=@sprites["front_cover"]
+      cover.z=90
+      cover.x=layout_position("cover","x",BOOK_X)
+      cover.y=layout_position("cover","y",BOOK_Y)
+      cover.ox=0
+      cover.zoom_x=1.0
       pbSetSystemFont(cover.bitmap) if defined?(pbSetSystemFont)
-      bmp = cover.bitmap
-      bmp.fill_rect(0, 0, BOOK_W, BOOK_H, COVER)
-      bmp.fill_rect(7, 7, BOOK_W - 14, BOOK_H - 14, COVER_2)
-      bmp.fill_rect(13, 13, 22, BOOK_H - 26, Color.new(35, 24, 21))
-      bmp.fill_rect(39, 18, 2, BOOK_H - 36, Color.new(132, 96, 60, 150))
-      label_w = 270
-      label_x = (BOOK_W - label_w) / 2
-      bmp.fill_rect(label_x, 94, label_w, 122, Color.new(50, 36, 28))
-      bmp.fill_rect(label_x + 6, 100, label_w - 12, 110, Color.new(91, 66, 43))
-      @skin.draw(bmp, :cover, 0, 0) if @skin
-      draw_text(bmp, label_x + 16, 118, label_w - 32, 34, ResearchNotebook.t("LIBRETA"), 25, WHITE, 1, true)
-      draw_text(bmp, label_x + 16, 153, label_w - 32, 28, ResearchNotebook.t("DE INVESTIGACIÓN"), 15, WHITE, 1, true)
-      draw_ring(bmp, BOOK_W / 2, 265, 54, Color.new(216, 190, 126, 125))
-      draw_ring(bmp, BOOK_W / 2, 265, 36, Color.new(216, 190, 126, 80))
-      draw_text(bmp, label_x + 16, BOOK_H - 56, label_w - 32, 20, ResearchNotebook.t("VERMEIL"), 10, Color.new(213, 194, 158), 1, true)
-      pages.visible = false
-      cover.visible = true
-      shadow.visible = true
+      bmp=cover.bitmap
+      # Every visible part of this folding book cover is authored by
+      # MakerStudio and folds in the same bitmap, instead of separately
+      # drawing a second hardcoded cover with overlapping graphics.
+      @skin.draw(bmp,:cover,0,0) if @skin
+      @skin.draw(bmp,:cover_label,
+                 layout_position("cover_label","x",178),
+                 layout_position("cover_label","y",94)) if @skin
+      draw_editor_text(bmp,"cover_title",194,118,238,34,
+                       ResearchNotebook.t("LIBRETA"),25,WHITE,1,true)
+      draw_editor_text(bmp,"cover_subtitle",194,153,238,28,
+                       ResearchNotebook.t("DE INVESTIGACION"),15,WHITE,1,true)
+      draw_editor_text(bmp,"cover_brand",194,331,238,20,
+                       ResearchNotebook.t("VERMEIL"),10,WHITE,1,true)
+      pages.visible=false
+      cover.visible=true
+      shadow.visible=true
     end
 
     def set_content_opacity(value)
