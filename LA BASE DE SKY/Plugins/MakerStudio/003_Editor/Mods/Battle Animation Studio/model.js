@@ -177,6 +177,7 @@ export function createCameraTrack() {
         startFrame: 0, endFrame: 0, logic: []
     };
 }
+import { normalizeBasCatalogType } from "./animation_catalogs.js";
 export function createAnimation(name, options) {
     if (name === void 0) {
         name = "New Animation";
@@ -192,7 +193,7 @@ export function createAnimation(name, options) {
         fps: 20, duration: 30,
         source: {
             type: "studio", move: options.move || null, version: 0,
-            catalogType: ["move", "common", "custom"].includes(String(options.catalogType || "move")) ? String(options.catalogType || "move") : "move",
+            catalogType: normalizeBasCatalogType(options.catalogType),
             opposing: targetMode === "player",
             sideContext: sideContext,
             targetMode: ["foe", "player", "both", "environment"].includes(targetMode) ? targetMode : "foe",
@@ -788,8 +789,7 @@ function normalizeAnimation(a) {
     if (typeof a.source.authors === "string") a.source.authors = a.source.authors.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
     if (!Array.isArray(a.source.authors)) a.source.authors = a.source.author ? [String(a.source.author)] : [];
     a.source.authors = a.source.authors.map(function (x) { return String(x || "").trim(); }).filter(Boolean);
-    if (!["move", "common", "custom"].includes(String(a.source.catalogType || "move")))
-        a.source.catalogType = "move";
+    a.source.catalogType = normalizeBasCatalogType(a.source.catalogType);
     if (!a.source.targetMode)
         a.source.targetMode = a.source.opposing || a.source.sideContext === "foe" ? "player" : "foe";
     if (!["auto", "single_foe", "multiple_foes", "single_other", "adjacent_others", "single_user", "multiple_users", "all_battlers", "environment"].includes(String(a.source.targetScope || "single_foe")))
