@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "nombre": "Pokedex/Area",
+  "titulo": "Pokédex · ubicaciones",
+  "lienzo": {
+    "ancho": 640,
+    "alto": 480,
+    "scale_mode": "pixel_perfect",
+    "pixel_perfect": true,
+    "integer_scaling": true,
+    "safe_area": false
+  },
+  "oscurecer_mapa": 0,
+  "aperturas": {},
+  "elementos": [
+    {
+      "id": "area_page",
+      "tipo": "imagen",
+      "capa": 0,
+      "x": 0,
+      "y": 0,
+      "ancho": 640,
+      "alto": 480,
+      "imagen": "Graphics/UI/Vermeil/NewPokedex/area_page",
+      "entrada": {
+        "efecto": "desde_derecha",
+        "duracion": 0.19,
+        "suavizado": "suave",
+        "distancia": 48
+      }
+    }
+  ],
+  "biblioteca": {
+    "carpeta": "Pokedex",
+    "vista": "Area",
+    "origen": "vermeil_pokedex_area"
+  }
+}
