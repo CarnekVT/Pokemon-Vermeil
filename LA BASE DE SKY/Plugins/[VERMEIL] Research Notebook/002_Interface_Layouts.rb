@@ -23,8 +23,12 @@ module VermeilInterfaceLayout
   NATIVE_IDS = {
     "Libreta/Catalogo" => %w[background cover pages focus_panel grid_panel
                             focus_sprite tab_arcane tab_golden
-                            notebook_title focus_number focus_name],
-    "Libreta/Ficha" => %w[detail_panel],
+                            notebook_title focus_number focus_name header_bar
+                            footer_bar book_spine grid_cell grid_cell_selected
+                            grid_cursor cover_label cover_title cover_subtitle
+                            cover_brand tab_arcane_label tab_golden_label
+                            footer_hint],
+    "Libreta/Ficha" => %w[detail_panel card_template],
     "Pokedex/Lista" => %w[background header list_panel portrait_panel
                          portrait_pokemon counter_panel scrollbar_track
                          list_row list_row_selected
@@ -137,12 +141,12 @@ module VermeilInterfaceLayout
   # Graphic slots: a changed PNG, size, panel fill, opacity or position
   # in MakerStudio now modifies the REAL native panel (not a fake preview).
   # Return true only when there is actual authored artwork/panel paint.
-  def paint_native(canvas, layout, id, x, y)
+  def paint_native(canvas, layout, id, x, y, target_width=nil, target_height=nil)
     data=element(layout,id)
     return false unless data.is_a?(Hash)
     return true if data["visible"] == false
-    width=data["ancho"].to_i
-    height=data["alto"].to_i
+    width=target_width ? target_width.to_i : data["ancho"].to_i
+    height=target_height ? target_height.to_i : data["alto"].to_i
     if data["tipo"]=="imagen"
       bmp=bitmap_for(data["imagen"])
       return false unless bmp && !(bmp.disposed? rescue true)
