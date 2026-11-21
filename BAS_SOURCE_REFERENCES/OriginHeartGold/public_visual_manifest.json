@@ -1,0 +1,2068 @@
+{
+  "format": "bas-external-visual-reference-v1",
+  "sourceRepository": "https://github.com/originheartgold/originheartgold.github.io",
+  "sourceSite": "https://originheartgold.github.io/",
+  "created": "2026-11-21",
+  "usage": "Reference gallery only; no local redistribution, asset importing, timeline or animation claiming.",
+  "total": 294,
+  "assets": [
+    {
+      "path": "_astro/01-entrance.D1jx34gX.png",
+      "name": "01 entrance",
+      "category": "escenas",
+      "bytes": 18130,
+      "url": "https://originheartgold.github.io/_astro/01-entrance.D1jx34gX.png"
+    },
+    {
+      "path": "_astro/02-clearing.CgAsE4WO.png",
+      "name": "02 clearing",
+      "category": "escenas",
+      "bytes": 24859,
+      "url": "https://originheartgold.github.io/_astro/02-clearing.CgAsE4WO.png"
+    },
+    {
+      "path": "_astro/03-clearing.C9f0UdYn.png",
+      "name": "03 clearing",
+      "category": "escenas",
+      "bytes": 24872,
+      "url": "https://originheartgold.github.io/_astro/03-clearing.C9f0UdYn.png"
+    },
+    {
+      "path": "_astro/04-clearing.C9Z-as_5.png",
+      "name": "04 clearing",
+      "category": "escenas",
+      "bytes": 24997,
+      "url": "https://originheartgold.github.io/_astro/04-clearing.C9Z-as_5.png"
+    },
+    {
+      "path": "_astro/05-clearing.DTHBAD9Q.png",
+      "name": "05 clearing",
+      "category": "escenas",
+      "bytes": 25115,
+      "url": "https://originheartgold.github.io/_astro/05-clearing.DTHBAD9Q.png"
+    },
+    {
+      "path": "_astro/alto-mare-waters-ether-201.DKhTN6kq_1WT5Sx.webp",
+      "name": "alto mare waters ether 201",
+      "category": "ubicaciones",
+      "bytes": 19846,
+      "url": "https://originheartgold.github.io/_astro/alto-mare-waters-ether-201.DKhTN6kq_1WT5Sx.webp"
+    },
+    {
+      "path": "_astro/alto-mare-waters-hp-up-202.BvyFN9mW_2bnpAL.webp",
+      "name": "alto mare waters hp up 202",
+      "category": "ubicaciones",
+      "bytes": 23482,
+      "url": "https://originheartgold.github.io/_astro/alto-mare-waters-hp-up-202.BvyFN9mW_2bnpAL.webp"
+    },
+    {
+      "path": "_astro/azalea-town-full-heal-113.D3lU28ej_ZcG4Tj.webp",
+      "name": "azalea town full heal 113",
+      "category": "ubicaciones",
+      "bytes": 25574,
+      "url": "https://originheartgold.github.io/_astro/azalea-town-full-heal-113.D3lU28ej_ZcG4Tj.webp"
+    },
+    {
+      "path": "_astro/bell-tower-3f-max-potion-139.DVZNYl9L_Z2rHHyQ.webp",
+      "name": "bell tower 3f max potion 139",
+      "category": "ubicaciones",
+      "bytes": 13976,
+      "url": "https://originheartgold.github.io/_astro/bell-tower-3f-max-potion-139.DVZNYl9L_Z2rHHyQ.webp"
+    },
+    {
+      "path": "_astro/bell-tower-5f-full-restore-140.BXih_1La_j9HQo.webp",
+      "name": "bell tower 5f full restore 140",
+      "category": "ubicaciones",
+      "bytes": 12568,
+      "url": "https://originheartgold.github.io/_astro/bell-tower-5f-full-restore-140.BXih_1La_j9HQo.webp"
+    },
+    {
+      "path": "_astro/bell-tower-8f-carbos-141.DF4qjjrR_Z1xPLi0.webp",
+      "name": "bell tower 8f carbos 141",
+      "category": "ubicaciones",
+      "bytes": 10810,
+      "url": "https://originheartgold.github.io/_astro/bell-tower-8f-carbos-141.DF4qjjrR_Z1xPLi0.webp"
+    },
+    {
+      "path": "_astro/bellchime-trail-big-mushroom-144.6-AHzzt9_a8OIu.webp",
+      "name": "bellchime trail big mushroom 144",
+      "category": "ubicaciones",
+      "bytes": 32980,
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-big-mushroom-144.6-AHzzt9_a8OIu.webp"
+    },
+    {
+      "path": "_astro/bellchime-trail-big-mushroom-146.BLr7905M_1jC0Kh.webp",
+      "name": "bellchime trail big mushroom 146",
+      "category": "ubicaciones",
+      "bytes": 36026,
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-big-mushroom-146.BLr7905M_1jC0Kh.webp"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-142.D58Mm-Sx_qvdMs.webp",
+      "name": "bellchime trail tiny mushroom 142",
+      "category": "ubicaciones",
+      "bytes": 32920,
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-142.D58Mm-Sx_qvdMs.webp"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-143.Hd6c7NMx_y4Uoh.webp",
+      "name": "bellchime trail tiny mushroom 143",
+      "category": "ubicaciones",
+      "bytes": 33370,
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-143.Hd6c7NMx_y4Uoh.webp"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-145.Cl9sYGSl_Z1Kj5Dk.webp",
+      "name": "bellchime trail tiny mushroom 145",
+      "category": "ubicaciones",
+      "bytes": 32274,
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-145.Cl9sYGSl_Z1Kj5Dk.webp"
+    },
+    {
+      "path": "_astro/burned-tower-antidote-135.BOKKc7UV_Z21b22U.webp",
+      "name": "burned tower antidote 135",
+      "category": "ubicaciones",
+      "bytes": 11976,
+      "url": "https://originheartgold.github.io/_astro/burned-tower-antidote-135.BOKKc7UV_Z21b22U.webp"
+    },
+    {
+      "path": "_astro/burned-tower-ether-138.KAtdm-TO_15IR10.webp",
+      "name": "burned tower ether 138",
+      "category": "ubicaciones",
+      "bytes": 14012,
+      "url": "https://originheartgold.github.io/_astro/burned-tower-ether-138.KAtdm-TO_15IR10.webp"
+    },
+    {
+      "path": "_astro/burned-tower-revive-136.BSwEdK78_1BF1B4.webp",
+      "name": "burned tower revive 136",
+      "category": "ubicaciones",
+      "bytes": 14516,
+      "url": "https://originheartgold.github.io/_astro/burned-tower-revive-136.BSwEdK78_1BF1B4.webp"
+    },
+    {
+      "path": "_astro/burned-tower-ultra-ball-137.Bzq-8XW__ZN2O1O.webp",
+      "name": "burned tower ultra ball 137",
+      "category": "ubicaciones",
+      "bytes": 10198,
+      "url": "https://originheartgold.github.io/_astro/burned-tower-ultra-ball-137.Bzq-8XW__ZN2O1O.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-big-pearl-85.Vklb-1ID_1HDykm.webp",
+      "name": "cerulean cave 2f big pearl 85",
+      "category": "ubicaciones",
+      "bytes": 4024,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-big-pearl-85.Vklb-1ID_1HDykm.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-full-heal-83.PmHjP-Oh_RSJQh.webp",
+      "name": "cerulean cave 2f full heal 83",
+      "category": "ubicaciones",
+      "bytes": 3950,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-full-heal-83.PmHjP-Oh_RSJQh.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-ultra-ball-82.BqzxA1BT_1fUhyP.webp",
+      "name": "cerulean cave 2f ultra ball 82",
+      "category": "ubicaciones",
+      "bytes": 3954,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-ultra-ball-82.BqzxA1BT_1fUhyP.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-zinc-84.D2LAsOi2_49b2x.webp",
+      "name": "cerulean cave 2f zinc 84",
+      "category": "ubicaciones",
+      "bytes": 3764,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-zinc-84.D2LAsOi2_49b2x.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-max-revive-87.DE6yvBBC_Z29UYEP.webp",
+      "name": "cerulean cave b1f max revive 87",
+      "category": "ubicaciones",
+      "bytes": 4708,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-max-revive-87.DE6yvBBC_Z29UYEP.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-nugget-86.Dtj2yJWE_SlDxA.webp",
+      "name": "cerulean cave b1f nugget 86",
+      "category": "ubicaciones",
+      "bytes": 4966,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-nugget-86.Dtj2yJWE_SlDxA.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-ultra-ball-88.PmR86eGL_14QIjf.webp",
+      "name": "cerulean cave b1f ultra ball 88",
+      "category": "ubicaciones",
+      "bytes": 4232,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-ultra-ball-88.PmR86eGL_14QIjf.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-hyper-potion-80.BLqpzqhg_Z1j565D.webp",
+      "name": "cerulean cave hyper potion 80",
+      "category": "ubicaciones",
+      "bytes": 4338,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-hyper-potion-80.BLqpzqhg_Z1j565D.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-rare-candy-81.7JuCDycr_1N1N2.webp",
+      "name": "cerulean cave rare candy 81",
+      "category": "ubicaciones",
+      "bytes": 5314,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-rare-candy-81.7JuCDycr_1N1N2.webp"
+    },
+    {
+      "path": "_astro/cerulean-cave-revive-79.lZop69Ft_1VlAVV.webp",
+      "name": "cerulean cave revive 79",
+      "category": "ubicaciones",
+      "bytes": 4444,
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-revive-79.lZop69Ft_1VlAVV.webp"
+    },
+    {
+      "path": "_astro/cerulean-city-nugget-9.6BTX_iVz_KgEcf.webp",
+      "name": "cerulean city nugget 9",
+      "category": "ubicaciones",
+      "bytes": 24732,
+      "url": "https://originheartgold.github.io/_astro/cerulean-city-nugget-9.6BTX_iVz_KgEcf.webp"
+    },
+    {
+      "path": "_astro/cherrygrove-city-nugget-91.DX4_Rliy_2gsNq3.webp",
+      "name": "cherrygrove city nugget 91",
+      "category": "ubicaciones",
+      "bytes": 25780,
+      "url": "https://originheartgold.github.io/_astro/cherrygrove-city-nugget-91.DX4_Rliy_2gsNq3.webp"
+    },
+    {
+      "path": "_astro/cianwood-cave-big-pearl-163.Cs6Oxiwx_Z2ihANd.webp",
+      "name": "cianwood cave big pearl 163",
+      "category": "ubicaciones",
+      "bytes": 19454,
+      "url": "https://originheartgold.github.io/_astro/cianwood-cave-big-pearl-163.Cs6Oxiwx_Z2ihANd.webp"
+    },
+    {
+      "path": "_astro/cianwood-city-revive-162.BCPPDGev_Z1nTgTI.webp",
+      "name": "cianwood city revive 162",
+      "category": "ubicaciones",
+      "bytes": 22732,
+      "url": "https://originheartgold.github.io/_astro/cianwood-city-revive-162.BCPPDGev_Z1nTgTI.webp"
+    },
+    {
+      "path": "_astro/cianwood-city-stardust-161.YAiCHl4e_1E0T6s.webp",
+      "name": "cianwood city stardust 161",
+      "category": "ubicaciones",
+      "bytes": 22812,
+      "url": "https://originheartgold.github.io/_astro/cianwood-city-stardust-161.YAiCHl4e_1E0T6s.webp"
+    },
+    {
+      "path": "_astro/cinnabar-island-iron-51.ChZts7Br_Z2byAAF.webp",
+      "name": "cinnabar island iron 51",
+      "category": "ubicaciones",
+      "bytes": 30028,
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-iron-51.ChZts7Br_Z2byAAF.webp"
+    },
+    {
+      "path": "_astro/cinnabar-island-rare-candy-52.DkDVy-4H_ZcgTB3.webp",
+      "name": "cinnabar island rare candy 52",
+      "category": "ubicaciones",
+      "bytes": 21752,
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-rare-candy-52.DkDVy-4H_ZcgTB3.webp"
+    },
+    {
+      "path": "_astro/cinnabar-island-star-piece-53.BzCXDkrC_I3RKn.webp",
+      "name": "cinnabar island star piece 53",
+      "category": "ubicaciones",
+      "bytes": 25718,
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-star-piece-53.BzCXDkrC_I3RKn.webp"
+    },
+    {
+      "path": "_astro/dark-cave-elixir-94.B34tF7Tc_Z1YjJzE.webp",
+      "name": "dark cave elixir 94",
+      "category": "ubicaciones",
+      "bytes": 4038,
+      "url": "https://originheartgold.github.io/_astro/dark-cave-elixir-94.B34tF7Tc_Z1YjJzE.webp"
+    },
+    {
+      "path": "_astro/dark-cave-hyper-potion-95.hhczvwWT_5mzC0.webp",
+      "name": "dark cave hyper potion 95",
+      "category": "ubicaciones",
+      "bytes": 4428,
+      "url": "https://originheartgold.github.io/_astro/dark-cave-hyper-potion-95.hhczvwWT_5mzC0.webp"
+    },
+    {
+      "path": "_astro/dark-cave-max-revive-93.Bs5k1e3F_2hyUvD.webp",
+      "name": "dark cave max revive 93",
+      "category": "ubicaciones",
+      "bytes": 4104,
+      "url": "https://originheartgold.github.io/_astro/dark-cave-max-revive-93.Bs5k1e3F_2hyUvD.webp"
+    },
+    {
+      "path": "_astro/dark-cave-route-31-side-max-ether-97.C5Exi9Xm_Z1izJvR.webp",
+      "name": "dark cave route 31 side max ether 97",
+      "category": "ubicaciones",
+      "bytes": 4506,
+      "url": "https://originheartgold.github.io/_astro/dark-cave-route-31-side-max-ether-97.C5Exi9Xm_Z1izJvR.webp"
+    },
+    {
+      "path": "_astro/dark-cave-route-31-side-pok-ball-96.BP9-SqH0_1YeXjq.webp",
+      "name": "dark cave route 31 side pok ball 96",
+      "category": "ubicaciones",
+      "bytes": 4422,
+      "url": "https://originheartgold.github.io/_astro/dark-cave-route-31-side-pok-ball-96.BP9-SqH0_1YeXjq.webp"
+    },
+    {
+      "path": "_astro/diglett-s-cave-max-revive-19.BcGHl_C1_Z1mJzMA.webp",
+      "name": "diglett s cave max revive 19",
+      "category": "ubicaciones",
+      "bytes": 15074,
+      "url": "https://originheartgold.github.io/_astro/diglett-s-cave-max-revive-19.BcGHl_C1_Z1mJzMA.webp"
+    },
+    {
+      "path": "_astro/dragon-s-den-max-elixir-196.f-hjINT6_1CNtN8.webp",
+      "name": "dragon s den max elixir 196",
+      "category": "ubicaciones",
+      "bytes": 18044,
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-max-elixir-196.f-hjINT6_1CNtN8.webp"
+    },
+    {
+      "path": "_astro/dragon-s-den-max-potion-195.CF-iM5Vc_DA6Xx.webp",
+      "name": "dragon s den max potion 195",
+      "category": "ubicaciones",
+      "bytes": 19146,
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-max-potion-195.CF-iM5Vc_DA6Xx.webp"
+    },
+    {
+      "path": "_astro/dragon-s-den-revive-194.CK79LTkF_ssdyp.webp",
+      "name": "dragon s den revive 194",
+      "category": "ubicaciones",
+      "bytes": 16854,
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-revive-194.CK79LTkF_ssdyp.webp"
+    },
+    {
+      "path": "_astro/ecruteak-city-ether-134.Dkmq86bY_1ClQtm.webp",
+      "name": "ecruteak city ether 134",
+      "category": "ubicaciones",
+      "bytes": 25090,
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-ether-134.Dkmq86bY_1ClQtm.webp"
+    },
+    {
+      "path": "_astro/ecruteak-city-hyper-potion-132.Jjtd11fA_Zv5zn.webp",
+      "name": "ecruteak city hyper potion 132",
+      "category": "ubicaciones",
+      "bytes": 30450,
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-hyper-potion-132.Jjtd11fA_Zv5zn.webp"
+    },
+    {
+      "path": "_astro/ecruteak-city-rare-candy-133.Cuq0JaCK_Z791S9.webp",
+      "name": "ecruteak city rare candy 133",
+      "category": "ubicaciones",
+      "bytes": 25024,
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-rare-candy-133.Cuq0JaCK_Z791S9.webp"
+    },
+    {
+      "path": "_astro/fuchsia-city-nugget-28.B_Yzakaf_54vaL.webp",
+      "name": "fuchsia city nugget 28",
+      "category": "ubicaciones",
+      "bytes": 26714,
+      "url": "https://originheartgold.github.io/_astro/fuchsia-city-nugget-28.B_Yzakaf_54vaL.webp"
+    },
+    {
+      "path": "_astro/goldenrod-city-super-potion-120.DHVIl4ct_Z2rzevc.webp",
+      "name": "goldenrod city super potion 120",
+      "category": "ubicaciones",
+      "bytes": 27112,
+      "url": "https://originheartgold.github.io/_astro/goldenrod-city-super-potion-120.DHVIl4ct_Z2rzevc.webp"
+    },
+    {
+      "path": "_astro/goldenrod-department-store-paralyze-heal-121.gCDs0OAq_Z18nHAC.webp",
+      "name": "goldenrod department store paralyze heal 121",
+      "category": "ubicaciones",
+      "bytes": 7716,
+      "url": "https://originheartgold.github.io/_astro/goldenrod-department-store-paralyze-heal-121.gCDs0OAq_Z18nHAC.webp"
+    },
+    {
+      "path": "_astro/goldenrod-tunnel-warehouse-max-potion-122.sjdF0fuz_7Nlhb.webp",
+      "name": "goldenrod tunnel warehouse max potion 122",
+      "category": "ubicaciones",
+      "bytes": 8774,
+      "url": "https://originheartgold.github.io/_astro/goldenrod-tunnel-warehouse-max-potion-122.sjdF0fuz_7Nlhb.webp"
+    },
+    {
+      "path": "_astro/goldenrod-tunnel-warehouse-revive-123.CWl2q0gr_Z1Vp9Y5.webp",
+      "name": "goldenrod tunnel warehouse revive 123",
+      "category": "ubicaciones",
+      "bytes": 9904,
+      "url": "https://originheartgold.github.io/_astro/goldenrod-tunnel-warehouse-revive-123.CWl2q0gr_Z1Vp9Y5.webp"
+    },
+    {
+      "path": "_astro/ice-path-b1f-revive-191.Cm01wMxJ_Z29FaRS.webp",
+      "name": "ice path b1f revive 191",
+      "category": "ubicaciones",
+      "bytes": 2686,
+      "url": "https://originheartgold.github.io/_astro/ice-path-b1f-revive-191.Cm01wMxJ_Z29FaRS.webp"
+    },
+    {
+      "path": "_astro/ice-path-b2f-calcium-192.BtUMVwoX_2crGU6.webp",
+      "name": "ice path b2f calcium 192",
+      "category": "ubicaciones",
+      "bytes": 21964,
+      "url": "https://originheartgold.github.io/_astro/ice-path-b2f-calcium-192.BtUMVwoX_2crGU6.webp"
+    },
+    {
+      "path": "_astro/ice-path-b3f-carbos-193.Dm6ckVe0_12irNe.webp",
+      "name": "ice path b3f carbos 193",
+      "category": "ubicaciones",
+      "bytes": 15918,
+      "url": "https://originheartgold.github.io/_astro/ice-path-b3f-carbos-193.Dm6ckVe0_12irNe.webp"
+    },
+    {
+      "path": "_astro/ice-path-ice-heal-189.DHGDAe32_2cLi8b.webp",
+      "name": "ice path ice heal 189",
+      "category": "ubicaciones",
+      "bytes": 17658,
+      "url": "https://originheartgold.github.io/_astro/ice-path-ice-heal-189.DHGDAe32_2cLi8b.webp"
+    },
+    {
+      "path": "_astro/ice-path-max-potion-190.CLcsdG8O_1A6lFe.webp",
+      "name": "ice path max potion 190",
+      "category": "ubicaciones",
+      "bytes": 17084,
+      "url": "https://originheartgold.github.io/_astro/ice-path-max-potion-190.CLcsdG8O_1A6lFe.webp"
+    },
+    {
+      "path": "_astro/ilex-forest-antidote-118.DupngRHE_Zzrhaj.webp",
+      "name": "ilex forest antidote 118",
+      "category": "ubicaciones",
+      "bytes": 27280,
+      "url": "https://originheartgold.github.io/_astro/ilex-forest-antidote-118.DupngRHE_Zzrhaj.webp"
+    },
+    {
+      "path": "_astro/ilex-forest-super-potion-117.Cv2WmnYj_20BHOH.webp",
+      "name": "ilex forest super potion 117",
+      "category": "ubicaciones",
+      "bytes": 27808,
+      "url": "https://originheartgold.github.io/_astro/ilex-forest-super-potion-117.Cv2WmnYj_20BHOH.webp"
+    },
+    {
+      "path": "_astro/indigo-plateau-indigo-conference-stage-one-rare-candy-62.BrQoB18w_Z2bHHhK.webp",
+      "name": "indigo plateau indigo conference stage one rare candy 62",
+      "category": "ubicaciones",
+      "bytes": 15560,
+      "url": "https://originheartgold.github.io/_astro/indigo-plateau-indigo-conference-stage-one-rare-candy-62.BrQoB18w_Z2bHHhK.webp"
+    },
+    {
+      "path": "_astro/indigo-plateau-rare-candy-61.CyaaDFI2_tP0Wu.webp",
+      "name": "indigo plateau rare candy 61",
+      "category": "ubicaciones",
+      "bytes": 23794,
+      "url": "https://originheartgold.github.io/_astro/indigo-plateau-rare-candy-61.CyaaDFI2_tP0Wu.webp"
+    },
+    {
+      "path": "_astro/indoor-00.Dox5XE-P_20sO5w.webp",
+      "name": "indoor 00",
+      "category": "ubicaciones",
+      "bytes": 8586,
+      "url": "https://originheartgold.github.io/_astro/indoor-00.Dox5XE-P_20sO5w.webp"
+    },
+    {
+      "path": "_astro/indoor-00.Dox5XE-P_Z2cuGno.webp",
+      "name": "indoor 00",
+      "category": "ubicaciones",
+      "bytes": 19502,
+      "url": "https://originheartgold.github.io/_astro/indoor-00.Dox5XE-P_Z2cuGno.webp"
+    },
+    {
+      "path": "_astro/indoor-01.DEw9ab8S_1egpKL.webp",
+      "name": "indoor 01",
+      "category": "ubicaciones",
+      "bytes": 18988,
+      "url": "https://originheartgold.github.io/_astro/indoor-01.DEw9ab8S_1egpKL.webp"
+    },
+    {
+      "path": "_astro/indoor-01.DEw9ab8S_m2MpK.webp",
+      "name": "indoor 01",
+      "category": "ubicaciones",
+      "bytes": 8076,
+      "url": "https://originheartgold.github.io/_astro/indoor-01.DEw9ab8S_m2MpK.webp"
+    },
+    {
+      "path": "_astro/indoor-02.9A2lN_dt_1Gal2M.webp",
+      "name": "indoor 02",
+      "category": "ubicaciones",
+      "bytes": 8128,
+      "url": "https://originheartgold.github.io/_astro/indoor-02.9A2lN_dt_1Gal2M.webp"
+    },
+    {
+      "path": "_astro/indoor-02.9A2lN_dt_Z2vNaq8.webp",
+      "name": "indoor 02",
+      "category": "ubicaciones",
+      "bytes": 18456,
+      "url": "https://originheartgold.github.io/_astro/indoor-02.9A2lN_dt_Z2vNaq8.webp"
+    },
+    {
+      "path": "_astro/indoor-03.ClhynpNp_ysKmG.webp",
+      "name": "indoor 03",
+      "category": "ubicaciones",
+      "bytes": 15380,
+      "url": "https://originheartgold.github.io/_astro/indoor-03.ClhynpNp_ysKmG.webp"
+    },
+    {
+      "path": "_astro/indoor-03.ClhynpNp_ZiJQXk.webp",
+      "name": "indoor 03",
+      "category": "ubicaciones",
+      "bytes": 6682,
+      "url": "https://originheartgold.github.io/_astro/indoor-03.ClhynpNp_ZiJQXk.webp"
+    },
+    {
+      "path": "_astro/indoor-04.syEJKQ3V_1l3D8V.webp",
+      "name": "indoor 04",
+      "category": "ubicaciones",
+      "bytes": 8204,
+      "url": "https://originheartgold.github.io/_astro/indoor-04.syEJKQ3V_1l3D8V.webp"
+    },
+    {
+      "path": "_astro/indoor-04.syEJKQ3V_2dhgtW.webp",
+      "name": "indoor 04",
+      "category": "ubicaciones",
+      "bytes": 18234,
+      "url": "https://originheartgold.github.io/_astro/indoor-04.syEJKQ3V_2dhgtW.webp"
+    },
+    {
+      "path": "_astro/indoor-05.DCUEWtNo_zhM2l.webp",
+      "name": "indoor 05",
+      "category": "ubicaciones",
+      "bytes": 20094,
+      "url": "https://originheartgold.github.io/_astro/indoor-05.DCUEWtNo_zhM2l.webp"
+    },
+    {
+      "path": "_astro/indoor-05.DCUEWtNo_ZhUPiF.webp",
+      "name": "indoor 05",
+      "category": "ubicaciones",
+      "bytes": 8736,
+      "url": "https://originheartgold.github.io/_astro/indoor-05.DCUEWtNo_ZhUPiF.webp"
+    },
+    {
+      "path": "_astro/indoor-06.yHxq4jJv_15vs1R.webp",
+      "name": "indoor 06",
+      "category": "ubicaciones",
+      "bytes": 19178,
+      "url": "https://originheartgold.github.io/_astro/indoor-06.yHxq4jJv_15vs1R.webp"
+    },
+    {
+      "path": "_astro/indoor-06.yHxq4jJv_dhOFQ.webp",
+      "name": "indoor 06",
+      "category": "ubicaciones",
+      "bytes": 8460,
+      "url": "https://originheartgold.github.io/_astro/indoor-06.yHxq4jJv_dhOFQ.webp"
+    },
+    {
+      "path": "_astro/indoor-07.Bgu5Ve8o_GN4MU.webp",
+      "name": "indoor 07",
+      "category": "ubicaciones",
+      "bytes": 18528,
+      "url": "https://originheartgold.github.io/_astro/indoor-07.Bgu5Ve8o_GN4MU.webp"
+    },
+    {
+      "path": "_astro/indoor-07.Bgu5Ve8o_Zapxx6.webp",
+      "name": "indoor 07",
+      "category": "ubicaciones",
+      "bytes": 8220,
+      "url": "https://originheartgold.github.io/_astro/indoor-07.Bgu5Ve8o_Zapxx6.webp"
+    },
+    {
+      "path": "_astro/indoor-08.mfk0pvTz_Z1euuM2.webp",
+      "name": "indoor 08",
+      "category": "ubicaciones",
+      "bytes": 9000,
+      "url": "https://originheartgold.github.io/_astro/indoor-08.mfk0pvTz_Z1euuM2.webp"
+    },
+    {
+      "path": "_astro/indoor-08.mfk0pvTz_ZmgRr1.webp",
+      "name": "indoor 08",
+      "category": "ubicaciones",
+      "bytes": 20254,
+      "url": "https://originheartgold.github.io/_astro/indoor-08.mfk0pvTz_ZmgRr1.webp"
+    },
+    {
+      "path": "_astro/indoor-09.BLnDtJgd_1XnvzK.webp",
+      "name": "indoor 09",
+      "category": "ubicaciones",
+      "bytes": 8578,
+      "url": "https://originheartgold.github.io/_astro/indoor-09.BLnDtJgd_1XnvzK.webp"
+    },
+    {
+      "path": "_astro/indoor-09.BLnDtJgd_Z2ezYSa.webp",
+      "name": "indoor 09",
+      "category": "ubicaciones",
+      "bytes": 19604,
+      "url": "https://originheartgold.github.io/_astro/indoor-09.BLnDtJgd_Z2ezYSa.webp"
+    },
+    {
+      "path": "_astro/indoor-0a.obeJP7Ss_1N64Mz.webp",
+      "name": "indoor 0a",
+      "category": "ubicaciones",
+      "bytes": 8398,
+      "url": "https://originheartgold.github.io/_astro/indoor-0a.obeJP7Ss_1N64Mz.webp"
+    },
+    {
+      "path": "_astro/indoor-0a.obeJP7Ss_Z2oRqFl.webp",
+      "name": "indoor 0a",
+      "category": "ubicaciones",
+      "bytes": 19676,
+      "url": "https://originheartgold.github.io/_astro/indoor-0a.obeJP7Ss_Z2oRqFl.webp"
+    },
+    {
+      "path": "_astro/indoor-0b.fu-ENX1M_K1qNa.webp",
+      "name": "indoor 0b",
+      "category": "ubicaciones",
+      "bytes": 18248,
+      "url": "https://originheartgold.github.io/_astro/indoor-0b.fu-ENX1M_K1qNa.webp"
+    },
+    {
+      "path": "_astro/indoor-0b.fu-ENX1M_Z7cbwQ.webp",
+      "name": "indoor 0b",
+      "category": "ubicaciones",
+      "bytes": 8154,
+      "url": "https://originheartgold.github.io/_astro/indoor-0b.fu-ENX1M_Z7cbwQ.webp"
+    },
+    {
+      "path": "_astro/indoor-0c.CGdx5Fqe_1yFwk7.webp",
+      "name": "indoor 0c",
+      "category": "ubicaciones",
+      "bytes": 8556,
+      "url": "https://originheartgold.github.io/_astro/indoor-0c.CGdx5Fqe_1yFwk7.webp"
+    },
+    {
+      "path": "_astro/indoor-0c.CGdx5Fqe_2qT9F8.webp",
+      "name": "indoor 0c",
+      "category": "ubicaciones",
+      "bytes": 19478,
+      "url": "https://originheartgold.github.io/_astro/indoor-0c.CGdx5Fqe_2qT9F8.webp"
+    },
+    {
+      "path": "_astro/indoor-0d.BusNAxSa_Z1g5dG1.webp",
+      "name": "indoor 0d",
+      "category": "ubicaciones",
+      "bytes": 6812,
+      "url": "https://originheartgold.github.io/_astro/indoor-0d.BusNAxSa_Z1g5dG1.webp"
+    },
+    {
+      "path": "_astro/indoor-0d.BusNAxSa_ZnQAl0.webp",
+      "name": "indoor 0d",
+      "category": "ubicaciones",
+      "bytes": 15956,
+      "url": "https://originheartgold.github.io/_astro/indoor-0d.BusNAxSa_ZnQAl0.webp"
+    },
+    {
+      "path": "_astro/indoor-0e.D9tu560h_Z1tjAGI.webp",
+      "name": "indoor 0e",
+      "category": "ubicaciones",
+      "bytes": 20004,
+      "url": "https://originheartgold.github.io/_astro/indoor-0e.D9tu560h_Z1tjAGI.webp"
+    },
+    {
+      "path": "_astro/indoor-0e.D9tu560h_Z2lxe2J.webp",
+      "name": "indoor 0e",
+      "category": "ubicaciones",
+      "bytes": 8786,
+      "url": "https://originheartgold.github.io/_astro/indoor-0e.D9tu560h_Z2lxe2J.webp"
+    },
+    {
+      "path": "_astro/indoor-0f.BYSovrMU_o2fOr.webp",
+      "name": "indoor 0f",
+      "category": "ubicaciones",
+      "bytes": 17788,
+      "url": "https://originheartgold.github.io/_astro/indoor-0f.BYSovrMU_o2fOr.webp"
+    },
+    {
+      "path": "_astro/indoor-0f.BYSovrMU_Ztbmvz.webp",
+      "name": "indoor 0f",
+      "category": "ubicaciones",
+      "bytes": 7794,
+      "url": "https://originheartgold.github.io/_astro/indoor-0f.BYSovrMU_Ztbmvz.webp"
+    },
+    {
+      "path": "_astro/indoor-10.hh0Btm6w_aqsSs.webp",
+      "name": "indoor 10",
+      "category": "ubicaciones",
+      "bytes": 19822,
+      "url": "https://originheartgold.github.io/_astro/indoor-10.hh0Btm6w_aqsSs.webp"
+    },
+    {
+      "path": "_astro/indoor-10.hh0Btm6w_ZGM9ry.webp",
+      "name": "indoor 10",
+      "category": "ubicaciones",
+      "bytes": 8770,
+      "url": "https://originheartgold.github.io/_astro/indoor-10.hh0Btm6w_ZGM9ry.webp"
+    },
+    {
+      "path": "_astro/interiors.Cnt83A2Y_Z2wjAQ1.webp",
+      "name": "interiors",
+      "category": "escenarios",
+      "bytes": 63536,
+      "url": "https://originheartgold.github.io/_astro/interiors.Cnt83A2Y_Z2wjAQ1.webp"
+    },
+    {
+      "path": "_astro/island-cave-full-heal-203.1ehkJuuY_2rynlS.webp",
+      "name": "island cave full heal 203",
+      "category": "ubicaciones",
+      "bytes": 14188,
+      "url": "https://originheartgold.github.io/_astro/island-cave-full-heal-203.1ehkJuuY_2rynlS.webp"
+    },
+    {
+      "path": "_astro/lake-of-rage-max-potion-186.CrrS9MC8_Z1FiTTk.webp",
+      "name": "lake of rage max potion 186",
+      "category": "ubicaciones",
+      "bytes": 27534,
+      "url": "https://originheartgold.github.io/_astro/lake-of-rage-max-potion-186.CrrS9MC8_Z1FiTTk.webp"
+    },
+    {
+      "path": "_astro/lake-of-rage-rare-candy-187.BnOCVuQA_Z2an1JY.webp",
+      "name": "lake of rage rare candy 187",
+      "category": "ubicaciones",
+      "bytes": 21812,
+      "url": "https://originheartgold.github.io/_astro/lake-of-rage-rare-candy-187.BnOCVuQA_Z2an1JY.webp"
+    },
+    {
+      "path": "_astro/lighthouse-3f-hyper-potion-155.Bi_Ws66b_Z1IRmrX.webp",
+      "name": "lighthouse 3f hyper potion 155",
+      "category": "ubicaciones",
+      "bytes": 8946,
+      "url": "https://originheartgold.github.io/_astro/lighthouse-3f-hyper-potion-155.Bi_Ws66b_Z1IRmrX.webp"
+    },
+    {
+      "path": "_astro/mt-moon-revive-4.Cm0OjDga_Z2KNab.webp",
+      "name": "mt moon revive 4",
+      "category": "ubicaciones",
+      "bytes": 16000,
+      "url": "https://originheartgold.github.io/_astro/mt-moon-revive-4.Cm0OjDga_Z2KNab.webp"
+    },
+    {
+      "path": "_astro/mt-moon-square-clefairy-dance-night-max-revive-6.C4rrXgY-_8AyCt.webp",
+      "name": "mt moon square clefairy dance night max revive 6",
+      "category": "ubicaciones",
+      "bytes": 23848,
+      "url": "https://originheartgold.github.io/_astro/mt-moon-square-clefairy-dance-night-max-revive-6.C4rrXgY-_8AyCt.webp"
+    },
+    {
+      "path": "_astro/mt-moon-square-max-revive-5.BFSh-Qqu_Z2itVT3.webp",
+      "name": "mt moon square max revive 5",
+      "category": "ubicaciones",
+      "bytes": 24748,
+      "url": "https://originheartgold.github.io/_astro/mt-moon-square-max-revive-5.BFSh-Qqu_Z2itVT3.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-ether-173.cE3SSSuG_ii29s.webp",
+      "name": "mt mortar 1f back cave ether 173",
+      "category": "ubicaciones",
+      "bytes": 19624,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-ether-173.cE3SSSuG_ii29s.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-max-repel-175.Bu7q0AEw_1LmmCI.webp",
+      "name": "mt mortar 1f back cave max repel 175",
+      "category": "ubicaciones",
+      "bytes": 16864,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-max-repel-175.Bu7q0AEw_1LmmCI.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-nugget-176.8FyA8QKv_PNPKr.webp",
+      "name": "mt mortar 1f back cave nugget 176",
+      "category": "ubicaciones",
+      "bytes": 17772,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-nugget-176.8FyA8QKv_PNPKr.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-rare-candy-177.BEa4FObc_Z1MTUH6.webp",
+      "name": "mt mortar 1f back cave rare candy 177",
+      "category": "ubicaciones",
+      "bytes": 17644,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-rare-candy-177.BEa4FObc_Z1MTUH6.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-ultra-ball-174.Dilp3dF__Z1FHCE2.webp",
+      "name": "mt mortar 1f back cave ultra ball 174",
+      "category": "ubicaciones",
+      "bytes": 16948,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-ultra-ball-174.Dilp3dF__Z1FHCE2.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-full-heal-178.BAO0Nl8p_Z1bWIdS.webp",
+      "name": "mt mortar 2f full heal 178",
+      "category": "ubicaciones",
+      "bytes": 18238,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-full-heal-178.BAO0Nl8p_Z1bWIdS.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-hp-up-179.B9wF5EJc_1ii1iN.webp",
+      "name": "mt mortar 2f hp up 179",
+      "category": "ubicaciones",
+      "bytes": 15940,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-hp-up-179.B9wF5EJc_1ii1iN.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-hyper-potion-180.BzpMvuBS_lbAUf.webp",
+      "name": "mt mortar 2f hyper potion 180",
+      "category": "ubicaciones",
+      "bytes": 16886,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-hyper-potion-180.BzpMvuBS_lbAUf.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-b1f-max-revive-181.XmZLV9Eq_z18wW.webp",
+      "name": "mt mortar b1f max revive 181",
+      "category": "ubicaciones",
+      "bytes": 20300,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-b1f-max-revive-181.XmZLV9Eq_z18wW.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-b1f-ultra-ball-182.9JYeFro4_Z9aKqw.webp",
+      "name": "mt mortar b1f ultra ball 182",
+      "category": "ubicaciones",
+      "bytes": 15658,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-b1f-ultra-ball-182.9JYeFro4_Z9aKqw.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-hyper-potion-171._vbLfNvr_Z1oXUUo.webp",
+      "name": "mt mortar hyper potion 171",
+      "category": "ubicaciones",
+      "bytes": 18268,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-hyper-potion-171._vbLfNvr_Z1oXUUo.webp"
+    },
+    {
+      "path": "_astro/mt-mortar-revive-172.DyzJqyfI_1CJ7dn.webp",
+      "name": "mt mortar revive 172",
+      "category": "ubicaciones",
+      "bytes": 21600,
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-revive-172.DyzJqyfI_1CJ7dn.webp"
+    },
+    {
+      "path": "_astro/mt-silver-big-mushroom-71.CLXLSOKY_vpeDx.webp",
+      "name": "mt silver big mushroom 71",
+      "category": "ubicaciones",
+      "bytes": 23054,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-big-mushroom-71.CLXLSOKY_vpeDx.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-2f-iron-76.D9sYA5dU_ZDd0gi.webp",
+      "name": "mt silver cave 2f iron 76",
+      "category": "ubicaciones",
+      "bytes": 13238,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-2f-iron-76.D9sYA5dU_ZDd0gi.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-2f-max-potion-77.bZgZ699v_na5Gw.webp",
+      "name": "mt silver cave 2f max potion 77",
+      "category": "ubicaciones",
+      "bytes": 16396,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-2f-max-potion-77.bZgZ699v_na5Gw.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-3f-max-revive-78.eoUUDmC2_Z17H5cd.webp",
+      "name": "mt silver cave 3f max revive 78",
+      "category": "ubicaciones",
+      "bytes": 15630,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-3f-max-revive-78.eoUUDmC2_Z17H5cd.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-dire-hit-73.COy5qopq_BSVKh.webp",
+      "name": "mt silver cave dire hit 73",
+      "category": "ubicaciones",
+      "bytes": 19638,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-dire-hit-73.COy5qopq_BSVKh.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-ultra-ball-72.yFQDw3cK_2mjtW5.webp",
+      "name": "mt silver cave ultra ball 72",
+      "category": "ubicaciones",
+      "bytes": 23994,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-ultra-ball-72.yFQDw3cK_2mjtW5.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-upper-mountainside-max-ether-74.BWtbOxhS_Z23FCST.webp",
+      "name": "mt silver cave upper mountainside max ether 74",
+      "category": "ubicaciones",
+      "bytes": 31762,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-upper-mountainside-max-ether-74.BWtbOxhS_Z23FCST.webp"
+    },
+    {
+      "path": "_astro/mt-silver-cave-upper-mountainside-rare-candy-75.CLI0GZbp_Za3NSP.webp",
+      "name": "mt silver cave upper mountainside rare candy 75",
+      "category": "ubicaciones",
+      "bytes": 31008,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-upper-mountainside-rare-candy-75.CLI0GZbp_Za3NSP.webp"
+    },
+    {
+      "path": "_astro/mt-silver-hot-spring-mountainside-max-ether-69.C7jIVykz_Z23oKAH.webp",
+      "name": "mt silver hot spring mountainside max ether 69",
+      "category": "ubicaciones",
+      "bytes": 31742,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-hot-spring-mountainside-max-ether-69.C7jIVykz_Z23oKAH.webp"
+    },
+    {
+      "path": "_astro/mt-silver-hot-spring-mountainside-rare-candy-70.Bv8I0ud0_Z298Jss.webp",
+      "name": "mt silver hot spring mountainside rare candy 70",
+      "category": "ubicaciones",
+      "bytes": 30184,
+      "url": "https://originheartgold.github.io/_astro/mt-silver-hot-spring-mountainside-rare-candy-70.Bv8I0ud0_Z298Jss.webp"
+    },
+    {
+      "path": "_astro/national-park-bug-catching-contest-full-heal-127.BPDNjGwp_Z11SjwV.webp",
+      "name": "national park bug catching contest full heal 127",
+      "category": "ubicaciones",
+      "bytes": 27490,
+      "url": "https://originheartgold.github.io/_astro/national-park-bug-catching-contest-full-heal-127.BPDNjGwp_Z11SjwV.webp"
+    },
+    {
+      "path": "_astro/national-park-bug-catching-contest-full-heal-128.Txv6nheX_1KghaE.webp",
+      "name": "national park bug catching contest full heal 128",
+      "category": "ubicaciones",
+      "bytes": 20520,
+      "url": "https://originheartgold.github.io/_astro/national-park-bug-catching-contest-full-heal-128.Txv6nheX_1KghaE.webp"
+    },
+    {
+      "path": "_astro/national-park-full-heal-125.B3wK23Um_1P335N.webp",
+      "name": "national park full heal 125",
+      "category": "ubicaciones",
+      "bytes": 29782,
+      "url": "https://originheartgold.github.io/_astro/national-park-full-heal-125.B3wK23Um_1P335N.webp"
+    },
+    {
+      "path": "_astro/national-park-full-heal-126.B9BK6FWe_vm6i0.webp",
+      "name": "national park full heal 126",
+      "category": "ubicaciones",
+      "bytes": 21356,
+      "url": "https://originheartgold.github.io/_astro/national-park-full-heal-126.B9BK6FWe_vm6i0.webp"
+    },
+    {
+      "path": "_astro/new-bark-town-potion-89.DXUcBr4B_w1qGI.webp",
+      "name": "new bark town potion 89",
+      "category": "ubicaciones",
+      "bytes": 23940,
+      "url": "https://originheartgold.github.io/_astro/new-bark-town-potion-89.DXUcBr4B_w1qGI.webp"
+    },
+    {
+      "path": "_astro/olivine-city-rare-candy-152.DDOH6Y5w_1M21SL.webp",
+      "name": "olivine city rare candy 152",
+      "category": "ubicaciones",
+      "bytes": 26414,
+      "url": "https://originheartgold.github.io/_astro/olivine-city-rare-candy-152.DDOH6Y5w_1M21SL.webp"
+    },
+    {
+      "path": "_astro/olivine-city-south-east-part-pearl-153.DknHWztD_Z15mO5N.webp",
+      "name": "olivine city south east part pearl 153",
+      "category": "ubicaciones",
+      "bytes": 22644,
+      "url": "https://originheartgold.github.io/_astro/olivine-city-south-east-part-pearl-153.DknHWztD_Z15mO5N.webp"
+    },
+    {
+      "path": "_astro/olivine-city-south-east-part-protein-154.TQUOMCOk_1Kx0p0.webp",
+      "name": "olivine city south east part protein 154",
+      "category": "ubicaciones",
+      "bytes": 20060,
+      "url": "https://originheartgold.github.io/_astro/olivine-city-south-east-part-protein-154.TQUOMCOk_1Kx0p0.webp"
+    },
+    {
+      "path": "_astro/outdoor-00.BVHbGPpb_avzs1.webp",
+      "name": "outdoor 00",
+      "category": "escenarios",
+      "bytes": 10400,
+      "url": "https://originheartgold.github.io/_astro/outdoor-00.BVHbGPpb_avzs1.webp"
+    },
+    {
+      "path": "_astro/outdoor-00.BVHbGPpb_Z27Vu1O.webp",
+      "name": "outdoor 00",
+      "category": "escenarios",
+      "bytes": 26520,
+      "url": "https://originheartgold.github.io/_astro/outdoor-00.BVHbGPpb_Z27Vu1O.webp"
+    },
+    {
+      "path": "_astro/outdoor-01.DXOpQaN8_29ozUG.webp",
+      "name": "outdoor 01",
+      "category": "escenarios",
+      "bytes": 11392,
+      "url": "https://originheartgold.github.io/_astro/outdoor-01.DXOpQaN8_29ozUG.webp"
+    },
+    {
+      "path": "_astro/outdoor-01.DXOpQaN8_Z93ty9.webp",
+      "name": "outdoor 01",
+      "category": "escenarios",
+      "bytes": 29914,
+      "url": "https://originheartgold.github.io/_astro/outdoor-01.DXOpQaN8_Z93ty9.webp"
+    },
+    {
+      "path": "_astro/outdoor-02.BSuiHJBm_1zNeXc.webp",
+      "name": "outdoor 02",
+      "category": "escenarios",
+      "bytes": 27924,
+      "url": "https://originheartgold.github.io/_astro/outdoor-02.BSuiHJBm_1zNeXc.webp"
+    },
+    {
+      "path": "_astro/outdoor-02.BSuiHJBm_Z1bUOlT.webp",
+      "name": "outdoor 02",
+      "category": "escenarios",
+      "bytes": 11274,
+      "url": "https://originheartgold.github.io/_astro/outdoor-02.BSuiHJBm_Z1bUOlT.webp"
+    },
+    {
+      "path": "_astro/outdoor-03.C2-GnPmd_17oXuG.webp",
+      "name": "outdoor 03",
+      "category": "escenarios",
+      "bytes": 35812,
+      "url": "https://originheartgold.github.io/_astro/outdoor-03.C2-GnPmd_17oXuG.webp"
+    },
+    {
+      "path": "_astro/outdoor-03.C2-GnPmd_Z1Ek5Op.webp",
+      "name": "outdoor 03",
+      "category": "escenarios",
+      "bytes": 14154,
+      "url": "https://originheartgold.github.io/_astro/outdoor-03.C2-GnPmd_Z1Ek5Op.webp"
+    },
+    {
+      "path": "_astro/outdoor-04.B2JRGsNa_2Bxql.webp",
+      "name": "outdoor 04",
+      "category": "escenarios",
+      "bytes": 27594,
+      "url": "https://originheartgold.github.io/_astro/outdoor-04.B2JRGsNa_2Bxql.webp"
+    },
+    {
+      "path": "_astro/outdoor-04.B2JRGsNa_2l4BUb.webp",
+      "name": "outdoor 04",
+      "category": "escenarios",
+      "bytes": 10884,
+      "url": "https://originheartgold.github.io/_astro/outdoor-04.B2JRGsNa_2l4BUb.webp"
+    },
+    {
+      "path": "_astro/outdoor-05.DrURfruB_14fU8r.webp",
+      "name": "outdoor 05",
+      "category": "escenarios",
+      "bytes": 10438,
+      "url": "https://originheartgold.github.io/_astro/outdoor-05.DrURfruB_14fU8r.webp"
+    },
+    {
+      "path": "_astro/outdoor-05.DrURfruB_Z1ec9lo.webp",
+      "name": "outdoor 05",
+      "category": "escenarios",
+      "bytes": 26574,
+      "url": "https://originheartgold.github.io/_astro/outdoor-05.DrURfruB_Z1ec9lo.webp"
+    },
+    {
+      "path": "_astro/outdoor-06.Bjxe0aOS_21xNhs.webp",
+      "name": "outdoor 06",
+      "category": "escenarios",
+      "bytes": 10396,
+      "url": "https://originheartgold.github.io/_astro/outdoor-06.Bjxe0aOS_21xNhs.webp"
+    },
+    {
+      "path": "_astro/outdoor-06.Bjxe0aOS_ZgTgcn.webp",
+      "name": "outdoor 06",
+      "category": "escenarios",
+      "bytes": 26820,
+      "url": "https://originheartgold.github.io/_astro/outdoor-06.Bjxe0aOS_ZgTgcn.webp"
+    },
+    {
+      "path": "_astro/outdoor-07.Die6PH0W_1zg4QM.webp",
+      "name": "outdoor 07",
+      "category": "escenarios",
+      "bytes": 10982,
+      "url": "https://originheartgold.github.io/_astro/outdoor-07.Die6PH0W_1zg4QM.webp"
+    },
+    {
+      "path": "_astro/outdoor-07.Die6PH0W_ZIbYC3.webp",
+      "name": "outdoor 07",
+      "category": "escenarios",
+      "bytes": 27968,
+      "url": "https://originheartgold.github.io/_astro/outdoor-07.Die6PH0W_ZIbYC3.webp"
+    },
+    {
+      "path": "_astro/outdoor-08.BpiYdbjC_GJpF0.webp",
+      "name": "outdoor 08",
+      "category": "escenarios",
+      "bytes": 25560,
+      "url": "https://originheartgold.github.io/_astro/outdoor-08.BpiYdbjC_GJpF0.webp"
+    },
+    {
+      "path": "_astro/outdoor-08.BpiYdbjC_Z24YDE6.webp",
+      "name": "outdoor 08",
+      "category": "escenarios",
+      "bytes": 10054,
+      "url": "https://originheartgold.github.io/_astro/outdoor-08.BpiYdbjC_Z24YDE6.webp"
+    },
+    {
+      "path": "_astro/outdoor-09.D_74Qpnz_OXfT9.webp",
+      "name": "outdoor 09",
+      "category": "escenarios",
+      "bytes": 25438,
+      "url": "https://originheartgold.github.io/_astro/outdoor-09.D_74Qpnz_OXfT9.webp"
+    },
+    {
+      "path": "_astro/outdoor-09.D_74Qpnz_Z1VKNpW.webp",
+      "name": "outdoor 09",
+      "category": "escenarios",
+      "bytes": 9892,
+      "url": "https://originheartgold.github.io/_astro/outdoor-09.D_74Qpnz_Z1VKNpW.webp"
+    },
+    {
+      "path": "_astro/outdoor-0a.C8agD4KS_Emwb7.webp",
+      "name": "outdoor 0a",
+      "category": "escenarios",
+      "bytes": 27582,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0a.C8agD4KS_Emwb7.webp"
+    },
+    {
+      "path": "_astro/outdoor-0a.C8agD4KS_Z27mx8Y.webp",
+      "name": "outdoor 0a",
+      "category": "escenarios",
+      "bytes": 10526,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0a.C8agD4KS_Z27mx8Y.webp"
+    },
+    {
+      "path": "_astro/outdoor-0b.Cduh6Pgr_jAy99.webp",
+      "name": "outdoor 0b",
+      "category": "escenarios",
+      "bytes": 28678,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0b.Cduh6Pgr_jAy99.webp"
+    },
+    {
+      "path": "_astro/outdoor-0b.Cduh6Pgr_Z2s8vaW.webp",
+      "name": "outdoor 0b",
+      "category": "escenarios",
+      "bytes": 11094,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0b.Cduh6Pgr_Z2s8vaW.webp"
+    },
+    {
+      "path": "_astro/outdoor-0c.BzOSy5oz_22HpsC.webp",
+      "name": "outdoor 0c",
+      "category": "escenarios",
+      "bytes": 10054,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0c.BzOSy5oz_22HpsC.webp"
+    },
+    {
+      "path": "_astro/outdoor-0c.BzOSy5oz_ZfJE1d.webp",
+      "name": "outdoor 0c",
+      "category": "escenarios",
+      "bytes": 25822,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0c.BzOSy5oz_ZfJE1d.webp"
+    },
+    {
+      "path": "_astro/outdoor-0d.B05QBobt_1hHEI0.webp",
+      "name": "outdoor 0d",
+      "category": "escenarios",
+      "bytes": 35238,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0d.B05QBobt_1hHEI0.webp"
+    },
+    {
+      "path": "_astro/outdoor-0d.B05QBobt_Z1u1oB6.webp",
+      "name": "outdoor 0d",
+      "category": "escenarios",
+      "bytes": 13746,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0d.B05QBobt_Z1u1oB6.webp"
+    },
+    {
+      "path": "_astro/outdoor-0e.BhlV2nL6_vRgW3.webp",
+      "name": "outdoor 0e",
+      "category": "escenarios",
+      "bytes": 25568,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0e.BhlV2nL6_vRgW3.webp"
+    },
+    {
+      "path": "_astro/outdoor-0e.BhlV2nL6_Z2fQMn3.webp",
+      "name": "outdoor 0e",
+      "category": "escenarios",
+      "bytes": 10006,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0e.BhlV2nL6_Z2fQMn3.webp"
+    },
+    {
+      "path": "_astro/outdoor-0f.BF-EysPT_i6krv.webp",
+      "name": "outdoor 0f",
+      "category": "escenarios",
+      "bytes": 9710,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0f.BF-EysPT_i6krv.webp"
+    },
+    {
+      "path": "_astro/outdoor-0f.BF-EysPT_Z20lJ2k.webp",
+      "name": "outdoor 0f",
+      "category": "escenarios",
+      "bytes": 25130,
+      "url": "https://originheartgold.github.io/_astro/outdoor-0f.BF-EysPT_Z20lJ2k.webp"
+    },
+    {
+      "path": "_astro/outdoor-10.B2YVKeZb_2g10sj.webp",
+      "name": "outdoor 10",
+      "category": "escenarios",
+      "bytes": 25320,
+      "url": "https://originheartgold.github.io/_astro/outdoor-10.B2YVKeZb_2g10sj.webp"
+    },
+    {
+      "path": "_astro/outdoor-10.B2YVKeZb_ZvI3QM.webp",
+      "name": "outdoor 10",
+      "category": "escenarios",
+      "bytes": 9896,
+      "url": "https://originheartgold.github.io/_astro/outdoor-10.B2YVKeZb_ZvI3QM.webp"
+    },
+    {
+      "path": "_astro/outdoors.9iJMFgKm_Z1ug2NO.webp",
+      "name": "outdoors",
+      "category": "escenarios",
+      "bytes": 89902,
+      "url": "https://originheartgold.github.io/_astro/outdoors.9iJMFgKm_Z1ug2NO.webp"
+    },
+    {
+      "path": "_astro/pewter-city-big-mushroom-0.BtAGOQEs_2nSLKl.webp",
+      "name": "pewter city big mushroom 0",
+      "category": "ubicaciones",
+      "bytes": 24678,
+      "url": "https://originheartgold.github.io/_astro/pewter-city-big-mushroom-0.BtAGOQEs_2nSLKl.webp"
+    },
+    {
+      "path": "_astro/pewter-city-nugget-2.4-30DkQO_1kzBPt.webp",
+      "name": "pewter city nugget 2",
+      "category": "ubicaciones",
+      "bytes": 22308,
+      "url": "https://originheartgold.github.io/_astro/pewter-city-nugget-2.4-30DkQO_1kzBPt.webp"
+    },
+    {
+      "path": "_astro/pewter-city-pp-up-1.BQa7ichq_1LSDjB.webp",
+      "name": "pewter city pp up 1",
+      "category": "ubicaciones",
+      "bytes": 23402,
+      "url": "https://originheartgold.github.io/_astro/pewter-city-pp-up-1.BQa7ichq_1LSDjB.webp"
+    },
+    {
+      "path": "_astro/pok-athlon-dome-pp-up-129.BlgRABca_o7jgG.webp",
+      "name": "pok athlon dome pp up 129",
+      "category": "ubicaciones",
+      "bytes": 28474,
+      "url": "https://originheartgold.github.io/_astro/pok-athlon-dome-pp-up-129.BlgRABca_o7jgG.webp"
+    },
+    {
+      "path": "_astro/pok-athlon-dome-protein-130.7nKq6XoJ_Z14AreD.webp",
+      "name": "pok athlon dome protein 130",
+      "category": "ubicaciones",
+      "bytes": 12178,
+      "url": "https://originheartgold.github.io/_astro/pok-athlon-dome-protein-130.7nKq6XoJ_Z14AreD.webp"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-29.BEvn7ogB_Zg7Sw.webp",
+      "name": "resort zone tiny mushroom 29",
+      "category": "ubicaciones",
+      "bytes": 21584,
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-29.BEvn7ogB_Zg7Sw.webp"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-30.Bg1DTeyp_Z1kkxul.webp",
+      "name": "resort zone tiny mushroom 30",
+      "category": "ubicaciones",
+      "bytes": 19976,
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-30.Bg1DTeyp_Z1kkxul.webp"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-31.BhBgUX73_18qzrd.webp",
+      "name": "resort zone tiny mushroom 31",
+      "category": "ubicaciones",
+      "bytes": 29578,
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-31.BhBgUX73_18qzrd.webp"
+    },
+    {
+      "path": "_astro/rock-tunnel-b1f-hp-up-24.CIA6Hjxg_1hcmwP.webp",
+      "name": "rock tunnel b1f hp up 24",
+      "category": "ubicaciones",
+      "bytes": 3072,
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-b1f-hp-up-24.CIA6Hjxg_1hcmwP.webp"
+    },
+    {
+      "path": "_astro/rock-tunnel-b1f-max-potion-25.BubErgCK_2RF07.webp",
+      "name": "rock tunnel b1f max potion 25",
+      "category": "ubicaciones",
+      "bytes": 3428,
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-b1f-max-potion-25.BubErgCK_2RF07.webp"
+    },
+    {
+      "path": "_astro/rock-tunnel-ultra-ball-23.CP8l8_XL_NKVBh.webp",
+      "name": "rock tunnel ultra ball 23",
+      "category": "ubicaciones",
+      "bytes": 4394,
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-ultra-ball-23.CP8l8_XL_NKVBh.webp"
+    },
+    {
+      "path": "_astro/route-10-carbos-21.mFmDKZc4_1iWQlT.webp",
+      "name": "route 10 carbos 21",
+      "category": "ubicaciones",
+      "bytes": 23154,
+      "url": "https://originheartgold.github.io/_astro/route-10-carbos-21.mFmDKZc4_1iWQlT.webp"
+    },
+    {
+      "path": "_astro/route-10-south-pp-up-22.DPwFf9Cn_Z27N58q.webp",
+      "name": "route 10 south pp up 22",
+      "category": "ubicaciones",
+      "bytes": 20624,
+      "url": "https://originheartgold.github.io/_astro/route-10-south-pp-up-22.DPwFf9Cn_Z27N58q.webp"
+    },
+    {
+      "path": "_astro/route-11-revive-20.BUeluRek_Z1JWiq3.webp",
+      "name": "route 11 revive 20",
+      "category": "ubicaciones",
+      "bytes": 30068,
+      "url": "https://originheartgold.github.io/_astro/route-11-revive-20.BUeluRek_Z1JWiq3.webp"
+    },
+    {
+      "path": "_astro/route-12-elixir-32._Ttkm54e_21vPL9.webp",
+      "name": "route 12 elixir 32",
+      "category": "ubicaciones",
+      "bytes": 23646,
+      "url": "https://originheartgold.github.io/_astro/route-12-elixir-32._Ttkm54e_21vPL9.webp"
+    },
+    {
+      "path": "_astro/route-13-calcium-33.DWMWbctT_FuDkd.webp",
+      "name": "route 13 calcium 33",
+      "category": "ubicaciones",
+      "bytes": 28068,
+      "url": "https://originheartgold.github.io/_astro/route-13-calcium-33.DWMWbctT_FuDkd.webp"
+    },
+    {
+      "path": "_astro/route-17-max-elixir-27.DXaaCZxM_1Y1TsH.webp",
+      "name": "route 17 max elixir 27",
+      "category": "ubicaciones",
+      "bytes": 23432,
+      "url": "https://originheartgold.github.io/_astro/route-17-max-elixir-27.DXaaCZxM_1Y1TsH.webp"
+    },
+    {
+      "path": "_astro/route-17-max-ether-26.BzcSjC5y_2iP0J3.webp",
+      "name": "route 17 max ether 26",
+      "category": "ubicaciones",
+      "bytes": 17274,
+      "url": "https://originheartgold.github.io/_astro/route-17-max-ether-26.BzcSjC5y_2iP0J3.webp"
+    },
+    {
+      "path": "_astro/route-19-big-pearl-38.BLZsxJTB_HC4AX.webp",
+      "name": "route 19 big pearl 38",
+      "category": "ubicaciones",
+      "bytes": 24302,
+      "url": "https://originheartgold.github.io/_astro/route-19-big-pearl-38.BLZsxJTB_HC4AX.webp"
+    },
+    {
+      "path": "_astro/route-19-max-elixir-35.gwCesNZa_1qEbUl.webp",
+      "name": "route 19 max elixir 35",
+      "category": "ubicaciones",
+      "bytes": 26302,
+      "url": "https://originheartgold.github.io/_astro/route-19-max-elixir-35.gwCesNZa_1qEbUl.webp"
+    },
+    {
+      "path": "_astro/route-19-pearl-36.DheJ0SD4_1s9iIg.webp",
+      "name": "route 19 pearl 36",
+      "category": "ubicaciones",
+      "bytes": 27354,
+      "url": "https://originheartgold.github.io/_astro/route-19-pearl-36.DheJ0SD4_1s9iIg.webp"
+    },
+    {
+      "path": "_astro/route-19-pearl-37.DweUX6qL_Z6HIsC.webp",
+      "name": "route 19 pearl 37",
+      "category": "ubicaciones",
+      "bytes": 25580,
+      "url": "https://originheartgold.github.io/_astro/route-19-pearl-37.DweUX6qL_Z6HIsC.webp"
+    },
+    {
+      "path": "_astro/route-19-revive-34.CEbDXu_P_Z1nHdSL.webp",
+      "name": "route 19 revive 34",
+      "category": "ubicaciones",
+      "bytes": 25226,
+      "url": "https://originheartgold.github.io/_astro/route-19-revive-34.CEbDXu_P_Z1nHdSL.webp"
+    },
+    {
+      "path": "_astro/route-20-deep-sea-tooth-39.BJfeEkoe_2vWueW.webp",
+      "name": "route 20 deep sea tooth 39",
+      "category": "ubicaciones",
+      "bytes": 26406,
+      "url": "https://originheartgold.github.io/_astro/route-20-deep-sea-tooth-39.BJfeEkoe_2vWueW.webp"
+    },
+    {
+      "path": "_astro/route-20-stardust-40.DQXFZE2t_U55EV.webp",
+      "name": "route 20 stardust 40",
+      "category": "ubicaciones",
+      "bytes": 20892,
+      "url": "https://originheartgold.github.io/_astro/route-20-stardust-40.DQXFZE2t_U55EV.webp"
+    },
+    {
+      "path": "_astro/route-21-rare-candy-50.BxdhNtob_zwbj1.webp",
+      "name": "route 21 rare candy 50",
+      "category": "ubicaciones",
+      "bytes": 29894,
+      "url": "https://originheartgold.github.io/_astro/route-21-rare-candy-50.BxdhNtob_zwbj1.webp"
+    },
+    {
+      "path": "_astro/route-21-stardust-47.Du6xN1C8_Z1j6qT9.webp",
+      "name": "route 21 stardust 47",
+      "category": "ubicaciones",
+      "bytes": 23314,
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-47.Du6xN1C8_Z1j6qT9.webp"
+    },
+    {
+      "path": "_astro/route-21-stardust-48.CJLAkrWV_1H3WGb.webp",
+      "name": "route 21 stardust 48",
+      "category": "ubicaciones",
+      "bytes": 21564,
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-48.CJLAkrWV_1H3WGb.webp"
+    },
+    {
+      "path": "_astro/route-21-stardust-49.Bb7D-oQx_2bQjns.webp",
+      "name": "route 21 stardust 49",
+      "category": "ubicaciones",
+      "bytes": 23188,
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-49.Bb7D-oQx_2bQjns.webp"
+    },
+    {
+      "path": "_astro/route-25-revive-10.DKwHnRpZ_5yTNt.webp",
+      "name": "route 25 revive 10",
+      "category": "ubicaciones",
+      "bytes": 17584,
+      "url": "https://originheartgold.github.io/_astro/route-25-revive-10.DKwHnRpZ_5yTNt.webp"
+    },
+    {
+      "path": "_astro/route-26-nugget-64.D3sja8Wo_Z1bCbWt.webp",
+      "name": "route 26 nugget 64",
+      "category": "ubicaciones",
+      "bytes": 23704,
+      "url": "https://originheartgold.github.io/_astro/route-26-nugget-64.D3sja8Wo_Z1bCbWt.webp"
+    },
+    {
+      "path": "_astro/route-26-tiny-mushroom-63.Cir83Xe7_ZTNIPR.webp",
+      "name": "route 26 tiny mushroom 63",
+      "category": "ubicaciones",
+      "bytes": 27366,
+      "url": "https://originheartgold.github.io/_astro/route-26-tiny-mushroom-63.Cir83Xe7_ZTNIPR.webp"
+    },
+    {
+      "path": "_astro/route-27-big-mushroom-66.tqY4WG1f_22b4WH.webp",
+      "name": "route 27 big mushroom 66",
+      "category": "ubicaciones",
+      "bytes": 21926,
+      "url": "https://originheartgold.github.io/_astro/route-27-big-mushroom-66.tqY4WG1f_22b4WH.webp"
+    },
+    {
+      "path": "_astro/route-27-revive-65.n0ENG0-j_Zjt9qq.webp",
+      "name": "route 27 revive 65",
+      "category": "ubicaciones",
+      "bytes": 20574,
+      "url": "https://originheartgold.github.io/_astro/route-27-revive-65.n0ENG0-j_Zjt9qq.webp"
+    },
+    {
+      "path": "_astro/route-28-full-restore-68.Cu6HAaPA_125Y3p.webp",
+      "name": "route 28 full restore 68",
+      "category": "ubicaciones",
+      "bytes": 22890,
+      "url": "https://originheartgold.github.io/_astro/route-28-full-restore-68.Cu6HAaPA_125Y3p.webp"
+    },
+    {
+      "path": "_astro/route-28-rare-candy-67.CqxY2r52_1b6AKO.webp",
+      "name": "route 28 rare candy 67",
+      "category": "ubicaciones",
+      "bytes": 24476,
+      "url": "https://originheartgold.github.io/_astro/route-28-rare-candy-67.CqxY2r52_1b6AKO.webp"
+    },
+    {
+      "path": "_astro/route-29-nugget-90.BbGslGmt_1s3Q5e.webp",
+      "name": "route 29 nugget 90",
+      "category": "ubicaciones",
+      "bytes": 25932,
+      "url": "https://originheartgold.github.io/_astro/route-29-nugget-90.BbGslGmt_1s3Q5e.webp"
+    },
+    {
+      "path": "_astro/route-3-ultra-ball-3.Bb80M6Cj_2j2ew4.webp",
+      "name": "route 3 ultra ball 3",
+      "category": "ubicaciones",
+      "bytes": 21182,
+      "url": "https://originheartgold.github.io/_astro/route-3-ultra-ball-3.Bb80M6Cj_2j2ew4.webp"
+    },
+    {
+      "path": "_astro/route-30-potion-92.DKsXE7yq_Zi95q4.webp",
+      "name": "route 30 potion 92",
+      "category": "ubicaciones",
+      "bytes": 28226,
+      "url": "https://originheartgold.github.io/_astro/route-30-potion-92.DKsXE7yq_Zi95q4.webp"
+    },
+    {
+      "path": "_astro/route-32-great-ball-102.QFiwg6Hu_Z5yjbi.webp",
+      "name": "route 32 great ball 102",
+      "category": "ubicaciones",
+      "bytes": 21144,
+      "url": "https://originheartgold.github.io/_astro/route-32-great-ball-102.QFiwg6Hu_Z5yjbi.webp"
+    },
+    {
+      "path": "_astro/route-32-heart-scale-101.BbjQC7fh_23obaA.webp",
+      "name": "route 32 heart scale 101",
+      "category": "ubicaciones",
+      "bytes": 23542,
+      "url": "https://originheartgold.github.io/_astro/route-32-heart-scale-101.BbjQC7fh_23obaA.webp"
+    },
+    {
+      "path": "_astro/route-32-super-potion-100.BdzyjKe3_1grVzY.webp",
+      "name": "route 32 super potion 100",
+      "category": "ubicaciones",
+      "bytes": 25896,
+      "url": "https://originheartgold.github.io/_astro/route-32-super-potion-100.BdzyjKe3_1grVzY.webp"
+    },
+    {
+      "path": "_astro/route-34-rare-candy-119.IKoZItj1_1miH3d.webp",
+      "name": "route 34 rare candy 119",
+      "category": "ubicaciones",
+      "bytes": 27558,
+      "url": "https://originheartgold.github.io/_astro/route-34-rare-candy-119.IKoZItj1_1miH3d.webp"
+    },
+    {
+      "path": "_astro/route-35-nugget-124.DVHCrJWs_Z1pjRkj.webp",
+      "name": "route 35 nugget 124",
+      "category": "ubicaciones",
+      "bytes": 21776,
+      "url": "https://originheartgold.github.io/_astro/route-35-nugget-124.DVHCrJWs_Z1pjRkj.webp"
+    },
+    {
+      "path": "_astro/route-36-awakening-131.BRuDaNCA_2bDWuM.webp",
+      "name": "route 36 awakening 131",
+      "category": "ubicaciones",
+      "bytes": 30408,
+      "url": "https://originheartgold.github.io/_astro/route-36-awakening-131.BRuDaNCA_2bDWuM.webp"
+    },
+    {
+      "path": "_astro/route-38-hp-up-147.DsjzTqpf_Z8KXS3.webp",
+      "name": "route 38 hp up 147",
+      "category": "ubicaciones",
+      "bytes": 26328,
+      "url": "https://originheartgold.github.io/_astro/route-38-hp-up-147.DsjzTqpf_Z8KXS3.webp"
+    },
+    {
+      "path": "_astro/route-39-full-heal-151.DeN615vH_Z1SOfuB.webp",
+      "name": "route 39 full heal 151",
+      "category": "ubicaciones",
+      "bytes": 23946,
+      "url": "https://originheartgold.github.io/_astro/route-39-full-heal-151.DeN615vH_Z1SOfuB.webp"
+    },
+    {
+      "path": "_astro/route-39-nugget-150.Bqh6AlhN_1FU5fx.webp",
+      "name": "route 39 nugget 150",
+      "category": "ubicaciones",
+      "bytes": 21098,
+      "url": "https://originheartgold.github.io/_astro/route-39-nugget-150.Bqh6AlhN_1FU5fx.webp"
+    },
+    {
+      "path": "_astro/route-39-pp-up-148.DV6IOUeR_ZXgNjz.webp",
+      "name": "route 39 pp up 148",
+      "category": "ubicaciones",
+      "bytes": 21954,
+      "url": "https://originheartgold.github.io/_astro/route-39-pp-up-148.DV6IOUeR_ZXgNjz.webp"
+    },
+    {
+      "path": "_astro/route-39-x-attack-149.C7x_yhRC_16Ac2m.webp",
+      "name": "route 39 x attack 149",
+      "category": "ubicaciones",
+      "bytes": 17372,
+      "url": "https://originheartgold.github.io/_astro/route-39-x-attack-149.C7x_yhRC_16Ac2m.webp"
+    },
+    {
+      "path": "_astro/route-4-star-piece-7.-w8JOB59_1J427p.webp",
+      "name": "route 4 star piece 7",
+      "category": "ubicaciones",
+      "bytes": 19844,
+      "url": "https://originheartgold.github.io/_astro/route-4-star-piece-7.-w8JOB59_1J427p.webp"
+    },
+    {
+      "path": "_astro/route-4-star-piece-8.D4v0EntN_Z2kf5LI.webp",
+      "name": "route 4 star piece 8",
+      "category": "ubicaciones",
+      "bytes": 24326,
+      "url": "https://originheartgold.github.io/_astro/route-4-star-piece-8.D4v0EntN_Z2kf5LI.webp"
+    },
+    {
+      "path": "_astro/route-41-max-ether-159.Bj4to19t_Zq2EsD.webp",
+      "name": "route 41 max ether 159",
+      "category": "ubicaciones",
+      "bytes": 25476,
+      "url": "https://originheartgold.github.io/_astro/route-41-max-ether-159.Bj4to19t_Zq2EsD.webp"
+    },
+    {
+      "path": "_astro/route-41-stardust-156.Dm5VmSjE_Z2l5xgg.webp",
+      "name": "route 41 stardust 156",
+      "category": "ubicaciones",
+      "bytes": 25568,
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-156.Dm5VmSjE_Z2l5xgg.webp"
+    },
+    {
+      "path": "_astro/route-41-stardust-157.Drbov-Xi_A2SN7.webp",
+      "name": "route 41 stardust 157",
+      "category": "ubicaciones",
+      "bytes": 25484,
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-157.Drbov-Xi_A2SN7.webp"
+    },
+    {
+      "path": "_astro/route-41-stardust-158.zjs-KIe5_ZfRF1m.webp",
+      "name": "route 41 stardust 158",
+      "category": "ubicaciones",
+      "bytes": 24792,
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-158.zjs-KIe5_ZfRF1m.webp"
+    },
+    {
+      "path": "_astro/route-41-stardust-160.ORYQO7Gr_2cwxuw.webp",
+      "name": "route 41 stardust 160",
+      "category": "ubicaciones",
+      "bytes": 26136,
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-160.ORYQO7Gr_2cwxuw.webp"
+    },
+    {
+      "path": "_astro/route-42-max-potion-170.CzRU5c7V_Z1Ppcyr.webp",
+      "name": "route 42 max potion 170",
+      "category": "ubicaciones",
+      "bytes": 24128,
+      "url": "https://originheartgold.github.io/_astro/route-42-max-potion-170.CzRU5c7V_Z1Ppcyr.webp"
+    },
+    {
+      "path": "_astro/route-44-elixir-188.CfQz5cin_2oPg6P.webp",
+      "name": "route 44 elixir 188",
+      "category": "ubicaciones",
+      "bytes": 21558,
+      "url": "https://originheartgold.github.io/_astro/route-44-elixir-188.CfQz5cin_2oPg6P.webp"
+    },
+    {
+      "path": "_astro/route-45-pp-max-198.Z6sEPQ73_2t5PHy.webp",
+      "name": "route 45 pp max 198",
+      "category": "ubicaciones",
+      "bytes": 20212,
+      "url": "https://originheartgold.github.io/_astro/route-45-pp-max-198.Z6sEPQ73_2t5PHy.webp"
+    },
+    {
+      "path": "_astro/route-45-pp-up-197.CO_4Mbhx_Z217neA.webp",
+      "name": "route 45 pp up 197",
+      "category": "ubicaciones",
+      "bytes": 25912,
+      "url": "https://originheartgold.github.io/_astro/route-45-pp-up-197.CO_4Mbhx_Z217neA.webp"
+    },
+    {
+      "path": "_astro/route-47-pearl-200.nTMGZSF9_Z14hFT8.webp",
+      "name": "route 47 pearl 200",
+      "category": "ubicaciones",
+      "bytes": 24408,
+      "url": "https://originheartgold.github.io/_astro/route-47-pearl-200.nTMGZSF9_Z14hFT8.webp"
+    },
+    {
+      "path": "_astro/route-47-stardust-199.S6qDLVY9_ZNMhpu.webp",
+      "name": "route 47 stardust 199",
+      "category": "ubicaciones",
+      "bytes": 20362,
+      "url": "https://originheartgold.github.io/_astro/route-47-stardust-199.S6qDLVY9_ZNMhpu.webp"
+    },
+    {
+      "path": "_astro/route-5-underground-path-full-restore-11.BwYWvsUq_ZSHBjv.webp",
+      "name": "route 5 underground path full restore 11",
+      "category": "ubicaciones",
+      "bytes": 7490,
+      "url": "https://originheartgold.github.io/_astro/route-5-underground-path-full-restore-11.BwYWvsUq_ZSHBjv.webp"
+    },
+    {
+      "path": "_astro/route-5-underground-path-x-sp-atk-12.B3cdqVKP_2gvils.webp",
+      "name": "route 5 underground path x sp atk 12",
+      "category": "ubicaciones",
+      "bytes": 8698,
+      "url": "https://originheartgold.github.io/_astro/route-5-underground-path-x-sp-atk-12.B3cdqVKP_2gvils.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-big-mushroom-107.DlUnXlE6_UnxYd.webp",
+      "name": "ruins of alph big mushroom 107",
+      "category": "ubicaciones",
+      "bytes": 28602,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-big-mushroom-107.DlUnXlE6_UnxYd.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-blocked-grass.BJQ64cfI_Z24SaBW.webp",
+      "name": "ruins of alph blocked grass",
+      "category": "ubicaciones",
+      "bytes": 18994,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-blocked-grass.BJQ64cfI_Z24SaBW.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-east-path.IM1DGlfc_ZLXeWR.webp",
+      "name": "ruins of alph east path",
+      "category": "ubicaciones",
+      "bytes": 19824,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-east-path.IM1DGlfc_ZLXeWR.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-great-ball-105.PnTQCNYO_13N5pU.webp",
+      "name": "ruins of alph great ball 105",
+      "category": "ubicaciones",
+      "bytes": 25302,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-great-ball-105.PnTQCNYO_13N5pU.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-kabuto-door.CXG7e_Sy_15A5gU.webp",
+      "name": "ruins of alph kabuto door",
+      "category": "ubicaciones",
+      "bytes": 18602,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-kabuto-door.CXG7e_Sy_15A5gU.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-nugget-106.CVoCR74Y_Zzw5dR.webp",
+      "name": "ruins of alph nugget 106",
+      "category": "ubicaciones",
+      "bytes": 24008,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-nugget-106.CVoCR74Y_Zzw5dR.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-rare-candy-103.DRJbq0BR_Z2sM5tR.webp",
+      "name": "ruins of alph rare candy 103",
+      "category": "ubicaciones",
+      "bytes": 26586,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-rare-candy-103.DRJbq0BR_Z2sM5tR.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-south-path.DMDQ6kj3_Z1kWczc.webp",
+      "name": "ruins of alph south path",
+      "category": "ubicaciones",
+      "bytes": 20472,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-south-path.DMDQ6kj3_Z1kWczc.webp"
+    },
+    {
+      "path": "_astro/ruins-of-alph-tiny-mushroom-104.D87N5DT1_QvFV0.webp",
+      "name": "ruins of alph tiny mushroom 104",
+      "category": "ubicaciones",
+      "bytes": 21528,
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-tiny-mushroom-104.D87N5DT1_QvFV0.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-b1f-ice-heal-42.jyw-_t8c_Z1pI1c6.webp",
+      "name": "seafoam islands b1f ice heal 42",
+      "category": "ubicaciones",
+      "bytes": 17030,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b1f-ice-heal-42.jyw-_t8c_Z1pI1c6.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-b2f-pearl-43.DYkMU6yY_Z1AiMbY.webp",
+      "name": "seafoam islands b2f pearl 43",
+      "category": "ubicaciones",
+      "bytes": 19358,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b2f-pearl-43.DYkMU6yY_Z1AiMbY.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-b2f-pearl-44.BFc57XUo_Z1aiC0D.webp",
+      "name": "seafoam islands b2f pearl 44",
+      "category": "ubicaciones",
+      "bytes": 20828,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b2f-pearl-44.BFc57XUo_Z1aiC0D.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-b3f-max-revive-45.DgB0r_WN_Zhdpy3.webp",
+      "name": "seafoam islands b3f max revive 45",
+      "category": "ubicaciones",
+      "bytes": 14554,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b3f-max-revive-45.DgB0r_WN_Zhdpy3.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-b4f-zinc-46.6edw1l9r_Ohu9v.webp",
+      "name": "seafoam islands b4f zinc 46",
+      "category": "ubicaciones",
+      "bytes": 18088,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b4f-zinc-46.6edw1l9r_Ohu9v.webp"
+    },
+    {
+      "path": "_astro/seafoam-islands-escape-rope-41.Bmiqeb39_OVN2p.webp",
+      "name": "seafoam islands escape rope 41",
+      "category": "ubicaciones",
+      "bytes": 14938,
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-escape-rope-41.Bmiqeb39_OVN2p.webp"
+    },
+    {
+      "path": "_astro/slowpoke-well-b1f-full-heal-115.BJXLFXDD_Z1I8D8B.webp",
+      "name": "slowpoke well b1f full heal 115",
+      "category": "ubicaciones",
+      "bytes": 21074,
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-b1f-full-heal-115.BJXLFXDD_Z1I8D8B.webp"
+    },
+    {
+      "path": "_astro/slowpoke-well-b1f-super-potion-116.CwK5SY_u_v5Q9y.webp",
+      "name": "slowpoke well b1f super potion 116",
+      "category": "ubicaciones",
+      "bytes": 17022,
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-b1f-super-potion-116.CwK5SY_u_v5Q9y.webp"
+    },
+    {
+      "path": "_astro/slowpoke-well-great-ball-114.BhKNUien_Z1aAfHm.webp",
+      "name": "slowpoke well great ball 114",
+      "category": "ubicaciones",
+      "bytes": 12302,
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-great-ball-114.BhKNUien_Z1aAfHm.webp"
+    },
+    {
+      "path": "_astro/team-rocket-hq-b2f-full-heal-184.D-KoZI0R_2rI2C2.webp",
+      "name": "team rocket hq b2f full heal 184",
+      "category": "ubicaciones",
+      "bytes": 6314,
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-b2f-full-heal-184.D-KoZI0R_2rI2C2.webp"
+    },
+    {
+      "path": "_astro/team-rocket-hq-b2f-x-sp-def-185.BM7ao763_Z19i0ye.webp",
+      "name": "team rocket hq b2f x sp def 185",
+      "category": "ubicaciones",
+      "bytes": 8836,
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-b2f-x-sp-def-185.BM7ao763_Z19i0ye.webp"
+    },
+    {
+      "path": "_astro/team-rocket-hq-revive-183.DCPqQcIO_Z1OHYaw.webp",
+      "name": "team rocket hq revive 183",
+      "category": "ubicaciones",
+      "bytes": 8002,
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-revive-183.DCPqQcIO_Z1OHYaw.webp"
+    },
+    {
+      "path": "_astro/union-cave-b1f-revive-111.DUjj-ttk_ZQw9oI.webp",
+      "name": "union cave b1f revive 111",
+      "category": "ubicaciones",
+      "bytes": 14918,
+      "url": "https://originheartgold.github.io/_astro/union-cave-b1f-revive-111.DUjj-ttk_ZQw9oI.webp"
+    },
+    {
+      "path": "_astro/union-cave-b1f-x-speed-112.DeHMlQrE_ZL1RXy.webp",
+      "name": "union cave b1f x speed 112",
+      "category": "ubicaciones",
+      "bytes": 12798,
+      "url": "https://originheartgold.github.io/_astro/union-cave-b1f-x-speed-112.DeHMlQrE_ZL1RXy.webp"
+    },
+    {
+      "path": "_astro/union-cave-big-pearl-108.D0rREGzC_1z7jSd.webp",
+      "name": "union cave big pearl 108",
+      "category": "ubicaciones",
+      "bytes": 16004,
+      "url": "https://originheartgold.github.io/_astro/union-cave-big-pearl-108.D0rREGzC_1z7jSd.webp"
+    },
+    {
+      "path": "_astro/union-cave-great-ball-110.BYAAPVHE_Z1Mk5rA.webp",
+      "name": "union cave great ball 110",
+      "category": "ubicaciones",
+      "bytes": 13840,
+      "url": "https://originheartgold.github.io/_astro/union-cave-great-ball-110.BYAAPVHE_Z1Mk5rA.webp"
+    },
+    {
+      "path": "_astro/union-cave-paralyze-heal-109.Bt0ByTnR_ZvOU3S.webp",
+      "name": "union cave paralyze heal 109",
+      "category": "ubicaciones",
+      "bytes": 13444,
+      "url": "https://originheartgold.github.io/_astro/union-cave-paralyze-heal-109.Bt0ByTnR_ZvOU3S.webp"
+    },
+    {
+      "path": "_astro/vermilion-city-big-pearl-16.DLqpPl0Y_Z1pJU7k.webp",
+      "name": "vermilion city big pearl 16",
+      "category": "ubicaciones",
+      "bytes": 20106,
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-big-pearl-16.DLqpPl0Y_Z1pJU7k.webp"
+    },
+    {
+      "path": "_astro/vermilion-city-full-heal-13.C5D2R-il_ByfBV.webp",
+      "name": "vermilion city full heal 13",
+      "category": "ubicaciones",
+      "bytes": 24000,
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-full-heal-13.C5D2R-il_ByfBV.webp"
+    },
+    {
+      "path": "_astro/vermilion-city-heart-scale-14.2o9IcP56_17bs0w.webp",
+      "name": "vermilion city heart scale 14",
+      "category": "ubicaciones",
+      "bytes": 26744,
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-heart-scale-14.2o9IcP56_17bs0w.webp"
+    },
+    {
+      "path": "_astro/vermilion-city-pearl-15.C8Hs3I4r_vENOy.webp",
+      "name": "vermilion city pearl 15",
+      "category": "ubicaciones",
+      "bytes": 20976,
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-pearl-15.C8Hs3I4r_vENOy.webp"
+    },
+    {
+      "path": "_astro/vermilion-city-pearl-17.BH8I-isJ_2q2pyf.webp",
+      "name": "vermilion city pearl 17",
+      "category": "ubicaciones",
+      "bytes": 21446,
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-pearl-17.BH8I-isJ_2q2pyf.webp"
+    },
+    {
+      "path": "_astro/vermilion-harbor-pier-iron-18.DvSOjNv__Z27MN4A.webp",
+      "name": "vermilion harbor pier iron 18",
+      "category": "ubicaciones",
+      "bytes": 22042,
+      "url": "https://originheartgold.github.io/_astro/vermilion-harbor-pier-iron-18.DvSOjNv__Z27MN4A.webp"
+    },
+    {
+      "path": "_astro/victory-road-2f-max-revive-56.CyL_TwxS_1kJWSJ.webp",
+      "name": "victory road 2f max revive 56",
+      "category": "ubicaciones",
+      "bytes": 17050,
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-max-revive-56.CyL_TwxS_1kJWSJ.webp"
+    },
+    {
+      "path": "_astro/victory-road-2f-pp-up-57.rX1Milj1_Z1f2m8J.webp",
+      "name": "victory road 2f pp up 57",
+      "category": "ubicaciones",
+      "bytes": 15994,
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-pp-up-57.rX1Milj1_Z1f2m8J.webp"
+    },
+    {
+      "path": "_astro/victory-road-2f-ultra-ball-58.CA6VDcd__Zee2Rj.webp",
+      "name": "victory road 2f ultra ball 58",
+      "category": "ubicaciones",
+      "bytes": 18752,
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-ultra-ball-58.CA6VDcd__Zee2Rj.webp"
+    },
+    {
+      "path": "_astro/victory-road-3f-hyper-potion-59.DXmDxJnc_Z1POX5W.webp",
+      "name": "victory road 3f hyper potion 59",
+      "category": "ubicaciones",
+      "bytes": 17026,
+      "url": "https://originheartgold.github.io/_astro/victory-road-3f-hyper-potion-59.DXmDxJnc_Z1POX5W.webp"
+    },
+    {
+      "path": "_astro/victory-road-3f-hyper-potion-60.x99Uji0t_ZpkSSL.webp",
+      "name": "victory road 3f hyper potion 60",
+      "category": "ubicaciones",
+      "bytes": 14244,
+      "url": "https://originheartgold.github.io/_astro/victory-road-3f-hyper-potion-60.x99Uji0t_ZpkSSL.webp"
+    },
+    {
+      "path": "_astro/victory-road-full-heal-54.CzeQe_-G_ZKrPzP.webp",
+      "name": "victory road full heal 54",
+      "category": "ubicaciones",
+      "bytes": 13332,
+      "url": "https://originheartgold.github.io/_astro/victory-road-full-heal-54.CzeQe_-G_ZKrPzP.webp"
+    },
+    {
+      "path": "_astro/victory-road-max-potion-55.CWJ-9MWL_4S3fI.webp",
+      "name": "victory road max potion 55",
+      "category": "ubicaciones",
+      "bytes": 19470,
+      "url": "https://originheartgold.github.io/_astro/victory-road-max-potion-55.CWJ-9MWL_4S3fI.webp"
+    },
+    {
+      "path": "_astro/violet-city-hyper-potion-99.BCcfkmSJ_qf7kl.webp",
+      "name": "violet city hyper potion 99",
+      "category": "ubicaciones",
+      "bytes": 28124,
+      "url": "https://originheartgold.github.io/_astro/violet-city-hyper-potion-99.BCcfkmSJ_qf7kl.webp"
+    },
+    {
+      "path": "_astro/violet-city-pok-ball-98.CymF_WYw_1myyt.webp",
+      "name": "violet city pok ball 98",
+      "category": "ubicaciones",
+      "bytes": 14260,
+      "url": "https://originheartgold.github.io/_astro/violet-city-pok-ball-98.CymF_WYw_1myyt.webp"
+    },
+    {
+      "path": "_astro/viridian-forest-honey-tree.CClFVaQq_2oFkMO.webp",
+      "name": "viridian forest honey tree",
+      "category": "ubicaciones",
+      "bytes": 68384,
+      "url": "https://originheartgold.github.io/_astro/viridian-forest-honey-tree.CClFVaQq_2oFkMO.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-pearl-166.u6D0859S_1hhNrM.webp",
+      "name": "whirl islands b1f pearl 166",
+      "category": "ubicaciones",
+      "bytes": 3914,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-pearl-166.u6D0859S_1hhNrM.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-revive-167.CJeAurD6_Z224tug.webp",
+      "name": "whirl islands b1f revive 167",
+      "category": "ubicaciones",
+      "bytes": 3902,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-revive-167.CJeAurD6_Z224tug.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-super-repel-165.DYd9VbBH_ZTKMuL.webp",
+      "name": "whirl islands b1f super repel 165",
+      "category": "ubicaciones",
+      "bytes": 4396,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-super-repel-165.DYd9VbBH_ZTKMuL.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-ultra-ball-168.sta1vET2_Z95BfV.webp",
+      "name": "whirl islands b1f ultra ball 168",
+      "category": "ubicaciones",
+      "bytes": 4310,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-ultra-ball-168.sta1vET2_Z95BfV.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-b2f-full-restore-169.DeGZS0FY_ZpMjhK.webp",
+      "name": "whirl islands b2f full restore 169",
+      "category": "ubicaciones",
+      "bytes": 17328,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b2f-full-restore-169.DeGZS0FY_ZpMjhK.webp"
+    },
+    {
+      "path": "_astro/whirl-islands-rare-candy-164.C2UglyBu_1RJsn8.webp",
+      "name": "whirl islands rare candy 164",
+      "category": "ubicaciones",
+      "bytes": 4210,
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-rare-candy-164.C2UglyBu_1RJsn8.webp"
+    },
+    {
+      "path": "_astro/widescreen.Dv2-qb4x_2kYsoy.webp",
+      "name": "widescreen",
+      "category": "escenarios",
+      "bytes": 57500,
+      "url": "https://originheartgold.github.io/_astro/widescreen.Dv2-qb4x_2kYsoy.webp"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "name": "apple touch icon.png",
+      "category": "interfaz",
+      "bytes": 2784,
+      "url": "https://originheartgold.github.io/apple-touch-icon.png"
+    },
+    {
+      "path": "favicon-192.png",
+      "name": "favicon 192.png",
+      "category": "interfaz",
+      "bytes": 4054,
+      "url": "https://originheartgold.github.io/favicon-192.png"
+    },
+    {
+      "path": "favicon-48.png",
+      "name": "favicon 48.png",
+      "category": "interfaz",
+      "bytes": 1052,
+      "url": "https://originheartgold.github.io/favicon-48.png"
+    },
+    {
+      "path": "favicon-512.png",
+      "name": "favicon 512.png",
+      "category": "interfaz",
+      "bytes": 12356,
+      "url": "https://originheartgold.github.io/favicon-512.png"
+    },
+    {
+      "path": "favicon-96.png",
+      "name": "favicon 96.png",
+      "category": "interfaz",
+      "bytes": 1959,
+      "url": "https://originheartgold.github.io/favicon-96.png"
+    },
+    {
+      "path": "favicon.svg",
+      "name": "favicon.svg",
+      "category": "interfaz",
+      "bytes": 1725,
+      "url": "https://originheartgold.github.io/favicon.svg"
+    },
+    {
+      "path": "maskable-512.png",
+      "name": "maskable 512.png",
+      "category": "interfaz",
+      "bytes": 7174,
+      "url": "https://originheartgold.github.io/maskable-512.png"
+    },
+    {
+      "path": "og/default.png",
+      "name": "default.png",
+      "category": "interfaz",
+      "bytes": 36714,
+      "url": "https://originheartgold.github.io/og/default.png"
+    },
+    {
+      "path": "save-editor/favicon.svg",
+      "name": "favicon.svg",
+      "category": "interfaz",
+      "bytes": 350,
+      "url": "https://originheartgold.github.io/save-editor/favicon.svg"
+    }
+  ]
+}
