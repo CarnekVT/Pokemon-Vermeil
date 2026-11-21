@@ -1,7 +1,7 @@
 name: Bifrost Capture studio checks
 on:
   push:
-    branches: [feature/bifrost-overworld-capture-studio]
+    branches: [feature/bifrost-overworld-capture-studio, new-MK-for-2.5D-Testeo]
     paths:
       - 'LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/**'
       - 'LA BASE DE SKY/Plugins/Battle Additions/Abilities/180_SuncoronaEclipsoraAbilities.rb'
