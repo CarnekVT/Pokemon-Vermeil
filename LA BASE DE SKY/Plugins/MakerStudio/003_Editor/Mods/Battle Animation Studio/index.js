@@ -2877,6 +2877,7 @@ function renderStudio(ctx, host) {
                     '<option value="move">Moves (solo si usas el ID de un Move real)</option></select></label>' +
                     '<label class="bas-field">Rama del script<select class="bas-select" data-nitro-side><option value="player">Player (usuario)</option><option value="foe">Foe (rival)</option></select></label>' +
                     '<label class="bas-toggle"><input type="checkbox" data-nitro-placeholders checked> Crear clips procedurales editables para las partículas (no son los gráficos de DS)</label>' +
+                    '<label class="bas-toggle"><input type="checkbox" data-nitro-adapt-native> Aproximar comandos HGSS conocidos como claves editables (shake, slide, flash, tone). No reproduce el timing original DS.</label>' +
                     '<details><summary>Vincular recursos convertidos de tu proyecto (opcional)</summary>' +
                     '<p class="bas-help">Cada recurso debe existir en Vermeil. Sin mapa se conserva un placeholder; los IDs de audio DS no son archivos SE. No se importa contenido de una ROM.</p>' +
                     '<label class="bas-field">PNG por SPA o SPA:emitter<textarea class="bas-input" data-nitro-graphics-map rows="3" spellcheck="false" placeholder="499:2=Graphics/Animations/mi_particula.png"></textarea></label>' +
@@ -2919,7 +2920,8 @@ function renderStudio(ctx, host) {
                             placeholders:!!body.querySelector('[data-nitro-placeholders]').checked,
                             graphicsMap:graphicsMap.value,
                             audioMap:audioMap.value,
-                            side:sideSelect.value
+                            side:sideSelect.value,
+                            adaptNativeCues:!!body.querySelector('[data-nitro-adapt-native]').checked
                         });
                         if(!result.analysis.commands.length)return toast("No se reconocen comandos Nitro en el texto.","warn");
                         pushUndo("importar script Nitro");
