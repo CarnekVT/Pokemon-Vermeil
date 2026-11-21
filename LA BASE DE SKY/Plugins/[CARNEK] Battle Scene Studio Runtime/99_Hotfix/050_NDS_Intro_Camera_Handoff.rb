@@ -362,7 +362,8 @@ module VermeilBSSNDSIntroScene
           darkness.visible=false if darkness
           tear_bands.each_with_index do |band,i|
             offset=(i%4)*0.055
-            phase=[[(p-reveal_at)/(1.0-reveal_at)-offset,0.0].max,1.0].min
+            progress=(p-reveal_at)/(1.0-reveal_at)
+            phase=[[(progress-offset)/(1.0-offset),0.0].max,1.0].min
             snap=phase*phase*(3.0-2.0*phase)
             width=[(Graphics.width*(1.0-snap)).round,0].max
             band.zoom_x=width.to_f
