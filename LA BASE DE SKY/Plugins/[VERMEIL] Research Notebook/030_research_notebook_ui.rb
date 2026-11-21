@@ -177,6 +177,9 @@ module ResearchNotebook
       @grid_signature = nil
       @pending_grid_icons = []
       @interface_layout = defined?(VermeilInterfaceLayout) ? VermeilInterfaceLayout.load(:notebook) : {}
+      @skin.editor_layout = @interface_layout if @skin.respond_to?(:editor_layout=)
+      @designer_extras = []
+      @designer_page = nil
       @species_generation = 0
       @focus_signature = nil
       @icon_base_zoom = {}
@@ -197,6 +200,20 @@ module ResearchNotebook
       VermeilInterfaceLayout.position(@interface_layout, id, axis, fallback)
     end
 
+    # Extra panels/images/text made in MakerStudio render through the normal
+    # Interfaces engine while the actual Notebook manages data and selection.
+    # Only swap elements when changing Catalogue <-> Detail, not every frame.
+    def update_designer_extras
+      return unless defined?(VermeilInterfaceLayout) && @viewport
+      page=@detail_open ? "vermeil_libreta_detalle" : "vermeil_libreta"
+      if @designer_page!=page
+        VermeilInterfaceLayout.dispose_extras(@designer_extras)
+        @designer_extras=VermeilInterfaceLayout.make_extras(@interface_layout,@viewport,page)
+        @designer_page=page
+      end
+      VermeilInterfaceLayout.update_extras(@designer_extras)
+    end
+
     def main
       start
       loop do
@@ -207,6 +224,7 @@ module ResearchNotebook
         focus = @sprites["pokemon"]
         focus.update if focus && focus.visible && focus.respond_to?(:update)
         update_gamefeel
+        update_designer_extras
         # Page icons are rasterized before the page is presented.
         break if update_input
       end
@@ -238,7 +256,7 @@ module ResearchNotebook
 
       if defined?(PokemonSprite)
         @sprites["pokemon"] = PokemonSprite.new(@viewport)
-        @sprites["pokemon"].z = 4
+        @sprites["pokemon"].z = defined?(VermeilInterfaceLayout) ? VermeilInterfaceLayout.layer(@interface_layout,"focus_sprite",4) : 4
         @sprites["pokemon"].visible = false
       end
 
@@ -288,6 +306,10 @@ module ResearchNotebook
     end
 
     def dispose
+      if defined?(VermeilInterfaceLayout)
+        VermeilInterfaceLayout.dispose_extras(@designer_extras)
+        VermeilInterfaceLayout.release_images
+      end
       @skin.dispose if @skin
       dispose_grid_icons
       begin
@@ -943,8 +965,8 @@ module ResearchNotebook
     #===========================================================================
     def draw_detail_panel(bmp)
       @sprites["cursor"].visible = false
-      x = layout_position("grid_panel", "x", GRID_X)
-      y = 61
+      x = layout_position("detail_panel", "x", layout_position("grid_panel", "x", GRID_X))
+      y = layout_position("detail_panel", "y", 61)
       w = GRID_W
       h = 365
       draw_card(bmp, x, y, w, h, PAPER_2)
