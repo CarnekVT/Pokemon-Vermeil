@@ -183,7 +183,7 @@ module VermeilInterfaceLayout
   # Additional author-created decorative text, art, panels and animations are
   # rendered by Interfaces::Elemento itself, on the native scene viewport.
   # Never create decorative clones of the reserved/native scene anchors.
-  def make_extras(layout, viewport, page)
+  def make_extras(layout, viewport, page, animate_entry=true)
     return [] unless defined?(Interfaces::Elemento)
     native=NATIVE_IDS[page] || []
     result=[]
@@ -195,6 +195,9 @@ module VermeilInterfaceLayout
       begin
         copy=data.dup
         copy.delete("__page")
+        # On first opening the native screen itself fades in. Do not replay
+        # another independent editor entrance on those same first frames.
+        copy.delete("entrada") unless animate_entry
         copy["capa"] = [[data["capa"].to_i+8,8].max,65].min
         obj=Interfaces::Elemento.construir(copy,viewport,notes)
         next unless obj
