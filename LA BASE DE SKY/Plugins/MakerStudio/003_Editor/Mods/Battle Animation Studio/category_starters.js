@@ -4,14 +4,14 @@ import { normalizeBasCatalogType, basCatalogMetadata } from "./animation_catalog
 // Author-created and resource-independent starters, NOT decoded Origin HG sprites.
 // They remain normal BAS clips, events and keys, editable from the timeline.
 const PALETTES={
-    subanimation:"#fff1bf", status:"#bfa0f2",weather:"#9bd6ff",terrain:"#81d8a7",
-    ability:"#f4ce81",item:"#ffe0ab",entry:"#8de9d2",faint:"#b7b5d0",
-    field:"#a5e4d1",transition:"#c8d5ff"
+    subanimation:"rgba(255,241,191,1)", status:"rgba(191,160,242,1)",weather:"rgba(155,214,255,1)",terrain:"rgba(129,216,167,1)",
+    ability:"rgba(244,206,129,1)",item:"rgba(255,224,171,1)",entry:"rgba(141,233,210,1)",faint:"rgba(183,181,208,1)",
+    field:"rgba(165,228,209,1)",transition:"rgba(200,213,255,1)"
 };
 function key(frame,value){return {id:uid("pkey"),frame,value,easing:"ease_both"};}
 function position(frame,anchor){return {id:uid("key"),frame,easing:"ease_both",point:{anchor,x:0,y:0,offsetX:0,offsetY:0}};}
 function proceduralClip(category,animation) {
-    const palette=PALETTES[category]||"#e2ecf4";
+    const palette=PALETTES[category]||"rgba(226,236,244,1)";
     const metadata=basCatalogMetadata(category);
     const anchor=metadata.subject==="field"?"screen":metadata.subject==="user"?"user_battler":"target_battler";
     const clip=createProjectile();
