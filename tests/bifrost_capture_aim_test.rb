@@ -272,7 +272,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
       event.instance_variable_set(:@x,10)
       event.instance_variable_set(:@y,6)
       assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
-                                            BifrostCapture.options)
+                                            BifrostCapture.options,nil,0.0)
       assert_same pkmn,BifrostCapture.captures.last
       assert BifrostCapture.captures.last.shiny?,
         "Direct OW capture must keep the same shiny Pokémon"
@@ -342,7 +342,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event=$game_map.events.values.first
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,6)
-    result=BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+    result=BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options,nil,0.0)
     assert result
     assert_equal 1,$bag.used
     assert_equal 1,BifrostCapture.captures.length
@@ -357,7 +357,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event=$game_map.events.values.first
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,6)
-    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options,nil,0.0)
     assert_equal 1,$player.party.length
     assert_equal :PIKACHU,$player.party[0].species
     assert_includes [:caught,:critical],BifrostCapture::Feedback.last_result[:kind]
@@ -384,7 +384,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event=$game_map.events.values.first
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,6)
-    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options,nil,0.0)
     assert_equal :PIKACHU,$PokemonStorage.stored.species
     assert_includes [:caught,:critical],BifrostCapture::Feedback.last_result[:kind]
     assert_equal "Enviado a Caja 1",BifrostCapture::Feedback.last_result[:detail]
@@ -398,7 +398,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     original=BifrostCapture.method(:catch_chance)
     BifrostCapture.singleton_class.send(:define_method,:catch_chance) { |*| 0.0 }
     begin
-      refute BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+      refute BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options,nil,0.0)
       assert_equal :breakout,BifrostCapture::Feedback.last_result[:kind]
       assert_equal 1,$bag.used
       assert_equal 0,BifrostCapture.captures.length
@@ -483,7 +483,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal :PIKACHU,BifrostCapture.event_spec(event)[0]
     assert BifrostCapture.valid_target?(event)
     assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
-                                         BifrostCapture.options)
+                                         BifrostCapture.options,nil,0.0)
     assert_equal 1,BifrostCapture.captures.length
   end
 
