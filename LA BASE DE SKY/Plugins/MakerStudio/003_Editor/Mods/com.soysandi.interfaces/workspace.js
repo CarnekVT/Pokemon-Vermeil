@@ -431,8 +431,11 @@ export function montarEspacio(editor, M) {
     toggleFocus(){toggle("focus");},
     toggleTimeline(){toggle("timeline");},
     showTimeline(){
-      if(!state.timeline){state.timeline=true;drawState();
-        // The user keeps their current zoom/scroll while editing animation.}
+      if(!state.timeline){
+        state.timeline=true;
+        drawState();
+        // The current zoom and scroll remain unchanged.
+      }
     },
     destroy(){disposers.forEach(fn=>fn());closeMenus();}
   };
