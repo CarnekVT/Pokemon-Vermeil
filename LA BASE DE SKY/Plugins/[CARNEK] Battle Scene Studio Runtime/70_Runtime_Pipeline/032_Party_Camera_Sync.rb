@@ -45,15 +45,6 @@ module BSS104
     return if !scene || !state
     v=scene.instance_variable_get(:@vector) rescue nil
     return if !v
-    # A freshly sent-out SOS battler must never restore a stale target/zoom
-    # from before the Pokeball animation. Re-establish the single fixed
-    # Vermeil home shot, then let the room and new battler re-align.
-    if scene.respond_to?(:vermeil_cinema_active?) && scene.vermeil_cinema_active? &&
-       scene.respond_to?(:vermeil_cinema_queue_home) &&
-       !(scene.respond_to?(:vermeil_cinema_script_locked?) && scene.vermeil_cinema_script_locked?)
-      scene.vermeil_cinema_queue_home
-      return
-    end
     v.snap(state[:current]) if state[:current] && v.respond_to?(:snap)
     v.inc=state[:inc] if !state[:inc].nil? && v.respond_to?(:inc=)
     v.set(state[:target]) if state[:target] && v.respond_to?(:set)
@@ -132,17 +123,8 @@ module BSS104PartyCameraSync
       bss070_ebdx_recalibrate_if_needed if respond_to?(:bss070_ebdx_recalibrate_if_needed)
       room=@bss070_ebdx_room rescue nil
       room.update if room && !(room.disposed? rescue true)
-      # Camera locks can still be active when a native SOS send-out ends.
-      # Use the native BSS103 compositor directly once, after the party
-      # animation is finished, so new Pokemon and shadows start at home size.
-      if respond_to?(:vermeil_cinema_active?) && vermeil_cinema_active? &&
-         defined?(BSS103WorldSpaceBattlers)
-        BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
-      elsif respond_to?(:bss070_ebdx_apply_world_alignment)
-        bss070_ebdx_apply_world_alignment
-      end
-    rescue StandardError => e
-      BSS064.log("BSS104 sync after sendout: #{e.class}: #{e.message}") if defined?(BSS064)
+      bss070_ebdx_apply_world_alignment if respond_to?(:bss070_ebdx_apply_world_alignment)
+    rescue
     end
   end
 
