@@ -45,6 +45,31 @@ module BifrostCapture
     Pressure.calm_with_bait(event,item,local)
   end
 
+  # A deliberate free-aim throw can land on empty ground. Charge the ball
+  # and alert only a nearby overworld Pokémon, rather than turning a miss
+  # into a phantom capture or punishing a distant target.
+  def self.resolve_empty_throw(point,item,cfg)
+    return false unless $bag && $bag.quantity(item).to_i > 0
+    return false if cfg["consume_on_miss"] == "1" && !$bag.remove(item,1)
+    near = if point && respond_to?(:visible_targets)
+      visible_targets.map do |event|
+        x,y = screen_position(event)
+        [event,(x-point[0]).abs+(y-point[1]).abs]
+      end.select { |entry| entry[1] <= 96 }.min_by { |entry| entry[1] }
+    end
+    if near
+      event = near[0]
+      spec = event_spec(event)
+      local = options($game_map.map_id,spec[0],event.id)
+      Pressure.add(event,:miss,local) if defined?(Pressure)
+      react(event,local,:miss) if local["alert_on_miss"] == "1"
+    end
+    notice(_INTL("¡El lanzamiento falló!"))
+    capture_result(:miss,near && event_spec(near[0])[0],
+                   _INTL("La Poké Ball cayó al suelo"),cfg)
+    false
+  end
+
   def self.aim_allowed?
     cfg = options
     return false unless cfg["enabled"] == "1"
