@@ -1351,7 +1351,11 @@ end
                      NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
     pbDrawShadowText(bmp, 304, 202, 200, 20, NuevaPokedex.t("Peso: {1} kg", entry[:weight] / 10.0),
                      NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
-    # Ficha de descripción (ancho completo)
+    # Ficha de descripción (ancho completo): draw the actual MakerStudio
+    # panel BEFORE the native dynamic text so colors/images can be customized.
+    @view.skin.draw(bmp,:entry_description,
+                    NuevaPokedex.layout_position("entry_description","x",24),
+                    NuevaPokedex.layout_position("entry_description","y",NuevaPokedex::ENTRY_DESC_Y))
 
     pbDrawShadowText(bmp, 24, NuevaPokedex.layout_position("entry_description", "y", NuevaPokedex::ENTRY_DESC_Y) - 22, 120, 18, NuevaPokedex.t("POKÉDEX"),
                      NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
