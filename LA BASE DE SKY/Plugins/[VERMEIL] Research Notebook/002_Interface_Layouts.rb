@@ -44,12 +44,14 @@ module VermeilInterfaceLayout
     result={}
     loaded=0
     (FILES[kind] || []).each do |page|
-      names=[page, LEGACY[page]].compact
-      present=names.map { |name| "UI/#{name}.json" }.select { |f| File.file?(f) }
-      next if present.empty?
-      # A user's older edited flat JSON must not silently be overridden by
-      # the new library defaults. Choose by edit time, canonical on ties.
-      filename=present.max_by { |f| [(File.mtime(f).to_f rescue 0.0), f.include?("/") && f.count("/")>1 ? 1 : 0] }
+      # The file visible in MakerStudio's UI/<Interface>/<Page> library is
+      # ALWAYS the source of truth. mtime comparisons previously made edits
+      # appear ignored when a legacy flat JSON had a newer timestamp.
+      canonical="UI/#{page}.json"
+      legacy=LEGACY[page] ? "UI/#{LEGACY[page]}.json" : nil
+      filename=File.file?(canonical) ? canonical :
+               (legacy && File.file?(legacy) ? legacy : nil)
+      next unless filename
       begin
         source=File.open(filename,"rb") { |file| file.read.force_encoding("UTF-8") }
         data=if defined?(Interfaces::AnalizadorJSON)
@@ -222,10 +224,13 @@ module VermeilInterfaceLayout
       desired_w=data["ancho"].to_f
       desired_h=data["alto"].to_f
       if desired_w>0 && bitmap_w>0
-        sprite.zoom_x=sprite.zoom_x.to_f*(desired_w/bitmap_w)
+        # Elemento#actualizar resets the authored "zoom" every update, but
+        # applying any multiplier to a previous frame invites compounding if
+        # another runtime updates the sprite in between.
+        sprite.zoom_x=item.valor_de("zoom",now).to_f*(desired_w/bitmap_w)
       end
       if desired_h>0 && bitmap_h>0
-        sprite.zoom_y=sprite.zoom_y.to_f*(desired_h/bitmap_h)
+        sprite.zoom_y=item.valor_de("zoom",now).to_f*(desired_h/bitmap_h)
       end
     end
   rescue StandardError => error
