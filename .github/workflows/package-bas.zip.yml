@@ -2,7 +2,7 @@ name: Build BAS editor and runtime ZIP
 on:
   push:
     branches:
-      - rescate-makerstudio-mods-2026-10-10
+      - new-MK-for-2.5D-Testeo
     paths:
       - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio/**'
       - 'LA BASE DE SKY/Plugins/Battle Animation Studio Runtime/**'
@@ -26,11 +26,11 @@ jobs:
           cp -a 'LA BASE DE SKY/Plugins/Battle Animation Studio Runtime' 'bas-package/LA BASE DE SKY/Plugins/'
           cp -a 'BAS_INSTALL_README.md' 'bas-package/README_INSTALACION.md'
           cd bas-package
-          zip -qr '../Battle_Animation_Studio_1.0.87_Editor_Runtime.zip' .
+          zip -qr '../Battle_Animation_Studio_1.0.91_Editor_Runtime.zip' .
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: Battle_Animation_Studio_1.0.87_Editor_Runtime
-          path: Battle_Animation_Studio_1.0.87_Editor_Runtime.zip
+          name: Battle_Animation_Studio_1.0.91_Editor_Runtime
+          path: Battle_Animation_Studio_1.0.91_Editor_Runtime.zip
           if-no-files-found: error
           retention-days: 30
