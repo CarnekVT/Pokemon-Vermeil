@@ -154,7 +154,8 @@ module VermeilBSSNDSIntroScene
 
       # An initial shot from MAIN means the visual reference and Essentials'
       # trainer sendout use one baseline. No competing per-frame zoom writers.
-      main=(BSS070EBDXCore.get_vector(:MAIN,@battle) rescue nil)
+      main=(respond_to?(:vermeil_cinema_base_vector) ?
+            vermeil_cinema_base_vector : (BSS070EBDXCore.get_vector(:MAIN,@battle) rescue nil))
       @vector.snap(main) if main && @vector && @vector.respond_to?(:snap)
       # Authoritative trainer height is computed ONCE by 042 and cached.
       # EBDX/DBK cutscenes use these exact coordinates without repeatedly
@@ -192,26 +193,24 @@ module VermeilBSSNDSIntroScene
       # their original visibility IMMEDIATELY after one capture frame. Capturing
       # trainers/Pokemon in this bitmap froze them while the live sprites moved,
       # and their positions appeared to jump when the overlay disappeared.
-      captured=[]
-      begin
-        @sprites.each do |key,sp|
-          next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
-          next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
-          captured << [sp,sp.visible]
-          sp.visible=false
-        end
-        Graphics.update
-        # Capture the authored stage, not our temporary black curtain.
-        # The curtain remains opaque on-screen throughout the operation.
+      if @battle.wildBattle?
+        # The wild Pokemon is never temporarily hidden to capture a frame.
+        bitmap=Bitmap.new(Graphics.width,Graphics.height)
+      else
+        captured=[]
         begin
-          darkness.visible=false if darkness
+          @sprites.each do |key,sp|
+            next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
+            next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
+            captured << [sp,sp.visible]
+            sp.visible=false
+          end
+          Graphics.update
           bitmap=Graphics.snap_to_bitmap
         ensure
-          darkness.visible=true if darkness
-        end
-      ensure
-        captured.each do |sp,was_visible|
-          sp.visible=was_visible if sp && !(sp.disposed? rescue true)
+          captured.each do |sp,was_visible|
+            sp.visible=was_visible if sp && !(sp.disposed? rescue true)
+          end
         end
       end
       return false unless bitmap && !(bitmap.disposed? rescue false)
@@ -301,6 +300,13 @@ module VermeilBSSNDSIntroScene
       dx,dy=drift
       began=Time.now.to_f
       frame=0
+      wild_focus=nil
+      if @battle.wildBattle? && main.is_a?(Array) && main.length>=6
+        wild_focus=main.clone.map { |v| v.to_f }
+        wild_focus[0]-=18.0
+        wild_focus[4]*=1.16
+        wild_focus[5]*=1.16
+      end
       loop do
         elapsed=[Time.now.to_f-began,0.0].max
         p=[[(elapsed-hold)/duration,0.0].max,1.0].min
@@ -360,12 +366,31 @@ module VermeilBSSNDSIntroScene
           dark_ease=dark_p*dark_p*(3.0-2.0*dark_p)
           darkness.opacity=(255.0*(1.0-dark_ease)).round
         end
-        # Keep trainers hidden until their separate right-to-left entrance.
-        # Do not advance TrainerBitmapWrapper during this snapshot transition.
-        # DBK advances animated Pokemon from pbFrameUpdate; Graphics.update
-        # alone makes them appear frozen for the whole encounter transition.
-        Graphics.update
+        # Update first, then restore full wild visibility before drawing.
+        # Native animation scripts may otherwise re-apply ghost opacity.
         pbFrameUpdate if respond_to?(:pbFrameUpdate)
+        if wild_focus && @vector && @vector.respond_to?(:snap)
+          retreat=[[(p-0.43)/0.57,0.0].max,1.0].min
+          eased=retreat*retreat*(3.0-2.0*retreat)
+          shot=main.each_index.map do |idx|
+            wild_focus[idx].to_f+(main[idx].to_f-wild_focus[idx].to_f)*eased
+          end
+          @vector.snap(shot)
+          room.update if room && !(room.disposed? rescue true)
+          if defined?(BSS103WorldSpaceBattlers)
+            BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+          end
+        end
+        if @battle.wildBattle?
+          @battle.sideSizes[1].times do |i|
+            sp=@sprites["pokemon_#{2*i+1}"]
+            next unless sp && !(sp.disposed? rescue true)
+            sp.visible=true if sp.respond_to?(:visible=)
+            sp.opacity=255 if sp.respond_to?(:opacity=)
+            sp.color=Color.new(0,0,0,0) if sp.respond_to?(:color=)
+          end
+        end
+        Graphics.update
         frame+=1
         break if elapsed>=hold+duration && frame>=2
         break if frame>=1000 # Never hang if a platform clock misbehaves.
