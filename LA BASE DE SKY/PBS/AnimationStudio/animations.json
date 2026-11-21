@@ -547,7 +547,7 @@
               "endFrame": 25,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/Examples/punches.png",
+                "projectPath": "Graphics/AnimationStudio/punches.png",
                 "folder": "Battle animations",
                 "name": "punches",
                 "relativeHint": "",
