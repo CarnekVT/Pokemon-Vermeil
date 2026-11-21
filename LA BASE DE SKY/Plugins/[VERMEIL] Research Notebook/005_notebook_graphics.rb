@@ -3,6 +3,7 @@
 # Independiente del progreso y de los JSON de Golden/Arcane/SpeciesDex.
 module ResearchNotebook
   class Skin
+    attr_accessor :editor_layout
     ROOT = "Graphics/UI/Vermeil/ResearchNotebook"
     SIZES = {
       :background         => [640, 480],
@@ -51,6 +52,11 @@ module ResearchNotebook
     end
 
     def draw(canvas, key, x, y)
+      # Real editor image/panel takes precedence over the bundled skin, even
+      # when the optional PNG skin toggle is disabled.
+      if defined?(VermeilInterfaceLayout) && @editor_layout
+        return true if VermeilInterfaceLayout.paint_native(canvas,@editor_layout,key,x,y)
+      end
       bmp = bitmap(key)
       return false if !bmp || !canvas || canvas.disposed?
       canvas.blt(x.to_i, y.to_i, bmp, Rect.new(0, 0, bmp.width, bmp.height))
