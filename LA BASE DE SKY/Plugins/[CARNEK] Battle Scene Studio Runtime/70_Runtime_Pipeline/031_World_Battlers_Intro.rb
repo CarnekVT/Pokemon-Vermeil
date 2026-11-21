@@ -68,15 +68,14 @@ module BSS103WorldSpaceBattlers
     if @vector && defined?(BSS070EBDXCore) &&
        respond_to?(:vermeil_cinema_active?) && vermeil_cinema_active?
       current=@vector.get
-      main=respond_to?(:vermeil_cinema_base_vector) ?
-           vermeil_cinema_base_vector : BSS070EBDXCore.get_vector(:MAIN,@battle)
+      main=BSS070EBDXCore.get_vector(:MAIN,@battle)
       if current.is_a?(Array) && main.is_a?(Array)
         camera_dx=(current[0].to_f-main[0].to_f)*0.65
         camera_dy=(current[1].to_f-main[1].to_f)*0.45
-        # Use the absolute EBDX zoom relative to the fixed MAIN shot.
-        # Cached native Pokemon/form scales below prevent compounding on SOS.
+        # Both EBDX backdrop and DBK battlers use the SAME zoom ratio.
+        # Never accumulate scaling from an already-transformed sprite.
         if main[4].to_f.abs>0.001
-          camera_zoom=[[current[4].to_f/main[4].to_f,1.0].max,1.20].min
+          camera_zoom=[[current[4].to_f/main[4].to_f,0.88].max,1.18].min
         end
       end
     end
@@ -92,25 +91,14 @@ module BSS103WorldSpaceBattlers
       offset_x=bss103_formation_spacing_x(i)
       native_x=native[0].to_f+offset_x
       native_y=native[1].to_f
-      sp.x=native_x+camera_dx if sp.respond_to?(:x=)
+      cx=Graphics.width.to_f/2.0
+      cy=Graphics.height.to_f/2.0
+      sp.x=cx+(native_x-cx)*camera_zoom+camera_dx if sp.respond_to?(:x=)
       locked_y=(sp.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-      sp.y=locked_y || native_y+camera_dy if sp.respond_to?(:y=)
+      sp.y=locked_y || (cy+(native_y-cy)*camera_zoom+camera_dy) if sp.respond_to?(:y=)
       if native.length>=5
-        # Stable native zoom per Pokemon/form. Its starting value must not be
-        # resampled from an already scaled sprite after any SOS/send-out.
-        battler=(@battle.battlers[i] rescue nil)
-        pokemon=(battler.pokemon rescue nil)
-        identity=[i, pokemon ? pokemon.object_id : 0,
-                  (pokemon.form rescue 0), sp.object_id]
-        @bss103_native_zoom ||= {}
-        baseline=@bss103_native_zoom[identity]
-        unless baseline
-          baseline=[native[3].to_f,native[4].to_f]
-          @bss103_native_zoom.clear if @bss103_native_zoom.length>32
-          @bss103_native_zoom[identity]=baseline
-        end
-        sp.zoom_x=baseline[0]*camera_zoom if sp.respond_to?(:zoom_x=) && baseline[0]>0.02
-        sp.zoom_y=baseline[1]*camera_zoom if sp.respond_to?(:zoom_y=) && baseline[1]>0.02
+        sp.zoom_x=native[3].to_f*camera_zoom if sp.respond_to?(:zoom_x=) && native[3].to_f>0.02
+        sp.zoom_y=native[4].to_f*camera_zoom if sp.respond_to?(:zoom_y=) && native[4].to_f>0.02
       end
       sp.z=[(sp.z rescue 50).to_i,50+i].max if sp.respond_to?(:z=)
 
@@ -125,21 +113,12 @@ module BSS103WorldSpaceBattlers
       shadow=(bss096_native_shadow_position(i) rescue nil)
       shadow=(bss070_ebdx_native_shadow_position_for(i) rescue nil) unless shadow.is_a?(Array) && shadow.length>=5
       next unless shadow.is_a?(Array) && shadow.length>=2
-      sh.x=shadow[0].to_f+offset_x+camera_dx if sh.respond_to?(:x=)
+      sh.x=cx+(shadow[0].to_f+offset_x-cx)*camera_zoom+camera_dx if sh.respond_to?(:x=)
       locked_shadow_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
-      sh.y=locked_shadow_y || shadow[1].to_f+camera_dy if sh.respond_to?(:y=)
+      sh.y=locked_shadow_y || (cy+(shadow[1].to_f-cy)*camera_zoom+camera_dy) if sh.respond_to?(:y=)
       if shadow.length>=5
-        @bss103_native_shadow_zoom ||= {}
-        identity=[i, (@battle.battlers[i].pokemon.object_id rescue 0),
-                  (@battle.battlers[i].pokemon.form rescue 0), sh.object_id]
-        baseline=@bss103_native_shadow_zoom[identity]
-        unless baseline
-          baseline=[shadow[3].to_f,shadow[4].to_f]
-          @bss103_native_shadow_zoom.clear if @bss103_native_shadow_zoom.length>32
-          @bss103_native_shadow_zoom[identity]=baseline
-        end
-        sh.zoom_x=baseline[0]*camera_zoom if sh.respond_to?(:zoom_x=) && baseline[0]>0.02
-        sh.zoom_y=baseline[1]*camera_zoom if sh.respond_to?(:zoom_y=) && baseline[1]>0.02
+        sh.zoom_x=shadow[3].to_f*camera_zoom if sh.respond_to?(:zoom_x=) && shadow[3].to_f>0.02
+        sh.zoom_y=shadow[4].to_f*camera_zoom if sh.respond_to?(:zoom_y=) && shadow[4].to_f>0.02
       end
       sh.z=[(sh.z rescue 3).to_i,30+i].max if sh.respond_to?(:z=)
     end
