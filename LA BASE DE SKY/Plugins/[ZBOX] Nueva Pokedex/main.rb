@@ -901,8 +901,8 @@ class PokemonPokedexNueva_Scene
 
   def update_designer_extras
     return unless defined?(VermeilInterfaceLayout) && @viewport
-    names=["vermeil_pokedex_lista","vermeil_pokedex_ficha",
-           "vermeil_pokedex_area","vermeil_pokedex_formas"]
+    names=["Pokedex/Lista","Pokedex/Ficha",
+           "Pokedex/Area","Pokedex/Formas"]
     page=names[[@state.to_i,0].max] || names[0]
     if @designer_page!=page
       VermeilInterfaceLayout.dispose_extras(@designer_extras)
