@@ -1,0 +1,2364 @@
+{
+  "source": {
+    "repository": "originheartgold/originheartgold.github.io",
+    "treeSha": "63e8ae6b737a13c287965440a8b1c1de46f04fc2",
+    "url": "https://originheartgold.github.io/",
+    "scope": "primary publication; preview/ excluded",
+    "copyright": "References and links only. No third-party image bytes repackaged.",
+    "filesCount": 294
+  },
+  "assets": [
+    {
+      "path": "_astro/01-entrance.D1jx34gX.png",
+      "url": "https://originheartgold.github.io/_astro/01-entrance.D1jx34gX.png",
+      "bytes": 18130,
+      "format": "png",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/02-clearing.CgAsE4WO.png",
+      "url": "https://originheartgold.github.io/_astro/02-clearing.CgAsE4WO.png",
+      "bytes": 24859,
+      "format": "png",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/03-clearing.C9f0UdYn.png",
+      "url": "https://originheartgold.github.io/_astro/03-clearing.C9f0UdYn.png",
+      "bytes": 24872,
+      "format": "png",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/04-clearing.C9Z-as_5.png",
+      "url": "https://originheartgold.github.io/_astro/04-clearing.C9Z-as_5.png",
+      "bytes": 24997,
+      "format": "png",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/05-clearing.DTHBAD9Q.png",
+      "url": "https://originheartgold.github.io/_astro/05-clearing.DTHBAD9Q.png",
+      "bytes": 25115,
+      "format": "png",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/alto-mare-waters-ether-201.DKhTN6kq_1WT5Sx.webp",
+      "url": "https://originheartgold.github.io/_astro/alto-mare-waters-ether-201.DKhTN6kq_1WT5Sx.webp",
+      "bytes": 19846,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/alto-mare-waters-hp-up-202.BvyFN9mW_2bnpAL.webp",
+      "url": "https://originheartgold.github.io/_astro/alto-mare-waters-hp-up-202.BvyFN9mW_2bnpAL.webp",
+      "bytes": 23482,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/azalea-town-full-heal-113.D3lU28ej_ZcG4Tj.webp",
+      "url": "https://originheartgold.github.io/_astro/azalea-town-full-heal-113.D3lU28ej_ZcG4Tj.webp",
+      "bytes": 25574,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bell-tower-3f-max-potion-139.DVZNYl9L_Z2rHHyQ.webp",
+      "url": "https://originheartgold.github.io/_astro/bell-tower-3f-max-potion-139.DVZNYl9L_Z2rHHyQ.webp",
+      "bytes": 13976,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bell-tower-5f-full-restore-140.BXih_1La_j9HQo.webp",
+      "url": "https://originheartgold.github.io/_astro/bell-tower-5f-full-restore-140.BXih_1La_j9HQo.webp",
+      "bytes": 12568,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bell-tower-8f-carbos-141.DF4qjjrR_Z1xPLi0.webp",
+      "url": "https://originheartgold.github.io/_astro/bell-tower-8f-carbos-141.DF4qjjrR_Z1xPLi0.webp",
+      "bytes": 10810,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bellchime-trail-big-mushroom-144.6-AHzzt9_a8OIu.webp",
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-big-mushroom-144.6-AHzzt9_a8OIu.webp",
+      "bytes": 32980,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bellchime-trail-big-mushroom-146.BLr7905M_1jC0Kh.webp",
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-big-mushroom-146.BLr7905M_1jC0Kh.webp",
+      "bytes": 36026,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-142.D58Mm-Sx_qvdMs.webp",
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-142.D58Mm-Sx_qvdMs.webp",
+      "bytes": 32920,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-143.Hd6c7NMx_y4Uoh.webp",
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-143.Hd6c7NMx_y4Uoh.webp",
+      "bytes": 33370,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/bellchime-trail-tiny-mushroom-145.Cl9sYGSl_Z1Kj5Dk.webp",
+      "url": "https://originheartgold.github.io/_astro/bellchime-trail-tiny-mushroom-145.Cl9sYGSl_Z1Kj5Dk.webp",
+      "bytes": 32274,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/burned-tower-antidote-135.BOKKc7UV_Z21b22U.webp",
+      "url": "https://originheartgold.github.io/_astro/burned-tower-antidote-135.BOKKc7UV_Z21b22U.webp",
+      "bytes": 11976,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/burned-tower-ether-138.KAtdm-TO_15IR10.webp",
+      "url": "https://originheartgold.github.io/_astro/burned-tower-ether-138.KAtdm-TO_15IR10.webp",
+      "bytes": 14012,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/burned-tower-revive-136.BSwEdK78_1BF1B4.webp",
+      "url": "https://originheartgold.github.io/_astro/burned-tower-revive-136.BSwEdK78_1BF1B4.webp",
+      "bytes": 14516,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/burned-tower-ultra-ball-137.Bzq-8XW__ZN2O1O.webp",
+      "url": "https://originheartgold.github.io/_astro/burned-tower-ultra-ball-137.Bzq-8XW__ZN2O1O.webp",
+      "bytes": 10198,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-big-pearl-85.Vklb-1ID_1HDykm.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-big-pearl-85.Vklb-1ID_1HDykm.webp",
+      "bytes": 4024,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-full-heal-83.PmHjP-Oh_RSJQh.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-full-heal-83.PmHjP-Oh_RSJQh.webp",
+      "bytes": 3950,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-ultra-ball-82.BqzxA1BT_1fUhyP.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-ultra-ball-82.BqzxA1BT_1fUhyP.webp",
+      "bytes": 3954,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-2f-zinc-84.D2LAsOi2_49b2x.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-2f-zinc-84.D2LAsOi2_49b2x.webp",
+      "bytes": 3764,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-max-revive-87.DE6yvBBC_Z29UYEP.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-max-revive-87.DE6yvBBC_Z29UYEP.webp",
+      "bytes": 4708,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-nugget-86.Dtj2yJWE_SlDxA.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-nugget-86.Dtj2yJWE_SlDxA.webp",
+      "bytes": 4966,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-b1f-ultra-ball-88.PmR86eGL_14QIjf.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-b1f-ultra-ball-88.PmR86eGL_14QIjf.webp",
+      "bytes": 4232,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-hyper-potion-80.BLqpzqhg_Z1j565D.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-hyper-potion-80.BLqpzqhg_Z1j565D.webp",
+      "bytes": 4338,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-rare-candy-81.7JuCDycr_1N1N2.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-rare-candy-81.7JuCDycr_1N1N2.webp",
+      "bytes": 5314,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-cave-revive-79.lZop69Ft_1VlAVV.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-cave-revive-79.lZop69Ft_1VlAVV.webp",
+      "bytes": 4444,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cerulean-city-nugget-9.6BTX_iVz_KgEcf.webp",
+      "url": "https://originheartgold.github.io/_astro/cerulean-city-nugget-9.6BTX_iVz_KgEcf.webp",
+      "bytes": 24732,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cherrygrove-city-nugget-91.DX4_Rliy_2gsNq3.webp",
+      "url": "https://originheartgold.github.io/_astro/cherrygrove-city-nugget-91.DX4_Rliy_2gsNq3.webp",
+      "bytes": 25780,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cianwood-cave-big-pearl-163.Cs6Oxiwx_Z2ihANd.webp",
+      "url": "https://originheartgold.github.io/_astro/cianwood-cave-big-pearl-163.Cs6Oxiwx_Z2ihANd.webp",
+      "bytes": 19454,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cianwood-city-revive-162.BCPPDGev_Z1nTgTI.webp",
+      "url": "https://originheartgold.github.io/_astro/cianwood-city-revive-162.BCPPDGev_Z1nTgTI.webp",
+      "bytes": 22732,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cianwood-city-stardust-161.YAiCHl4e_1E0T6s.webp",
+      "url": "https://originheartgold.github.io/_astro/cianwood-city-stardust-161.YAiCHl4e_1E0T6s.webp",
+      "bytes": 22812,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cinnabar-island-iron-51.ChZts7Br_Z2byAAF.webp",
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-iron-51.ChZts7Br_Z2byAAF.webp",
+      "bytes": 30028,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cinnabar-island-rare-candy-52.DkDVy-4H_ZcgTB3.webp",
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-rare-candy-52.DkDVy-4H_ZcgTB3.webp",
+      "bytes": 21752,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/cinnabar-island-star-piece-53.BzCXDkrC_I3RKn.webp",
+      "url": "https://originheartgold.github.io/_astro/cinnabar-island-star-piece-53.BzCXDkrC_I3RKn.webp",
+      "bytes": 25718,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dark-cave-elixir-94.B34tF7Tc_Z1YjJzE.webp",
+      "url": "https://originheartgold.github.io/_astro/dark-cave-elixir-94.B34tF7Tc_Z1YjJzE.webp",
+      "bytes": 4038,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dark-cave-hyper-potion-95.hhczvwWT_5mzC0.webp",
+      "url": "https://originheartgold.github.io/_astro/dark-cave-hyper-potion-95.hhczvwWT_5mzC0.webp",
+      "bytes": 4428,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dark-cave-max-revive-93.Bs5k1e3F_2hyUvD.webp",
+      "url": "https://originheartgold.github.io/_astro/dark-cave-max-revive-93.Bs5k1e3F_2hyUvD.webp",
+      "bytes": 4104,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dark-cave-route-31-side-max-ether-97.C5Exi9Xm_Z1izJvR.webp",
+      "url": "https://originheartgold.github.io/_astro/dark-cave-route-31-side-max-ether-97.C5Exi9Xm_Z1izJvR.webp",
+      "bytes": 4506,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dark-cave-route-31-side-pok-ball-96.BP9-SqH0_1YeXjq.webp",
+      "url": "https://originheartgold.github.io/_astro/dark-cave-route-31-side-pok-ball-96.BP9-SqH0_1YeXjq.webp",
+      "bytes": 4422,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/diglett-s-cave-max-revive-19.BcGHl_C1_Z1mJzMA.webp",
+      "url": "https://originheartgold.github.io/_astro/diglett-s-cave-max-revive-19.BcGHl_C1_Z1mJzMA.webp",
+      "bytes": 15074,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dragon-s-den-max-elixir-196.f-hjINT6_1CNtN8.webp",
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-max-elixir-196.f-hjINT6_1CNtN8.webp",
+      "bytes": 18044,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dragon-s-den-max-potion-195.CF-iM5Vc_DA6Xx.webp",
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-max-potion-195.CF-iM5Vc_DA6Xx.webp",
+      "bytes": 19146,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/dragon-s-den-revive-194.CK79LTkF_ssdyp.webp",
+      "url": "https://originheartgold.github.io/_astro/dragon-s-den-revive-194.CK79LTkF_ssdyp.webp",
+      "bytes": 16854,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ecruteak-city-ether-134.Dkmq86bY_1ClQtm.webp",
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-ether-134.Dkmq86bY_1ClQtm.webp",
+      "bytes": 25090,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ecruteak-city-hyper-potion-132.Jjtd11fA_Zv5zn.webp",
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-hyper-potion-132.Jjtd11fA_Zv5zn.webp",
+      "bytes": 30450,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ecruteak-city-rare-candy-133.Cuq0JaCK_Z791S9.webp",
+      "url": "https://originheartgold.github.io/_astro/ecruteak-city-rare-candy-133.Cuq0JaCK_Z791S9.webp",
+      "bytes": 25024,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/fuchsia-city-nugget-28.B_Yzakaf_54vaL.webp",
+      "url": "https://originheartgold.github.io/_astro/fuchsia-city-nugget-28.B_Yzakaf_54vaL.webp",
+      "bytes": 26714,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/goldenrod-city-super-potion-120.DHVIl4ct_Z2rzevc.webp",
+      "url": "https://originheartgold.github.io/_astro/goldenrod-city-super-potion-120.DHVIl4ct_Z2rzevc.webp",
+      "bytes": 27112,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/goldenrod-department-store-paralyze-heal-121.gCDs0OAq_Z18nHAC.webp",
+      "url": "https://originheartgold.github.io/_astro/goldenrod-department-store-paralyze-heal-121.gCDs0OAq_Z18nHAC.webp",
+      "bytes": 7716,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/goldenrod-tunnel-warehouse-max-potion-122.sjdF0fuz_7Nlhb.webp",
+      "url": "https://originheartgold.github.io/_astro/goldenrod-tunnel-warehouse-max-potion-122.sjdF0fuz_7Nlhb.webp",
+      "bytes": 8774,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/goldenrod-tunnel-warehouse-revive-123.CWl2q0gr_Z1Vp9Y5.webp",
+      "url": "https://originheartgold.github.io/_astro/goldenrod-tunnel-warehouse-revive-123.CWl2q0gr_Z1Vp9Y5.webp",
+      "bytes": 9904,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ice-path-b1f-revive-191.Cm01wMxJ_Z29FaRS.webp",
+      "url": "https://originheartgold.github.io/_astro/ice-path-b1f-revive-191.Cm01wMxJ_Z29FaRS.webp",
+      "bytes": 2686,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ice-path-b2f-calcium-192.BtUMVwoX_2crGU6.webp",
+      "url": "https://originheartgold.github.io/_astro/ice-path-b2f-calcium-192.BtUMVwoX_2crGU6.webp",
+      "bytes": 21964,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ice-path-b3f-carbos-193.Dm6ckVe0_12irNe.webp",
+      "url": "https://originheartgold.github.io/_astro/ice-path-b3f-carbos-193.Dm6ckVe0_12irNe.webp",
+      "bytes": 15918,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ice-path-ice-heal-189.DHGDAe32_2cLi8b.webp",
+      "url": "https://originheartgold.github.io/_astro/ice-path-ice-heal-189.DHGDAe32_2cLi8b.webp",
+      "bytes": 17658,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ice-path-max-potion-190.CLcsdG8O_1A6lFe.webp",
+      "url": "https://originheartgold.github.io/_astro/ice-path-max-potion-190.CLcsdG8O_1A6lFe.webp",
+      "bytes": 17084,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ilex-forest-antidote-118.DupngRHE_Zzrhaj.webp",
+      "url": "https://originheartgold.github.io/_astro/ilex-forest-antidote-118.DupngRHE_Zzrhaj.webp",
+      "bytes": 27280,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ilex-forest-super-potion-117.Cv2WmnYj_20BHOH.webp",
+      "url": "https://originheartgold.github.io/_astro/ilex-forest-super-potion-117.Cv2WmnYj_20BHOH.webp",
+      "bytes": 27808,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indigo-plateau-indigo-conference-stage-one-rare-candy-62.BrQoB18w_Z2bHHhK.webp",
+      "url": "https://originheartgold.github.io/_astro/indigo-plateau-indigo-conference-stage-one-rare-candy-62.BrQoB18w_Z2bHHhK.webp",
+      "bytes": 15560,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indigo-plateau-rare-candy-61.CyaaDFI2_tP0Wu.webp",
+      "url": "https://originheartgold.github.io/_astro/indigo-plateau-rare-candy-61.CyaaDFI2_tP0Wu.webp",
+      "bytes": 23794,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-00.Dox5XE-P_20sO5w.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-00.Dox5XE-P_20sO5w.webp",
+      "bytes": 8586,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-00.Dox5XE-P_Z2cuGno.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-00.Dox5XE-P_Z2cuGno.webp",
+      "bytes": 19502,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-01.DEw9ab8S_1egpKL.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-01.DEw9ab8S_1egpKL.webp",
+      "bytes": 18988,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-01.DEw9ab8S_m2MpK.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-01.DEw9ab8S_m2MpK.webp",
+      "bytes": 8076,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-02.9A2lN_dt_1Gal2M.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-02.9A2lN_dt_1Gal2M.webp",
+      "bytes": 8128,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-02.9A2lN_dt_Z2vNaq8.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-02.9A2lN_dt_Z2vNaq8.webp",
+      "bytes": 18456,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-03.ClhynpNp_ZiJQXk.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-03.ClhynpNp_ZiJQXk.webp",
+      "bytes": 6682,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-03.ClhynpNp_ysKmG.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-03.ClhynpNp_ysKmG.webp",
+      "bytes": 15380,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-04.syEJKQ3V_1l3D8V.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-04.syEJKQ3V_1l3D8V.webp",
+      "bytes": 8204,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-04.syEJKQ3V_2dhgtW.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-04.syEJKQ3V_2dhgtW.webp",
+      "bytes": 18234,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-05.DCUEWtNo_ZhUPiF.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-05.DCUEWtNo_ZhUPiF.webp",
+      "bytes": 8736,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-05.DCUEWtNo_zhM2l.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-05.DCUEWtNo_zhM2l.webp",
+      "bytes": 20094,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-06.yHxq4jJv_15vs1R.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-06.yHxq4jJv_15vs1R.webp",
+      "bytes": 19178,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-06.yHxq4jJv_dhOFQ.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-06.yHxq4jJv_dhOFQ.webp",
+      "bytes": 8460,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-07.Bgu5Ve8o_GN4MU.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-07.Bgu5Ve8o_GN4MU.webp",
+      "bytes": 18528,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-07.Bgu5Ve8o_Zapxx6.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-07.Bgu5Ve8o_Zapxx6.webp",
+      "bytes": 8220,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-08.mfk0pvTz_Z1euuM2.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-08.mfk0pvTz_Z1euuM2.webp",
+      "bytes": 9000,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-08.mfk0pvTz_ZmgRr1.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-08.mfk0pvTz_ZmgRr1.webp",
+      "bytes": 20254,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-09.BLnDtJgd_1XnvzK.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-09.BLnDtJgd_1XnvzK.webp",
+      "bytes": 8578,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-09.BLnDtJgd_Z2ezYSa.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-09.BLnDtJgd_Z2ezYSa.webp",
+      "bytes": 19604,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0a.obeJP7Ss_1N64Mz.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0a.obeJP7Ss_1N64Mz.webp",
+      "bytes": 8398,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0a.obeJP7Ss_Z2oRqFl.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0a.obeJP7Ss_Z2oRqFl.webp",
+      "bytes": 19676,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0b.fu-ENX1M_K1qNa.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0b.fu-ENX1M_K1qNa.webp",
+      "bytes": 18248,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0b.fu-ENX1M_Z7cbwQ.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0b.fu-ENX1M_Z7cbwQ.webp",
+      "bytes": 8154,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0c.CGdx5Fqe_1yFwk7.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0c.CGdx5Fqe_1yFwk7.webp",
+      "bytes": 8556,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0c.CGdx5Fqe_2qT9F8.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0c.CGdx5Fqe_2qT9F8.webp",
+      "bytes": 19478,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0d.BusNAxSa_Z1g5dG1.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0d.BusNAxSa_Z1g5dG1.webp",
+      "bytes": 6812,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0d.BusNAxSa_ZnQAl0.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0d.BusNAxSa_ZnQAl0.webp",
+      "bytes": 15956,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0e.D9tu560h_Z1tjAGI.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0e.D9tu560h_Z1tjAGI.webp",
+      "bytes": 20004,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0e.D9tu560h_Z2lxe2J.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0e.D9tu560h_Z2lxe2J.webp",
+      "bytes": 8786,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0f.BYSovrMU_Ztbmvz.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0f.BYSovrMU_Ztbmvz.webp",
+      "bytes": 7794,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-0f.BYSovrMU_o2fOr.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-0f.BYSovrMU_o2fOr.webp",
+      "bytes": 17788,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-10.hh0Btm6w_ZGM9ry.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-10.hh0Btm6w_ZGM9ry.webp",
+      "bytes": 8770,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/indoor-10.hh0Btm6w_aqsSs.webp",
+      "url": "https://originheartgold.github.io/_astro/indoor-10.hh0Btm6w_aqsSs.webp",
+      "bytes": 19822,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/interiors.Cnt83A2Y_Z2wjAQ1.webp",
+      "url": "https://originheartgold.github.io/_astro/interiors.Cnt83A2Y_Z2wjAQ1.webp",
+      "bytes": 63536,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/island-cave-full-heal-203.1ehkJuuY_2rynlS.webp",
+      "url": "https://originheartgold.github.io/_astro/island-cave-full-heal-203.1ehkJuuY_2rynlS.webp",
+      "bytes": 14188,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/lake-of-rage-max-potion-186.CrrS9MC8_Z1FiTTk.webp",
+      "url": "https://originheartgold.github.io/_astro/lake-of-rage-max-potion-186.CrrS9MC8_Z1FiTTk.webp",
+      "bytes": 27534,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/lake-of-rage-rare-candy-187.BnOCVuQA_Z2an1JY.webp",
+      "url": "https://originheartgold.github.io/_astro/lake-of-rage-rare-candy-187.BnOCVuQA_Z2an1JY.webp",
+      "bytes": 21812,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/lighthouse-3f-hyper-potion-155.Bi_Ws66b_Z1IRmrX.webp",
+      "url": "https://originheartgold.github.io/_astro/lighthouse-3f-hyper-potion-155.Bi_Ws66b_Z1IRmrX.webp",
+      "bytes": 8946,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-moon-revive-4.Cm0OjDga_Z2KNab.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-moon-revive-4.Cm0OjDga_Z2KNab.webp",
+      "bytes": 16000,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-moon-square-clefairy-dance-night-max-revive-6.C4rrXgY-_8AyCt.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-moon-square-clefairy-dance-night-max-revive-6.C4rrXgY-_8AyCt.webp",
+      "bytes": 23848,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-moon-square-max-revive-5.BFSh-Qqu_Z2itVT3.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-moon-square-max-revive-5.BFSh-Qqu_Z2itVT3.webp",
+      "bytes": 24748,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-ether-173.cE3SSSuG_ii29s.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-ether-173.cE3SSSuG_ii29s.webp",
+      "bytes": 19624,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-max-repel-175.Bu7q0AEw_1LmmCI.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-max-repel-175.Bu7q0AEw_1LmmCI.webp",
+      "bytes": 16864,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-nugget-176.8FyA8QKv_PNPKr.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-nugget-176.8FyA8QKv_PNPKr.webp",
+      "bytes": 17772,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-rare-candy-177.BEa4FObc_Z1MTUH6.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-rare-candy-177.BEa4FObc_Z1MTUH6.webp",
+      "bytes": 17644,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-1f-back-cave-ultra-ball-174.Dilp3dF__Z1FHCE2.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-1f-back-cave-ultra-ball-174.Dilp3dF__Z1FHCE2.webp",
+      "bytes": 16948,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-full-heal-178.BAO0Nl8p_Z1bWIdS.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-full-heal-178.BAO0Nl8p_Z1bWIdS.webp",
+      "bytes": 18238,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-hp-up-179.B9wF5EJc_1ii1iN.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-hp-up-179.B9wF5EJc_1ii1iN.webp",
+      "bytes": 15940,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-2f-hyper-potion-180.BzpMvuBS_lbAUf.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-2f-hyper-potion-180.BzpMvuBS_lbAUf.webp",
+      "bytes": 16886,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-b1f-max-revive-181.XmZLV9Eq_z18wW.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-b1f-max-revive-181.XmZLV9Eq_z18wW.webp",
+      "bytes": 20300,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-b1f-ultra-ball-182.9JYeFro4_Z9aKqw.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-b1f-ultra-ball-182.9JYeFro4_Z9aKqw.webp",
+      "bytes": 15658,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-hyper-potion-171._vbLfNvr_Z1oXUUo.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-hyper-potion-171._vbLfNvr_Z1oXUUo.webp",
+      "bytes": 18268,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-mortar-revive-172.DyzJqyfI_1CJ7dn.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-mortar-revive-172.DyzJqyfI_1CJ7dn.webp",
+      "bytes": 21600,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-big-mushroom-71.CLXLSOKY_vpeDx.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-big-mushroom-71.CLXLSOKY_vpeDx.webp",
+      "bytes": 23054,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-2f-iron-76.D9sYA5dU_ZDd0gi.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-2f-iron-76.D9sYA5dU_ZDd0gi.webp",
+      "bytes": 13238,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-2f-max-potion-77.bZgZ699v_na5Gw.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-2f-max-potion-77.bZgZ699v_na5Gw.webp",
+      "bytes": 16396,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-3f-max-revive-78.eoUUDmC2_Z17H5cd.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-3f-max-revive-78.eoUUDmC2_Z17H5cd.webp",
+      "bytes": 15630,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-dire-hit-73.COy5qopq_BSVKh.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-dire-hit-73.COy5qopq_BSVKh.webp",
+      "bytes": 19638,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-ultra-ball-72.yFQDw3cK_2mjtW5.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-ultra-ball-72.yFQDw3cK_2mjtW5.webp",
+      "bytes": 23994,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-upper-mountainside-max-ether-74.BWtbOxhS_Z23FCST.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-upper-mountainside-max-ether-74.BWtbOxhS_Z23FCST.webp",
+      "bytes": 31762,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-cave-upper-mountainside-rare-candy-75.CLI0GZbp_Za3NSP.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-cave-upper-mountainside-rare-candy-75.CLI0GZbp_Za3NSP.webp",
+      "bytes": 31008,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-hot-spring-mountainside-max-ether-69.C7jIVykz_Z23oKAH.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-hot-spring-mountainside-max-ether-69.C7jIVykz_Z23oKAH.webp",
+      "bytes": 31742,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/mt-silver-hot-spring-mountainside-rare-candy-70.Bv8I0ud0_Z298Jss.webp",
+      "url": "https://originheartgold.github.io/_astro/mt-silver-hot-spring-mountainside-rare-candy-70.Bv8I0ud0_Z298Jss.webp",
+      "bytes": 30184,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/national-park-bug-catching-contest-full-heal-127.BPDNjGwp_Z11SjwV.webp",
+      "url": "https://originheartgold.github.io/_astro/national-park-bug-catching-contest-full-heal-127.BPDNjGwp_Z11SjwV.webp",
+      "bytes": 27490,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/national-park-bug-catching-contest-full-heal-128.Txv6nheX_1KghaE.webp",
+      "url": "https://originheartgold.github.io/_astro/national-park-bug-catching-contest-full-heal-128.Txv6nheX_1KghaE.webp",
+      "bytes": 20520,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/national-park-full-heal-125.B3wK23Um_1P335N.webp",
+      "url": "https://originheartgold.github.io/_astro/national-park-full-heal-125.B3wK23Um_1P335N.webp",
+      "bytes": 29782,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/national-park-full-heal-126.B9BK6FWe_vm6i0.webp",
+      "url": "https://originheartgold.github.io/_astro/national-park-full-heal-126.B9BK6FWe_vm6i0.webp",
+      "bytes": 21356,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/new-bark-town-potion-89.DXUcBr4B_w1qGI.webp",
+      "url": "https://originheartgold.github.io/_astro/new-bark-town-potion-89.DXUcBr4B_w1qGI.webp",
+      "bytes": 23940,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/olivine-city-rare-candy-152.DDOH6Y5w_1M21SL.webp",
+      "url": "https://originheartgold.github.io/_astro/olivine-city-rare-candy-152.DDOH6Y5w_1M21SL.webp",
+      "bytes": 26414,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/olivine-city-south-east-part-pearl-153.DknHWztD_Z15mO5N.webp",
+      "url": "https://originheartgold.github.io/_astro/olivine-city-south-east-part-pearl-153.DknHWztD_Z15mO5N.webp",
+      "bytes": 22644,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/olivine-city-south-east-part-protein-154.TQUOMCOk_1Kx0p0.webp",
+      "url": "https://originheartgold.github.io/_astro/olivine-city-south-east-part-protein-154.TQUOMCOk_1Kx0p0.webp",
+      "bytes": 20060,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-00.BVHbGPpb_Z27Vu1O.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-00.BVHbGPpb_Z27Vu1O.webp",
+      "bytes": 26520,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-00.BVHbGPpb_avzs1.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-00.BVHbGPpb_avzs1.webp",
+      "bytes": 10400,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-01.DXOpQaN8_29ozUG.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-01.DXOpQaN8_29ozUG.webp",
+      "bytes": 11392,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-01.DXOpQaN8_Z93ty9.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-01.DXOpQaN8_Z93ty9.webp",
+      "bytes": 29914,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-02.BSuiHJBm_1zNeXc.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-02.BSuiHJBm_1zNeXc.webp",
+      "bytes": 27924,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-02.BSuiHJBm_Z1bUOlT.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-02.BSuiHJBm_Z1bUOlT.webp",
+      "bytes": 11274,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-03.C2-GnPmd_17oXuG.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-03.C2-GnPmd_17oXuG.webp",
+      "bytes": 35812,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-03.C2-GnPmd_Z1Ek5Op.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-03.C2-GnPmd_Z1Ek5Op.webp",
+      "bytes": 14154,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-04.B2JRGsNa_2Bxql.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-04.B2JRGsNa_2Bxql.webp",
+      "bytes": 27594,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-04.B2JRGsNa_2l4BUb.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-04.B2JRGsNa_2l4BUb.webp",
+      "bytes": 10884,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-05.DrURfruB_14fU8r.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-05.DrURfruB_14fU8r.webp",
+      "bytes": 10438,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-05.DrURfruB_Z1ec9lo.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-05.DrURfruB_Z1ec9lo.webp",
+      "bytes": 26574,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-06.Bjxe0aOS_21xNhs.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-06.Bjxe0aOS_21xNhs.webp",
+      "bytes": 10396,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-06.Bjxe0aOS_ZgTgcn.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-06.Bjxe0aOS_ZgTgcn.webp",
+      "bytes": 26820,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-07.Die6PH0W_1zg4QM.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-07.Die6PH0W_1zg4QM.webp",
+      "bytes": 10982,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-07.Die6PH0W_ZIbYC3.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-07.Die6PH0W_ZIbYC3.webp",
+      "bytes": 27968,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-08.BpiYdbjC_GJpF0.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-08.BpiYdbjC_GJpF0.webp",
+      "bytes": 25560,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-08.BpiYdbjC_Z24YDE6.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-08.BpiYdbjC_Z24YDE6.webp",
+      "bytes": 10054,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-09.D_74Qpnz_OXfT9.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-09.D_74Qpnz_OXfT9.webp",
+      "bytes": 25438,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-09.D_74Qpnz_Z1VKNpW.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-09.D_74Qpnz_Z1VKNpW.webp",
+      "bytes": 9892,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0a.C8agD4KS_Emwb7.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0a.C8agD4KS_Emwb7.webp",
+      "bytes": 27582,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0a.C8agD4KS_Z27mx8Y.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0a.C8agD4KS_Z27mx8Y.webp",
+      "bytes": 10526,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0b.Cduh6Pgr_Z2s8vaW.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0b.Cduh6Pgr_Z2s8vaW.webp",
+      "bytes": 11094,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0b.Cduh6Pgr_jAy99.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0b.Cduh6Pgr_jAy99.webp",
+      "bytes": 28678,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0c.BzOSy5oz_22HpsC.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0c.BzOSy5oz_22HpsC.webp",
+      "bytes": 10054,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0c.BzOSy5oz_ZfJE1d.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0c.BzOSy5oz_ZfJE1d.webp",
+      "bytes": 25822,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0d.B05QBobt_1hHEI0.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0d.B05QBobt_1hHEI0.webp",
+      "bytes": 35238,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0d.B05QBobt_Z1u1oB6.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0d.B05QBobt_Z1u1oB6.webp",
+      "bytes": 13746,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0e.BhlV2nL6_Z2fQMn3.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0e.BhlV2nL6_Z2fQMn3.webp",
+      "bytes": 10006,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0e.BhlV2nL6_vRgW3.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0e.BhlV2nL6_vRgW3.webp",
+      "bytes": 25568,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0f.BF-EysPT_Z20lJ2k.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0f.BF-EysPT_Z20lJ2k.webp",
+      "bytes": 25130,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-0f.BF-EysPT_i6krv.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-0f.BF-EysPT_i6krv.webp",
+      "bytes": 9710,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-10.B2YVKeZb_2g10sj.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-10.B2YVKeZb_2g10sj.webp",
+      "bytes": 25320,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoor-10.B2YVKeZb_ZvI3QM.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoor-10.B2YVKeZb_ZvI3QM.webp",
+      "bytes": 9896,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/outdoors.9iJMFgKm_Z1ug2NO.webp",
+      "url": "https://originheartgold.github.io/_astro/outdoors.9iJMFgKm_Z1ug2NO.webp",
+      "bytes": 89902,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/pewter-city-big-mushroom-0.BtAGOQEs_2nSLKl.webp",
+      "url": "https://originheartgold.github.io/_astro/pewter-city-big-mushroom-0.BtAGOQEs_2nSLKl.webp",
+      "bytes": 24678,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/pewter-city-nugget-2.4-30DkQO_1kzBPt.webp",
+      "url": "https://originheartgold.github.io/_astro/pewter-city-nugget-2.4-30DkQO_1kzBPt.webp",
+      "bytes": 22308,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/pewter-city-pp-up-1.BQa7ichq_1LSDjB.webp",
+      "url": "https://originheartgold.github.io/_astro/pewter-city-pp-up-1.BQa7ichq_1LSDjB.webp",
+      "bytes": 23402,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/pok-athlon-dome-pp-up-129.BlgRABca_o7jgG.webp",
+      "url": "https://originheartgold.github.io/_astro/pok-athlon-dome-pp-up-129.BlgRABca_o7jgG.webp",
+      "bytes": 28474,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/pok-athlon-dome-protein-130.7nKq6XoJ_Z14AreD.webp",
+      "url": "https://originheartgold.github.io/_astro/pok-athlon-dome-protein-130.7nKq6XoJ_Z14AreD.webp",
+      "bytes": 12178,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-29.BEvn7ogB_Zg7Sw.webp",
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-29.BEvn7ogB_Zg7Sw.webp",
+      "bytes": 21584,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-30.Bg1DTeyp_Z1kkxul.webp",
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-30.Bg1DTeyp_Z1kkxul.webp",
+      "bytes": 19976,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/resort-zone-tiny-mushroom-31.BhBgUX73_18qzrd.webp",
+      "url": "https://originheartgold.github.io/_astro/resort-zone-tiny-mushroom-31.BhBgUX73_18qzrd.webp",
+      "bytes": 29578,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/rock-tunnel-b1f-hp-up-24.CIA6Hjxg_1hcmwP.webp",
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-b1f-hp-up-24.CIA6Hjxg_1hcmwP.webp",
+      "bytes": 3072,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/rock-tunnel-b1f-max-potion-25.BubErgCK_2RF07.webp",
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-b1f-max-potion-25.BubErgCK_2RF07.webp",
+      "bytes": 3428,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/rock-tunnel-ultra-ball-23.CP8l8_XL_NKVBh.webp",
+      "url": "https://originheartgold.github.io/_astro/rock-tunnel-ultra-ball-23.CP8l8_XL_NKVBh.webp",
+      "bytes": 4394,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-10-carbos-21.mFmDKZc4_1iWQlT.webp",
+      "url": "https://originheartgold.github.io/_astro/route-10-carbos-21.mFmDKZc4_1iWQlT.webp",
+      "bytes": 23154,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-10-south-pp-up-22.DPwFf9Cn_Z27N58q.webp",
+      "url": "https://originheartgold.github.io/_astro/route-10-south-pp-up-22.DPwFf9Cn_Z27N58q.webp",
+      "bytes": 20624,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-11-revive-20.BUeluRek_Z1JWiq3.webp",
+      "url": "https://originheartgold.github.io/_astro/route-11-revive-20.BUeluRek_Z1JWiq3.webp",
+      "bytes": 30068,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-12-elixir-32._Ttkm54e_21vPL9.webp",
+      "url": "https://originheartgold.github.io/_astro/route-12-elixir-32._Ttkm54e_21vPL9.webp",
+      "bytes": 23646,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-13-calcium-33.DWMWbctT_FuDkd.webp",
+      "url": "https://originheartgold.github.io/_astro/route-13-calcium-33.DWMWbctT_FuDkd.webp",
+      "bytes": 28068,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-17-max-elixir-27.DXaaCZxM_1Y1TsH.webp",
+      "url": "https://originheartgold.github.io/_astro/route-17-max-elixir-27.DXaaCZxM_1Y1TsH.webp",
+      "bytes": 23432,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-17-max-ether-26.BzcSjC5y_2iP0J3.webp",
+      "url": "https://originheartgold.github.io/_astro/route-17-max-ether-26.BzcSjC5y_2iP0J3.webp",
+      "bytes": 17274,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-19-big-pearl-38.BLZsxJTB_HC4AX.webp",
+      "url": "https://originheartgold.github.io/_astro/route-19-big-pearl-38.BLZsxJTB_HC4AX.webp",
+      "bytes": 24302,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-19-max-elixir-35.gwCesNZa_1qEbUl.webp",
+      "url": "https://originheartgold.github.io/_astro/route-19-max-elixir-35.gwCesNZa_1qEbUl.webp",
+      "bytes": 26302,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-19-pearl-36.DheJ0SD4_1s9iIg.webp",
+      "url": "https://originheartgold.github.io/_astro/route-19-pearl-36.DheJ0SD4_1s9iIg.webp",
+      "bytes": 27354,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-19-pearl-37.DweUX6qL_Z6HIsC.webp",
+      "url": "https://originheartgold.github.io/_astro/route-19-pearl-37.DweUX6qL_Z6HIsC.webp",
+      "bytes": 25580,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-19-revive-34.CEbDXu_P_Z1nHdSL.webp",
+      "url": "https://originheartgold.github.io/_astro/route-19-revive-34.CEbDXu_P_Z1nHdSL.webp",
+      "bytes": 25226,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-20-deep-sea-tooth-39.BJfeEkoe_2vWueW.webp",
+      "url": "https://originheartgold.github.io/_astro/route-20-deep-sea-tooth-39.BJfeEkoe_2vWueW.webp",
+      "bytes": 26406,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-20-stardust-40.DQXFZE2t_U55EV.webp",
+      "url": "https://originheartgold.github.io/_astro/route-20-stardust-40.DQXFZE2t_U55EV.webp",
+      "bytes": 20892,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-21-rare-candy-50.BxdhNtob_zwbj1.webp",
+      "url": "https://originheartgold.github.io/_astro/route-21-rare-candy-50.BxdhNtob_zwbj1.webp",
+      "bytes": 29894,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-21-stardust-47.Du6xN1C8_Z1j6qT9.webp",
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-47.Du6xN1C8_Z1j6qT9.webp",
+      "bytes": 23314,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-21-stardust-48.CJLAkrWV_1H3WGb.webp",
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-48.CJLAkrWV_1H3WGb.webp",
+      "bytes": 21564,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-21-stardust-49.Bb7D-oQx_2bQjns.webp",
+      "url": "https://originheartgold.github.io/_astro/route-21-stardust-49.Bb7D-oQx_2bQjns.webp",
+      "bytes": 23188,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-25-revive-10.DKwHnRpZ_5yTNt.webp",
+      "url": "https://originheartgold.github.io/_astro/route-25-revive-10.DKwHnRpZ_5yTNt.webp",
+      "bytes": 17584,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-26-nugget-64.D3sja8Wo_Z1bCbWt.webp",
+      "url": "https://originheartgold.github.io/_astro/route-26-nugget-64.D3sja8Wo_Z1bCbWt.webp",
+      "bytes": 23704,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-26-tiny-mushroom-63.Cir83Xe7_ZTNIPR.webp",
+      "url": "https://originheartgold.github.io/_astro/route-26-tiny-mushroom-63.Cir83Xe7_ZTNIPR.webp",
+      "bytes": 27366,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-27-big-mushroom-66.tqY4WG1f_22b4WH.webp",
+      "url": "https://originheartgold.github.io/_astro/route-27-big-mushroom-66.tqY4WG1f_22b4WH.webp",
+      "bytes": 21926,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-27-revive-65.n0ENG0-j_Zjt9qq.webp",
+      "url": "https://originheartgold.github.io/_astro/route-27-revive-65.n0ENG0-j_Zjt9qq.webp",
+      "bytes": 20574,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-28-full-restore-68.Cu6HAaPA_125Y3p.webp",
+      "url": "https://originheartgold.github.io/_astro/route-28-full-restore-68.Cu6HAaPA_125Y3p.webp",
+      "bytes": 22890,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-28-rare-candy-67.CqxY2r52_1b6AKO.webp",
+      "url": "https://originheartgold.github.io/_astro/route-28-rare-candy-67.CqxY2r52_1b6AKO.webp",
+      "bytes": 24476,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-29-nugget-90.BbGslGmt_1s3Q5e.webp",
+      "url": "https://originheartgold.github.io/_astro/route-29-nugget-90.BbGslGmt_1s3Q5e.webp",
+      "bytes": 25932,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-3-ultra-ball-3.Bb80M6Cj_2j2ew4.webp",
+      "url": "https://originheartgold.github.io/_astro/route-3-ultra-ball-3.Bb80M6Cj_2j2ew4.webp",
+      "bytes": 21182,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-30-potion-92.DKsXE7yq_Zi95q4.webp",
+      "url": "https://originheartgold.github.io/_astro/route-30-potion-92.DKsXE7yq_Zi95q4.webp",
+      "bytes": 28226,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-32-great-ball-102.QFiwg6Hu_Z5yjbi.webp",
+      "url": "https://originheartgold.github.io/_astro/route-32-great-ball-102.QFiwg6Hu_Z5yjbi.webp",
+      "bytes": 21144,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-32-heart-scale-101.BbjQC7fh_23obaA.webp",
+      "url": "https://originheartgold.github.io/_astro/route-32-heart-scale-101.BbjQC7fh_23obaA.webp",
+      "bytes": 23542,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-32-super-potion-100.BdzyjKe3_1grVzY.webp",
+      "url": "https://originheartgold.github.io/_astro/route-32-super-potion-100.BdzyjKe3_1grVzY.webp",
+      "bytes": 25896,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-34-rare-candy-119.IKoZItj1_1miH3d.webp",
+      "url": "https://originheartgold.github.io/_astro/route-34-rare-candy-119.IKoZItj1_1miH3d.webp",
+      "bytes": 27558,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-35-nugget-124.DVHCrJWs_Z1pjRkj.webp",
+      "url": "https://originheartgold.github.io/_astro/route-35-nugget-124.DVHCrJWs_Z1pjRkj.webp",
+      "bytes": 21776,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-36-awakening-131.BRuDaNCA_2bDWuM.webp",
+      "url": "https://originheartgold.github.io/_astro/route-36-awakening-131.BRuDaNCA_2bDWuM.webp",
+      "bytes": 30408,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-38-hp-up-147.DsjzTqpf_Z8KXS3.webp",
+      "url": "https://originheartgold.github.io/_astro/route-38-hp-up-147.DsjzTqpf_Z8KXS3.webp",
+      "bytes": 26328,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-39-full-heal-151.DeN615vH_Z1SOfuB.webp",
+      "url": "https://originheartgold.github.io/_astro/route-39-full-heal-151.DeN615vH_Z1SOfuB.webp",
+      "bytes": 23946,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-39-nugget-150.Bqh6AlhN_1FU5fx.webp",
+      "url": "https://originheartgold.github.io/_astro/route-39-nugget-150.Bqh6AlhN_1FU5fx.webp",
+      "bytes": 21098,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-39-pp-up-148.DV6IOUeR_ZXgNjz.webp",
+      "url": "https://originheartgold.github.io/_astro/route-39-pp-up-148.DV6IOUeR_ZXgNjz.webp",
+      "bytes": 21954,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-39-x-attack-149.C7x_yhRC_16Ac2m.webp",
+      "url": "https://originheartgold.github.io/_astro/route-39-x-attack-149.C7x_yhRC_16Ac2m.webp",
+      "bytes": 17372,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-4-star-piece-7.-w8JOB59_1J427p.webp",
+      "url": "https://originheartgold.github.io/_astro/route-4-star-piece-7.-w8JOB59_1J427p.webp",
+      "bytes": 19844,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-4-star-piece-8.D4v0EntN_Z2kf5LI.webp",
+      "url": "https://originheartgold.github.io/_astro/route-4-star-piece-8.D4v0EntN_Z2kf5LI.webp",
+      "bytes": 24326,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-41-max-ether-159.Bj4to19t_Zq2EsD.webp",
+      "url": "https://originheartgold.github.io/_astro/route-41-max-ether-159.Bj4to19t_Zq2EsD.webp",
+      "bytes": 25476,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-41-stardust-156.Dm5VmSjE_Z2l5xgg.webp",
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-156.Dm5VmSjE_Z2l5xgg.webp",
+      "bytes": 25568,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-41-stardust-157.Drbov-Xi_A2SN7.webp",
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-157.Drbov-Xi_A2SN7.webp",
+      "bytes": 25484,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-41-stardust-158.zjs-KIe5_ZfRF1m.webp",
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-158.zjs-KIe5_ZfRF1m.webp",
+      "bytes": 24792,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-41-stardust-160.ORYQO7Gr_2cwxuw.webp",
+      "url": "https://originheartgold.github.io/_astro/route-41-stardust-160.ORYQO7Gr_2cwxuw.webp",
+      "bytes": 26136,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-42-max-potion-170.CzRU5c7V_Z1Ppcyr.webp",
+      "url": "https://originheartgold.github.io/_astro/route-42-max-potion-170.CzRU5c7V_Z1Ppcyr.webp",
+      "bytes": 24128,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-44-elixir-188.CfQz5cin_2oPg6P.webp",
+      "url": "https://originheartgold.github.io/_astro/route-44-elixir-188.CfQz5cin_2oPg6P.webp",
+      "bytes": 21558,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-45-pp-max-198.Z6sEPQ73_2t5PHy.webp",
+      "url": "https://originheartgold.github.io/_astro/route-45-pp-max-198.Z6sEPQ73_2t5PHy.webp",
+      "bytes": 20212,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-45-pp-up-197.CO_4Mbhx_Z217neA.webp",
+      "url": "https://originheartgold.github.io/_astro/route-45-pp-up-197.CO_4Mbhx_Z217neA.webp",
+      "bytes": 25912,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-47-pearl-200.nTMGZSF9_Z14hFT8.webp",
+      "url": "https://originheartgold.github.io/_astro/route-47-pearl-200.nTMGZSF9_Z14hFT8.webp",
+      "bytes": 24408,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-47-stardust-199.S6qDLVY9_ZNMhpu.webp",
+      "url": "https://originheartgold.github.io/_astro/route-47-stardust-199.S6qDLVY9_ZNMhpu.webp",
+      "bytes": 20362,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-5-underground-path-full-restore-11.BwYWvsUq_ZSHBjv.webp",
+      "url": "https://originheartgold.github.io/_astro/route-5-underground-path-full-restore-11.BwYWvsUq_ZSHBjv.webp",
+      "bytes": 7490,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/route-5-underground-path-x-sp-atk-12.B3cdqVKP_2gvils.webp",
+      "url": "https://originheartgold.github.io/_astro/route-5-underground-path-x-sp-atk-12.B3cdqVKP_2gvils.webp",
+      "bytes": 8698,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-big-mushroom-107.DlUnXlE6_UnxYd.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-big-mushroom-107.DlUnXlE6_UnxYd.webp",
+      "bytes": 28602,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-blocked-grass.BJQ64cfI_Z24SaBW.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-blocked-grass.BJQ64cfI_Z24SaBW.webp",
+      "bytes": 18994,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-east-path.IM1DGlfc_ZLXeWR.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-east-path.IM1DGlfc_ZLXeWR.webp",
+      "bytes": 19824,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-great-ball-105.PnTQCNYO_13N5pU.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-great-ball-105.PnTQCNYO_13N5pU.webp",
+      "bytes": 25302,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-kabuto-door.CXG7e_Sy_15A5gU.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-kabuto-door.CXG7e_Sy_15A5gU.webp",
+      "bytes": 18602,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-nugget-106.CVoCR74Y_Zzw5dR.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-nugget-106.CVoCR74Y_Zzw5dR.webp",
+      "bytes": 24008,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-rare-candy-103.DRJbq0BR_Z2sM5tR.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-rare-candy-103.DRJbq0BR_Z2sM5tR.webp",
+      "bytes": 26586,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-south-path.DMDQ6kj3_Z1kWczc.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-south-path.DMDQ6kj3_Z1kWczc.webp",
+      "bytes": 20472,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/ruins-of-alph-tiny-mushroom-104.D87N5DT1_QvFV0.webp",
+      "url": "https://originheartgold.github.io/_astro/ruins-of-alph-tiny-mushroom-104.D87N5DT1_QvFV0.webp",
+      "bytes": 21528,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-b1f-ice-heal-42.jyw-_t8c_Z1pI1c6.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b1f-ice-heal-42.jyw-_t8c_Z1pI1c6.webp",
+      "bytes": 17030,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-b2f-pearl-43.DYkMU6yY_Z1AiMbY.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b2f-pearl-43.DYkMU6yY_Z1AiMbY.webp",
+      "bytes": 19358,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-b2f-pearl-44.BFc57XUo_Z1aiC0D.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b2f-pearl-44.BFc57XUo_Z1aiC0D.webp",
+      "bytes": 20828,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-b3f-max-revive-45.DgB0r_WN_Zhdpy3.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b3f-max-revive-45.DgB0r_WN_Zhdpy3.webp",
+      "bytes": 14554,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-b4f-zinc-46.6edw1l9r_Ohu9v.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-b4f-zinc-46.6edw1l9r_Ohu9v.webp",
+      "bytes": 18088,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/seafoam-islands-escape-rope-41.Bmiqeb39_OVN2p.webp",
+      "url": "https://originheartgold.github.io/_astro/seafoam-islands-escape-rope-41.Bmiqeb39_OVN2p.webp",
+      "bytes": 14938,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/slowpoke-well-b1f-full-heal-115.BJXLFXDD_Z1I8D8B.webp",
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-b1f-full-heal-115.BJXLFXDD_Z1I8D8B.webp",
+      "bytes": 21074,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/slowpoke-well-b1f-super-potion-116.CwK5SY_u_v5Q9y.webp",
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-b1f-super-potion-116.CwK5SY_u_v5Q9y.webp",
+      "bytes": 17022,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/slowpoke-well-great-ball-114.BhKNUien_Z1aAfHm.webp",
+      "url": "https://originheartgold.github.io/_astro/slowpoke-well-great-ball-114.BhKNUien_Z1aAfHm.webp",
+      "bytes": 12302,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/team-rocket-hq-b2f-full-heal-184.D-KoZI0R_2rI2C2.webp",
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-b2f-full-heal-184.D-KoZI0R_2rI2C2.webp",
+      "bytes": 6314,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/team-rocket-hq-b2f-x-sp-def-185.BM7ao763_Z19i0ye.webp",
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-b2f-x-sp-def-185.BM7ao763_Z19i0ye.webp",
+      "bytes": 8836,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/team-rocket-hq-revive-183.DCPqQcIO_Z1OHYaw.webp",
+      "url": "https://originheartgold.github.io/_astro/team-rocket-hq-revive-183.DCPqQcIO_Z1OHYaw.webp",
+      "bytes": 8002,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/union-cave-b1f-revive-111.DUjj-ttk_ZQw9oI.webp",
+      "url": "https://originheartgold.github.io/_astro/union-cave-b1f-revive-111.DUjj-ttk_ZQw9oI.webp",
+      "bytes": 14918,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/union-cave-b1f-x-speed-112.DeHMlQrE_ZL1RXy.webp",
+      "url": "https://originheartgold.github.io/_astro/union-cave-b1f-x-speed-112.DeHMlQrE_ZL1RXy.webp",
+      "bytes": 12798,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/union-cave-big-pearl-108.D0rREGzC_1z7jSd.webp",
+      "url": "https://originheartgold.github.io/_astro/union-cave-big-pearl-108.D0rREGzC_1z7jSd.webp",
+      "bytes": 16004,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/union-cave-great-ball-110.BYAAPVHE_Z1Mk5rA.webp",
+      "url": "https://originheartgold.github.io/_astro/union-cave-great-ball-110.BYAAPVHE_Z1Mk5rA.webp",
+      "bytes": 13840,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/union-cave-paralyze-heal-109.Bt0ByTnR_ZvOU3S.webp",
+      "url": "https://originheartgold.github.io/_astro/union-cave-paralyze-heal-109.Bt0ByTnR_ZvOU3S.webp",
+      "bytes": 13444,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-city-big-pearl-16.DLqpPl0Y_Z1pJU7k.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-big-pearl-16.DLqpPl0Y_Z1pJU7k.webp",
+      "bytes": 20106,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-city-full-heal-13.C5D2R-il_ByfBV.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-full-heal-13.C5D2R-il_ByfBV.webp",
+      "bytes": 24000,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-city-heart-scale-14.2o9IcP56_17bs0w.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-heart-scale-14.2o9IcP56_17bs0w.webp",
+      "bytes": 26744,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-city-pearl-15.C8Hs3I4r_vENOy.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-pearl-15.C8Hs3I4r_vENOy.webp",
+      "bytes": 20976,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-city-pearl-17.BH8I-isJ_2q2pyf.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-city-pearl-17.BH8I-isJ_2q2pyf.webp",
+      "bytes": 21446,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/vermilion-harbor-pier-iron-18.DvSOjNv__Z27MN4A.webp",
+      "url": "https://originheartgold.github.io/_astro/vermilion-harbor-pier-iron-18.DvSOjNv__Z27MN4A.webp",
+      "bytes": 22042,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-2f-max-revive-56.CyL_TwxS_1kJWSJ.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-max-revive-56.CyL_TwxS_1kJWSJ.webp",
+      "bytes": 17050,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-2f-pp-up-57.rX1Milj1_Z1f2m8J.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-pp-up-57.rX1Milj1_Z1f2m8J.webp",
+      "bytes": 15994,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-2f-ultra-ball-58.CA6VDcd__Zee2Rj.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-2f-ultra-ball-58.CA6VDcd__Zee2Rj.webp",
+      "bytes": 18752,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-3f-hyper-potion-59.DXmDxJnc_Z1POX5W.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-3f-hyper-potion-59.DXmDxJnc_Z1POX5W.webp",
+      "bytes": 17026,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-3f-hyper-potion-60.x99Uji0t_ZpkSSL.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-3f-hyper-potion-60.x99Uji0t_ZpkSSL.webp",
+      "bytes": 14244,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-full-heal-54.CzeQe_-G_ZKrPzP.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-full-heal-54.CzeQe_-G_ZKrPzP.webp",
+      "bytes": 13332,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/victory-road-max-potion-55.CWJ-9MWL_4S3fI.webp",
+      "url": "https://originheartgold.github.io/_astro/victory-road-max-potion-55.CWJ-9MWL_4S3fI.webp",
+      "bytes": 19470,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/violet-city-hyper-potion-99.BCcfkmSJ_qf7kl.webp",
+      "url": "https://originheartgold.github.io/_astro/violet-city-hyper-potion-99.BCcfkmSJ_qf7kl.webp",
+      "bytes": 28124,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/violet-city-pok-ball-98.CymF_WYw_1myyt.webp",
+      "url": "https://originheartgold.github.io/_astro/violet-city-pok-ball-98.CymF_WYw_1myyt.webp",
+      "bytes": 14260,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/viridian-forest-honey-tree.CClFVaQq_2oFkMO.webp",
+      "url": "https://originheartgold.github.io/_astro/viridian-forest-honey-tree.CClFVaQq_2oFkMO.webp",
+      "bytes": 68384,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-pearl-166.u6D0859S_1hhNrM.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-pearl-166.u6D0859S_1hhNrM.webp",
+      "bytes": 3914,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-revive-167.CJeAurD6_Z224tug.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-revive-167.CJeAurD6_Z224tug.webp",
+      "bytes": 3902,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-super-repel-165.DYd9VbBH_ZTKMuL.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-super-repel-165.DYd9VbBH_ZTKMuL.webp",
+      "bytes": 4396,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-b1f-ultra-ball-168.sta1vET2_Z95BfV.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b1f-ultra-ball-168.sta1vET2_Z95BfV.webp",
+      "bytes": 4310,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-b2f-full-restore-169.DeGZS0FY_ZpMjhK.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-b2f-full-restore-169.DeGZS0FY_ZpMjhK.webp",
+      "bytes": 17328,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/whirl-islands-rare-candy-164.C2UglyBu_1RJsn8.webp",
+      "url": "https://originheartgold.github.io/_astro/whirl-islands-rare-candy-164.C2UglyBu_1RJsn8.webp",
+      "bytes": 4210,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "_astro/widescreen.Dv2-qb4x_2kYsoy.webp",
+      "url": "https://originheartgold.github.io/_astro/widescreen.Dv2-qb4x_2kYsoy.webp",
+      "bytes": 57500,
+      "format": "webp",
+      "context": "site-astro",
+      "animated": "not-verified"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "url": "https://originheartgold.github.io/apple-touch-icon.png",
+      "bytes": 2784,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "favicon-192.png",
+      "url": "https://originheartgold.github.io/favicon-192.png",
+      "bytes": 4054,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "favicon-48.png",
+      "url": "https://originheartgold.github.io/favicon-48.png",
+      "bytes": 1052,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "favicon-512.png",
+      "url": "https://originheartgold.github.io/favicon-512.png",
+      "bytes": 12356,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "favicon-96.png",
+      "url": "https://originheartgold.github.io/favicon-96.png",
+      "bytes": 1959,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "favicon.svg",
+      "url": "https://originheartgold.github.io/favicon.svg",
+      "bytes": 1725,
+      "format": "svg",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "maskable-512.png",
+      "url": "https://originheartgold.github.io/maskable-512.png",
+      "bytes": 7174,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "og/default.png",
+      "url": "https://originheartgold.github.io/og/default.png",
+      "bytes": 36714,
+      "format": "png",
+      "context": "site-public",
+      "animated": "not-verified"
+    },
+    {
+      "path": "save-editor/favicon.svg",
+      "url": "https://originheartgold.github.io/save-editor/favicon.svg",
+      "bytes": 350,
+      "format": "svg",
+      "context": "site-public",
+      "animated": "not-verified"
+    }
+  ]
+}
