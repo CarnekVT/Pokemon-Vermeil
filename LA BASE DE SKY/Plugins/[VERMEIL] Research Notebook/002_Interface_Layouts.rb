@@ -22,12 +22,15 @@ module VermeilInterfaceLayout
 
   NATIVE_IDS = {
     "Libreta/Catalogo" => %w[background cover pages focus_panel grid_panel
-                            focus_sprite tab_arcane tab_golden],
+                            focus_sprite tab_arcane tab_golden
+                            notebook_title focus_number focus_name],
     "Libreta/Ficha" => %w[detail_panel],
     "Pokedex/Lista" => %w[background header list_panel portrait_panel
                          portrait_pokemon counter_panel scrollbar_track
-                         list_row list_row_selected],
-    "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description],
+                         list_row list_row_selected
+                         pokedex_title seen_counter caught_counter],
+    "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description
+                         detail_name detail_category detail_height detail_weight],
     "Pokedex/Area" => %w[area_page],
     "Pokedex/Formas" => %w[forms_page]
   }.freeze
