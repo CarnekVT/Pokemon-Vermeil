@@ -298,6 +298,9 @@ module ResearchNotebook
       refresh
       remember_content_visibility
       set_notebook_content_visible(false)
+      # Create editor elements before opening the cover so their entrance
+      # progresses AT THE SAME TIME as the native animation, not afterwards.
+      update_designer_extras
       if ResearchNotebook::Settings::ENABLE_OPEN_ANIMATION
         open_animation
       else
@@ -1529,6 +1532,7 @@ module ResearchNotebook
         eased = 0.5 - Math.cos(Math::PI * t) * 0.5
         cover.zoom_x = [1.0 - 0.96 * eased, 0.04].max
         shadow.opacity = (135 - 65 * eased).round if shadow
+        update_designer_extras
         Graphics.update
       end
       cover.visible = false
@@ -1539,6 +1543,7 @@ module ResearchNotebook
         t = (i + 1).to_f / fade_frames
         pages.opacity = (255 * (1.0 - t)).round
         set_content_opacity((255 * t).round)
+        update_designer_extras
         Graphics.update
       end
       set_content_opacity(255)
