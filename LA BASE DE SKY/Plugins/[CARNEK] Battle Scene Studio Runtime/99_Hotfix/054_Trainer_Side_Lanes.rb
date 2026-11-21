@@ -98,7 +98,7 @@ module VermeilTrainerSideLanes
   def bss_camera_right_focus_tick
     return unless @bss_right_camera_active && @vector && @bss_right_camera_to
     return if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i>0
-    t=[[(Time.now.to_f-@bss_right_camera_started.to_f)/0.44,0.0].max,1.0].min
+    t=[[(Time.now.to_f-@bss_right_camera_started.to_f)/0.18,0.0].max,1.0].min
     ease=t*t*(3.0-2.0*t)
     from=@bss_right_camera_from
     dest=@bss_right_camera_to
