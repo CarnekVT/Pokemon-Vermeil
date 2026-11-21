@@ -203,26 +203,9 @@ module VermeilBSSNDSIntroScene
       # their original visibility IMMEDIATELY after one capture frame. Capturing
       # trainers/Pokemon in this bitmap froze them while the live sprites moved,
       # and their positions appeared to jump when the overlay disappeared.
-      if @battle.wildBattle?
-        # The wild Pokemon is never temporarily hidden to capture a frame.
-        bitmap=Bitmap.new(Graphics.width,Graphics.height)
-      else
-        captured=[]
-        begin
-          @sprites.each do |key,sp|
-            next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
-            next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
-            captured << [sp,sp.visible]
-            sp.visible=false
-          end
-          Graphics.update
-          bitmap=Graphics.snap_to_bitmap
-        ensure
-          captured.each do |sp,was_visible|
-            sp.visible=was_visible if sp && !(sp.disposed? rescue true)
-          end
-        end
-      end
+      # No second frozen screenshot of the battle. The same EBDX actors
+      # remain live behind an opaque, color-matched biome curtain.
+      bitmap=Bitmap.new(Graphics.width,Graphics.height)
       return false unless bitmap && !(bitmap.disposed? rescue false)
       # Underlying TrainerSprite and DBK animated Pokemon keep playing while
       # this environment-only snapshot zooms and fades.
@@ -238,7 +221,7 @@ module VermeilBSSNDSIntroScene
       # A stage snapshot above wild sprites would dissolve over them and make
       # even full-opacity Pokemon look like translucent ghosts. Only trainer
       # battles need that environment-only snapshot during the handoff.
-      cover.visible=false if @battle.wildBattle?
+      cover.visible=false   # EBDX scenery is rendered once, never duplicated
       if @battle.wildBattle?
         @battle.sideSizes[1].times do |i|
           idx=(2*i)+1
@@ -346,11 +329,12 @@ module VermeilBSSNDSIntroScene
         # transparent, including the first Graphics.update after allocation.
         entrance=[[elapsed/0.13,0.0].max,1.0].min
         entrance=entrance*entrance*(3.0-2.0*entrance)
-        # Two shots, not two fades: the biome is opaque until the final
-        # reveal, so the wild/trainer never appears as a translucent ghost.
-        out_at=@battle.wildBattle? ? 0.57 : 0.84
-        departure=[[(p-out_at)/(1.0-out_at),0.0].max,1.0].min
-        departure=departure*departure*(3.0-2.0*departure)
+        # A literal opaque wipe, NOT an alpha dissolve. Reveal the actual
+        # EBDX scene from RIGHT to LEFT, after sprites are fully prepared.
+        reveal_at=@battle.wildBattle? ? 0.61 : 0.76
+        reveal=[[(p-reveal_at)/(1.0-reveal_at),0.0].max,1.0].min
+        reveal=reveal*reveal*(3.0-2.0*reveal)
+        remaining=(Graphics.width.to_f*(1.0-reveal)).round
         # A Pokemon rustling in tall grass: fast, damped lateral shakes
         # with a short vertical kick. Clock-based for mkxp's variable FPS.
         damping=Math.exp(-elapsed*4.5)
@@ -360,7 +344,12 @@ module VermeilBSSNDSIntroScene
         grass.y=(dy.to_f*elapsed*1.5+rustle_y).round
         # Native grass texture may contain dark pixels; cap its opacity on
         # wild encounters so it cannot black out the Pokemon or battle sky.
-        grass.opacity=(255.0*(1.0-departure)).round
+        # The grass PNG can have alpha; the matching opaque matte below it
+        # guarantees that no live battlefield leaks through transparent parts.
+        darkness.zoom_x=remaining.to_f if darkness
+        grass.x=0 if p>=reveal_at
+        grass.src_rect.set(0,0,remaining,Graphics.height) if grass.respond_to?(:src_rect)
+        grass.opacity=255
         if mosaic
           fragment=[[(p-0.22)/0.61,0.0].max,1.0].min
           mosaic.x=(-38.0+100.0*fragment).round
@@ -375,13 +364,8 @@ module VermeilBSSNDSIntroScene
         # Prevents two differently aligned terrain copies from ghosting.
         reveal=[[(p-0.77)/0.23,0.0].max,1.0].min
         smooth_reveal=reveal*reveal*(3.0-2.0*reveal)
-        cover.opacity=(255.0*(1.0-smooth_reveal)).round
-        if darkness
-          reveal_at=@battle.wildBattle? ? 0.45 : 0.85
-          fade=[[(p-reveal_at)/(1.0-reveal_at),0.0].max,1.0].min
-          fade=fade*fade*(3.0-2.0*fade)
-          darkness.opacity=(255.0*(1.0-fade)).round
-        end
+        cover.opacity=0 # No frozen environment overlay
+        darkness.opacity=255 if darkness
         # Stage the REAL trainer while still hidden behind the opaque mask.
         # DBK's animation starts only after the NDS presentation finishes.
         if @battle.trainerBattle? && p>=0.32 && !@bss_nds_trainer_staged
