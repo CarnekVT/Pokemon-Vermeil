@@ -1,55 +1,83 @@
-# Vermeil: Libreta y Pokédex en MakerStudio
+# Interfaces nativas de Vermeil — MakerStudio
 
-Abrir **MakerStudio > Mods > Abrir el Editor de Interfaces**. Los seis diseños
-`vermeil_*` aparecen junto con las interfaces normales. Trabajan a **640 × 480**,
-como el juego en `mkxp.json`. Guardar la escena JSON y volver a abrir la
-Libreta o la Pokédex para ver los cambios (no se necesita recompilar Ruby).
+La Libreta y la Nueva Pokédex son escenas **nativas** con datos, navegación,
+sprites y progreso propios. El Editor de Interfaces controla sus **perfiles
+visuales**: los guarda en `LA BASE DE SKY/UI/vermeil_*.json` y el juego
+vuelve a leerlos cada vez que abre la pantalla. No son interfaces de prueba
+separadas que haya que llamar con `pbInterfaz`.
 
-## Pantallas
+## Cómo editarlas
 
-| Diseño | Función |
+1. Abre MakerStudio en el **proyecto correcto** (`LA BASE DE SKY`).
+2. Abre **Editor de Interfaces**. Arriba está la navegación rápida:
+   - **Libreta:** Catálogo · Ficha
+   - **Pokédex:** Listado · Ficha · Área · Formas
+3. Elige el perfil y selecciona una capa en el panel izquierdo o el lienzo.
+4. Modifica sus propiedades. **Ctrl+S** guarda el diseño en `UI/`.
+5. En el juego, **cierra y vuelve a abrir** la Libreta o Pokédex para
+   cargar el JSON recién guardado. No uses el menú de pruebas de `pbInterfaz`
+   para evaluar las pantallas nativas.
+
+**Navegación y comodidad:** usa los botones **Anterior/Siguiente**, el
+buscador superior o **Alt+← / Alt+→** para cambiar de página. **Ctrl+J** enfoca
+la búsqueda de pantallas. El zoom y el desplazamiento se mantienen al cambiar
+de página o tamaño de panel. Pulsa **Encajar** para centrar deliberadamente.
+
+## Qué elementos controla el editor de verdad
+
+| Tipo de capa | Cambio real en el juego |
 | --- | --- |
-| `vermeil_libreta` | portada, panel focal, cuadrícula, centro del Pokémon y pestañas |
-| `vermeil_libreta_detalle` | panel derecho de la ficha; comparte el panel focal de la Libreta |
-| `vermeil_pokedex_lista` | paneles, lista, contadores, scrollbar y posición del Pokémon |
-| `vermeil_pokedex_ficha` | página de ficha, zona transparente de sprite, cuadro descriptivo |
-| `vermeil_pokedex_area` | fondo de localizaciones |
-| `vermeil_pokedex_formas` | fondo de formas; comparte la zona del sprite de la ficha |
+| Un panel nativo con ID reservado | Posición, imagen del PNG indicada, dimensiones del arte, opacidad del PNG; si se cambia a tipo `panel`, relleno y borde |
+| `focus_sprite` (Libreta) / `portrait_pokemon` (Pokédex) | Anclaje del Pokémon; se mantiene el sprite real y sus formas |
+| Pestañas y paneles nativos | Posición y sustitución por el PNG indicado |
+| `cover` y paneles con entrada | Duración de apertura y transición en los puntos ya conectados |
+| **Elementos adicionales** (ID nuevo) de tipo `imagen`, `texto`, `panel`, `animado` y `barra` | Se crean y animan con el propio motor de Interfaces dentro de la escena nativa: posición, tamaño, capa relativa, opacidad y efectos de entrada/animación compatibles |
 
-## Qué modifica y qué no
+Los ID existentes son **anclas reservadas**. Renombrarlos desactiva su enlace
+nativo; un ID nuevo se usa para capas **decorativas adicionales**.
 
-- Los **X/Y de elementos vinculados** se leen al abrir las escenas.
-- El tiempo **Entrada > Duración** de `cover` controla la apertura de la
-  Libreta; `grid_panel` y `detail_panel` ajustan la duración del paso de página.
-- El tiempo de entrada de `entry_page`, `area_page` y `forms_page` ajusta
-  la transición de esas vistas en la Pokédex.
-- `focus_sprite` y `portrait_pokemon` son **marcadores de punto**, no
-  decoración real. Sirven para mover los sprites de Pokémon desde el editor.
-- Los elementos del editor son una **guía visual** de la disposición; las
-  pantallas conservan el dibujado y las interacciones existentes en Ruby.
-  Esto no convierte cada texto, barra y celda en un sprite independiente.
-- La apariencia de los PNG existentes sigue controlada por
-  `ResearchNotebook::Settings::USE_CUSTOM_UI` y
-  `NewPokedexConfig::CONFIG[:use_custom_ui]`; mover una imagen en MakerStudio
-  no activa por sí mismo una skin ni reemplaza los textos y datos dinámicos.
-- Algunos valores de `ancho/alto`, `capa`, animaciones de rotación, etc.
-  todavía los decide el runtime. **Solo los atributos documentados arriba están
-  enlazados**. No modificar el progreso de especies, habilidades, forms o
-  el JSON de SpeciesDex desde los diseños.
+Los PNG opcionales indicados por defecto pueden **no existir** todavía. En
+MakerStudio el recuadro con el nombre del panel es una representación de
+sus límites, no una imagen ni una captura de la Pokédex real. Si quieres
+sustituir el arte, selecciona la capa e indica un PNG existente en
+`Graphics/UI/...`. No se crea automáticamente un PNG.
 
-## Pruebas rápidas
+**Límites vigentes:** la selección de especies, formularios, textos
+dinámicos y filas de cuadrícula/listado siguen calculándose en Ruby; editar
+sus anchos o posiciones no convierte cada fila en un componente separado.
+Los botones nuevos del editor **no controlan las escenas nativas**; usa
+decoración con los tipos indicados arriba. La capa de una pieza nativa
+rasterizada dentro del mismo bitmap no se puede reordenar individualmente
+respecto a cada texto dinámico. No presentar esos controles como
+enteramente conectados.
 
-1. Abrir Libreta y recorrer páginas de más de 25 especies, alternar Arcano /
-   Áureo y abrir una ficha. Los iconos de la página deben estar listos al mostrarse.
-2. Mover provisionalmente `focus_sprite` 8 px y comprobar su coordenada
-   en la Libreta; revertirla al terminar.
-3. Mover `list_panel` 8 px en la Pokédex y comprobar que fondo y filas siguen
-   juntos. Probar lista, ficha, área y formas.
-4. En un combate, abrir Luchar, cancelar a comandos, entrar en Mochila,
-   salir y comprobar el encuadre general.
-5. Probar introducciones salvajes y de entrenador, confirmar ausencia de
-   cuadrados negros, desplazamiento desde fuera de pantalla y profundidad
-   del entrenador. Comprobar animaciones nativas DBK / BAS.
+## Prueba que confirma la conexión
 
-**Nota:** Estas modificaciones pasan comprobaciones estáticas de archivos y JSON.
-No sustituyen una prueba en el Game.exe de Windows con partidas reales.
+1. Abre `vermeil_pokedex_lista` en el editor.
+2. Añade un **Texto** con un ID nuevo, por ejemplo `test_conexion`.
+3. Pon `texto` = `PRUEBA EDITOR`, posición `x=30`, `y=400`,
+   tamaño `16`, color claro y `capa=20`.
+4. Guarda (**Ctrl+S**). Abre `LA BASE DE SKY/UI/vermeil_pokedex_lista.json`
+   para verificar que el elemento existe.
+5. Abre la **Nueva Pokédex del juego**. El texto debe verse encima de la
+   pantalla. Si no aparece, revisa en la consola del juego las líneas
+   `[Vermeil Interface Studio]`: indican perfiles leídos o errores de
+   JSON. También comprueba que MakerStudio no haya escrito en un proyecto
+   distinto.
+6. Borra el texto de prueba, vuelve a guardar y reabre la Pokédex.
+
+Realiza la misma prueba en `vermeil_libreta` para la Libreta. Las
+modificaciones de Ruby del plugin sí necesitan que el juego arranque con los
+scripts actualizados; cambiar **solo JSON** no necesita recompilar Ruby.
+
+## Regresión tras editar
+
+- Libreta: abrir, ver la cuadrícula ya poblada, cambiar de catálogo a ficha
+  y volver, mover `detail_panel` provisionalmente y restaurar
+- Pokédex: Listado / Ficha / Área / Formas; probar todas las entradas,
+  filtros, shiny y formas conocidas sin sustituir datos o sprites
+- Comprobar que una imagen nueva y un texto adicional aparecen y desaparecen
+  al guardar y reabrir sin dejar sprites fantasma en otras páginas
+
+La validación de esta integración es todavía **estática**: requiere probar
+MakerStudio y `Game.exe` en Windows para confirmar el comportamiento visual.
