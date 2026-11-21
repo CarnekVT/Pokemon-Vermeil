@@ -1015,8 +1015,23 @@ end
     bmp.fill_rect(NuevaPokedex.layout_position("scrollbar_track", "x", NuevaPokedex::SCROLLBAR_X), NuevaPokedex.layout_position("scrollbar_track", "y", NuevaPokedex::SCROLLBAR_Y), NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
     draw_counters
     # Help is readable on a dark panel, rather than one overlong legend.
-    draw_navigation_hint(bmp, "↑↓ Elegir  ·  ←→ Saltar 5  ·  C Ficha",
-                              "D Ordenar  ·  Z Buscar  ·  X Salir")
+    draw_navigation_hint(bmp, "ARR/ABA: Elegir     IZQ/DER: Saltar 5",
+                              "ACEPTAR: Ficha    CAMBIAR: Orden    ATRAS: Salir")
+  end
+
+  # Plain ASCII navigation. The game font lacks several Unicode arrows.
+  # Labels describe actions rather than guessing Input Studio key bindings.
+  def draw_section_navigation_hint(bmp, detail="")
+    labels=pokedex_tab_order.map do |tab|
+      name=case tab
+           when NuevaPokedex::STATE_INFO then "DATOS"
+           when NuevaPokedex::STATE_AREA then "AREA"
+           when NuevaPokedex::STATE_FORMS then "FORMAS"
+           end
+      tab==@state ? "[#{name}]" : name
+    end.join("  /  ")
+    bottom=detail.empty? ? "IZQ/DER: Pestaña    ATRAS: Lista" : detail
+    draw_navigation_hint(bmp,labels,bottom)
   end
 
   def draw_navigation_hint(bmp, first, second)
@@ -1413,11 +1428,8 @@ end
                      NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
-    pbDrawShadowText(bmp, 304, 280, 300, 19,
-                      collect_form_list.length>1 ? "← Área   → Formas" : "← / → Área",
-                      NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
-    draw_navigation_hint(bmp, "↑↓ Pokémon  ·  ← Área  ·  → Formas",
-                              "C Continuar  ·  D Color  ·  X Lista")
+    draw_section_navigation_hint(bmp,
+      "IZQ/DER: Pestaña   ARR/ABA: Pokémon   ATRAS: Lista")
   end
 
   def draw_ball(bmp, cx, cy, r, owned, seen)
@@ -1558,6 +1570,8 @@ end
     else
       draw_area_text(bmp, [], names)
     end
+    draw_section_navigation_hint(bmp,
+      "IZQ/DER: Pestaña    ATRAS: Lista")
   ensure
     map_asset.dispose if map_asset && map_asset.respond_to?(:dispose)
   end
@@ -1635,9 +1649,6 @@ end
     end
     pbDrawShadowText(bmp,16,y+5,NuevaPokedex::SCREEN_WIDTH-32,19,text,
                      NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
-    pbDrawShadowText(bmp,16,y+36,NuevaPokedex::SCREEN_WIDTH-32,18,
-                     "← Ficha  ·  → Formas  ·  C / X Volver",
-                     NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
   ensure
     bmp.font.size=previous if previous && bmp && bmp.font
   end
@@ -1781,8 +1792,8 @@ end
     end
     # Panel izquierda-abajo: datos de la forma seleccionada
     draw_forms_detail(bmp, entry, form_ids)
-    draw_navigation_hint(bmp, "↑↓ Elegir forma  ·  ← Área  ·  → Ficha",
-                              "Z Color  ·  D Grito  ·  X Volver")
+    draw_section_navigation_hint(bmp,
+      "ARR/ABA: Forma   IZQ/DER: Pestaña   ATRAS: Lista")
   end
 
   def draw_forms_detail(bmp, entry, form_ids)
@@ -1915,39 +1926,61 @@ end
     return :continue
   end
 
+  # Consistent Pokédex page order: Datos -> Area -> Formas -> Datos.
+  # If the species has no other forms, only Datos and Area are available.
+  def pokedex_tab_order
+    result=[NuevaPokedex::STATE_INFO,NuevaPokedex::STATE_AREA]
+    result << NuevaPokedex::STATE_FORMS if collect_form_list.length>1
+    result
+  end
+
+  def next_pokedex_tab(direction)
+    tabs=pokedex_tab_order
+    target=tabs[((tabs.index(@state)||0)+direction)%tabs.length]
+    if @state==NuevaPokedex::STATE_FORMS
+      current=@model.data_for(@current_index)
+      store_display_form(current,@current_form) if current
+    end
+    case target
+    when NuevaPokedex::STATE_INFO then back_to_info_state
+    when NuevaPokedex::STATE_AREA then enter_area_state
+    when NuevaPokedex::STATE_FORMS then enter_forms_state
+    end
+  end
+
+  def return_to_pokedex_list
+    pbSEPlay("GUI pokedex cancel")
+    if @state==NuevaPokedex::STATE_FORMS
+      current=@model.data_for(@current_index)
+      store_display_form(current,@current_form) if current
+    end
+    @state=NuevaPokedex::STATE_LIST
+    @view.clear_bitmap("overlay")
+    pbRefresh
+    start_crossfade
+  end
+
   def handle_info_input
     if Input.trigger?(Input::BACK)
-      pbSEPlay("GUI pokedex cancel")
-      @state = NuevaPokedex::STATE_LIST
-      @view.clear_bitmap("overlay")
-      pbRefresh
-      start_crossfade
+      return_to_pokedex_list
     elsif Input.repeat?(Input::UP)
       change_entry(-1)
     elsif Input.repeat?(Input::DOWN)
       change_entry(1)
     elsif Input.trigger?(Input::LEFT)
-      enter_area_state
+      next_pokedex_tab(-1)
     elsif Input.trigger?(Input::RIGHT)
-      if collect_form_list.length > 1
-        enter_forms_state
-      else
-        enter_area_state
-      end
+      next_pokedex_tab(1)
     elsif Input.trigger?(Input::USE)
-      entry = @model.data_for(@current_index)
-      return if !entry
-      if @page + 1 < description_pages(entry)
-        @page += 1
+      entry=@model.data_for(@current_index)
+      return unless entry
+      # Confirm pages the description only, without unexpectedly changing tab.
+      if @page+1<description_pages(entry)
+        @page+=1
         draw_info
-        start_crossfade
-      elsif collect_form_list.length > 1
-        enter_forms_state
-      else
-        pbSEPlay("GUI pokedex cancel")
-        @state = NuevaPokedex::STATE_LIST
-        @view.clear_bitmap("overlay")
-        pbRefresh
+      elsif @page>0
+        @page=0
+        draw_info
       end
     elsif Input.trigger?(Input::ACTION)
       play_cry
@@ -2018,40 +2051,39 @@ end
   end
 
   def handle_area_input
-    if Input.trigger?(Input::BACK) || Input.trigger?(Input::USE)
+    if Input.trigger?(Input::BACK)
+      return_to_pokedex_list
+    elsif Input.trigger?(Input::USE)
       back_to_info_state
     elsif Input.trigger?(Input::LEFT)
-      back_to_info_state
+      next_pokedex_tab(-1)
     elsif Input.trigger?(Input::RIGHT)
-      if collect_form_list.length > 1
-        enter_forms_state
-      else
-        back_to_info_state
-      end
+      next_pokedex_tab(1)
     end
   end
 
   def handle_forms_input
-    if Input.trigger?(Input::BACK) || Input.trigger?(Input::USE)
+    if Input.trigger?(Input::BACK)
+      return_to_pokedex_list
+    elsif Input.trigger?(Input::USE)
       back_to_info_state
     elsif Input.trigger?(Input::LEFT)
-      store_display_form(@model.data_for(@current_index), @current_form)
-      enter_area_state
+      next_pokedex_tab(-1)
     elsif Input.trigger?(Input::RIGHT)
-      back_to_info_state
+      next_pokedex_tab(1)
     elsif Input.repeat?(Input::UP)
-      forms = collect_form_list
+      forms=collect_form_list
       return if forms.empty?
-      @current_form = forms[((forms.index(@current_form) || 0) - 1) % forms.length]
-      store_display_form(@model.data_for(@current_index), @current_form)
+      @current_form=forms[((forms.index(@current_form)||0)-1)%forms.length]
+      store_display_form(@model.data_for(@current_index),@current_form)
       pbPlayCursorSE if defined?(pbPlayCursorSE)
       draw_forms
       update_sprite_icon
     elsif Input.repeat?(Input::DOWN)
-      forms = collect_form_list
+      forms=collect_form_list
       return if forms.empty?
-      @current_form = forms[((forms.index(@current_form) || -1) + 1) % forms.length]
-      store_display_form(@model.data_for(@current_index), @current_form)
+      @current_form=forms[((forms.index(@current_form)||-1)+1)%forms.length]
+      store_display_form(@model.data_for(@current_index),@current_form)
       pbPlayCursorSE if defined?(pbPlayCursorSE)
       draw_forms
       update_sprite_icon
