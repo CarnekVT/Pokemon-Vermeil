@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.89",
+  "version": "1.0.90",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Visual battle animation editor for Pokémon Vermeil: 77 action examples with real sprites, contextual mouse handles (route, orbit, rise and spawn), editable layered impacts, synchronized audio and Ruby runtime support.",
+  "description": "Battle Animation Studio for Pokémon Vermeil: visual move editor, 77 action examples, per-frame animation forensics, emitter QA and optimized preview (Essentials v21.1 / Ruby runtime).",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
