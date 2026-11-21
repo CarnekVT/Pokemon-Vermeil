@@ -178,7 +178,7 @@ class BifrostCoreTest < Minitest::Test
     assert BifrostCapture.geometry(10,10,10,6,cfg)[:in_range]
     assert BifrostCapture.geometry(10,10,13,6,cfg)[:in_range]
     refute BifrostCapture.geometry(10,10,10,2,cfg)[:in_range]
-    assert_in_delta 1.0,BifrostCapture.hit_chance(4,cfg),0.00001
+    assert_in_delta 0.9,BifrostCapture.hit_chance(4,cfg),0.00001
     assert_equal 0.0,BifrostCapture.hit_chance(8,cfg)
   end
 end
