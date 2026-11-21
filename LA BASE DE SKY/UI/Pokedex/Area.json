@@ -15,19 +15,21 @@
   "elementos": [
     {
       "id": "area_page",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 0,
       "x": 0,
       "y": 0,
       "ancho": 640,
       "alto": 480,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/area_page",
       "entrada": {
         "efecto": "desde_derecha",
         "duracion": 0.19,
         "suavizado": "suave",
         "distancia": 48
-      }
+      },
+      "color": "#101824FF",
+      "borde": "#536B8D4D",
+      "borde_grosor": 1
     }
   ],
   "biblioteca": {
