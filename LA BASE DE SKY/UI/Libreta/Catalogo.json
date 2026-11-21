@@ -105,6 +105,48 @@
       "color": "#8A682EFF",
       "borde": "#536B8D4D",
       "borde_grosor": 1
+    },
+    {
+      "id": "notebook_title",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 18,
+      "y": 10,
+      "ancho": 286,
+      "alto": 30,
+      "texto": "LIBRETA DE INVESTIGACIÓN",
+      "tamano": 19,
+      "color": "#FAF8F0",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "focus_number",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 28,
+      "y": 72,
+      "ancho": 62,
+      "alto": 20,
+      "texto": "#001",
+      "tamano": 12,
+      "color": "#7B6C5B",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "focus_name",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 86,
+      "y": 69,
+      "ancho": 206,
+      "alto": 28,
+      "texto": "Nombre del Pokémon",
+      "tamano": 21,
+      "color": "#352C27",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
