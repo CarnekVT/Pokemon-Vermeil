@@ -121,6 +121,19 @@ var EMITTER_KEY_ALIASES = {
     emitOpacityMultiplier: ["opacityMultiplier"],
     opacityMultiplier: ["emitOpacityMultiplier"]
 };
+// In the emitter hot path the editor usually keeps command keys ordered.
+// Keep the same stable sorting semantics without cloning + sorting for every
+// preview frame and for every particle. Edited/out-of-order keys still sort.
+function basSortedEmitterSequence(keys) {
+    if (!Array.isArray(keys)) return [];
+    for (var i = 1; i < keys.length; i++) {
+        if (Number((keys[i - 1] || {}).frame || 0) > Number((keys[i] || {}).frame || 0))
+            return keys.slice().sort(function(a, b) {
+                return Number((a || {}).frame || 0) - Number((b || {}).frame || 0);
+            });
+    }
+    return keys;
+}
 var clamp = function (v, min, max) { return Math.max(min, Math.min(max, v)); };
 var lerp = function (a, b, t) { return a + (b - a) * t; };
 var ease = function (t, m) {
@@ -2173,7 +2186,7 @@ var BattlePreview = /** @class */ (function () {
         // Each SetEmitting=true starts/restarts the cadence. EmitterRate can be
         // keyed by the Studio, so sample it at each emission instead of assuming
         // one immutable interval for the whole attack.
-        var list = (((_b = (_a = clip.pbs) === null || _a === void 0 ? void 0 : _a.emitterCommands) === null || _b === void 0 ? void 0 : _b.emitting) || []).slice().sort(function (a, b) { return Number(a.frame || 0) - Number(b.frame || 0); });
+        var list = basSortedEmitterSequence((((_b = (_a = clip.pbs) === null || _a === void 0 ? void 0 : _a.emitterCommands) === null || _b === void 0 ? void 0 : _b.emitting) || []));
         if (!list.length)
             return [];
         var out = [];
@@ -2234,7 +2247,7 @@ var BattlePreview = /** @class */ (function () {
         // Compatibility with BAS 1.9.4-1.9.6: Studio-created radial keys were
         // stored at the emitter's global start frame, while native PBS particle
         // commands are local to each particle's lifetime.
-        var emitting = (((pbs.emitterCommands || {}).emitting) || []).slice().sort(function (a, b) { return Number(a.frame || 0) - Number(b.frame || 0); });
+        var emitting = basSortedEmitterSequence((((pbs.emitterCommands || {}).emitting) || []));
         var start = emitting.find(function (x) { return !!x.value; });
         var startFrame = start ? Number(start.frame || 0) : 0;
         var minRadiusFrame = Infinity;
