@@ -451,6 +451,21 @@ module BifrostCapture
           target = BifrostCapture.focus_at([s[:x],s[:y]],s[:config])
         end
         if !target || !BifrostCapture.eligible_event?(target)
+          # Mouse free aim: a real throw at empty ground may miss. Keep
+          # the keyboard's auto-target mode safe when nothing is nearby.
+          if s[:mode] == :ball && s[:mouse_active] &&
+             s[:balls] && s[:balls][s[:ball_index]]
+            item = s[:balls][s[:ball_index]][0]
+            launched = BifrostCapture::Motion.launch(nil,item,:ball,
+              s[:config],[s[:x],s[:y]])
+            if launched
+              s[:shot_during_hold] = true
+              @throw_cooldown = s[:config]["throw_cooldown_frames"].to_i.clamp(0,90)
+              s[:mouse_active] = false
+              remember_selection(s)
+              return true
+            end
+          end
           BifrostCapture.capture_result(:blocked,nil,
             _INTL("No hay un Pokémon capturable"),s[:config])
           return false
@@ -603,8 +618,16 @@ module BifrostCapture
         BifrostCapture::LiveAim.close if BifrostCapture::LiveAim.active?
       end
 
-      def launch(event,item,mode,cfg)
-        return false unless can_launch?(event,item,mode,cfg)
+      def launch(event,item,mode,cfg,miss_point=nil)
+        empty = event.nil? && mode == :ball && miss_point
+        if empty
+          return false unless $bag && $bag.quantity(item).to_i > 0
+          return false if flights.length >= cfg["max_flights"].to_i.clamp(1,6)
+          reserved = flights.count { |a| a[:mode] == :ball && a[:item] == item }
+          return false if $bag.quantity(item).to_i <= reserved
+        else
+          return false unless can_launch?(event,item,mode,cfg)
+        end
         vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
         if mode == :bait
@@ -623,11 +646,11 @@ module BifrostCapture
         shadow.bitmap.fill_rect(2,3,28,4,Color.new(12,18,28,94))
         shadow.ox = 16; shadow.oy = 5
         x,y,w,h = BifrostCapture.target_rect($game_player)
-        geom = BifrostCapture.geometry($game_player.x,$game_player.y,
-                                       event.x,event.y,cfg)
-        roll = mode == :ball ? rand : nil
-        miss = roll && roll >= BifrostCapture.hit_chance(geom[:front],cfg)
-        back = BifrostCapture.behind?($game_player.x,$game_player.y,event)
+        geom = event && BifrostCapture.geometry($game_player.x,$game_player.y,
+                                                event.x,event.y,cfg)
+        roll = mode == :ball && !empty ? rand : nil
+        miss = !!empty || (roll && roll >= BifrostCapture.hit_chance(geom[:front],cfg))
+        back = event ? BifrostCapture.behind?($game_player.x,$game_player.y,event) : false
         critical = false
         if mode == :ball
           rate = back ? cfg["critical_back"] : cfg["critical_front"]
@@ -650,18 +673,18 @@ module BifrostCapture
           BifrostCapture::Audio.play(:critical,cfg) if critical
         end
         ball.color = Color.new(126,246,255,75) if critical
-        event.instance_variable_set(:@bifrost_projectile_lock,true)
+        event.instance_variable_set(:@bifrost_projectile_lock,true) if event
         a = {
           :vp=>vp,:owns_vp=>owns_vp, :sprites=>[ball,shadow,*trails],
           :shared_bitmaps=>[trail_bmp],
           :event=>event,:item=>item,:mode=>mode,:config=>cfg,
           :back=>back, :critical=>critical,
           :origin=>[$game_player.x,$game_player.y],
-          :roll=>roll,:miss=>miss,
+          :roll=>roll,:miss=>miss,:empty=>!!empty,
           :frame=>0,:frames=>cfg["throw_frames"].to_i.clamp(8,48),
           :start=>[x+w*0.72,y+h*0.50],:ground=>y+h,
           :start_depth=>depth_for($game_player),
-          :last=>BifrostCapture.screen_position(event),
+          :last=>empty ? miss_point.dup : BifrostCapture.screen_position(event),
           :positions=>[]
         }
         flights << a
@@ -744,7 +767,8 @@ module BifrostCapture
         origin_z = a[:start_depth]
         target_z = depth_for(event)
         ball.z = (origin_z+(target_z-origin_z)*k).to_i + 1
-        rect = BifrostCapture.target_rect(event)
+        rect = event ? BifrostCapture.target_rect(event) :
+               [a[:last][0],a[:last][1],0,0]
         shadow.x = bx
         shadow.y = a[:ground] + ((rect[1]+rect[3])-a[:ground])*k
         shadow.opacity = (120-55*Math.sin(Math::PI*t)).to_i
@@ -777,7 +801,9 @@ module BifrostCapture
           cue = a[:mode] == :ball && a[:back] ? :backstrike : :hit
           BifrostCapture::Audio.play(cue,a[:config])
         end
-        if a[:mode] == :bait
+        if a[:empty]
+          BifrostCapture.resolve_empty_throw(a[:last],a[:item],a[:config])
+        elsif a[:mode] == :bait
           BifrostCapture.resolve_bait(event,a[:item],a[:config]) if
             BifrostCapture.respond_to?(:resolve_bait)
         else
