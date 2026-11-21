@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.90",
+  "version": "1.0.91",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Battle Animation Studio for Pokémon Vermeil: visual move editor, 77 action examples, per-frame animation forensics, emitter QA and optimized preview (Essentials v21.1 / Ruby runtime).",
+  "description": "Battle Animation Studio: 13 battle animation catalogs, editable procedural starters, Nitro-script research import, timeline forensics and separate Essentials/LBDS runtime dispatch.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
