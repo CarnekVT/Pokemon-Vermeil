@@ -492,6 +492,13 @@ module VermeilBSSNDSIntroScene
     @battle.opponent.each_index do |i|
       actor=@sprites["trainer_#{i+1}"]
       next unless actor && !(actor.disposed? rescue true)
+      # DBK's animated TrainerSprite sometimes has not yet resolved its
+      # bitmap at the NDS handoff. Reuse its real trainer type, never make a
+      # fake portrait Sprite as a workaround.
+      if !actor.bitmap && actor.respond_to?(:setTrainerBitmap)
+        trainer_type=(@battle.opponent[i].trainer_type rescue nil)
+        actor.setTrainerBitmap(trainer_type) if trainer_type
+      end
       saved=(@bss_nds_trainer_anchor || {})[i+1]
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
       actor.y=saved[1] if saved && saved[1] && actor.respond_to?(:y=)
@@ -502,6 +509,10 @@ module VermeilBSSNDSIntroScene
       actor.z=[actor.z.to_i,foe_z+2,150+i].max if actor.respond_to?(:z=)
       actor.opacity=255 if actor.respond_to?(:opacity=)
       actor.visible=true if actor.respond_to?(:visible=)
+      if defined?(BSS064)
+        BSS064.log("NDS trainer #{i+1}: x=#{actor.x.round} y=#{actor.y.round} " +
+          "visible=#{actor.visible} bitmap=#{!!actor.bitmap}")
+      end
       @bss_nds_trainer_anchor[i+1]=[(actor.x rescue nil),(actor.y rescue nil),(actor.z rescue nil)]
     end
     @bss_nds_trainer_staged=true
