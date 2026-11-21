@@ -173,6 +173,86 @@ export function parseNitroAnimationText(source, options={}) {
         }))
     };
 }
+// Optional approximations for documented HGSS macros/callback IDs. All new
+// keys remain editable. Waitstate/SPA timing is unknown and never synthesized.
+function adaptNitroNativeCues(animation,commands) {
+    const max=(v,a,b,fallback)=>{const n=Number(v);return Number.isFinite(n)?Math.min(b,Math.max(a,n)):fallback;};
+    const makeKey=(frame,value)=>({id:uid("pkey"),frame,value,easing:"ease_both"});
+    const makePos=(frame,role,dx,dy)=>({id:uid("key"),frame,easing:"ease_both",
+        point:{anchor:role+"_battler",x:0,y:0,offsetX:dx,offsetY:dy}});
+    let adapted=0,latestFrame=animation.duration;
+    const position={
+        user:{x:0,y:0},target:{x:0,y:0}
+    };
+    const appendPos=(track,frame,role,x,y)=>{
+        const list=track.positionKeys||(track.positionKeys=[]);
+        list.push(makePos(frame,role,x,y));
+        list.sort((a,b)=>Number(a.frame)-Number(b.frame));
+        latestFrame=Math.max(latestFrame,frame);
+    };
+    const appendTone=(track,frame,r,g,b)=>{
+        const keys=track.valueKeys||(track.valueKeys={});
+        [["toneRed",r],["toneGreen",g],["toneBlue",b]].forEach(([property,value])=>{
+            const list=keys[property]||(keys[property]=[]);
+            list.push(makeKey(frame,value),makeKey(frame+8,0));
+            list.sort((a,b)=>a.frame-b.frame);
+        });
+        latestFrame=Math.max(latestFrame,frame+8);
+    };
+    const shake=(track,role,frame,times,magnitude)=>{
+        const count=max(times,1,10,2),strength=max(magnitude,1,24,6);
+        const original=position[role],x=original.x,y=original.y;
+        for(let i=0;i<count*2;i++)
+            appendPos(track,frame+i,role,x+(i%2===0?strength:-strength),y);
+        appendPos(track,frame+count*2,role,x,y);
+        latestFrame=Math.max(latestFrame,frame+count*2);
+    };
+    for(const cue of commands||[]){
+        const op=cue.op,id=cue.callbackId,frame=Number(cue.frame)||0;
+        const args=cue.args||[];
+        if(op==="shakescreen" || (op==="callfunction"&&id===68)){
+            animation.events.push({id:uid("event"),type:"screen_shake",frame,
+                duration:8,strength:6,axis:0,nitroApproximate:true});
+            latestFrame=Math.max(latestFrame,frame+8);adapted++;continue;
+        }
+        if(op==="slideattackingmon" || (op==="callfunction"&&id===57)){
+            const dx=op==="callfunction"?args[3]:args[0];
+            const dy=op==="callfunction"?args[4]:args[1];
+            if(!Number.isFinite(Number(dx))||!Number.isFinite(Number(dy)))continue;
+            const current=position.user,track=animation.battlers.user;
+            appendPos(track,frame,"user",current.x,current.y);
+            current.x+=max(dx,-300,300,0);
+            current.y+=max(dy,-300,300,0);
+            appendPos(track,frame+8,"user",current.x,current.y);
+            adapted++;continue;
+        }
+        if(op==="shaketargetmon" || (op==="callfunction"&&id===36)){
+            const count=op==="callfunction"?args[2]:args[0];
+            const magnitude=op==="callfunction"?args[5]:args[1];
+            shake(animation.battlers.target,"target",frame,count,magnitude);
+            adapted++;continue;
+        }
+        if(op==="flashscreencolor" || (op==="callfunction"&&id===33)){
+            if(op==="callfunction")continue; // expression-based args: no safe RGB inference
+            const values=args.slice(0,3).map(v=>Number(v));
+            if(values.length<3||!values.every(Number.isFinite))continue;
+            const rgba=values.map(v=>Math.round(max(v,0,31,0)*255/31)).concat([180]);
+            animation.events.push({id:uid("event"),type:"screen_flash",
+                frame,duration:8,color:rgba,nitroApproximate:true});
+            latestFrame=Math.max(latestFrame,frame+8);adapted++;continue;
+        }
+        if(["shadeattackingmon","shadetargetmon"].includes(op)){
+            const values=args.slice(0,3).map(v=>Number(v));
+            if(values.length<3||!values.every(Number.isFinite))continue;
+            const target=op==="shadeattackingmon"?animation.battlers.user:animation.battlers.target;
+            appendTone(target,frame,...values.map(v=>Math.round(max(v,0,31,0)*255/31)));
+            adapted++;
+        }
+    }
+    animation.duration=Math.max(animation.duration,Math.ceil(latestFrame));
+    return adapted;
+}
+
 export function createBasFromNitroText(text,config={}) {
     const analysis=parseNitroAnimationText(text,{side:config.side||"player"});
     const graphics=parseNitroResourceMap(config.graphicsMap||"", "graphics");
@@ -240,6 +320,10 @@ export function createBasFromNitroText(text,config={}) {
             track.clips.push(clip);
         }
         if(spawns.length>100)animation.source.unsupported.push({id:"too-many-spawns",detail:"Se limitaron placeholders a 100 por seguridad"});
+    }
+    if(config.adaptNativeCues===true){
+        animation.source.nitroAdaptedNativeCues=adaptNitroNativeCues(animation,analysis.commands);
+        animation.notes+=" Callbacks compatibles convertidos a keyframes/eventos APROXIMADOS (duraciones de 8 frames por defecto); revisarlos antes de usar.";
     }
     if(analysis.spaIds.length && !config.placeholders) {
         animation.source.nitroUnresolvedGraphics=analysis.spaIds.filter(id=>
