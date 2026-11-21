@@ -41,23 +41,9 @@ module BSSCameraPhaseAuthority
     if scene_active && scene
       current = scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i
       scene.instance_variable_set(:@bss_camera_attack_phase_depth,[current-1,0].max)
-      # An attack can leave BAS/DBK temporary battler zooms on-screen.
-      # At the OUTERMOST phase boundary, restore a single home shot and
-      # native Pokemon sizes before the next command/SOS begins.
-      if current<=1 && scene.respond_to?(:vermeil_cinema_active?) &&
-         scene.vermeil_cinema_active? &&
-         !(scene.respond_to?(:vermeil_cinema_script_locked?) && scene.vermeil_cinema_script_locked?)
-        begin
-          scene.vermeil_cinema_queue_home if scene.respond_to?(:vermeil_cinema_queue_home)
-          room=scene.instance_variable_get(:@bss070_ebdx_room)
-          room.update if room && !(room.disposed? rescue true)
-          if defined?(BSS103WorldSpaceBattlers)
-            BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(scene).call
-          end
-        rescue StandardError => e
-          BSS064.log("Attack end camera reset: #{e.class}: #{e.message}") if defined?(BSS064)
-        end
-      end
+      # No backdrop-depth restoration: nothing was displaced.
+      # Leave the camera where BAS ended: only a future menu may request
+      # another shot; never snap to a stale intro/attack camera.
     end
   end
 end
@@ -86,7 +72,7 @@ module BSSCameraTrainerDepth
       # after a switch the foe can be logically hidden for a frame, and the
       # previous code skipped the trainer entirely, burying it in EBDX terrain.
       foe_z=(battler && !(battler.disposed? rescue true)) ? (battler.z rescue 50).to_i : 50
-      trainer.z=[trainer.z.to_i,foe_z+2,150+i].max
+      trainer.z=[trainer.z.to_i,foe_z+2,52+i].max
       # DBK alone owns TrainerSprite#visible and its animated X/Y positions.
     end
   rescue StandardError => e
