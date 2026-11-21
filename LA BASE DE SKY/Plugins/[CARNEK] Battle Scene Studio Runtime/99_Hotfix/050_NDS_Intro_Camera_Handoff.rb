@@ -485,6 +485,8 @@ module VermeilBSSNDSIntroScene
       actor.visible=true if actor.respond_to?(:visible=)
       @bss_nds_trainer_anchor[i+1]=[(actor.x rescue nil),(actor.y rescue nil),(actor.z rescue nil)]
     end
+    @bss_nds_trainer_staged=true
+    bss_camera_begin_right_focus if respond_to?(:bss_camera_begin_right_focus)
   ensure
     @bss_nds_trainer_slide_pending=false
   end
@@ -510,6 +512,7 @@ module VermeilBSSNDSIntroScene
       pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
+      bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
       return
     end
     @battle.sideSizes[1].times do |i|
