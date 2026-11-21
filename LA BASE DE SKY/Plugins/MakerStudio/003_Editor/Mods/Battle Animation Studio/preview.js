@@ -3380,8 +3380,14 @@ var BattlePreview = /** @class */ (function () {
         if (!image || !src)
             return { image: image, src: src };
         var key = [image.src, src.sx, src.sy, src.sw, src.sh, Math.round(tone.r), Math.round(tone.g), Math.round(tone.b), Math.round(tone.a), Math.round(color.r), Math.round(color.g), Math.round(color.b), Math.round(color.a)].join("|");
-        if (this.fxCache.has(key))
-            return this.fxCache.get(key);
+        if (this.fxCache.has(key)) {
+            // Bound image processing without evicting effects used every frame.
+            // Map insertion order becomes an LRU order on cache hits.
+            var cachedFx = this.fxCache.get(key);
+            this.fxCache.delete(key);
+            this.fxCache.set(key, cachedFx);
+            return cachedFx;
+        }
         var cv = document.createElement("canvas");
         cv.width = Math.max(1, Math.round(src.sw));
         cv.height = Math.max(1, Math.round(src.sh));
