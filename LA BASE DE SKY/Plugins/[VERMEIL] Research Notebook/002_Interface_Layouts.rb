@@ -193,7 +193,28 @@ module VermeilInterfaceLayout
   def update_extras(items)
     return unless items
     now=Time.now.to_f
-    items.each { |item| item.actualizar(now) }
+    items.each do |item|
+      item.actualizar(now)
+      # The original Interfaces engine uses zoom_x/zoom_y but its Imagen
+      # implementation does not apply the editor's explicit image W/H.
+      # Apply them from the ORIGINAL bitmap every frame (non-accumulating).
+      data=item.datos
+      next unless ["imagen","animado"].include?(data["tipo"].to_s)
+      sprite=item.sprite
+      next unless sprite && sprite.bitmap && !(sprite.disposed? rescue true)
+      source=sprite.bitmap
+      src=(sprite.src_rect rescue nil)
+      bitmap_w=(src && src.width.to_f>0 ? src.width.to_f : source.width.to_f)
+      bitmap_h=(src && src.height.to_f>0 ? src.height.to_f : source.height.to_f)
+      desired_w=data["ancho"].to_f
+      desired_h=data["alto"].to_f
+      if desired_w>0 && bitmap_w>0
+        sprite.zoom_x=sprite.zoom_x.to_f*(desired_w/bitmap_w)
+      end
+      if desired_h>0 && bitmap_h>0
+        sprite.zoom_y=sprite.zoom_y.to_f*(desired_h/bitmap_h)
+      end
+    end
   rescue StandardError => error
     report("Elemento visual: #{error.class}: #{error.message}")
   end
