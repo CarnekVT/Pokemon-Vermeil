@@ -1,0 +1,105 @@
+{
+  "version": 2,
+  "nombre": "Libreta/Catalogo",
+  "titulo": "Libreta · portada y catálogo",
+  "lienzo": {
+    "ancho": 640,
+    "alto": 480,
+    "scale_mode": "pixel_perfect",
+    "pixel_perfect": true,
+    "integer_scaling": true,
+    "safe_area": false
+  },
+  "oscurecer_mapa": 0,
+  "aperturas": {},
+  "elementos": [
+    {
+      "id": "background",
+      "tipo": "imagen",
+      "capa": 0,
+      "x": 0,
+      "y": 0,
+      "ancho": 640,
+      "alto": 480,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/background"
+    },
+    {
+      "id": "cover",
+      "tipo": "imagen",
+      "capa": 1,
+      "x": 6,
+      "y": 55,
+      "ancho": 628,
+      "alto": 387,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/cover",
+      "entrada": {
+        "efecto": "crece",
+        "duracion": 0.3,
+        "suavizado": "suave"
+      }
+    },
+    {
+      "id": "focus_panel",
+      "tipo": "imagen",
+      "capa": 2,
+      "x": 14,
+      "y": 62,
+      "ancho": 294,
+      "alto": 368,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/focus_panel"
+    },
+    {
+      "id": "grid_panel",
+      "tipo": "imagen",
+      "capa": 3,
+      "x": 320,
+      "y": 76,
+      "ancho": 306,
+      "alto": 348,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/grid_panel",
+      "entrada": {
+        "efecto": "desde_derecha",
+        "duracion": 0.27,
+        "suavizado": "suave",
+        "distancia": 32
+      }
+    },
+    {
+      "id": "focus_sprite",
+      "tipo": "panel",
+      "capa": 5,
+      "x": 161,
+      "y": 223,
+      "ancho": 54,
+      "alto": 54,
+      "color": "#E8C76B55",
+      "borde": "#FFFFFF88",
+      "borde_grosor": 1
+    },
+    {
+      "id": "tab_arcane",
+      "tipo": "imagen",
+      "capa": 6,
+      "x": 318,
+      "y": 8,
+      "ancho": 149,
+      "alto": 37,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/tab_arcane"
+    },
+    {
+      "id": "tab_golden",
+      "tipo": "imagen",
+      "capa": 6,
+      "x": 471,
+      "y": 8,
+      "ancho": 149,
+      "alto": 37,
+      "imagen": "Graphics/UI/Vermeil/ResearchNotebook/tab_golden"
+    }
+  ],
+  "biblioteca": {
+    "carpeta": "Libreta",
+    "vista": "Catalogo",
+    "origen": "vermeil_libreta"
+  }
+}
