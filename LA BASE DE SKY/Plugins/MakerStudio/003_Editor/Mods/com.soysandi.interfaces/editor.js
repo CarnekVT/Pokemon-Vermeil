@@ -312,20 +312,33 @@ export class EditorInterfaces {
 
     await this.recargarLista();
     if (this.disponibles.length)
-      await this.abrir(this.disponibles.includes("vermeil_libreta") ?
-        "vermeil_libreta" : this.disponibles[0]);
+      await this.abrir(this.disponibles.includes("Libreta/Catalogo") ?
+        "Libreta/Catalogo" : this.disponibles[0]);
     else this.cargarDiseno(M.disenoNuevo("sin_nombre"), null);
   }
 
   async recargarLista() {
     this.disponibles = [];
+    this.carpetas = [];
     try {
-      const ficheros = await this.ctx.fs.listProjectDir(CARPETA);
-      this.disponibles = (ficheros || [])
-        .filter(n => /\.json$/i.test(n))
-        .map(n => n.replace(/\.json$/i, ""))
-        .sort();
-    } catch { this.disponibles = []; }
+      const entryName = item => String(typeof item === "string" ? item : (item?.name || item?.path || ""));
+      const cleanName = item => entryName(item).replace(/\\/g,"/").replace(/\/$/,"").split("/").pop();
+      const root = await this.ctx.fs.listProjectDir(CARPETA);
+      const names = (root || []).map(cleanName);
+      const loose = names.filter(n => /\.json$/i.test(n)).map(n => n.replace(/\.json$/i,""));
+      const dirs = [...new Set(names.filter(n => /^[a-zA-Z0-9_-]+$/.test(n)))];
+      const nested = await Promise.all(dirs.map(async folder => {
+        try {
+          const entries = await this.ctx.fs.listProjectDir(`${CARPETA}/${folder}`);
+          const screens = (entries || []).map(cleanName)
+            .filter(n => /\.json$/i.test(n))
+            .map(n => folder + "/" + n.replace(/\.json$/i,""));
+          return {folder,screens};
+        } catch { return {folder,screens:[]}; }
+      }));
+      this.carpetas = nested.filter(x => x.screens.length).map(x=>x.folder).sort();
+      this.disponibles = [...new Set([...loose,...nested.flatMap(x=>x.screens)])].sort((a,b)=>a.localeCompare(b,"es"));
+    } catch { this.disponibles = []; this.carpetas=[]; }
 
     await this.recargarAperturas();
 
@@ -576,8 +589,8 @@ export class EditorInterfaces {
       this.pintarSucio();
       await this.recargarLista();
       this.selDiseno.value = this.nombre;
-      const destino = this.nombre.startsWith("vermeil_libreta") ? "la Libreta" :
-        this.nombre.startsWith("vermeil_pokedex") ? "la Pokédex" : null;
+      const destino = /^(Libreta\/|vermeil_libreta)/i.test(this.nombre) ? "la Libreta" :
+        /^(Pokedex\/|vermeil_pokedex)/i.test(this.nombre) ? "la Pokédex" : null;
       this.toast(destino ?
         `Guardado. Cierra y vuelve a abrir ${destino} en el juego para aplicar estos cambios.` :
         `Guardado en ${CARPETA}/${this.nombre}.json. Prueba desde Debug > Abrir una interfaz.`,
@@ -590,11 +603,45 @@ export class EditorInterfaces {
   }
 
   async asegurarCarpeta() {
-    try {
-      if (this.ctx.fs.projectExists && !(await this.ctx.fs.projectExists(CARPETA))) {
-        if (this.ctx.fs.projectMkdir) await this.ctx.fs.projectMkdir(CARPETA);
+    const folder=(this.nombre||"").split("/")[0];
+    const mkdir=async path=>{
+      try {
+        if (this.ctx.fs.projectExists && await this.ctx.fs.projectExists(path)) return;
+        if (this.ctx.fs.projectMkdir) await this.ctx.fs.projectMkdir(path);
+      } catch (error) {
+        if (!(this.ctx.fs.projectExists && await this.ctx.fs.projectExists(path))) throw error;
       }
-    } catch { /* si no se puede comprobar, se intenta escribir igual */ }
+    };
+    await mkdir(CARPETA);
+    if (this.nombre?.includes("/")) await mkdir(CARPETA+"/"+folder);
+  }
+
+  // One folder is a complete interface, with as many JSON sub-screens as needed.
+  // Ruby's Interfaces::Lector supports these paths too, including pbInterfaz.
+  async nuevaCarpeta() {
+    const name=await this.pedirNombre("Nombre de la carpeta (una interfaz)");
+    if(!name)return;
+    const folder=name.charAt(0).toUpperCase()+name.slice(1);
+    if((this.carpetas||[]).some(n=>n.toLowerCase()===folder.toLowerCase())){
+      this.toast("Esa carpeta ya existe; selecciónala para agregar una pantalla.","warning");return;
+    }
+    try{
+      if(!this.ctx.fs.projectMkdir)throw Error("MakerStudio no permite crear carpetas en esta versión");
+      await this.ctx.fs.projectMkdir(CARPETA+"/"+folder);
+      this.carpetas=[...new Set([...(this.carpetas||[]),folder])].sort();
+      await this.nuevoEnCarpeta(folder);
+    }catch(e){this.toast("No pude crear la carpeta: "+e.message,"error");}
+  }
+
+  async nuevoEnCarpeta(folder) {
+    if(this.sucio && !(await this.confirmar("Hay cambios sin guardar. ¿Los descarto?")))return;
+    if(!/^[a-zA-Z0-9_-]+$/.test(folder))return;
+    const sub=await this.pedirNombre("Nombre de la pantalla dentro de "+folder);
+    if(!sub)return;
+    const name=folder+"/"+sub;
+    if(this.disponibles.includes(name)){this.toast("Esta pantalla ya existe.","warning");return;}
+    this.cargarDiseno(M.disenoNuevo(name),name);
+    this.sucio=true;this.pintarSucio();
   }
 
   async nuevo() {
