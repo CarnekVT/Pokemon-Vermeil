@@ -178,6 +178,7 @@ class BifrostLiveTest < Minitest::Test
       assert_equal [220,150],attempts.first[4]
     ensure
       BifrostCapture::Motion.define_singleton_method(:launch,original)
+      BifrostCapture::LiveAim.instance_variable_set(:@throw_cooldown,0)
     end
   end
 
