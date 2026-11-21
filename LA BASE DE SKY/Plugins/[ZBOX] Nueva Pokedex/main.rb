@@ -92,6 +92,10 @@ module NuevaPokedex
                         end
   end
 
+  def self.interface_layout
+    @interface_layout || {}
+  end
+
   def self.layout_position(id, axis, fallback)
     return fallback unless defined?(VermeilInterfaceLayout)
     VermeilInterfaceLayout.position(@interface_layout, id, axis, fallback)
@@ -675,6 +679,7 @@ class NuevaPokedexView
     @sprites = {}
     @bitmaps = {}
     @skin = VermeilPokedexSkin.new(NewPokedexConfig::CONFIG[:use_custom_ui])
+    @skin.editor_layout = NuevaPokedex.interface_layout if @skin.respond_to?(:editor_layout=)
     create_sprites
   end
 
@@ -818,6 +823,7 @@ class PokemonPokedexNueva_Scene
   def pbUpdate
     @view&.pbUpdate
     update_animation
+    update_designer_extras
   end
 
   def update_animation
@@ -893,8 +899,23 @@ class PokemonPokedexNueva_Scene
     @page_entrance_speed = [[0.15 * 12.0 / [NuevaPokedex.layout_frames(entry_id, 12), 1].max, 0.04].max, 0.5].min
   end
 
+  def update_designer_extras
+    return unless defined?(VermeilInterfaceLayout) && @viewport
+    names=["vermeil_pokedex_lista","vermeil_pokedex_ficha",
+           "vermeil_pokedex_area","vermeil_pokedex_formas"]
+    page=names[[@state.to_i,0].max] || names[0]
+    if @designer_page!=page
+      VermeilInterfaceLayout.dispose_extras(@designer_extras)
+      @designer_extras=VermeilInterfaceLayout.make_extras(NuevaPokedex.interface_layout,@viewport,page)
+      @designer_page=page
+    end
+    VermeilInterfaceLayout.update_extras(@designer_extras)
+  end
+
   def pbStartScene
     NuevaPokedex.use_layout_for(@state)
+    @designer_extras=[]
+    @designer_page=nil
     @viewport = Viewport.new(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT)
     @viewport.z = 99999
     @view = NuevaPokedexView.new(@viewport)
@@ -906,10 +927,15 @@ class PokemonPokedexNueva_Scene
     @view.sprites["overlay"].visible = false
     pbFadeInAndShow(@view.sprites)
     @view.sprites["overlay"].visible = false
+    update_designer_extras
   end
 
   def pbEndScene
     pbFadeOutAndHide(@view.sprites)
+    if defined?(VermeilInterfaceLayout)
+      VermeilInterfaceLayout.dispose_extras(@designer_extras)
+      VermeilInterfaceLayout.release_images
+    end
     @view.dispose
     @viewport.dispose
   end
@@ -1442,6 +1468,9 @@ end
     # Fondo opaco completo: nada del master (header "Pokédex Payu", lista) se transparenta
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT,
                   NuevaPokedex::COLOR_BG)
+    @view.skin.draw(bmp, :area_page,
+                    NuevaPokedex.layout_position("area_page", "x", 0),
+                    NuevaPokedex.layout_position("area_page", "y", 0))
     # El mapa debe permanecer libre de marcos/bocetos de la skin que tapen
     # ubicaciones o contengan textos en inglés. El área ya tiene su cabecera.
     entry = @model.data_for(@current_index)
