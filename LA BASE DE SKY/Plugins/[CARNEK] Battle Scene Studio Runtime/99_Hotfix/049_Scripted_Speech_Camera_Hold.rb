@@ -240,40 +240,35 @@ module BSSScriptedSpeakerComposition
     snapshot=@bss_scripted_trainer_restore || {}
     return if snapshot.empty? || @bss_scripted_trainer_restoring
     @bss_scripted_trainer_restoring=true
-    # Close the same real actor that appeared with an alpha tween; do not
-    # restore the old hidden state or X in one frame ("pop").
-    bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
+
+    # The same sprite (not a duplicate portrait) fades out at its current
+    # RIGHT-hand position. Only after alpha reaches zero is its old anchor
+    # restored, so there cannot be an in-frame teleport.
     snapshot.each_value do |row|
-      trainer,was_visible,x,y,z,original_alpha=row
+      trainer,_was_visible,x,y,z,original_alpha=row
       next unless trainer && !(trainer.disposed? rescue true)
-      unless was_visible
-        started=Time.now.to_f
-        from=(trainer.opacity rescue 255).to_f
-        frames=0
-        loop do
-          t=[[(Time.now.to_f-started)/0.28,0.0].max,1.0].min
-          ease=t*t*(3.0-2.0*t)
-          trainer.opacity=(from*(1.0-ease)).round if trainer.respond_to?(:opacity=)
-          bss_camera_right_focus_tick if respond_to?(:bss_camera_right_focus_tick)
-          bss_camera_park_trainer(trainer,0,true) if respond_to?(:bss_camera_park_trainer)
-          Graphics.update
-          frames+=1
-          break if (t>=1.0 && frames>=2) || frames>=120
-        end
-        trainer.visible=false if trainer.respond_to?(:visible=)
-        # Restore its hidden native anchor only AFTER the actor disappears.
-        trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
-        trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
-        trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
-        trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
-      else
-        # A previously shown actor stays at its visible right-hand position.
-        trainer.visible=true if trainer.respond_to?(:visible=)
-        trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
+      initial=(trainer.opacity rescue 255).to_f
+      started=Time.now.to_f
+      frames=0
+      loop do
+        t=[[(Time.now.to_f-started)/0.28,0.0].max,1.0].min
+        eased=t*t*(3.0-2.0*t)
+        trainer.opacity=(initial*(1.0-eased)).round if trainer.respond_to?(:opacity=)
+        Graphics.update
+        frames+=1
+        break if (t>=1.0 && frames>=2) || frames>=120
       end
+      trainer.visible=false if trainer.respond_to?(:visible=)
+      trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
+      trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
+      trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
+      trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
     end
+    # Release the sole EBDX camera lease AFTER the actor has disappeared.
+    # The camera then interpolates home while the message box closes.
+    bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
   rescue StandardError => e
-    BSS064.log("Smooth trainer disappearance: #{e.class}: #{e.message}") if defined?(BSS064)
+    BSS064.log("Trainer dialogue fade: #{e.class}: #{e.message}") if defined?(BSS064)
   ensure
     @bss_scripted_trainer_restore=nil
     @bss_scripted_trainer_fade_started=nil
