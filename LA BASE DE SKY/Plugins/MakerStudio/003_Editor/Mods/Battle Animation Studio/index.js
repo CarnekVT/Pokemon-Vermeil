@@ -137,6 +137,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import { FORMAT_VERSION, SAVE_DIR, SAVE_FILE, CODE_CAPTURE_FILE, COMPILED_FILE, GAME_RUNTIME_DIR, GAME_RUNTIME_FILE, createAnimation, createProject, createProjectile, getAllClips, getEffectsTrack, getAnimatable, getAllAnimatables, getBattlerTrack, getCameraTrack, normalizeProject, uid, positionKeyAt, getPositionKeyById, setPositionKey, setPositionAxisKey, disablePositionKeyAxis, movePositionKey, removePositionKey, clampNumber, sortPositionKeys, setValueKey, setVisibleKey, sampleValue, sampleVisible, cloneClipForLibrary, instantiateReusableClip } from "./model.js";
 import { BattlePreview } from "./preview.js";
+import { BAS_ANIMATION_CATALOGS, BAS_ANIMATION_CATALOG_MODES, normalizeBasCatalogType, basCatalogMode, basCatalogTypeFromMode, basCatalogMetadata, basCatalogOptionsHtml } from "./animation_catalogs.js";
+import { applyBasCategoryStarter } from "./category_starters.js";
 import { openAnimationForensicsDialog } from "./animation_forensics_ui.js";
 import { scanAnimationAssets, scanBattlerAssets, scanUiAssets, loadProjectImageUrl, loadAbsoluteImageUrl, readAbsoluteText, readAbsoluteBinary, writeAbsoluteText, writeAbsoluteBinary, ensureAbsoluteDirectory, detectExternalGameRoot, resolveExternalGraphicPath, resolveLegacyGraphic, compactProjectPath, scanProjectFiles, scanAbsoluteFiles, absoluteProjectPath, scanBattlebackAssets } from "./assets.js";
 import { readRuntimeContext, effectiveBattleContext } from "./context.js";
@@ -4062,14 +4064,14 @@ function renderStudio(ctx, host) {
         if (!page || !names || !versions)
             return false;
         var maps = animationLibraryMaps();
-        if (!["moves", "common", "custom"].includes(libraryMode))
+        if (!BAS_ANIMATION_CATALOG_MODES.includes(libraryMode))
             libraryMode = "moves";
-        var activeMap = libraryMode === "common" ? maps.common : (libraryMode === "custom" ? maps.custom : maps.moves);
-        if (!activeMap.size && (project.animations || []).length) {
+        var activeMap = maps[libraryMode] || maps.moves;
+        if (!activeMap.size && libraryMode === "moves" && (project.animations || []).length) {
             if (maps.moves.size) libraryMode = "moves";
             else if (maps.common.size) libraryMode = "common";
             else if (maps.custom.size) libraryMode = "custom";
-            activeMap = libraryMode === "common" ? maps.common : (libraryMode === "custom" ? maps.custom : maps.moves);
+            activeMap = maps[libraryMode] || maps.moves;
         }
         var signature = [project.animations.length, libraryMode, activeMap.size, Math.round(root.clientWidth || 0), Math.round(root.clientHeight || 0)].join('|');
         var missingRows = activeMap.size > 0 && names.children.length === 0;
@@ -4153,12 +4155,10 @@ function renderStudio(ctx, host) {
     }
     function currentLibraryMap() {
         var maps = animationLibraryMaps();
-        return libraryMode === "common" ? maps.common : (libraryMode === "custom" ? maps.custom : maps.moves);
+        return maps[libraryMode] || maps.moves;
     }
     function libraryGroupIdentity(mode, key) {
-        var type = String(mode || "move").toLowerCase();
-        if (type === "moves") type = "move";
-        if (type !== "common" && type !== "custom") type = "move";
+        var type = basCatalogTypeFromMode(mode);
         return type + "|" + String(key || "").toUpperCase();
     }
     function libraryGroupDisplayName(key, animations) {
@@ -4177,7 +4177,7 @@ function renderStudio(ctx, host) {
         var arr = key != null ? (map.get(key) || []) : [];
         if (!arr.length) return Promise.resolve(false);
         var currentName = libraryGroupDisplayName(key, arr);
-        var typeLabel = libraryMode === "moves" ? "Move" : (libraryMode === "common" ? "Common" : "Custom");
+        var typeLabel = basCatalogMetadata(basCatalogTypeFromMode(libraryMode)).es;
         return showStudioInput({
             title: uiLanguage === "en" ? "Rename group" : "Renombrar grupo",
             message: uiLanguage === "en"
@@ -4321,7 +4321,7 @@ function renderStudio(ctx, host) {
         Array.from(libraryMultiSelectedIds || []).forEach(function (id) { if (!validMultiIds[id]) libraryMultiSelectedIds.delete(id); });
         var e_22, _j, e_23, _k;
         var _a, _b, _c, _d, _e;
-        var _l = animationLibraryMaps(), moves = _l.moves, common = _l.common, custom = _l.custom, map = libraryMode === "common" ? common : (libraryMode === "custom" ? custom : moves), q = (((_a = root.querySelector('[data-role="library-search"]')) === null || _a === void 0 ? void 0 : _a.value) || "").trim().toLowerCase();
+        var _l = animationLibraryMaps(), moves = _l.moves, common = _l.common, custom = _l.custom, map = _l[libraryMode] || moves, q = (((_a = root.querySelector('[data-role="library-search"]')) === null || _a === void 0 ? void 0 : _a.value) || "").trim().toLowerCase();
         root.querySelectorAll('[data-lib-tab]').forEach(function (b) { return b.classList.toggle('active', b.dataset.libTab === libraryMode); });
         var mc = root.querySelector('[data-lib-count="moves"]'), cc = root.querySelector('[data-lib-count="common"]'), xc = root.querySelector('[data-lib-count="custom"]');
         if (mc)
@@ -4356,7 +4356,7 @@ function renderStudio(ctx, host) {
             var displayName = libraryGroupDisplayName(k, groupAnimations);
             var selectedCount = groupAnimations.filter(function (animation) { return libraryMultiSelectedIds.has(animation.id); }).length;
             var groupSelectionMark = selectedCount === groupAnimations.length && groupAnimations.length ? "✓" : (selectedCount ? "−" : "☐");
-            var typeLabel = libraryMode === 'moves' ? 'Move' : (libraryMode === 'common' ? 'Common' : 'Custom');
+            var typeLabel = basCatalogMetadata(basCatalogTypeFromMode(libraryMode)).es;
             groupAnimations.forEach(function (animation) {
                 animation.source || (animation.source = {});
                 if (!animation.source.groupIdentity) animation.source.groupIdentity = libraryGroupIdentity(libraryMode, k);
@@ -4512,7 +4512,7 @@ function renderStudio(ctx, host) {
         }
         if (label) {
             var selectedGroupName = libraryGroupDisplayName(librarySelectedMove, arr);
-            var selectedGroupType = libraryMode === 'moves' ? 'Move' : (libraryMode === 'common' ? 'Common' : 'Custom');
+            var selectedGroupType = basCatalogMetadata(basCatalogTypeFromMode(libraryMode)).es;
             label.textContent = chosen ? "".concat(selectedGroupName, " · ").concat(selectedGroupType, " ").concat(librarySelectedMove, " · ").concat(runtimeAuthoredSide(chosen) === 'foe' ? 'Foe · ' : runtimeAuthoredSide(chosen) === 'both' ? 'Both · ' : 'Player · ', "V").concat(Number(((_d = chosen.source) === null || _d === void 0 ? void 0 : _d.version) || 0), " · ").concat(String(((_e = chosen.source) === null || _e === void 0 ? void 0 : _e.type) || 'studio').toUpperCase()) : 'Selecciona un movimiento y una versión.';
         }
         var multiCount = libraryMultiSelectedIds.size;
@@ -4566,16 +4566,16 @@ function renderStudio(ctx, host) {
     }
     function animationCatalogType(animation) {
         var type = String((animation && animation.source && animation.source.catalogType) || "move").toLowerCase();
-        return type === "common" || type === "custom" ? type : "move";
+        return normalizeBasCatalogType(type);
     }
     function libraryModeFromCatalogType(type) {
         var t = String(type || "move").toLowerCase();
-        return t === "common" ? "common" : (t === "custom" ? "custom" : "moves");
+        return basCatalogMode(t);
     }
     function destinationGroupsForCatalogType(type) {
         var t = String(type || "move").toLowerCase();
         var maps = animationLibraryMaps();
-        var map = t === "common" ? maps.common : (t === "custom" ? maps.custom : maps.moves);
+        var map = maps[basCatalogMode(t)] || maps.moves;
         var records = new Map();
         map.forEach(function (arr, key) {
             var firstNamed = (arr || []).find(function (a) { return a && a.source && String(a.source.groupName || "").trim(); });
@@ -4604,7 +4604,7 @@ function renderStudio(ctx, host) {
     function applyAnimationLibraryDestination(animation, catalogType, groupKey, groupName) {
         if (!animation) return;
         var type = String(catalogType || "move").toLowerCase();
-        if (type !== "common" && type !== "custom") type = "move";
+        type = normalizeBasCatalogType(type);
         var key = String(groupKey || "").trim();
         if (!key) key = type === "move" ? studioMoveId(animation.name || "NEW_ANIMATION") : String(animation.name || "Animation").trim();
         if (type === "move") key = studioMoveId(key);
