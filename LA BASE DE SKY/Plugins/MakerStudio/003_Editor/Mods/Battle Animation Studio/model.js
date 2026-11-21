@@ -293,7 +293,22 @@ export function getEffectsTrack(animation) {
     }
     return t;
 }
-export function sortPositionKeys(o) { o.positionKeys || (o.positionKeys = []); o.positionKeys.sort(function (a, b) { return Number(a.frame) - Number(b.frame); }); return o.positionKeys; }
+// Preview calls this repeatedly. Avoid sorting when frames are already ordered.
+// Keep the original in-place sort for the editor's mutable key arrays.
+function basEnsureSortedFrames(keys, numeric) {
+    for (var i = 1; i < keys.length; i++) {
+        var previous = numeric ? Number(keys[i - 1].frame) : keys[i - 1].frame;
+        var current = numeric ? Number(keys[i].frame) : keys[i].frame;
+        if (previous > current) {
+            keys.sort(numeric
+                ? function (a, b) { return Number(a.frame) - Number(b.frame); }
+                : function (a, b) { return a.frame - b.frame; });
+            break;
+        }
+    }
+    return keys;
+}
+export function sortPositionKeys(o) { o.positionKeys || (o.positionKeys = []); return basEnsureSortedFrames(o.positionKeys, true); }
 export function positionKeyAt(o, frame, tolerance) {
     if (tolerance === void 0) {
         tolerance = .001;
@@ -421,7 +436,7 @@ export function recalcObjectBounds(o) {
     o.startFrame = ks[0].frame;
     o.endFrame = Math.max(Number(o.endFrame || 0), ks[ks.length - 1].frame);
 }
-export function sortValueKeys(o, prop) { var _a; o.valueKeys || (o.valueKeys = {}); (_a = o.valueKeys)[prop] || (_a[prop] = []); o.valueKeys[prop].sort(function (a, b) { return a.frame - b.frame; }); return o.valueKeys[prop]; }
+export function sortValueKeys(o, prop) { var _a; o.valueKeys || (o.valueKeys = {}); (_a = o.valueKeys)[prop] || (_a[prop] = []); return basEnsureSortedFrames(o.valueKeys[prop], false); }
 export function setValueKey(o, prop, frame, value, easing) {
     if (easing === void 0) {
         easing = "ease_both";
@@ -469,29 +484,19 @@ export function setVisibleKey(o, frame, value) {
     return k;
 }
 export function sampleVisible(o, frame) {
-    var e_2, _c;
-    var ks = (o.visibleKeys || []).slice().sort(function (a, b) { return a.frame - b.frame; });
+    // Visibility is a discrete channel: choose the last key at or before the
+    // requested frame. A stable tie chooses the latest key in source order.
+    // The old implementation copied and sorted the complete key array on
+    // every preview sample; no allocation/sort is needed for this lookup.
+    var ks = o.visibleKeys || [];
+    var chosenFrame = -Infinity;
     var v = o.enabled !== false;
-    try {
-        for (var ks_1 = __values(ks), ks_1_1 = ks_1.next(); !ks_1_1.done; ks_1_1 = ks_1.next()) {
-            var k = ks_1_1.value;
-            if (k.frame > frame)
-                break;
-            v = !!k.value;
-        }
-    }
-    catch (e_2_1) {
-        e_2 = { error: e_2_1 };
-    }
-    finally {
-        try {
-            if (ks_1_1 && !ks_1_1.done && (_c = ks_1.return))
-                _c.call(ks_1);
-        }
-        finally {
-            if (e_2)
-                throw e_2.error;
-        }
+    for (var i = 0; i < ks.length; i++) {
+        var k = ks[i];
+        if (!k || k.frame > frame || k.frame < chosenFrame)
+            continue;
+        chosenFrame = k.frame;
+        v = !!k.value;
     }
     return v && o.enabled !== false;
 }
