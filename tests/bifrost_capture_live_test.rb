@@ -157,6 +157,30 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :blocked,BifrostCapture.result[0]
     assert $game_player.moving?
   end
+  def test_mouse_free_aim_launches_real_empty_throw
+    original = BifrostCapture::Motion.method(:launch)
+    attempts = []
+    BifrostCapture::Motion.define_singleton_method(:launch) do |*args|
+      attempts << args
+      true
+    end
+    begin
+      assert BifrostCapture::LiveAim.start
+      aim = BifrostCapture::LiveAim
+      aim.instance_variable_set(:@throw_cooldown,0)
+      aim.session[:mouse_active] = true
+      aim.session[:x] = 220
+      aim.session[:y] = 150
+      assert aim.fire
+      assert_nil attempts.first[0]
+      assert_equal :POKEBALL,attempts.first[1]
+      assert_equal :ball,attempts.first[2]
+      assert_equal [220,150],attempts.first[4]
+    ensure
+      BifrostCapture::Motion.define_singleton_method(:launch,original)
+    end
+  end
+
   def test_s_short_tap_cycles_ball_without_using_d
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
