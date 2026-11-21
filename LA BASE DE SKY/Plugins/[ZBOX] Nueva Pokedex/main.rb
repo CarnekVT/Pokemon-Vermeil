@@ -925,6 +925,9 @@ class PokemonPokedexNueva_Scene
     pbRefresh
     update_animation
     @view.sprites["overlay"].visible = false
+    # Start MakerStudio extras before the scene's one opening fade. Previously
+    # they appeared only AFTER that fade and replayed an independent entrance.
+    update_designer_extras
     pbFadeInAndShow(@view.sprites)
     @view.sprites["overlay"].visible = false
     update_designer_extras
