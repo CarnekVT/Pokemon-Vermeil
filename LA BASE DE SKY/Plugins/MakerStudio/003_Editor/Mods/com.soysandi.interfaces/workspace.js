@@ -4,6 +4,11 @@ export function montarEspacio(editor, M) {
   const root = editor.raiz;
   const disposers = [];
   const state = { focus:false, layers:true, inspector:true, timeline:false };
+  const sceneGroups=[
+    {name:"Libreta",pages:[["vermeil_libreta","Catálogo"],["vermeil_libreta_detalle","Ficha"]]},
+    {name:"Pokédex",pages:[["vermeil_pokedex_lista","Listado"],["vermeil_pokedex_ficha","Ficha"],
+                           ["vermeil_pokedex_area","Área"],["vermeil_pokedex_formas","Formas"]]}
+  ];
   const node = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -173,7 +178,7 @@ export function montarEspacio(editor, M) {
     if((key==="layers"||key==="inspector")&&state.focus&&state.layers&&state.inspector)state.focus=false;
     drawState();
     // Ajustar después del reflow, no antes de cambiar las dimensiones reales.
-    requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});
+    // Preserve canvas position and zoom when opening/closing tool panes.
   };
   for(const [key,label,title] of [
     ["layers","Capas","Mostrar u ocultar la lista de capas"],
@@ -209,6 +214,83 @@ export function montarEspacio(editor, M) {
   },"Ver guía rápida de manejo");
   bar.append(help);
   root.insertBefore(bar,editor.cuerpo);
+  // Persistent, low-motion navigation between the REAL in-game screens.
+  const nav=node("nav","ui-native-navigation");
+  const navTop=node("div","ui-native-navigation-top");
+  const searchScreens=node("input","ui-txt ui-native-screen-search");
+  searchScreens.type="search";
+  searchScreens.placeholder="Buscar pantalla…";
+  searchScreens.setAttribute("aria-label","Buscar pantalla por nombre");
+  const datalist=document.createElement("datalist");
+  datalist.id="ui-vermeil-screen-options";
+  searchScreens.setAttribute("list",datalist.id);
+  const goScreen=async id=>{
+    if(!id||id===editor.nombre)return;
+    await editor.abrir(id);
+    if(editor.nombre===id)searchScreens.value="";
+    navUpdate();
+  };
+  const currentGroup=()=>sceneGroups.find(g=>g.pages.some(([id])=>id===editor.nombre));
+  const pageOptions=()=>{
+    const g=currentGroup();
+    return g?g.pages.map(([id])=>id).filter(id=>editor.disponibles.includes(id)):
+             [...editor.disponibles];
+  };
+  const goRelative=delta=>{
+    const pages=pageOptions(),idx=pages.indexOf(editor.nombre);
+    if(idx+delta>=0 && idx+delta<pages.length)goScreen(pages[idx+delta]);
+  };
+  const prev=action("← Anterior",()=>goRelative(-1),"Pantalla anterior");
+  const next=action("Siguiente →",()=>goRelative(1),"Pantalla siguiente");
+  const groupsRow=node("div","ui-native-page-groups");
+  const helpLabel=node("span","ui-native-navigation-help");
+  const groupButtons=[];
+  for(const group of sceneGroups){
+    const block=node("div","ui-native-page-group");
+    block.append(node("span","ui-native-page-caption",group.name));
+    for(const [id,label] of group.pages){
+      const b=action(label,()=>goScreen(id),"Abrir "+group.name+" · "+label);
+      b.classList.add("ui-native-page");
+      b.dataset.screen=id;
+      block.append(b);
+      groupButtons.push(b);
+    }
+    groupsRow.append(block);
+  }
+  navTop.append(node("strong",null,"PANTALLAS"),searchScreens,datalist,prev,next);
+  nav.append(navTop,groupsRow,helpLabel);
+  root.insertBefore(nav,bar);
+  let lastNames="";
+  const navUpdate=()=>{
+    const names=editor.disponibles||[],signature=names.join("|");
+    if(signature!==lastNames){
+      lastNames=signature;
+      datalist.replaceChildren(...names.map(name=>{
+        const option=document.createElement("option");option.value=name;return option;
+      }));
+    }
+    const pages=pageOptions(),index=pages.indexOf(editor.nombre);
+    prev.disabled=index<=0;
+    next.disabled=index<0||index>=pages.length-1;
+    groupButtons.forEach(b=>{
+      b.hidden=!names.includes(b.dataset.screen);
+      const active=b.dataset.screen===editor.nombre;
+      b.classList.toggle("ui-native-active",active);
+      b.setAttribute("aria-current",active?"page":"false");
+    });
+    groupsRow.hidden=!names.some(n=>n.startsWith("vermeil_"));
+    helpLabel.textContent=currentGroup()?
+      "Conectado al juego. Guarda y vuelve a abrir la pantalla. El arte, posiciones y elementos extra proceden de este JSON.":
+      "Selecciona una capa, edítala en Propiedades y guarda con Ctrl+S.";
+    copy.hidden=!!currentGroup();
+  };
+  searchScreens.addEventListener("keydown",ev=>{
+    if(ev.key==="Escape"){searchScreens.value="";searchScreens.blur();ev.preventDefault();}
+    if(ev.key!=="Enter")return;
+    const term=searchScreens.value.trim().toLocaleLowerCase("es");
+    const matches=(editor.disponibles||[]).filter(n=>n.toLocaleLowerCase("es").includes(term));
+    if(matches.length){goScreen(matches[0]);ev.preventDefault();}
+  });
   // Evitar robar las teclas a otros diálogos: el editor sólo debe
   // recibir atajos tras interactuar con SU propio lienzo.
   root.tabIndex=0;
@@ -223,6 +305,7 @@ export function montarEspacio(editor, M) {
   root.insertBefore(status,editor.tiempo.el);
   const update=()=>{
     resLabel();
+    navUpdate();
     const d=editor.diseno,els=d?.elementos||[],selected=editor.extra?.size||0;
     statusLeft.textContent=(editor.nombre||"Sin guardar")+" · "+els.length+" elementos"+(selected?" · "+selected+" seleccionados":"");
     statusRight.textContent=d?.lienzo?d.lienzo.ancho+"×"+d.lienzo.alto+" · "+(editor.sucio?"Cambios pendientes":"Guardado"):"Configura un diseño";
@@ -246,7 +329,7 @@ export function montarEspacio(editor, M) {
         pane.style.width=Math.max(min,Math.min(max,start+delta))+"px";
       };
       const up=()=>{
-        requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});
+        // Keep the current zoom after resizing the side panels.
         handle.removeEventListener("pointermove",move);
         handle.removeEventListener("pointerup",up);
         handle.removeEventListener("pointercancel",up);
@@ -270,12 +353,19 @@ export function montarEspacio(editor, M) {
   editor.tiempo.selPropiedad.classList.add("ui-timeline-advanced");
   editor.tiempo.btnAnadir.classList.add("ui-timeline-advanced");
   drawState();update();
+  let hasFitted=false;
   const fitOnOpen=()=>requestAnimationFrame(()=>{
-    if(root.isConnected&&editor.diseno)editor.lienzo.encajar();
+    if(root.isConnected&&editor.diseno&&!hasFitted){
+      hasFitted=true;
+      editor.lienzo.encajar();
+    }
   });
   return {
     update,fitOnOpen,
     openPalette(){palette.d.open=true;search.focus();},
+    nextScreen(){goRelative(1);},
+    previousScreen(){goRelative(-1);},
+    focusScreenSearch(){searchScreens.focus();searchScreens.select();},
     toggleFocus(){toggle("focus");},
     toggleTimeline(){toggle("timeline");},
     showTimeline(){
