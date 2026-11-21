@@ -59,6 +59,14 @@ class Game_Event
   def move_toward_player
     @x += (@x < $game_player.x ? 1 : -1) if @x != $game_player.x
   end
+  def move_generic(dir)
+    offsets = {2=>[0,1],4=>[-1,0],6=>[1,0],8=>[0,-1]}
+    dx,dy = offsets.fetch(dir)
+    return unless @map.valid?(@x+dx,@y+dy) &&
+                  @map.passable?(@x,@y,dir)
+    @x += dx
+    @y += dy
+  end
   def turn_toward_player; end
 end
 class FakeMap
@@ -193,14 +201,47 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert BifrostCapture.start_chase(event,cfg)
     # The outer radius warns first: the creature must not instantly
     # fly toward the player from its sensing distance.
-    25.times { BifrostCapture.chase_tick(event,cfg) }
+    24.times { BifrostCapture.chase_tick(event,cfg) }
     assert_equal 14,event.x
     assert_equal :alert,event.instance_variable_get(:@bifrost_mood_state)
-    event.instance_variable_set(:@x,13)
+    BifrostCapture.chase_tick(event,cfg)
+    assert_equal 13,event.x
+    assert_equal :chase,event.instance_variable_get(:@bifrost_mood_state)
     BifrostCapture.chase_tick(event,cfg)
     assert_equal 12,event.x
     assert_equal :charge,event.instance_variable_get(:@bifrost_mood_state)
     assert_equal 9,BifrostCapture.battle_wild_for(event).level
+  end
+
+  def test_aggressive_navigates_around_blocked_tiles
+    BifrostCapture.spawn_wild(:Land)
+    event = $game_map.events.values.first
+    event.instance_variable_set(:@x,14)
+    event.instance_variable_set(:@y,10)
+    $game_map.define_singleton_method(:passable?) do |x,y,dir|
+      steps = {2=>[0,1],4=>[-1,0],6=>[1,0],8=>[0,-1]}
+      dx,dy = steps.fetch(dir)
+      [x,y] != [13,10] && [x+dx,y+dy] != [13,10]
+    end
+    cfg=BifrostCapture.options.merge("aggressive_notice_frames"=>"0",
+      "aggressive_step_pause"=>"0")
+    assert BifrostCapture.start_chase(event,cfg)
+    12.times do
+      BifrostCapture.chase_tick(event,cfg)
+      refute_equal [13,10],[event.x,event.y]
+    end
+    assert_operator BifrostCapture.distance(event),:<=,1
+  end
+
+  def test_empty_ground_miss_consumes_ball_and_notifies
+    BifrostCapture.spawn_wild(:Land)
+    cfg = BifrostCapture.options
+    event = $game_map.events.values.first
+    x,y = BifrostCapture.screen_position(event)
+    refute BifrostCapture.resolve_empty_throw([x+50,y],:POKEBALL,cfg)
+    assert_equal 1,$bag.used
+    assert_equal :miss,BifrostCapture::Feedback.last_result[:kind]
+    assert_equal 0,BifrostCapture.captures.length
   end
 
   def test_native_grass_roll_creates_capturable_ow
