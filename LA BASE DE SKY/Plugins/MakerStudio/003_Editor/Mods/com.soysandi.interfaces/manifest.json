@@ -1,13 +1,13 @@
 {
   "id": "com.soysandi.interfaces",
   "name": "Editor de Interfaces",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "authors": [
     {
       "name": "SoySandi"
     }
   ],
-  "description": "Editor visual de Interfaces; navegación directa y buscador para pantallas nativas de Vermeil, zoom y desplazamiento estables, inspector y capas sin saltos, y perfiles UI conectados a Libreta y Pokédex.",
+  "description": "Editor visual con biblioteca de interfaces en carpetas reales UI/<interfaz>/<pantalla>.json, navegación de subpantallas, propiedades sin saltos y conexión visual con Libreta/Pokédex nativas de Vermeil.",
   "homepage": "https://github.com/yobrantoro/ms-interfaces",
   "tags": [
     "essentials",
