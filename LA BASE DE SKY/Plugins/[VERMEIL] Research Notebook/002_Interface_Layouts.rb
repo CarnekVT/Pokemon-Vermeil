@@ -3,21 +3,32 @@
 # The game logic remains native; authored graphic slots and EXTRA elements use
 # the very same UI/*.json that the MakerStudio editor writes.
 module VermeilInterfaceLayout
+  # Native screen profiles live in real folders. Flat filenames remain as
+  # compatibility aliases; the most recently edited file wins per page.
   FILES = {
-    :notebook => ["vermeil_libreta", "vermeil_libreta_detalle"],
-    :pokedex  => ["vermeil_pokedex_lista", "vermeil_pokedex_ficha",
-                  "vermeil_pokedex_area", "vermeil_pokedex_formas"]
+    :notebook => ["Libreta/Catalogo", "Libreta/Ficha"],
+    :pokedex  => ["Pokedex/Lista", "Pokedex/Ficha",
+                  "Pokedex/Area", "Pokedex/Formas"]
+  }.freeze
+
+  LEGACY = {
+    "Libreta/Catalogo" => "vermeil_libreta",
+    "Libreta/Ficha" => "vermeil_libreta_detalle",
+    "Pokedex/Lista" => "vermeil_pokedex_lista",
+    "Pokedex/Ficha" => "vermeil_pokedex_ficha",
+    "Pokedex/Area" => "vermeil_pokedex_area",
+    "Pokedex/Formas" => "vermeil_pokedex_formas"
   }.freeze
 
   NATIVE_IDS = {
-    "vermeil_libreta" => %w[background cover pages focus_panel grid_panel
-                           focus_sprite tab_arcane tab_golden],
-    "vermeil_libreta_detalle" => %w[detail_panel],
-    "vermeil_pokedex_lista" => %w[background header list_panel portrait_panel
-                                 portrait_pokemon counter_panel scrollbar_track],
-    "vermeil_pokedex_ficha" => %w[entry_page entry_sprite entry_description],
-    "vermeil_pokedex_area" => %w[area_page],
-    "vermeil_pokedex_formas" => %w[forms_page]
+    "Libreta/Catalogo" => %w[background cover pages focus_panel grid_panel
+                            focus_sprite tab_arcane tab_golden],
+    "Libreta/Ficha" => %w[detail_panel],
+    "Pokedex/Lista" => %w[background header list_panel portrait_panel
+                         portrait_pokemon counter_panel scrollbar_track],
+    "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description],
+    "Pokedex/Area" => %w[area_page],
+    "Pokedex/Formas" => %w[forms_page]
   }.freeze
 
   EXTRA_TYPES = %w[imagen panel texto animado barra].freeze
@@ -29,38 +40,38 @@ module VermeilInterfaceLayout
   end
 
   def load(kind)
-    result = {}
-    loaded = 0
-    (FILES[kind] || []).each do |name|
-      filename = "UI/#{name}.json"
-      next unless File.file?(filename)
+    result={}
+    loaded=0
+    (FILES[kind] || []).each do |page|
+      names=[page, LEGACY[page]].compact
+      present=names.map { |name| "UI/#{name}.json" }.select { |f| File.file?(f) }
+      next if present.empty?
+      # A user's older edited flat JSON must not silently be overridden by
+      # the new library defaults. Choose by edit time, canonical on ties.
+      filename=present.max_by { |f| [(File.mtime(f).to_f rescue 0.0), f.include?("/") && f.count("/")>1 ? 1 : 0] }
       begin
-        source = File.open(filename, "rb") { |f| f.read }
-        source = source.force_encoding("UTF-8")
-        # Essentials' bundled JSON C extension does NOT match its Ruby ABI.
-        # Its own pure-Ruby interface reader is the canonical, safe parser.
-        data = if defined?(Interfaces::AnalizadorJSON)
-                 Interfaces::AnalizadorJSON.analizar(source, filename)
-               elsif defined?(JSON) && JSON.respond_to?(:parse)
-                 JSON.parse(source)
-               end
+        source=File.open(filename,"rb") { |file| file.read.force_encoding("UTF-8") }
+        data=if defined?(Interfaces::AnalizadorJSON)
+               Interfaces::AnalizadorJSON.analizar(source,filename)
+             elsif defined?(JSON) && JSON.respond_to?(:parse)
+               JSON.parse(source)
+             end
         unless data.is_a?(Hash) && data["elementos"].is_a?(Array)
-          report("#{filename}: el lector no pudo obtener una lista de elementos")
+          report("#{filename}: no se pudo leer una lista de elementos")
           next
         end
-        loaded += 1
+        loaded+=1
         data["elementos"].each do |element|
           next unless element.is_a?(Hash)
-          id = element["id"].to_s
+          id=element["id"].to_s
           next if id.empty?
-          # Store the source page for scoping overlays to the correct state.
-          result[id] = element.merge("__page" => name)
+          result[id]=element.merge("__page"=>page)
         end
-      rescue StandardError => error
+      rescue StandardError=>error
         report("#{filename}: #{error.class}: #{error.message}")
       end
     end
-    report("#{kind}: #{loaded}/#{(FILES[kind] || []).length} perfiles leidos, #{result.length} elementos") if $DEBUG
+    report("#{kind}: #{loaded} perfiles leidos / #{result.length} elementos") if $DEBUG
     result
   end
 
