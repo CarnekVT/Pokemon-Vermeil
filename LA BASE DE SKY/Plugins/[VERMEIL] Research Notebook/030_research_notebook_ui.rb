@@ -205,7 +205,7 @@ module ResearchNotebook
     # Only swap elements when changing Catalogue <-> Detail, not every frame.
     def update_designer_extras
       return unless defined?(VermeilInterfaceLayout) && @viewport
-      page=@detail_open ? "vermeil_libreta_detalle" : "vermeil_libreta"
+      page=@detail_open ? "Libreta/Ficha" : "Libreta/Catalogo"
       if @designer_page!=page
         VermeilInterfaceLayout.dispose_extras(@designer_extras)
         @designer_extras=VermeilInterfaceLayout.make_extras(@interface_layout,@viewport,page)
