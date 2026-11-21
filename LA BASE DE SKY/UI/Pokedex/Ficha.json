@@ -52,6 +52,62 @@
       "color": "#1B283CFF",
       "borde": "#536B8D4D",
       "borde_grosor": 1
+    },
+    {
+      "id": "detail_name",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 20,
+      "y": 20,
+      "ancho": 265,
+      "alto": 32,
+      "texto": "Nombre del Pokémon",
+      "tamano": 19,
+      "color": "#F46A72",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "detail_category",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 304,
+      "y": 100,
+      "ancho": 304,
+      "alto": 20,
+      "texto": "Categoría:",
+      "tamano": 16,
+      "color": "#A9BCD4",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "detail_height",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 304,
+      "y": 178,
+      "ancho": 220,
+      "alto": 20,
+      "texto": "Altura:",
+      "tamano": 16,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "detail_weight",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 304,
+      "y": 202,
+      "ancho": 220,
+      "alto": 20,
+      "texto": "Peso:",
+      "tamano": 16,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
