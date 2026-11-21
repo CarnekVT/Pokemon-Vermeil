@@ -5232,6 +5232,23 @@ module BattleAnimationStudioRuntime
         end
       end
 
+      # A one-battler call to an explicit category uses the battler role
+      # authored by its clips. Status/Faint are usually Target-focused,
+      # Ability/Entry User-focused; a two-role Item can use itself as both.
+      # Never remap Move/Custom/Common here (their own paths stay unchanged).
+      if BattleAnimationStudioRuntime.valid_category_kind?(common) && user && raw_target.nil?
+        category_role = BattleAnimationStudioRuntime.common_subject_role(data)
+        if category_role == "target"
+          play_user = nil
+          play_target = user
+        elsif category_role == "both"
+          play_target = user
+        elsif category_role == "none"
+          play_user = nil
+          play_target = nil
+        end
+      end
+
       explicit_targets = targets.is_a?(Array) ? targets.compact : [targets].compact
       # Common animations often receive a single affected battler through a
       # different argument shape; preserve the remapped role in that case.
