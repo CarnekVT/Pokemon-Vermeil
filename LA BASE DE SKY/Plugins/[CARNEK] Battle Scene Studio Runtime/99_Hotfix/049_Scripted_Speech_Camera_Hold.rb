@@ -200,11 +200,12 @@ module BSSScriptedSpeakerComposition
           # calculated at intro setup. Never recompute pbSetPosition during
           # dialogue: that reset caused the trainer to jump/flicker.
           authored=(@bss_nds_trainer_anchor || {})[1]
+          # Use the real opponent formation even when this dialogue did not
+          # originate in the NDS battle intro (no cached trainer anchor).
+          side=respond_to?(:bss_camera_trainer_side_x) ? bss_camera_trainer_side_x(trainer,0) : nil
+          trainer.x=side if side && trainer.respond_to?(:x=)
           if authored && authored.length>=2
-            # 'behind' is the old configured mode name. Visually place the
-            # real trainer beside the enemy group, not behind Lucario/Meowth.
-            side=respond_to?(:bss_camera_trainer_side_x) ? bss_camera_trainer_side_x(trainer,0) : nil
-            trainer.x=side || authored[0] if trainer.respond_to?(:x=)
+            trainer.x=authored[0] if !side && authored[0] && trainer.respond_to?(:x=)
             trainer.y=authored[1] if trainer.respond_to?(:y=)
           end
           trainer.opacity=0 if trainer.respond_to?(:opacity=)
@@ -237,7 +238,7 @@ module BSSScriptedSpeakerComposition
 
   def bss_scripted_restore_trainer_actor
     snapshot=@bss_scripted_trainer_restore || {}
-    return if @bss_scripted_trainer_restoring
+    return if snapshot.empty? || @bss_scripted_trainer_restoring
     @bss_scripted_trainer_restoring=true
     # Close the same real actor that appeared with an alpha tween; do not
     # restore the old hidden state or X in one frame ("pop").
