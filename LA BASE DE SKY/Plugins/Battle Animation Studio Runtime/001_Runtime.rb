@@ -217,7 +217,7 @@ module BattleAnimationStudioRuntime
   end
 
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 37
+  VERSION = 38
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
@@ -247,24 +247,33 @@ module BattleAnimationStudioRuntime
     move.to_s.upcase
   end
 
+  CATALOG_KINDS = %w[subanimation status weather terrain ability item entry faint field transition].freeze
+  def valid_category_kind?(value)
+    CATALOG_KINDS.include?(value.to_s.downcase)
+  end
   def rebuild_lookup_index
     @lookup_index = {}
+    @category_lookup_index = {}
     arr = @cache && @cache["animations"]
     return @lookup_index if !arr.is_a?(Array)
     arr.each do |anim|
       next if !anim.is_a?(Hash)
       src = source_of(anim)
       catalog = src["catalogType"].to_s.downcase
-      kind = catalog == "common" ? 1 : (catalog == "custom" ? 2 : 0)
       move_id = (src["move"] || anim["name"]).to_s.upcase
       next if move_id.empty?
-      key = [kind, move_id]
-      (@lookup_index[key] ||= []) << anim
+      if valid_category_kind?(catalog)
+        (@category_lookup_index[[catalog, move_id]] ||= []) << anim
+      else
+        kind = catalog == "common" ? 1 : (catalog == "custom" ? 2 : 0)
+        (@lookup_index[[kind, move_id]] ||= []) << anim
+      end
     end
     @lookup_index
   rescue => e
     log("index #{e.class}: #{e.message}")
     @lookup_index = {}
+    @category_lookup_index = {}
   end
 
   def data_file
@@ -533,6 +542,31 @@ module BattleAnimationStudioRuntime
       src["type"].to_s.downcase == "studio" || src["system"].to_s.downcase == "battle_animation_studio"
     end
     studio || list.find { |a| !source_opposing?(a) } || list.first
+  end
+
+  # Separate category lookup; preserves vanilla Move and Common resolution.
+  def category_matching(category, name, version = 0, user_index = 0)
+    kind = category.to_s.downcase
+    return nil if !valid_category_kind?(kind)
+    id = normalize_move_id(name)
+    load_data
+    list = ((@category_lookup_index || {})[[kind, id]] || []).select do |anim|
+      src = source_of(anim)
+      !(src.key?("runtimeEnabled") && !src["runtimeEnabled"])
+    end
+    return nil if list.empty?
+    selected_version = list.select { |a| source_of(a)["version"].to_i == version.to_i }
+    list = selected_version unless selected_version.empty?
+    is_foe = user_index.to_i.odd?
+    same_side = list.select { |a| source_opposing?(a) == is_foe }
+    list = same_side unless same_side.empty?
+    explicit = list.select { |a| source_of(a)["runtimeSelected"] == true }
+    list = explicit unless explicit.empty?
+    authored = list.reverse.find do |a|
+      src = source_of(a)
+      src["type"].to_s.downcase == "studio" || src["system"].to_s.downcase == "battle_animation_studio"
+    end
+    authored || list.find { |a| !source_opposing?(a) } || list.first
   end
 
   def deep_number(value, fallback = 0.0)
@@ -5420,6 +5454,8 @@ module BattleAnimationStudioRuntime
       idx = side_battler && side_battler.respond_to?(:index) ? side_battler.index : 0
       data = if common == :custom || common.to_s == "custom"
                BattleAnimationStudioRuntime.custom_matching(move_id, version, idx)
+             elsif BattleAnimationStudioRuntime.valid_category_kind?(common)
+               BattleAnimationStudioRuntime.category_matching(common, move_id, version, idx)
              elsif common
                BattleAnimationStudioRuntime.common_matching(move_id, idx)
              else
@@ -5502,6 +5538,11 @@ module BattleAnimationStudioRuntime
     #   @scene.pbPlayBattleAnimationStudioCustom("WEATHER_INTRO", user, targets)
     def pbPlayBattleAnimationStudioCustom(anim_id, user = nil, targets = nil, version = 0)
       pbPlayBattleAnimationStudio(anim_id, user, targets, version, :custom)
+    end
+    # Explicit playback only: no implicit weather, entry or faint hooks.
+    def pbPlayBattleAnimationStudioCategory(kind, anim_id, user = nil, targets = nil, version = 0)
+      return false unless BattleAnimationStudioRuntime.valid_category_kind?(kind)
+      pbPlayBattleAnimationStudio(anim_id, user, targets, version, kind.to_s.downcase)
     end
 
     def pbAnimation(move_id, user, targets, version = 0)
