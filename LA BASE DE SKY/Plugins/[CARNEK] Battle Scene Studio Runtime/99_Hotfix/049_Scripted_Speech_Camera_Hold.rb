@@ -208,6 +208,9 @@ module BSSScriptedSpeakerComposition
             trainer.y=authored[1] if trainer.respond_to?(:y=)
           end
           trainer.opacity=0 if trainer.respond_to?(:opacity=)
+          # Drive camera and the REAL trainer together during speech. This
+          # prepares the strictly-right framing before the first visible fade.
+          bss_camera_begin_right_focus if respond_to?(:bss_camera_begin_right_focus)
           @bss_scripted_trainer_fade_started=Time.now.to_f
         end
       end
@@ -234,17 +237,46 @@ module BSSScriptedSpeakerComposition
 
   def bss_scripted_restore_trainer_actor
     snapshot=@bss_scripted_trainer_restore || {}
+    return if @bss_scripted_trainer_restoring
+    @bss_scripted_trainer_restoring=true
+    # Close the same real actor that appeared with an alpha tween; do not
+    # restore the old hidden state or X in one frame ("pop").
+    bss_camera_release_right_focus if respond_to?(:bss_camera_release_right_focus)
     snapshot.each_value do |row|
-      trainer,visible,x,y,z,opacity=row
+      trainer,was_visible,x,y,z,original_alpha=row
       next unless trainer && !(trainer.disposed? rescue true)
-      trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
-      trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
-      trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
-      trainer.opacity=opacity if !opacity.nil? && trainer.respond_to?(:opacity=)
-      trainer.visible=visible if trainer.respond_to?(:visible=)
+      unless was_visible
+        started=Time.now.to_f
+        from=(trainer.opacity rescue 255).to_f
+        frames=0
+        loop do
+          t=[[(Time.now.to_f-started)/0.28,0.0].max,1.0].min
+          ease=t*t*(3.0-2.0*t)
+          trainer.opacity=(from*(1.0-ease)).round if trainer.respond_to?(:opacity=)
+          bss_camera_right_focus_tick if respond_to?(:bss_camera_right_focus_tick)
+          bss_camera_park_trainer(trainer,0,true) if respond_to?(:bss_camera_park_trainer)
+          Graphics.update
+          frames+=1
+          break if (t>=1.0 && frames>=2) || frames>=120
+        end
+        trainer.visible=false if trainer.respond_to?(:visible=)
+        # Restore its hidden native anchor only AFTER the actor disappears.
+        trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
+        trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
+        trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
+        trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
+      else
+        # A previously shown actor stays at its visible right-hand position.
+        trainer.visible=true if trainer.respond_to?(:visible=)
+        trainer.opacity=original_alpha if trainer.respond_to?(:opacity=)
+      end
     end
+  rescue StandardError => e
+    BSS064.log("Smooth trainer disappearance: #{e.class}: #{e.message}") if defined?(BSS064)
+  ensure
     @bss_scripted_trainer_restore=nil
     @bss_scripted_trainer_fade_started=nil
+    @bss_scripted_trainer_restoring=false
   end
 
   def pbUpdate(*args,&block)
