@@ -25,7 +25,8 @@ module VermeilInterfaceLayout
                             focus_sprite tab_arcane tab_golden],
     "Libreta/Ficha" => %w[detail_panel],
     "Pokedex/Lista" => %w[background header list_panel portrait_panel
-                         portrait_pokemon counter_panel scrollbar_track],
+                         portrait_pokemon counter_panel scrollbar_track
+                         list_row list_row_selected],
     "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description],
     "Pokedex/Area" => %w[area_page],
     "Pokedex/Formas" => %w[forms_page]
