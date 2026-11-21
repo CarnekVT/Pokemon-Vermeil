@@ -64,6 +64,44 @@ assert.throws(()=>lib.parseNitroResourceMap("1911=Anim/foo\n1911=Anim/dup","audi
 assert.equal(result.animation.source.catalogType,"subanimation");
 assert.equal(result.animation.source.runtimeEnabled,false);
 assert.equal(result.animation.tracks[0].clips.length,1);
+assert.equal(result.animation.tracks[0].clips[0].positionKeys[0].point.anchor,"user_battler");
+
+// HGSS jumpifside 0 selects different scripted emitters for Player and Foe.
+// Origin code 3 = user, 4 = target; never merge the two branches.
+const branched=`a010_499:
+loadparticlefromspa 0, 510
+jumpifside 0, playerPart, enemyPart
+end
+playerPart:
+addparticle 0, 7, 3
+wait 8
+unloadparticle 0
+end
+enemyPart:
+addparticle 0, 9, 4
+wait 12
+unloadparticle 0
+end`;
+const left=lib.createBasFromNitroText(branched,{id:"SIDE",side:"player"});
+const right=lib.createBasFromNitroText(branched,{id:"SIDE",side:"foe"});
+assert.equal(left.analysis.frameCount,8);
+assert.equal(right.analysis.frameCount,12);
+assert.equal(left.analysis.particleSpawns,1);
+assert.equal(right.analysis.particleSpawns,1);
+assert.equal(left.animation.tracks[0].clips[0].positionKeys[0].point.anchor,"user_battler");
+assert.equal(right.animation.tracks[0].clips[0].positionKeys[0].point.anchor,"target_battler");
+assert.equal(left.animation.source.nitroImportSide,"player");
+assert.equal(right.animation.source.nitroImportSide,"foe");
+
+// A panned DS sequence can be mapped to a real Vermeil SFX, but the pan
+// automation is recorded as metadata until a compatible Ruby player exists.
+const pan=lib.createBasFromNitroText("playsepanmod 1993, -117, 117, 4, 2
+end",{
+    id:"PAN",audioMap:"1993=Anim/StereoSample"
+});
+assert.equal(pan.animation.events.length,1);
+assert.equal(pan.animation.events[0].nitroPanEnd,117);
+assert(pan.analysis.issues.some(x=>x.code==="pan-sweep-not-emulated"));
 const original=JSON.parse(await readFile(new URL("../../../../../PBS/AnimationStudio/animations.json",root),"utf8"));
 assert.equal(original.animations.length,22);
 const normalizedOriginal=lib.normalizeProject(original);
