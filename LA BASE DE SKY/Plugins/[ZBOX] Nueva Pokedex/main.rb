@@ -906,8 +906,10 @@ class PokemonPokedexNueva_Scene
     page=names[[@state.to_i,0].max] || names[0]
     if @designer_page!=page
       VermeilInterfaceLayout.dispose_extras(@designer_extras)
-      @designer_extras=VermeilInterfaceLayout.make_extras(NuevaPokedex.interface_layout,@viewport,page)
+      @designer_extras=VermeilInterfaceLayout.make_extras(
+          NuevaPokedex.interface_layout,@viewport,page,!@skip_extra_entry_once)
       @designer_page=page
+      @skip_extra_entry_once=false
     end
     VermeilInterfaceLayout.update_extras(@designer_extras)
   end
@@ -916,6 +918,7 @@ class PokemonPokedexNueva_Scene
     NuevaPokedex.use_layout_for(@state)
     @designer_extras=[]
     @designer_page=nil
+    @skip_extra_entry_once=true
     @viewport = Viewport.new(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT)
     @viewport.z = 99999
     @view = NuevaPokedexView.new(@viewport)
@@ -928,7 +931,14 @@ class PokemonPokedexNueva_Scene
     # Start MakerStudio extras before the scene's one opening fade. Previously
     # they appeared only AFTER that fade and replayed an independent entrance.
     update_designer_extras
-    pbFadeInAndShow(@view.sprites)
+    # All sprites are in the SAME native fade group, including author-added
+    # text and images. This prevents a second fade after the Pokédex opens.
+    fade_sprites=@view.sprites.dup
+    @designer_extras.each_with_index do |element,i|
+      sprite=element.sprite if element.respond_to?(:sprite)
+      fade_sprites["editor_#{i}"]=sprite if sprite && !(sprite.disposed? rescue true)
+    end
+    pbFadeInAndShow(fade_sprites)
     @view.sprites["overlay"].visible = false
     update_designer_extras
   end
