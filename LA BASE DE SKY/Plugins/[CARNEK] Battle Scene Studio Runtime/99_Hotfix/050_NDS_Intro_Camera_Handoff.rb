@@ -441,65 +441,24 @@ module VermeilBSSNDSIntroScene
     end
   end
 
-  # Reuse the real Animated Trainer Intros sprite. Do not call Animation::Intro
-  # (which would reintroduce a second black-background transition), and do
-  # not use TrainerAppear's hard-coded base XY (which ignores trainer metrics).
-  def bss_nds_slide_trainers
+  # Trainer is already at the RIGHT of every foe when the NDS prelude ends.
+  # Only DBK's own frames animate afterwards. No slide from outside the screen.
+  def bss_nds_stage_trainers
     return unless @battle && @battle.trainerBattle? && @battle.opponent
-    rows=[]
     @battle.opponent.each_index do |i|
       actor=@sprites["trainer_#{i+1}"]
       next unless actor && !(actor.disposed? rescue true)
       saved=(@bss_nds_trainer_anchor || {})[i+1]
-      target_x=saved && saved[0] ? saved[0].to_f : actor.x.to_f
-      target_y=saved && saved[1] ? saved[1].to_f : actor.y.to_f
-      # A TrainerSprite bitmap may be an animation strip rather than one
-      # visible frame: cap the offscreen margin to prevent a late pop-in.
-      offscreen=actor.bitmap ? [[actor.bitmap.width.to_f / 2.0,48.0].max,160.0].min : 64.0
-      if respond_to?(:bss_camera_trainer_side_x)
-        side_x=bss_camera_trainer_side_x(actor,i)
-        target_x=side_x if side_x
-      end
-      start_x=Graphics.width.to_f+offscreen
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
-      actor.x=start_x
-      actor.y=target_y
-      # TrainerSprite#pbSetPosition resets z to 10-index. Keep the real
-      # animated DBK actor over the battle backdrop and enemy battler.
+      actor.y=saved[1] if saved && saved[1] && actor.respond_to?(:y=)
+      side=(respond_to?(:bss_camera_trainer_side_x) ? bss_camera_trainer_side_x(actor,i) : nil)
+      actor.x=side if side && actor.respond_to?(:x=)
       foe=@sprites["pokemon_#{2*i+1}"]
       foe_z=foe && !(foe.disposed? rescue true) ? foe.z.to_i : 50
-      actor.z=[actor.z.to_i,foe_z+2,150+i].max
+      actor.z=[actor.z.to_i,foe_z+2,150+i].max if actor.respond_to?(:z=)
       actor.opacity=255 if actor.respond_to?(:opacity=)
       actor.visible=true if actor.respond_to?(:visible=)
-      rows << [actor,start_x,target_x,target_y]
-    end
-    return if rows.empty?
-    began=Time.now.to_f
-    duration=0.46
-    frames=0
-    loop do
-      t=[[((Time.now.to_f-began)/duration),0.0].max,1.0].min
-      eased=1.0-(1.0-t)**3
-      rows.each do |actor,start_x,target_x,target_y|
-        next if actor.disposed? rescue false
-        actor.x=start_x+(target_x-start_x)*eased
-        actor.y=target_y
-      end
-      # pbUpdate runs camera and battler alignment hooks that may move the
-      # actor back to its endpoint during the slide. Render this frame with
-      # Graphics.update and tick DBK's animated bitmap without reanchoring.
-      Graphics.update
-      rows.each do |actor,_,_,_|
-        actor.play if actor.respond_to?(:play) && !(actor.finished? rescue false)
-      end
-      frames+=1
-      break if t>=1.0 && frames>=2
-      break if frames>=300
-    end
-    rows.each do |actor,_start_x,target_x,target_y|
-      next if actor.disposed? rescue false
-      actor.x=target_x
-      actor.y=target_y
+      @bss_nds_trainer_anchor[i+1]=[(actor.x rescue nil),(actor.y rescue nil),(actor.z rescue nil)]
     end
   ensure
     @bss_nds_trainer_slide_pending=false
@@ -522,7 +481,7 @@ module VermeilBSSNDSIntroScene
       # TrainerBitmapWrapper animation (not Pokemon Intro2) is the one that
       # should run in a scripted trainer battle. Resume any unplayed frames
       # from the reveal before native PokeballTrainerSendOut takes over.
-      bss_nds_slide_trainers if @bss_nds_trainer_slide_pending
+      bss_nds_stage_trainers if @bss_nds_trainer_slide_pending
       pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
