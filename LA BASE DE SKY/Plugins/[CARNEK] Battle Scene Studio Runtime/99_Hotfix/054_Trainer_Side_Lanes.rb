@@ -20,7 +20,11 @@ module VermeilTrainerSideLanes
     @battle.battlers.each_index.filter_map do |index|
       next unless index.odd?
       actor=@sprites["pokemon_#{index}"]
-      next unless actor && (actor.visible rescue false)
+      # Opponents are initially hidden until send-out; their positions are
+      # still needed to stage the trainer correctly BEFORE his first frame.
+      next unless actor
+      battler=(@battle.battlers[index] rescue nil)
+      next if battler && (battler.fainted? rescue false)
       bss_camera_visible_span(actor)
     end
   end
@@ -67,11 +71,11 @@ module VermeilTrainerSideLanes
       overflow=[foes.map(&:last).max+14.0+(bounds[1]-bounds[0])-
                 Graphics.width.to_f+18.0,0.0].max
     end
-    pan=[[((overflow+32.0)/0.65),35.0].max,105.0].min
+    pan=[[((overflow+25.0)/0.65),30.0].max,55.0].min
     target=base.clone
     target[0]-=pan
-    target[4]*=1.07
-    target[5]*=1.07
+    target[4]*=1.12
+    target[5]*=1.12
     @bss_right_camera_from=@vector.get.clone
     @bss_right_camera_to=target
     @bss_right_camera_started=Time.now.to_f
@@ -100,8 +104,9 @@ module VermeilTrainerSideLanes
     @vector.snap(shot) if @vector.respond_to?(:snap)
     # Script camera lease must agree with the actual shot; otherwise its
     # director restores the old camera next frame and produces a visible snap.
-    @vermeil_cinema_script_camera_hold=shot.clone if
-      @vermeil_cinema_script_depth.to_i>0
+    if @vermeil_cinema_script_depth.to_i>0
+      @vermeil_cinema_script_camera_hold=shot.clone
+    end
     room=@bss070_ebdx_room
     room.update if room && !(room.disposed? rescue true)
     if t>=1.0
