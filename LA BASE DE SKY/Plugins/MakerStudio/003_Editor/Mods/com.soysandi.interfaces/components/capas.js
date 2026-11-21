@@ -57,6 +57,8 @@ export class Capas {
   }
 
   refrescar() {
+    // Keep the scroll position when selecting, typing or changing properties.
+    const oldScroll = this.lista.scrollTop;
     this.lista.innerHTML = "";
     const total = this.ordenados();
     const q = this.buscar.value.trim().toLocaleLowerCase("es");
@@ -69,6 +71,7 @@ export class Capas {
       return;
     }
     els.forEach((el) => this.lista.appendChild(this.filaCapa(el)));
+    this.lista.scrollTop = oldScroll;
   }
 
   filaCapa(el) {
