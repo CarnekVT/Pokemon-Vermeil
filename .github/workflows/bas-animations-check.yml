@@ -51,5 +51,7 @@ jobs:
           ROOT='LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio'
           node "$ROOT/tests/catalogs_nitro.test.mjs"
           node "$ROOT/tests/forensics.test.mjs"
-      - name: Run synthetic Nitro archive extraction tests
+      - name: Install TGA conversion test dependency
+        run: python -m pip install Pillow
+      - name: Run synthetic Nitro archive and TGA extraction tests
         run: python -m unittest discover -s BAS_SOURCE_REFERENCES/OriginHeartGold/tools -p 'test_*.py' -v
