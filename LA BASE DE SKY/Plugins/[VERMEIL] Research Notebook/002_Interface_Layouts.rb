@@ -28,7 +28,10 @@ module VermeilInterfaceLayout
                             grid_cursor cover_label cover_title cover_subtitle
                             cover_brand tab_arcane_label tab_golden_label
                             footer_hint],
-    "Libreta/Ficha" => %w[detail_panel card_template],
+    "Libreta/Ficha" => %w[detail_panel card_template
+                         detail_arcane_title detail_ability_name detail_arcane_note
+                         detail_power_title detail_power_note detail_form_title
+                         detail_form_ability detail_moves_title detail_form_note],
     "Pokedex/Lista" => %w[background header list_panel portrait_panel
                          portrait_pokemon counter_panel scrollbar_track
                          list_row list_row_selected
