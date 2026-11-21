@@ -370,7 +370,7 @@ export function montarEspacio(editor, M) {
     toggleTimeline(){toggle("timeline");},
     showTimeline(){
       if(!state.timeline){state.timeline=true;drawState();
-        requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});}
+        // The user keeps their current zoom/scroll while editing animation.}
     },
     destroy(){disposers.forEach(fn=>fn());closeMenus();}
   };
