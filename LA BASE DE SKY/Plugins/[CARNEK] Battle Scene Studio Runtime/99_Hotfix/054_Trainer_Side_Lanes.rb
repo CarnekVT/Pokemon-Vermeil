@@ -6,6 +6,17 @@ module VermeilTrainerSideLanes
   TRAINER_GAP = 14.0
   TRAINER_MARGIN = 12.0
 
+  def pbInitSprites(*args,&block)
+    @bss_right_camera_active=false
+    @bss_right_camera_returning=false
+    @bss_right_camera_from=nil
+    @bss_right_camera_to=nil
+    @bss_nds_trainer_staged=false
+    @bss_trainer_cleanup_started=nil
+    @bss_trainer_placed={}
+    super
+  end
+
   def bss_camera_visible_span(sprite)
     return nil unless sprite && !(sprite.disposed? rescue true) && sprite.bitmap
     rect=(sprite.src_rect rescue nil)
