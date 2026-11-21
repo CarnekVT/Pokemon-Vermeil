@@ -271,10 +271,18 @@ module Interfaces
     def listar
       carpeta = Interfaces::RUTA_PANTALLAS
       return [] if !File.directory?(carpeta)
-      # Los que empiezan por _ no son pantallas: queda reservado para ficheros de
-      # configuracion que puedan hacer falta mas adelante.
-      nombres = Dir.entries(carpeta).select { |f| f =~ /\.json\z/i && f[0, 1] != "_" }
-      return nombres.map { |f| f.sub(/\.json\z/i, "") }.sort
+      # Library folders behave like real screens in the original interface
+      # engine as well. Debug, menu and hotkey discovery must be recursive.
+      # Ignore private folders/files beginning with "_" to preserve configs.
+      nombres=Dir.glob(File.join(carpeta,"**","*.json")).map do |path|
+        relative=path.sub(/\A#{Regexp.escape(carpeta)}/,"").tr("\\","/")
+        relative=relative.sub(/\.json\z/i,"")
+        relative
+      end
+      nombres.select! do |name|
+        !name.split("/").any? { |segment| segment.start_with?("_") }
+      end
+      nombres.sort
     end
 
     #---------------------------------------------------------------------------
