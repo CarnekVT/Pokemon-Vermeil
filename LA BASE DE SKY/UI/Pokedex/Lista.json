@@ -118,6 +118,48 @@
       "color": "#344A68FF",
       "borde": "#F46A72AA",
       "borde_grosor": 2
+    },
+    {
+      "id": "pokedex_title",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 32,
+      "y": 16,
+      "ancho": 240,
+      "alto": 24,
+      "texto": "Pokédex",
+      "tamano": 18,
+      "color": "#F46A72",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "seen_counter",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 32,
+      "y": 324,
+      "ancho": 235,
+      "alto": 18,
+      "texto": "VISTOS: 0/0",
+      "tamano": 15,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "caught_counter",
+      "tipo": "texto",
+      "capa": 7,
+      "x": 32,
+      "y": 344,
+      "ancho": 235,
+      "alto": 18,
+      "texto": "OBTENIDOS: 0/0",
+      "tamano": 15,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
