@@ -162,9 +162,13 @@ module VermeilInterfaceLayout
     elsif data["tipo"]=="panel"
       return false if width<=0 || height<=0
       fill=color(data["color"],Color.new(22,29,43,255))
+      alpha=[[number(layout,id,"opacidad",255).to_i,0].max,255].min
+      fill=Color.new(fill.red,fill.green,fill.blue,(fill.alpha*alpha/255.0).round)
       canvas.fill_rect(x.to_i,y.to_i,width,height,fill)
       border=color(data["borde"])
       if border
+        border=Color.new(border.red,border.green,border.blue,
+                         (border.alpha*alpha/255.0).round)
         thick=[[data["borde_grosor"].to_i,1].max,10].min
         canvas.fill_rect(x.to_i,y.to_i,width,thick,border)
         canvas.fill_rect(x.to_i,y.to_i+height-thick,width,thick,border)
