@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.91",
+  "version": "1.0.92",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Battle Animation Studio: 13 battle animation catalogs, editable procedural starters, Nitro-script research import, timeline forensics and separate Essentials/LBDS runtime dispatch.",
+  "description": "Battle Animation Studio: 13 animation catalogs, 10 distinct procedural timelines, side-aware HGSS Nitro script reference importer, optional native cues, private iSPA texture bridge and Essentials/LBDS dispatcher.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
