@@ -311,7 +311,9 @@ export class EditorInterfaces {
     } catch { this.marcos = []; }
 
     await this.recargarLista();
-    if (this.disponibles.length) await this.abrir(this.disponibles[0]);
+    if (this.disponibles.length)
+      await this.abrir(this.disponibles.includes("vermeil_libreta") ?
+        "vermeil_libreta" : this.disponibles[0]);
     else this.cargarDiseno(M.disenoNuevo("sin_nombre"), null);
   }
 
@@ -574,7 +576,12 @@ export class EditorInterfaces {
       this.pintarSucio();
       await this.recargarLista();
       this.selDiseno.value = this.nombre;
-      this.toast(`Guardado en ${CARPETA}/${this.nombre}.json. En el juego: menu de debug, "Abrir una interfaz...".`, "success");
+      const destino = this.nombre.startsWith("vermeil_libreta") ? "la Libreta" :
+        this.nombre.startsWith("vermeil_pokedex") ? "la Pokédex" : null;
+      this.toast(destino ?
+        `Guardado. Cierra y vuelve a abrir ${destino} en el juego para aplicar estos cambios.` :
+        `Guardado en ${CARPETA}/${this.nombre}.json. Prueba desde Debug > Abrir una interfaz.`,
+        "success");
       return true;
     } catch (e) {
       this.toast(`No he podido guardar: ${e.message}`, "error");
@@ -880,6 +887,17 @@ export class EditorInterfaces {
       // La escritura tiene prioridad: preservar los atajos nativos de los campos.
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" ||
                 t.tagName === "SELECT" || t.isContentEditable)) return;
+      // Native layout page switch: without moving the canvas or touching
+      // its currently selected element/zoom. Alt+arrows are only handled here.
+      if (e.altKey && e.key === "ArrowLeft") {
+        e.preventDefault(); this.espacio?.previousScreen(); return;
+      }
+      if (e.altKey && e.key === "ArrowRight") {
+        e.preventDefault(); this.espacio?.nextScreen(); return;
+      }
+      if (ctrl && e.key.toLowerCase() === "j") {
+        e.preventDefault(); this.espacio?.focusScreenSearch(); return;
+      }
       if (ctrl && e.key.toLowerCase() === "k") { e.preventDefault(); this.espacio?.openPalette(); return; }
       if (e.key === "F6") { e.preventDefault(); this.espacio?.toggleFocus(); return; }
       if (e.key === "F7") { e.preventDefault(); this.espacio?.toggleTimeline(); return; }
