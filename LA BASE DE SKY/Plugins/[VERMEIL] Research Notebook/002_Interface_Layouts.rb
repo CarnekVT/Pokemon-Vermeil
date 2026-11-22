@@ -27,7 +27,7 @@ module VermeilInterfaceLayout
                             footer_bar book_spine grid_cell grid_cell_selected
                             grid_cursor cover_label cover_title cover_subtitle
                             cover_brand tab_arcane_label tab_golden_label
-                            footer_hint],
+                            footer_hint notebook_subtitle],
     "Libreta/Ficha" => %w[detail_panel card_template
                          detail_arcane_title detail_ability_name detail_arcane_note
                          detail_power_title detail_power_note detail_form_title
@@ -35,11 +35,16 @@ module VermeilInterfaceLayout
     "Pokedex/Lista" => %w[background header list_panel portrait_panel
                          portrait_pokemon counter_panel scrollbar_track
                          list_row list_row_selected
-                         pokedex_title seen_counter caught_counter],
+                         pokedex_title seen_counter caught_counter
+                         list_total list_number list_name],
     "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description
-                         detail_name detail_category detail_height detail_weight],
+                         detail_name detail_category detail_height detail_weight
+                         entry_header entry_divider entry_description_rule
+                         entry_sprite_frame entry_number entry_status
+                         entry_description_title],
     "Pokedex/Area" => %w[area_page],
-    "Pokedex/Formas" => %w[forms_page]
+    "Pokedex/Formas" => %w[forms_page forms_list_panel forms_detail_panel
+                          forms_row forms_row_selected forms_title forms_name]
   }.freeze
 
   EXTRA_TYPES = %w[imagen panel texto animado barra].freeze
