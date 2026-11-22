@@ -412,48 +412,86 @@ module VermeilBSSNDSIntroScene
     end
   end
 
-  # Reuse the real Animated Trainer Intros sprite. Do not call Animation::Intro
-  # (which would reintroduce a second black-background transition), and do
-  # not use TrainerAppear's hard-coded base XY (which ignores trainer metrics).
-  def bss_nds_slide_trainers
-    return unless @battle && @battle.trainerBattle? && @battle.opponent
+  # Trainer/foe composition is calculated once from REAL visible sprite
+  # dimensions. No separate trainer slide or another camera controller.
+  # Trainer always occupies the rightmost lane, never the foe's native anchor.
+  def bss_nds_place_trainer_right(actor)
+    return false unless actor && actor.bitmap && @battle
+    foes=[]
+    @battle.battlers.each_index do |idx|
+      next if idx.even?
+      sprite=@sprites["pokemon_#{idx}"]
+      next unless sprite && sprite.bitmap && !(sprite.disposed? rescue true)
+      width=(sprite.src_rect.width rescue sprite.bitmap.width).to_f
+      zoom=(sprite.zoom_x rescue 1.0).to_f.abs
+      left=sprite.x.to_f-(sprite.ox rescue width/2).to_f*zoom
+      foes << (left+width*zoom)
+    end
+    return false if foes.empty?
+    rect_width=(actor.src_rect.width rescue actor.bitmap.width).to_f
+    rect_width=actor.bitmap.width.to_f if rect_width<=0
+    zoom=(actor.zoom_x rescue 1.0).to_f.abs
+    zoom=1.0 if zoom<0.01
+    target_left=foes.max+12.0
+    available=Graphics.width.to_f-target_left-10.0
+    # When the foe stands far to the right, preserve a visible trainer by
+    # fitting the *real actor* into the free side lane instead of teleporting
+    # him behind the Pokemon or outside the window.
+    if available < rect_width*zoom && available>=38.0
+      factor=[[available/(rect_width*zoom),0.42].max,1.0].min
+      actor.zoom_x=zoom*factor if actor.respond_to?(:zoom_x=)
+      actor.zoom_y=(actor.zoom_y rescue zoom).to_f*factor if actor.respond_to?(:zoom_y=)
+      zoom=actor.zoom_x.to_f
+    end
+    width=rect_width*zoom
+    target_left=[target_left,Graphics.width.to_f-width-8.0].min
+    target_left=[target_left,Graphics.width.to_f*0.54].max
+    target_left=[target_left,Graphics.width.to_f-width-6.0].min
+    actor.x=target_left+(actor.ox rescue rect_width/2.0).to_f*zoom
+    actor.z=[actor.z.to_i,160].max
+    true
+  rescue StandardError => e
+    BSS064.log("NDS trainer placement: #{e.class}: #{e.message}") if defined?(BSS064)
+    false
+  end
+
+  def bss_nds_fade_trainer_actor(rows,appearing)
+    return if rows.nil? || rows.empty?
+    from=appearing ? 0.0 : 255.0
+    to=appearing ? 255.0 : 0.0
+    8.times do |frame|
+      t=(frame+1)/8.0
+      eased=t*t*(3.0-2.0*t)
+      rows.each do |actor|
+        next if actor.disposed? rescue false
+        actor.opacity=(from+(to-from)*eased).round if actor.respond_to?(:opacity=)
+      end
+      Graphics.update
+    end
+    rows.each do |actor|
+      next if actor.disposed? rescue false
+      actor.visible=appearing if actor.respond_to?(:visible=)
+      actor.opacity=255 if actor.respond_to?(:opacity=)
+    end
+  end
+
+  def bss_nds_present_trainers
+    return [] unless @battle && @battle.trainerBattle? && @battle.opponent
     rows=[]
     @battle.opponent.each_index do |i|
       actor=@sprites["trainer_#{i+1}"]
-      next unless actor && !(actor.disposed? rescue true)
+      next unless actor && !(actor.disposed? rescue true) && actor.bitmap
       saved=(@bss_nds_trainer_anchor || {})[i+1]
-      target_x=saved && saved[0] ? saved[0].to_f : actor.x.to_f
-      target_y=saved && saved[1] ? saved[1].to_f : actor.y.to_f
-      start_x=target_x+Graphics.width*0.44
       actor.to_first_frame if actor.respond_to?(:to_first_frame)
-      actor.x=start_x
-      actor.y=target_y
-      actor.opacity=255 if actor.respond_to?(:opacity=)
+      actor.y=saved[1] if saved && saved[1] && actor.respond_to?(:y=)
+      bss_nds_place_trainer_right(actor)
+      @bss_nds_trainer_anchor[i+1]=[(actor.x rescue nil),(actor.y rescue nil),(actor.z rescue nil)]
+      actor.opacity=0 if actor.respond_to?(:opacity=)
       actor.visible=true if actor.respond_to?(:visible=)
-      rows << [actor,start_x,target_x,target_y]
+      rows << actor
     end
-    return if rows.empty?
-    began=Time.now.to_f
-    duration=0.28
-    frames=0
-    loop do
-      t=[[((Time.now.to_f-began)/duration),0.0].max,1.0].min
-      eased=1.0-(1.0-t)**3
-      rows.each do |actor,start_x,target_x,target_y|
-        next if actor.disposed? rescue false
-        actor.x=start_x+(target_x-start_x)*eased
-        actor.y=target_y
-      end
-      pbUpdate
-      frames+=1
-      break if t>=1.0 && frames>=2
-      break if frames>=300
-    end
-    rows.each do |actor,_start_x,target_x,target_y|
-      next if actor.disposed? rescue false
-      actor.x=target_x
-      actor.y=target_y
-    end
+    bss_nds_fade_trainer_actor(rows,true)
+    rows
   ensure
     @bss_nds_trainer_slide_pending=false
   end
@@ -475,10 +513,11 @@ module VermeilBSSNDSIntroScene
       # TrainerBitmapWrapper animation (not Pokemon Intro2) is the one that
       # should run in a scripted trainer battle. Resume any unplayed frames
       # from the reveal before native PokeballTrainerSendOut takes over.
-      bss_nds_slide_trainers if @bss_nds_trainer_slide_pending
+      trainer_rows=bss_nds_trainer_slide_pending ? bss_nds_present_trainers : []
       pbAnimateTrainerIntros if respond_to?(:pbAnimateTrainerIntros)
       pbShowPartyLineup(0,true)
       pbShowPartyLineup(1,true)
+      bss_nds_fade_trainer_actor(trainer_rows,false)
       return
     end
     @battle.sideSizes[1].times do |i|
