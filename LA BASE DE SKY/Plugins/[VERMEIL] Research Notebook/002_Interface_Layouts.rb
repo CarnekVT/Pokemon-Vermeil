@@ -183,6 +183,98 @@ module VermeilInterfaceLayout
     false
   end
 
+  # -----------------------------------------------------------------------
+  # ONE declarative compositor for BOTH scenes.
+  # The JSON created in MakerStudio defines order, geometry, typography,
+  # color, artwork and visibility. Ruby supplies ONLY values/state.
+  # All native visual layers are rasterized through the same method.
+  # -----------------------------------------------------------------------
+  def render_document(canvas,layout,page,ids,values={},origin_x=0,origin_y=0)
+    return [] unless canvas && layout && ids && !ids.empty?
+    allowed=ids.map(&:to_s)
+    layers=layout.map do |id,data|
+      next unless allowed.include?(id) && data.is_a?(Hash) &&
+                  data["__page"]==page && data["visible"]!=false
+      [id,data]
+    end.compact
+    layers.sort_by! { |id,data| [data["capa"].to_i,allowed.index(id)||0] }
+    painted=[]
+    layers.each do |id,data|
+      x=data["x"].to_i-origin_x.to_i
+      y=data["y"].to_i-origin_y.to_i
+      case data["tipo"]
+      when "panel","imagen"
+        painted << id if paint_native(canvas,layout,id,x,y)
+      when "texto"
+        value=values.key?(id) ? values[id] : data["texto"].to_s
+        paint_text(canvas,data,x,y,value)
+        painted << id
+      end
+    end
+    painted
+  end
+
+  def paint_text(canvas,data,x,y,value)
+    return unless canvas && canvas.respond_to?(:font) && canvas.font
+    prev_size=canvas.font.size
+    prev_bold=(canvas.font.bold rescue nil)
+    size=data["tamano"].to_i
+    canvas.font.size=[[size,8].max,54].min if size>0
+    canvas.font.bold=(data["negrita"]==true) if canvas.font.respond_to?(:bold=)
+    w=[data["ancho"].to_i,1].max
+    h=[data["alto"].to_i,1].max
+    align=case data["alineacion"]
+          when "centro" then 1
+          when "derecha" then 2
+          else 0
+          end
+    primary=color(data["color"],Color.new(240,240,240,255))
+    shadow=color(data["sombra"],Color.new(20,20,25,180))
+    if defined?(pbDrawShadowText)
+      pbDrawShadowText(canvas,x,y,w,h,value.to_s,primary,shadow,align)
+    else
+      canvas.font.color=primary
+      canvas.draw_text(x,y,w,h,value.to_s,align)
+    end
+  ensure
+    canvas.font.size=prev_size if prev_size && canvas && canvas.font
+    canvas.font.bold=prev_bold if !prev_bold.nil? && canvas && canvas.font &&
+                                   canvas.font.respond_to?(:bold=)
+  end
+
+  def render_component(canvas,layout,id,x,y,width=nil,height=nil)
+    paint_native(canvas,layout,id,x,y,width,height)
+  end
+
+  # Draw an authored full page while preserving the actual transparent
+  # Pokemon window. The rect is scene state, the *page art* comes from JSON.
+  def render_masked_page(canvas,layout,page,id,hole_x,hole_y,hole_w,hole_h)
+    data=element(layout,id)
+    return false unless data && data["__page"]==page && data["visible"]!=false
+    fill=color(data["color"],Color.new(20,28,42,255))
+    fill=Color.new(fill.red,fill.green,fill.blue,255)
+    w=canvas.width;h=canvas.height
+    canvas.fill_rect(0,0,w,hole_y,fill)
+    canvas.fill_rect(0,hole_y+hole_h,w,h-hole_y-hole_h,fill)
+    canvas.fill_rect(0,hole_y,hole_x,hole_h,fill)
+    canvas.fill_rect(hole_x+hole_w,hole_y,w-hole_x-hole_w,hole_h,fill)
+    # A custom background image may be used only when it explicitly asks for
+    # full coverage; do not stretch it across the Pokemon sprite hole.
+    if data["tipo"]=="imagen"
+      bmp=bitmap_for(data["imagen"])
+      if bmp
+        pieces=[[0,0,w,hole_y],[0,hole_y+hole_h,w,h-hole_y-hole_h],
+                [0,hole_y,hole_x,hole_h],
+                [hole_x+hole_w,hole_y,w-hole_x-hole_w,hole_h]]
+        pieces.each do |x,y,pw,ph|
+          next if pw<=0 || ph<=0
+          canvas.blt(x,y,bmp,Rect.new(x,y,pw,ph))
+        end
+      end
+    end
+    true
+  end
+
   def release_images
     (@images || {}).each_value do |bitmap|
       bitmap.dispose if bitmap && !(bitmap.disposed? rescue true)
