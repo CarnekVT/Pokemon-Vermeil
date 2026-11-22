@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.93",
+  "version": "1.1.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Battle Animation Studio: 13 categories, predictive load preflight (1v1/2v2/3v3), timeline forensics, authored particle tools, side-aware HGSS reference tools, Essentials/LBDS runtime.",
+  "description": "Battle Animation Studio: 13 native animation catalogs, interactive particle budget HUD, 1v1/2v2/3v3 performance workbench, extensive emitters and Essentials/LBDS runtime.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

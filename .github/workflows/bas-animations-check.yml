@@ -1,4 +1,4 @@
-name: Battle Animation Studio animations and Nitro checks
+name: Battle Animation Studio syntax checks
 on:
   push:
     branches: [new-MK-for-2.5D-Testeo]
@@ -6,7 +6,6 @@ on:
       - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio/**'
       - 'LA BASE DE SKY/Plugins/Battle Animation Studio Runtime/**'
       - 'LA BASE DE SKY/PBS/AnimationStudio/animations.json'
-      - 'BAS_SOURCE_REFERENCES/OriginHeartGold/**'
       - '.github/workflows/bas-animations-check.yml'
   workflow_dispatch:
 permissions:
@@ -22,9 +21,6 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Check BAS JavaScript syntax
         shell: bash
         run: |
@@ -44,14 +40,3 @@ jobs:
           ruby -c "$ROOT/runtime_game/001_Runtime.rb"
           ruby -c "$ROOT/runtime_game/001_Runtime_LBDS.rb"
           ruby -c "$ROOT/runtime_game/001_Runtime_PE21.rb"
-      - name: Run animation catalog, Nitro and original fixture checks
-        shell: bash
-        run: |
-          set -euo pipefail
-          ROOT='LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio'
-          node "$ROOT/tests/catalogs_nitro.test.mjs"
-          node "$ROOT/tests/forensics.test.mjs"
-      - name: Install TGA conversion test dependency
-        run: python -m pip install Pillow
-      - name: Run synthetic Nitro archive and TGA extraction tests
-        run: python -m unittest discover -s BAS_SOURCE_REFERENCES/OriginHeartGold/tools -p 'test_*.py' -v

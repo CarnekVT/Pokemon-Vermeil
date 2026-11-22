@@ -49,6 +49,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import { getAllClips, getAnimatable, getBattlerTrack, getCameraTrack, sortPositionKeys, sampleValue, sampleVisible } from "./model.js";
 import { fallbackBattleContext } from "./context.js";
+import { preflightBasAnimation } from "./performance_preflight.js";
 var EMITTER_KEY_ALIASES = {
     emitAngle: ["emitDirection", "direction", "moveEmitAngle", "moveEmitDirection"],
     emitDirection: ["emitAngle", "direction", "moveEmitAngle", "moveEmitDirection"],
@@ -242,6 +243,31 @@ var BattlePreview = /** @class */ (function () {
         canvas.addEventListener("wheel", this._wh, { passive: false });
         this.resizeObserver = new ResizeObserver(function () { return _this.draw(); });
         this.resizeObserver.observe(canvas);
+        this.previewParticleLimit = 0;
+        this._perfMode = 1; this._perfSignature = ""; this._perfReport = null;
+        this._perfLastCheck = 0; this._perfChartMode = 0; this._perfCurrentBar = null;
+        this._perfHud = document.createElement("aside");
+        this._perfHud.className = "bas-perf-hud";
+        this._perfHud.innerHTML =
+            '<div class="bas-perf-head"><strong>Rendimiento</strong><button type="button" class="bas-perf-collapse" aria-expanded="true">−</button></div>' +
+            '<div class="bas-perf-body"><div class="bas-perf-stat"><b data-ph="peak">—</b><span data-ph="state">Partículas estimadas</span></div>' +
+            '<div class="bas-perf-meter"><i data-ph="meter"></i></div><div class="bas-perf-triple" data-ph="triple"></div>' +
+            '<div class="bas-perf-heatmap" data-ph="chart"></div>' +
+            '<div class="bas-perf-controls"><label>Combate<select data-ph="mode"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option></select></label>' +
+            '<label>Calidad<select data-ph="quality"><option value="0">Auto</option><option value="60">60</option><option value="120">120</option><option value="240">240</option><option value="500">500</option></select></label></div>' +
+            '<small>Estimación previa, no FPS medidos. Calidad afecta solo al preview.</small></div>';
+        this._perfHud.querySelector(".bas-perf-collapse").onclick = function() {
+            var hidden = _this._perfHud.classList.toggle("collapsed");
+            this.setAttribute("aria-expanded", String(!hidden)); this.textContent = hidden ? "+" : "−";
+        };
+        this._perfHud.querySelector('[data-ph="mode"]').onchange = function() {
+            _this._perfMode = Number(this.value) || 1; _this.updatePerformanceHud(true);
+        };
+        this._perfHud.querySelector('[data-ph="quality"]').onchange = function() {
+            _this.previewParticleLimit = Number(this.value) || 0; _this.draw();
+        };
+        this._perfHud.addEventListener("pointerdown", function(event){ event.stopPropagation(); });
+        canvas.parentElement.appendChild(this._perfHud);
     }
     BattlePreview.prototype.setEmitterEditMode = function (mode) {
         this.emitterEditMode = String(mode || "particle") === "emission" ? "emission" : "particle";
@@ -253,6 +279,7 @@ var BattlePreview = /** @class */ (function () {
     };
     BattlePreview.prototype.destroy = function () {
         var e_2, _q, e_3, _r, e_4, _s;
+        if (this._perfHud) this._perfHud.remove();
         this.canvas.removeEventListener("pointerdown", this._pd);
         window.removeEventListener("pointermove", this._pm);
         window.removeEventListener("pointerup", this._pu);
@@ -1498,6 +1525,65 @@ var BattlePreview = /** @class */ (function () {
         c.scale(tr.scale, tr.scale);
         this.drawBattleScene();
         c.restore();
+        this.updatePerformanceHud(false);
+    };
+    BattlePreview.prototype.updatePerformanceHud = function(force) {
+        var panel=this._perfHud, animation=this.animation;
+        if(!panel)return;
+        panel.hidden=!animation;
+        if(!animation)return;
+        var now=Date.now();
+        if(force || !this._perfReport || now-this._perfLastCheck>(this.playing ? 1100 : 240)) {
+            this._perfLastCheck=now;
+            var parts=[animation.id,animation.fps,animation.duration];
+            var source=animation.source||{};
+            parts.push(source.targetScope,source.autoReplicateAffected);
+            for(var track of (animation.tracks||[]))for(var clip of (track.clips||[])){
+                if(!clip||!clip.pbs||!clip.pbs.emitter||String(clip.pbs.emitter).toLowerCase()==="none")continue;
+                parts.push(clip.id,clip.startFrame,clip.endFrame,JSON.stringify(clip.pbs),JSON.stringify(clip.positionKeys||[]));
+            }
+            var signature=parts.join("|");
+            if(signature!==this._perfSignature || !this._perfReport) {
+                this._perfSignature=signature;
+                this._perfReport=preflightBasAnimation(animation);
+                this._perfChartMode=0;
+            }
+        }
+        var report=this._perfReport;
+        if(!report)return;
+        var scenario=report.scenarios[this._perfMode-1]||report.scenarios[0];
+        panel.querySelector('[data-ph="peak"]').textContent=String(scenario.peak);
+        panel.querySelector('[data-ph="state"]').textContent="pico estimado · "+scenario.format;
+        panel.dataset.load=scenario.peak>240?"high":scenario.peak>170?"medium":"low";
+        panel.querySelector('[data-ph="meter"]').style.width=Math.min(100,Math.round(100*scenario.peak/240))+"%";
+        panel.querySelector('[data-ph="triple"]').textContent=report.scenarios.map(function(x){return x.format+": "+x.peak;}).join(" · ");
+        var chart=panel.querySelector('[data-ph="chart"]');
+        if(this._perfChartMode!==this._perfMode){
+            this._perfChartMode=this._perfMode;
+            this._perfCurrentBar=null;chart.replaceChildren();
+            var values=scenario.density||[],max=Math.max(240,scenario.peak);
+            for(var i=0;i<values.length;i++){
+                var bar=document.createElement("button"),v=Number(values[i]||0);
+                bar.type="button";bar.className="bas-perf-bar";
+                bar.style.height=(12+Math.round(Math.min(1,v/max)*88))+"%";
+                bar.dataset.hot=v>240?"high":v>170?"medium":"low";
+                bar.dataset.frame=String(Math.round(i/Math.max(1,values.length-1)*scenario.analyzedFrames));
+                bar.title="Frame "+bar.dataset.frame+" · "+v+" partículas estimadas";
+                bar.addEventListener("click",function(event){
+                    var jump=Number(event.currentTarget.dataset.frame)||0;
+                    if(typeof _this.callbacks.onNavigateFrame==="function") _this.callbacks.onNavigateFrame(jump);
+                });
+                chart.appendChild(bar);
+            }
+        }
+        var bars=chart.querySelectorAll(".bas-perf-bar");
+        if(bars.length){
+            var index=Math.min(bars.length-1,Math.max(0,Math.round(this.frame/Math.max(1,scenario.analyzedFrames)*(bars.length-1))));
+            if(this._perfCurrentBar!==bars[index]){
+                if(this._perfCurrentBar)this._perfCurrentBar.classList.remove("current");
+                this._perfCurrentBar=bars[index];this._perfCurrentBar.classList.add("current");
+            }
+        }
     };
     BattlePreview.prototype.cameraFollowPoint = function (side) {
         var role = side === "target" ? "target" : "user";
@@ -2300,7 +2386,7 @@ var BattlePreview = /** @class */ (function () {
         }
         var _a, _b, _c, _d;
         var fps = Math.max(1, ((_a = this.animation) === null || _a === void 0 ? void 0 : _a.fps) || 20), baseRate = Math.max(.01, Number(((_b = clip.pbs) === null || _b === void 0 ? void 0 : _b.emitterRate) || 1)), baseIntensity = Math.max(1, Math.round(Number(((_c = clip.pbs) === null || _c === void 0 ? void 0 : _c.emitterIntensity) || 1))), now = this.frame, type = String(((_d = clip.pbs) === null || _d === void 0 ? void 0 : _d.emitter) || "none").toLowerCase();
-        var particleLimit = this.playing ? 240 : 500;
+        var particleLimit = this.previewParticleLimit > 0 ? this.previewParticleLimit : (this.playing ? 240 : 500);
         var emitterOpacity = clamp(this.sampleAt(clip, "emitterOpacity", now, 100) / 100, 0, 1);
         var emitterContextOverride = this.contextOverrideForObject(clip);
         if (emitterContextOverride) emitterOpacity = clamp(this.contextOpacityValue(clip, now, emitterOpacity * 100) / 100, 0, 1);

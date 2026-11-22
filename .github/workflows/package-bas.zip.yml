@@ -7,8 +7,6 @@ on:
       - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio/**'
       - 'LA BASE DE SKY/Plugins/Battle Animation Studio Runtime/**'
       - 'BAS_INSTALL_README.md'
-      - 'BAS_SOURCE_REFERENCES/OriginHeartGold/**'
-      - 'BAS_ORIGIN_HEARTGOLD_ENGINE_RESEARCH.md'
       - '.github/workflows/package-bas.zip.yml'
   workflow_dispatch:
 permissions:
@@ -27,15 +25,12 @@ jobs:
           cp -a 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio' 'bas-package/LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/'
           cp -a 'LA BASE DE SKY/Plugins/Battle Animation Studio Runtime' 'bas-package/LA BASE DE SKY/Plugins/'
           cp -a 'BAS_INSTALL_README.md' 'bas-package/README_INSTALACION.md'
-          mkdir -p 'bas-package/BAS_SOURCE_REFERENCES'
-          cp -a 'BAS_SOURCE_REFERENCES/OriginHeartGold' 'bas-package/BAS_SOURCE_REFERENCES/'
-          cp -a 'BAS_ORIGIN_HEARTGOLD_ENGINE_RESEARCH.md' 'bas-package/'
           cd bas-package
-          zip -qr '../Battle_Animation_Studio_1.0.91_Editor_Runtime.zip' .
+          zip -qr '../Battle_Animation_Studio_1.1.0_Editor_Runtime.zip' .
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: Battle_Animation_Studio_1.0.91_Editor_Runtime
-          path: Battle_Animation_Studio_1.0.91_Editor_Runtime.zip
+          name: Battle_Animation_Studio_1.1.0_Editor_Runtime
+          path: Battle_Animation_Studio_1.1.0_Editor_Runtime.zip
           if-no-files-found: error
           retention-days: 30
