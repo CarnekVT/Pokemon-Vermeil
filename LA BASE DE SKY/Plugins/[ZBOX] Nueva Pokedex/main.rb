@@ -986,18 +986,19 @@ class PokemonPokedexNueva_Scene
     draw_navigation_hint(bmp,labels,bottom)
   end
 
+  def pokedex_active_page
+    case @state
+    when NuevaPokedex::STATE_INFO then "Pokedex/Ficha"
+    when NuevaPokedex::STATE_AREA then "Pokedex/Area"
+    when NuevaPokedex::STATE_FORMS then "Pokedex/Formas"
+    else "Pokedex/Lista"
+    end
+  end
+
   def draw_navigation_hint(bmp, first, second)
-    y=NuevaPokedex::SCREEN_HEIGHT-38
-    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,38,NuevaPokedex::COLOR_PANEL)
-    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,2,NuevaPokedex::COLOR_ACCENT)
-    previous=(bmp.font.size rescue nil)
-    bmp.font.size=16 if previous && bmp.font.respond_to?(:size=)
-    pbDrawShadowText(bmp,16,y+3,NuevaPokedex::SCREEN_WIDTH-32,16,first,
-                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
-    pbDrawShadowText(bmp,16,y+20,NuevaPokedex::SCREEN_WIDTH-32,16,second,
-                     NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
-  ensure
-    bmp.font.size=previous if previous && bmp && bmp.font
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      pokedex_active_page,%w[help_bar help_primary help_secondary],
+      {"help_primary"=>first,"help_secondary"=>second})
   end
 
   # Dynamic text is still generated from the real Pokédex data, but its box,
@@ -1313,33 +1314,14 @@ class PokemonPokedexNueva_Scene
     bmp.clear
     entry = effective_entry(@model.data_for(@current_index))
     return if !entry
-    # Página completa a parte: fondo opaco salvo el hueco del sprite del Pokémon
-    bg = NuevaPokedex::COLOR_BG
-    sx = NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X)
-    sy = NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y)
-    sw = NuevaPokedex::ENTRY_SPRITE_W
-    sh = NuevaPokedex::ENTRY_SPRITE_H
-    bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, sy, bg)
-    bmp.fill_rect(0, sy + sh, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT - sy - sh, bg)
-    bmp.fill_rect(0, sy, sx, sh, bg)
-    bmp.fill_rect(sx + sw, sy, NuevaPokedex::SCREEN_WIDTH - sx - sw, sh, bg)
-    @view.skin.draw(bmp, :entry_page, NuevaPokedex.layout_position('entry_page', 'x', 0), NuevaPokedex.layout_position('entry_page', 'y', 0))
-    border_c = NuevaPokedex::COLOR_PANEL_DARK
-    # Marco del hueco del sprite (deja el interior transparente)
-    bmp.fill_rect(NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X) - 4, NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y) - 4,
-                  NuevaPokedex::ENTRY_SPRITE_W + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X) - 4, NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y) + NuevaPokedex::ENTRY_SPRITE_H + 1,
-                  NuevaPokedex::ENTRY_SPRITE_W + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X) - 4, NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y) - 4, 3, NuevaPokedex::ENTRY_SPRITE_H + 8, border_c)
-    bmp.fill_rect(NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X) + NuevaPokedex::ENTRY_SPRITE_W + 1, NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y) - 4, 3,
-                  NuevaPokedex::ENTRY_SPRITE_H + 8, border_c)
-    # Barra superior: Nº + nombre (+ forma al lado)
-    bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, 56, NuevaPokedex::COLOR_PANEL)
-    bmp.fill_rect(0, 54, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(295, 69, 2, 236, NuevaPokedex::COLOR_PANEL_DARK)
-    bmp.fill_rect(304, 255, 304, 2, NuevaPokedex::COLOR_PANEL_DARK)
-    pbDrawShadowText(bmp, 20, 3, 160, 16, NuevaPokedex.t("Nº {1}", sprintf("%03d", entry[:number])),
-                     NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    # The entire information page is one native JSON document. Its frame,
+    # header, divider, description and labels are editor-owned layers;
+    # the Pokemon sprite remains the live GameData-backed native sprite.
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Ficha",
+      %w[entry_page entry_sprite_frame entry_header entry_divider
+         entry_description_rule entry_description entry_number],
+      {"entry_number"=>NuevaPokedex.t("No. {1}",sprintf("%03d",entry[:number]))})
     name_w = bmp.text_size(entry[:name]).width
     draw_editor_label(bmp,"detail_name",20,20,
                      [name_w+8,265].min,32,entry[:name],
@@ -1362,7 +1344,8 @@ class PokemonPokedexNueva_Scene
     # Columna derecha de datos
     status_color = owned ? Color.new(150, 220, 150, 255) : (seen ? NuevaPokedex::COLOR_ACCENT : NuevaPokedex::COLOR_TEXT_DIM)
     status_text = owned ? NuevaPokedex.t("OBTENIDO") : (seen ? NuevaPokedex.t("VISTO") : NuevaPokedex.t("NO VISTO"))
-    pbDrawShadowText(bmp, 304, 70, 300, 20, status_text, status_color, NuevaPokedex::COLOR_SHADOW)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Ficha",%w[entry_status],{"entry_status"=>status_text})
     draw_editor_label(bmp,"detail_category",304,100,300,20,
                      NuevaPokedex.t("Categoría: {1}",entry[:category]),
                      NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
@@ -1373,14 +1356,8 @@ class PokemonPokedexNueva_Scene
     draw_editor_label(bmp,"detail_weight",304,202,200,20,
                      NuevaPokedex.t("Peso: {1} kg",entry[:weight]/10.0),
                      NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
-    # Ficha de descripción (ancho completo): draw the actual MakerStudio
-    # panel BEFORE the native dynamic text so colors/images can be customized.
-    @view.skin.draw(bmp,:entry_description,
-                    NuevaPokedex.layout_position("entry_description","x",24),
-                    NuevaPokedex.layout_position("entry_description","y",NuevaPokedex::ENTRY_DESC_Y))
-
-    pbDrawShadowText(bmp, 24, NuevaPokedex.layout_position("entry_description", "y", NuevaPokedex::ENTRY_DESC_Y) - 22, 120, 18, NuevaPokedex.t("POKÉDEX"),
-                     NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Ficha",%w[entry_description_title])
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
     draw_section_navigation_hint(bmp,
@@ -1488,12 +1465,8 @@ class PokemonPokedexNueva_Scene
   def draw_area
     bmp = @view.bitmaps["overlay"]
     bmp.clear
-    # Fondo opaco completo: nada del master (header "Pokédex Payu", lista) se transparenta
-    bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT,
-                  NuevaPokedex::COLOR_BG)
-    @view.skin.draw(bmp, :area_page,
-                    NuevaPokedex.layout_position("area_page", "x", 0),
-                    NuevaPokedex.layout_position("area_page", "y", 0))
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Area",%w[area_page])
     # El mapa debe permanecer libre de marcos/bocetos de la skin que tapen
     # ubicaciones o contengan textos en inglés. El área ya tiene su cabecera.
     entry = @model.data_for(@current_index)
@@ -1689,27 +1662,15 @@ class PokemonPokedexNueva_Scene
     form_ids = collect_form_list
     return if form_ids.length <= 1
     base = entry[:base_species]
-    # Fondo opaco completo dejando solo transparente el hueco del sprite
-    sx = NuevaPokedex.layout_position("entry_sprite", "x", NuevaPokedex::ENTRY_SPRITE_X)
-    sy = NuevaPokedex.layout_position("entry_sprite", "y", NuevaPokedex::ENTRY_SPRITE_Y)
-    sw = NuevaPokedex::ENTRY_SPRITE_W
-    sh = NuevaPokedex::ENTRY_SPRITE_H
-    bg = NuevaPokedex::COLOR_BG
-    bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, sy, bg)
-    bmp.fill_rect(0, sy + sh, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT - sy - sh, bg)
-    bmp.fill_rect(0, sy, sx, sh, bg)
-    bmp.fill_rect(sx + sw, sy, NuevaPokedex::SCREEN_WIDTH - sx - sw, sh, bg)
-    @view.skin.draw(bmp, :forms_page, NuevaPokedex.layout_position('forms_page', 'x', 0), NuevaPokedex.layout_position('forms_page', 'y', 0))
-    bmp.fill_rect(sx - 4, sy - 4, sw + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(sx - 4, sy + sh + 1, sw + 8, 3, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(sx - 4, sy - 4, 3, sh + 8, NuevaPokedex::COLOR_ACCENT)
-    bmp.fill_rect(sx + sw + 1, sy - 4, 3, sh + 8, NuevaPokedex::COLOR_ACCENT)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Formas",%w[forms_page forms_list_panel forms_detail_panel])
     # Panel derecha: lista de formas con su número de slot (si lo tienen)
     draw_panel(bmp, 318, 24, 310, 400)
     x = 330
     y = 46
-    pbDrawShadowText(bmp, x, y - 24, 290, 18, NuevaPokedex.t("Formas de {1}", entry[:name]),
-                     NuevaPokedex::COLOR_ACCENT, NuevaPokedex::COLOR_SHADOW)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Formas",%w[forms_title],
+      {"forms_title"=>NuevaPokedex.t("Formas de {1}",entry[:name])})
     selected_pos = form_ids.index(@current_form) || 0
     page_start = (selected_pos / 7) * 7
     form_ids[page_start, 7].each_with_index do |form_id, i|
@@ -1718,13 +1679,14 @@ class PokemonPokedexNueva_Scene
       form_known = NuevaPokedex.form_seen?(base, form_id)
       selected = (@current_form == form_id)
       row_y = y + i * (36 + 8)
-      col = selected ? Color.new(58, 81, 111, 255) : NuevaPokedex::COLOR_PANEL
-      bmp.fill_rect(x, row_y, 290, 36, col)
-      bmp.fill_rect(x, row_y, 4, 36, NuevaPokedex::COLOR_ACCENT) if selected
+      VermeilInterfaceLayout.render_component(bmp,NuevaPokedex.interface_layout,
+        selected ? "forms_row_selected" : "forms_row",x,row_y,290,36)
       form_name = form_id == 0 ? NuevaPokedex.t("Forma base") : form_sp.form_name.to_s
       form_name = NuevaPokedex.t("Forma {1}", form_id) if form_name.nil? || form_name.empty?
       name_c = selected ? NuevaPokedex::COLOR_TEXT : NuevaPokedex::COLOR_TEXT_DIM
-      pbDrawShadowText(bmp, x + 12, row_y + 8, 170, 20, form_name, name_c, NuevaPokedex::COLOR_SHADOW)
+      VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+        "Pokedex/Formas",%w[forms_name],
+        {"forms_name"=>{"texto"=>form_name,"x"=>x+12,"y"=>row_y+8}})
       slot_no = @model.slot_number_for(base, form_id)
       if slot_no
         pbDrawShadowText(bmp, x + 12, row_y + 26, 90, 11, NuevaPokedex.t("Nº {1}", sprintf("%02d", slot_no)),
@@ -1761,7 +1723,8 @@ class PokemonPokedexNueva_Scene
     py = 318
     pw = 262
     ph = 138
-    draw_panel(bmp, px, py, pw, ph)
+    VermeilInterfaceLayout.render_component(bmp,NuevaPokedex.interface_layout,
+      "forms_detail_panel",px,py,pw,ph)
     slot_no = @model.slot_number_for(entry[:base_species], form_id)
     name_txt = form_sp.name.to_s
     if form_id.to_i > 0
