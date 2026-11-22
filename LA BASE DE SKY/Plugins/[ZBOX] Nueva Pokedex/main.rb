@@ -778,18 +778,23 @@ class NuevaPokedexView
   end
 
   def set_sprite_color(type1)
-    type_color = NuevaPokedexTypeColors.color_for(type1)
-    bg = @bitmaps["sprite_bg"]
+    bg=@bitmaps["sprite_bg"]
     bg.clear
-    bg.fill_rect(0, 0, NuevaPokedex::SPRITE_BG_W, NuevaPokedex::SPRITE_BG_H, NuevaPokedex::COLOR_PANEL)
-    inner = Color.new(type_color.red, type_color.green, type_color.blue, 42)
-    bg.fill_rect(8, 8, NuevaPokedex::SPRITE_BG_W - 16, NuevaPokedex::SPRITE_BG_H - 16, inner)
-    border = Color.new(type_color.red, type_color.green, type_color.blue, 145)
-    bg.fill_rect(0, 0, NuevaPokedex::SPRITE_BG_W, 4, border)
-    bg.fill_rect(0, NuevaPokedex::SPRITE_BG_H - 4, NuevaPokedex::SPRITE_BG_W, 4, border)
-    bg.fill_rect(0, 0, 4, NuevaPokedex::SPRITE_BG_H, border)
-    bg.fill_rect(NuevaPokedex::SPRITE_BG_W - 4, 0, 4, NuevaPokedex::SPRITE_BG_H, border)
-    @skin.draw(bg, :portrait_panel, 0, 0) if @skin
+    # No procedural portrait frame or type-colored border. MakerStudio's
+    # portrait_panel alone is the visual source; an optional, *author-chosen*
+    # dynamic tint may be layered above it.
+    VermeilInterfaceLayout.render_component(bg,NuevaPokedex.interface_layout,
+      "portrait_panel",0,0,NuevaPokedex::SPRITE_BG_W,NuevaPokedex::SPRITE_BG_H)
+    data=VermeilInterfaceLayout.element(NuevaPokedex.interface_layout,"portrait_panel")
+    strength=data ? data["tinte_tipo"].to_f : 0.0
+    if strength>0
+      strength=[[strength,0.0].max,1.0].min
+      type_color=NuevaPokedexTypeColors.color_for(type1)
+      alpha=(strength*100).round
+      inner=Color.new(type_color.red,type_color.green,type_color.blue,alpha)
+      bg.fill_rect(8,8,NuevaPokedex::SPRITE_BG_W-16,
+                   NuevaPokedex::SPRITE_BG_H-16,inner)
+    end
   end
 end
 
@@ -1144,9 +1149,8 @@ class PokemonPokedexNueva_Scene
       thumb_y = (@scroll_offset / max_scroll) * (track_h - thumb_h)
       thumb_y = thumb_y.clamp(0, track_h - thumb_h)
     end
-    unless @view.skin.draw(sb, :scrollbar_track, 0, 0)
-      sb.fill_rect(0, 0, NuevaPokedex::SCROLLBAR_W, track_h, Color.new(50, 50, 60, 160))
-    end
+    VermeilInterfaceLayout.render_component(sb,NuevaPokedex.interface_layout,
+      "scrollbar_track",0,0,NuevaPokedex::SCROLLBAR_W,track_h)
     sb.fill_rect(0, thumb_y.round, NuevaPokedex::SCROLLBAR_W, thumb_h.round, Color.new(120, 126, 140, 200))
   end
 
