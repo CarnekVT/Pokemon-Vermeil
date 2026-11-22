@@ -90,7 +90,61 @@ export function montarEspacio(editor, M) {
   empty.hidden=true;
   const background=action("▧ Fondo de pantalla",()=>{editor.anadirFondo();palette.d.open=false;},"Crear una imagen detrás de todos los elementos, ajustada al lienzo");
   choices.append(background);
-  const palette=menu("＋ Elemento ▾",[search,choices,empty]);
+  // Ready-to-edit, reusable design components, similar to BAS/BSS presets.
+  // Each preset is native JSON components, not a visual mock that cannot run.
+  const presets=[
+    ["Cabecera", "Estructura", [
+      ["panel",{x:0,y:0,ancho:640,alto:54,color:"#1D293AFF",grupo:"01 · Cabecera",etiqueta:"Fondo de cabecera"}],
+      ["texto",{x:20,y:12,ancho:420,alto:32,texto:"TÍTULO DE PANTALLA",tamano:21,color:"#F0F5FB",grupo:"01 · Cabecera",etiqueta:"Título"}]
+    ]],
+    ["Tarjeta de información", "Ficha", [
+      ["panel",{x:24,y:84,ancho:256,alto:240,color:"#26364BFF",borde:"#5F7797FF",borde_grosor:2,grupo:"02 · Contenido",etiqueta:"Tarjeta"}],
+      ["texto",{x:39,y:96,ancho:228,alto:27,texto:"INFORMACIÓN",tamano:18,color:"#F0F5FB",grupo:"02 · Contenido",etiqueta:"Título de tarjeta"}],
+      ["texto",{x:39,y:139,ancho:228,alto:100,texto:"Descripción editable",tamano:15,color:"#B9CBDF",grupo:"02 · Contenido",etiqueta:"Descripción"}]
+    ]],
+    ["Fila de listado", "Listado", [
+      ["panel",{x:310,y:102,ancho:310,alto:40,color:"#304159FF",grupo:"03 · Listado",etiqueta:"Fondo de fila"}],
+      ["texto",{x:325,y:109,ancho:285,alto:26,texto:"Elemento del listado",tamano:16,color:"#F0F5FB",grupo:"03 · Listado",etiqueta:"Nombre"}]
+    ]],
+    ["Cuadro de Pokémon", "Ficha", [
+      ["panel",{x:24,y:80,ancho:256,alto:256,color:"#1D2B3EFF",borde:"#6A88AFFF",borde_grosor:3,grupo:"04 · Pokémon",etiqueta:"Marco del sprite"}],
+      ["texto",{x:38,y:342,ancho:226,alto:22,texto:"POKÉMON",tamano:17,color:"#F0F5FB",grupo:"04 · Pokémon",etiqueta:"Rótulo"}]
+    ]],
+    ["Barra de ayuda", "Navegación", [
+      ["panel",{x:0,y:440,ancho:640,alto:40,color:"#1C293AFF",grupo:"90 · Navegación",etiqueta:"Barra de controles"}],
+      ["texto",{x:16,y:452,ancho:608,alto:22,texto:"ACEPTAR: Elegir   ATRÁS: Volver",tamano:14,color:"#CFD9E8",grupo:"90 · Navegación",etiqueta:"Ayuda"}]
+    ]],
+    ["Botón de menú", "Interacción", [
+      ["boton",{x:440,y:375,ancho:164,alto:36,texto:"Aceptar",grupo:"80 · Botones",etiqueta:"Botón principal"}]
+    ]]
+  ];
+  const presetBar=node("div","ui-preset-library");
+  presetBar.append(node("strong","ui-preset-title","COMPONENTES LISTOS"));
+  const presetList=node("div","ui-preset-list");
+  for(const [label,kind,parts] of presets){
+    const btn=action("",()=>{
+      if(!editor.diseno)return;
+      editor.apuntarDeshacer();
+      const elements=editor.diseno.elementos;
+      let layer=elements.reduce((v,e)=>Math.max(v,Number(e.capa)||0),0);
+      let lastId=null;
+      for(const [type,props] of parts){
+        const id=M.idLibre(editor.diseno,type);
+        const item={...M.elementoNuevo(type,id,props.x,props.y),...props};
+        layer+=10;item.capa=layer;
+        elements.push(item);lastId=id;
+      }
+      editor.seleccion=lastId;
+      editor.marcarSucio();editor.refrescarTodo();
+      palette.d.open=false;
+    },"Crear "+label+" como componentes editables");
+    btn.classList.add("ui-preset-card");
+    btn.append(node("span","ui-preset-glyph",kind==="Listado"?"▤":kind==="Ficha"?"▧":"▣"),
+               node("span","ui-preset-card-label",label));
+    presetList.append(btn);
+  }
+  presetBar.append(presetList);
+  const palette=menu("＋ Elemento ▾",[search,choices,empty,presetBar]);
   const addLabel=editor.barraAnadir.querySelector(".ui-capa-tipo");
   editor.barraAnadir.classList.add("ui-add-toolbar");
   editor.barraAnadir.insertBefore(palette.d,addLabel||editor.barraAnadir.firstChild);
