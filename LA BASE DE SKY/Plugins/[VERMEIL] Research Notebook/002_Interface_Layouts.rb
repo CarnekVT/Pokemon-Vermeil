@@ -173,7 +173,13 @@ module VermeilInterfaceLayout
       height=bmp.height if height<=0
       return false if width<=0 || height<=0
       opacity=[[number(layout,id,"opacidad",255).to_i,0].max,255].min
-      canvas.stretch_blt(Rect.new(x.to_i,y.to_i,width,height),bmp,bmp.rect,opacity)
+      # Pixel-perfect 1:1 copy. stretch_blt even at original size can
+      # resample UI textures in mkxp-z and make small text/icons look soft.
+      if width==bmp.width && height==bmp.height
+        canvas.blt(x.to_i,y.to_i,bmp,bmp.rect,opacity)
+      else
+        canvas.stretch_blt(Rect.new(x.to_i,y.to_i,width,height),bmp,bmp.rect,opacity)
+      end
       return true
     elsif data["tipo"]=="panel"
       return false if width<=0 || height<=0
@@ -260,8 +266,10 @@ module VermeilInterfaceLayout
           else 0
           end
     primary=color(data["color"],Color.new(240,240,240,255))
-    shadow=color(data["sombra"],Color.new(20,20,25,180))
-    if defined?(pbDrawShadowText)
+    # Do not inject a second soft shadow by default: it creates visually
+    # doubled/blurred glyph edges at sizes below the original pixel font.
+    shadow=data["sombra"] ? color(data["sombra"]) : nil
+    if shadow && shadow.alpha>0 && defined?(pbDrawShadowText)
       pbDrawShadowText(canvas,x,y,w,h,value.to_s,primary,shadow,align)
     else
       canvas.font.color=primary
