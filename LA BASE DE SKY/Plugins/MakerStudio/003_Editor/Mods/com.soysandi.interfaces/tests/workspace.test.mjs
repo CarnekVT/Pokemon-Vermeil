@@ -20,8 +20,8 @@ test("No se pierden los ocho elementos originales",()=>{
 
 test("Compatibilidad de las interfaces JSON existentes",()=>{
   const design=model.disenoNuevo("prueba");
-  assert.equal(design.lienzo.ancho,512);
-  assert.equal(design.lienzo.alto,384);
+  assert.equal(design.lienzo.ancho,800);
+  assert.equal(design.lienzo.alto,480);
   assert.equal(design.version,2);
   const parsed=JSON.parse(model.escribirJSON(design));
   assert.equal(parsed.nombre,"prueba");
@@ -33,9 +33,9 @@ test("Los anchors de 2.x se conservan",()=>{
   const item=model.elementoNuevo("panel","panel_1",100,100);
   item.ancla="abajo_der";
   design.elementos.push(item);
-  assert.equal(model.cambiarResolucion(design,640,480,"anchors"),true);
-  assert.equal(item.x,228);
-  assert.equal(item.y,196);
+  assert.equal(model.cambiarResolucion(design,800,600,"anchors"),true);
+  assert.equal(item.x,260);
+  assert.equal(item.y,220);
   assert.equal(design.lienzo.ancho,640);
 });
 
@@ -47,9 +47,11 @@ test("El workspace nuevo reutiliza en vez de sustituir los editores",()=>{
   assert.match(editor,/const CARPETA = "UI";/);
   assert.match(editor,/montarEspacio\(this, M\)/);
   assert.match(workspace,/originalAdd\.forEach/);
-  assert.match(workspace,/originalAdd\.filter|originalAdd\.find/);
+  assert.match(workspace,/renderThumb\(/);
+  assert.match(workspace,/ui-studio-gallery/);
+  assert.match(workspace,/imagenDibujable/);
   assert.match(workspace,/pbInterfaz/);
-  assert.match(workspace,/editor\.anadirFondo/);
+  assert.match(workspace,/addPreset/);
   assert.match(workspace,/editor\.lienzo\.encajar/);
 });
 
