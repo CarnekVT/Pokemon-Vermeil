@@ -200,7 +200,7 @@ export function montarEspacio(editor, M) {
         }
       }else if(el.tipo==="texto"&&el.texto){
         const size=Math.max(9,Number(el.tamano)||16);
-        context.font=(el.negrita?"bold ":"")+size+"px sans-serif";
+        context.font=(el.negrita?"bold ":"")+G.fuenteSegunTamano(size);
         context.fillStyle=fill;
         context.textBaseline="middle";
         context.save();
