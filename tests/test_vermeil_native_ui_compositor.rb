@@ -94,8 +94,9 @@ class NativeUILayoutContractsTest < Minitest::Test
         json=JSON.parse(File.read("UI/#{name}.json"))
         ids=json.fetch("elementos").map { |e| e.fetch("id") }
         ids.each do |id|
-          assert data.key?(id),"#{kind} did not load #{name}/#{id}"
-          assert_equal name,data.fetch(id).fetch("__page")
+          scoped=data.fetch("__pages").fetch(name)
+          assert scoped.key?(id),"#{kind} did not load #{name}/#{id}"
+          assert_equal name,scoped.fetch(id).fetch("__page")
         end
       end
     end
