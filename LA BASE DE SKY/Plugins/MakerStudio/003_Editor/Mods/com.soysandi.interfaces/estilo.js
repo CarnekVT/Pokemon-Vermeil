@@ -498,4 +498,43 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
 .ui-library-screen.ui-native-active{background:var(--accent);color:white;font-weight:700}
 .ui-library-add-page{font-style:italic;color:var(--text-tertiary)}
 .ui-library-folder:focus-within{outline:1px solid var(--border)}
+
+/* Library 3.0: visual, low-clutter screen cards and grouped native layers. */
+.ui-interface-library{max-height:315px;min-height:120px;flex:0 1 auto}
+.ui-library-card{
+ display:flex!important;align-items:center;gap:10px!important;
+ padding:7px!important;border:1px solid transparent!important;
+ border-radius:8px!important;text-align:left!important;min-height:72px;
+}
+.ui-library-card:hover{background:var(--bg-hover,var(--bg-secondary));border-color:var(--border)!important}
+.ui-library-preview{
+ width:88px!important;height:66px!important;flex:0 0 88px;
+ image-rendering:pixelated;border-radius:5px;background:#111926;
+ border:1px solid rgba(165,187,222,.23);
+}
+.ui-library-card-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ui-library-card-info strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui-library-card-info small{font-size:10px;font-weight:400;opacity:.67}
+.ui-library-card.ui-native-active{outline:2px solid var(--accent);outline-offset:-2px}
+.ui-library-card.ui-native-active small{color:inherit;opacity:.7}
+.ui-layer-filters{
+ display:flex;align-items:center;gap:4px;padding:4px 8px;flex-wrap:wrap;
+ border-bottom:1px solid var(--border);
+}
+.ui-layer-filter{
+ background:transparent;color:var(--text-secondary);
+ border:1px solid var(--border);border-radius:5px;
+ padding:5px 7px;font:inherit;font-size:11px;cursor:pointer;
+}
+.ui-layer-filter.activo{background:var(--accent);border-color:var(--accent);color:#fff}
+.ui-layer-group{margin:3px 0 8px;border:1px solid var(--border);
+ border-radius:6px;overflow:hidden}
+.ui-layer-group-head{
+ border:0;display:block;width:100%;background:var(--bg-secondary);
+ color:var(--text-primary);text-align:left;
+ padding:9px 10px;font:inherit;font-size:11px;font-weight:650;cursor:pointer
+}
+.ui-layer-group-head:hover{background:var(--bg-hover)}
+.ui-layer-group .ui-capa{padding-left:6px}
+.ui-native-navigation-help{font-size:11px;line-height:1.45}
 `;
