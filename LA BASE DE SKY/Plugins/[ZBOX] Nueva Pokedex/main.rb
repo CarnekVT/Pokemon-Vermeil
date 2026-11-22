@@ -967,7 +967,7 @@ class PokemonPokedexNueva_Scene
     bmp.clear
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
       "Pokedex/Lista",
-      %w[background header list_panel portrait_panel counter_panel scrollbar_track
+      %w[background header list_panel counter_panel scrollbar_track
          pokedex_title],
       {"pokedex_title"=>NuevaPokedex.dex_name_for(@region)})
     draw_counters
