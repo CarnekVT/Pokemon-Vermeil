@@ -6,6 +6,8 @@ on:
       - 'LA BASE DE SKY/PBS/golden_forms.txt'
       - 'LA BASE DE SKY/PBS/golden_moves.txt'
       - 'LA BASE DE SKY/Plugins/**'
+      - 'LA BASE DE SKY/UI/**'
+      - 'tests/test_vermeil_native_ui_compositor.rb'
       - 'tests/test_vermeil_notebook_pokedex_golden.rb'
       - 'tests/test_vermeil_pokedex_logic.rb'
       - 'tests/test_vermeil_notebook_ui_logic.rb'
@@ -35,16 +37,22 @@ jobs:
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/001_research_notebook_config.rb"
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/010_research_notebook_data.rb"
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/015_catalog_and_golden_pbs.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/002_Interface_Layouts.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/005_notebook_graphics.rb"
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/030_research_notebook_ui.rb"
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/040_research_notebook_hooks.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/000_Config.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/001_CustomGraphics.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/main.rb"
+          ruby -c "tests/test_vermeil_native_ui_compositor.rb"
           ruby -c "LA BASE DE SKY/Plugins/[CARNKEVT] ChangeDex/001_ChangeDex.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/001_DataLoader.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/002_Scene.rb"
           ruby -c "tests/test_vermeil_notebook_pokedex_golden.rb"
           ruby -c "tests/test_vermeil_pokedex_logic.rb"
           ruby -c "tests/test_vermeil_notebook_ui_logic.rb"
+      - name: Native UI compositor and BSS transition contracts
+        run: ruby tests/test_vermeil_native_ui_compositor.rb
       - name: Golden Studio syntax
         run: node --check "LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Golden Systems Studio/index.js"
       - name: PBS golden form and move validation
