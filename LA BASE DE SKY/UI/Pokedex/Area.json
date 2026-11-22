@@ -29,7 +29,9 @@
       },
       "color": "#101824FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Localizaciones",
+      "etiqueta": "Area page"
     },
     {
       "id": "help_bar",
@@ -42,7 +44,9 @@
       "color": "#1E2A3CFF",
       "borde": "#F46A72FF",
       "borde_grosor": 2,
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help bar"
     },
     {
       "id": "help_primary",
@@ -56,7 +60,9 @@
       "tamano": 13,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help primary"
     },
     {
       "id": "help_secondary",
@@ -70,7 +76,9 @@
       "tamano": 13,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help secondary"
     }
   ],
   "biblioteca": {
