@@ -125,6 +125,27 @@ class NativeUILayoutContractsTest < Minitest::Test
     assert_equal [255,0],bmp.ops.map{|o|o[6]}
   end
 
+  def test_multiple_native_pages_can_reuse_ids_without_cross_page_overlays
+    list={"__page"=>"Pokedex/Lista","tipo"=>"texto","x"=>10,"y"=>10,
+          "ancho"=>200,"alto"=>24,"color"=>"#FFFFFF","texto"=>"LISTA"}
+    ficha={"__page"=>"Pokedex/Ficha","tipo"=>"texto","x"=>60,"y"=>30,
+           "ancho"=>200,"alto"=>24,"color"=>"#FFFFFF","texto"=>"DATOS"}
+    layout={
+      "help_primary"=>list,
+      "__pages"=>{
+        "Pokedex/Lista"=>{"help_primary"=>list},
+        "Pokedex/Ficha"=>{"help_primary"=>ficha}
+      }
+    }
+    first=StubCanvas.new
+    second=StubCanvas.new
+    VermeilInterfaceLayout.render_document(first,layout,"Pokedex/Lista",%w[help_primary])
+    VermeilInterfaceLayout.render_document(second,layout,"Pokedex/Ficha",%w[help_primary])
+    assert_equal "LISTA",first.ops.last[5]
+    assert_equal "DATOS",second.ops.last[5]
+    assert_equal [60,30],second.ops.last[1,2]
+  end
+
   def test_dynamic_species_name_is_live_but_uses_editor_geometry
     layout={
       "list_name"=>{
