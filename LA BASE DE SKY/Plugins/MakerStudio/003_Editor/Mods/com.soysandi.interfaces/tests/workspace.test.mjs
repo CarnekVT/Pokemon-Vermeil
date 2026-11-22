@@ -20,7 +20,7 @@ test("No se pierden los ocho elementos originales",()=>{
 
 test("Compatibilidad de las interfaces JSON existentes",()=>{
   const design=model.disenoNuevo("prueba");
-  assert.equal(design.lienzo.ancho,800);
+  assert.equal(design.lienzo.ancho,640);
   assert.equal(design.lienzo.alto,480);
   assert.equal(design.version,2);
   const parsed=JSON.parse(model.escribirJSON(design));
@@ -36,7 +36,7 @@ test("Los anchors de 2.x se conservan",()=>{
   assert.equal(model.cambiarResolucion(design,800,600,"anchors"),true);
   assert.equal(item.x,260);
   assert.equal(item.y,220);
-  assert.equal(design.lienzo.ancho,640);
+  assert.equal(design.lienzo.ancho,800);
 });
 
 test("El workspace nuevo reutiliza en vez de sustituir los editores",()=>{
