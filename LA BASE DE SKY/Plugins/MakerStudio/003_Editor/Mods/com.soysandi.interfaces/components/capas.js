@@ -21,6 +21,18 @@ export class Capas {
     this.op = opciones;              // {alSeleccionar, alCambiar}
     this.diseno = null;
     this.seleccion = null;
+    this.filtroTipo = "todos";
+    this.gruposCerrados = new Set();
+    this.filtros = h("div",{className:"ui-layer-filters"});
+    for (const [id,label] of [["todos","Todo"],["graficos","Arte"],["texto","Textos"],["acciones","Interactivos"]]) {
+      const btn=h("button",{
+        type:"button",className:"ui-layer-filter",
+        textContent:label,title:"Mostrar "+label.toLowerCase(),
+        onClick:()=>{this.filtroTipo=id;this.refrescar();}
+      });
+      btn.dataset.filtro=id;
+      this.filtros.append(btn);
+    }
 
     this.buscar = h("input", { className: "ui-txt ui-layer-search", type: "search",
       placeholder: "Buscar capa por ID o tipo...", title: "Filtra las capas sin alterar el diseño" });
@@ -35,6 +47,7 @@ export class Capas {
         h("span", { className: "ui-capa-tipo", textContent: "arriba = delante" })
       ),
       this.buscar,
+      this.filtros,
       this.contador,
       this.lista
     );
@@ -56,22 +69,70 @@ export class Capas {
       .map(x => x.el);
   }
 
+  tipoDe(el) {
+    if (el.tipo==="texto") return "texto";
+    if (["boton","barra","ventana"].includes(el.tipo)) return "acciones";
+    return "graficos";
+  }
+
+  grupoDe(el) {
+    if (el.grupo) return String(el.grupo);
+    switch (this.tipoDe(el)) {
+      case "texto": return "Textos y datos";
+      case "acciones": return "Interacción";
+      default: return "Gráficos y paneles";
+    }
+  }
+
   refrescar() {
-    // Keep the scroll position when selecting, typing or changing properties.
-    const oldScroll = this.lista.scrollTop;
-    this.lista.innerHTML = "";
-    const total = this.ordenados();
-    const q = this.buscar.value.trim().toLocaleLowerCase("es");
-    const els = q ? total.filter(el =>
-      (String(el.id)+" "+String(el.tipo)+" "+String(el.texto||"")).toLocaleLowerCase("es").includes(q)) : total;
-    this.contador.textContent = els.length===total.length ? total.length+" capas" : els.length+" de "+total.length+" capas";
-    if (!els.length) {
-      this.lista.appendChild(h("div", { className: "ui-ayuda", style: { padding: "10px" },
-        textContent: q ? "Ninguna capa coincide. Borra el filtro para verlas todas." : "Todavia no hay nada. Añade algo con los botones de arriba." }));
+    const oldScroll=this.lista.scrollTop;
+    this.lista.replaceChildren();
+    this.filtros.querySelectorAll("button").forEach(b=>{
+      const active=b.dataset.filtro===this.filtroTipo;
+      b.classList.toggle("activo",active);
+      b.setAttribute("aria-pressed",String(active));
+    });
+    const total=this.ordenados();
+    const q=this.buscar.value.trim().toLocaleLowerCase("es");
+    const visible=total.filter(el=>{
+      if(this.filtroTipo!=="todos"&&this.tipoDe(el)!==this.filtroTipo)return false;
+      const text=[el.id,el.etiqueta,el.grupo,el.tipo,el.texto||""].join(" ").toLocaleLowerCase("es");
+      return !q||text.includes(q);
+    });
+    this.contador.textContent=visible.length===total.length ?
+      total.length+" capas" : visible.length+" / "+total.length+" capas";
+    if(!visible.length){
+      this.lista.append(h("div",{className:"ui-ayuda",textContent:
+        q?"No hay resultados. Prueba otro nombre o grupo.":
+          "No hay capas de este tipo.",style:{padding:"12px"}}));
       return;
     }
-    els.forEach((el) => this.lista.appendChild(this.filaCapa(el)));
-    this.lista.scrollTop = oldScroll;
+    const grouped=new Map();
+    for(const el of visible){
+      const group=this.grupoDe(el);
+      if(!grouped.has(group))grouped.set(group,[]);
+      grouped.get(group).push(el);
+    }
+    for(const [name,elements] of grouped){
+      const group=h("section",{className:"ui-layer-group"});
+      const button=h("button",{
+        type:"button",className:"ui-layer-group-head",
+        textContent:(this.gruposCerrados.has(name)?"▸ ":"▾ ")+name+" ("+elements.length+")",
+        title:"Mostrar u ocultar las capas de "+name,
+        onClick:()=>{
+          if(this.gruposCerrados.has(name))this.gruposCerrados.delete(name);
+          else this.gruposCerrados.add(name);
+          this.refrescar();
+        }
+      });
+      button.setAttribute("aria-expanded",String(!this.gruposCerrados.has(name)));
+      group.append(button);
+      if(!this.gruposCerrados.has(name)||q){
+        for(const el of elements)group.append(this.filaCapa(el));
+      }
+      this.lista.append(group);
+    }
+    this.lista.scrollTop=oldScroll;
   }
 
   filaCapa(el) {
@@ -109,7 +170,9 @@ export class Capas {
     candado.className = "ui-ojo" + (el.bloqueado ? "" : " apagado");
 
     fila.appendChild(ojo);
-    fila.appendChild(h("span", { className: "ui-capa-id", textContent: el.id, title: el.id }));
+    fila.appendChild(h("span", { className: "ui-capa-id",
+      textContent: el.etiqueta||el.id,
+      title: el.etiqueta ? el.etiqueta+" ("+el.id+")" : el.id }));
     // Marcas de un vistazo: lo que se repite y lo que tiene condicion. Sin esto
     // habria que ir elemento por elemento para saber por que algo no sale.
     let marca = "";
