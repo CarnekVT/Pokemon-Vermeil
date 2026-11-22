@@ -105,7 +105,7 @@ class NativeUILayoutContractsTest < Minitest::Test
     PAGES.values.flatten.each do |name|
       ids=JSON.parse(File.read("UI/#{name}.json")).fetch("elementos").map{|e|e.fetch("id")}
       native=VermeilInterfaceLayout::NATIVE_IDS.fetch(name)
-      assert_empty(ids-native),"#{name} had a shipped component that is also drawn as an EXTRA"
+      assert_empty(ids - native),"#{name} had a shipped component that is also drawn as an EXTRA"
     end
   end
 
