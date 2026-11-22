@@ -22,7 +22,9 @@
       "ancho": 640,
       "alto": 480,
       "color": "#2A1F1BFF",
-      "borde": null
+      "borde": null,
+      "grupo": "02 · Libro y fondo",
+      "etiqueta": "Background"
     },
     {
       "id": "cover",
@@ -39,7 +41,9 @@
       },
       "color": "#4C3727FF",
       "borde": "#A18460FF",
-      "borde_grosor": 7
+      "borde_grosor": 7,
+      "grupo": "01 · Portada",
+      "etiqueta": "Cover"
     },
     {
       "id": "focus_panel",
@@ -51,7 +55,9 @@
       "alto": 368,
       "color": "#EEE2C9FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "04 · Pokémon seleccionado",
+      "etiqueta": "Focus panel"
     },
     {
       "id": "grid_panel",
@@ -69,7 +75,9 @@
       },
       "color": "#E9DBC0FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "05 · Cuadrícula",
+      "etiqueta": "Grid panel"
     },
     {
       "id": "focus_sprite",
@@ -81,7 +89,9 @@
       "alto": 54,
       "color": "#E8C76B55",
       "borde": "#FFFFFF88",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "04 · Pokémon seleccionado",
+      "etiqueta": "Focus sprite"
     },
     {
       "id": "tab_arcane",
@@ -93,7 +103,9 @@
       "alto": 37,
       "color": "#65517BFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Tab arcane"
     },
     {
       "id": "tab_golden",
@@ -105,7 +117,9 @@
       "alto": 37,
       "color": "#8A682EFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Tab golden"
     },
     {
       "id": "notebook_title",
@@ -119,7 +133,9 @@
       "tamano": 19,
       "color": "#FAF8F0",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Notebook title"
     },
     {
       "id": "focus_number",
@@ -133,7 +149,9 @@
       "tamano": 12,
       "color": "#7B6C5B",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "04 · Pokémon seleccionado",
+      "etiqueta": "Focus number"
     },
     {
       "id": "focus_name",
@@ -147,7 +165,9 @@
       "tamano": 21,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "04 · Pokémon seleccionado",
+      "etiqueta": "Focus name"
     },
     {
       "visible": true,
@@ -161,7 +181,9 @@
       "capa": 1,
       "color": "#EDE3C9FF",
       "borde": "#C6B38BFF",
-      "borde_grosor": 5
+      "borde_grosor": 5,
+      "grupo": "01 · Portada",
+      "etiqueta": "Pages"
     },
     {
       "visible": true,
@@ -173,7 +195,9 @@
       "ancho": 640,
       "alto": 55,
       "capa": 3,
-      "color": "#2A1F1BFF"
+      "color": "#2A1F1BFF",
+      "grupo": "02 · Libro y fondo",
+      "etiqueta": "Header bar"
     },
     {
       "visible": true,
@@ -185,7 +209,9 @@
       "ancho": 640,
       "alto": 38,
       "capa": 3,
-      "color": "#2A1F1BFF"
+      "color": "#2A1F1BFF",
+      "grupo": "02 · Libro y fondo",
+      "etiqueta": "Footer bar"
     },
     {
       "visible": true,
@@ -197,7 +223,9 @@
       "ancho": 4,
       "alto": 387,
       "capa": 3,
-      "color": "#9C8765FF"
+      "color": "#9C8765FF",
+      "grupo": "02 · Libro y fondo",
+      "etiqueta": "Book spine"
     },
     {
       "visible": true,
@@ -211,7 +239,9 @@
       "capa": 3,
       "color": "#EDE3C9FF",
       "borde": "#9A8767CC",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "05 · Cuadrícula",
+      "etiqueta": "Grid cell"
     },
     {
       "visible": true,
@@ -225,7 +255,9 @@
       "capa": 3,
       "color": "#D4BE8DFF",
       "borde": "#E7B63FFF",
-      "borde_grosor": 2
+      "borde_grosor": 2,
+      "grupo": "05 · Cuadrícula",
+      "etiqueta": "Grid cell selected"
     },
     {
       "visible": true,
@@ -239,7 +271,9 @@
       "capa": 3,
       "color": "#FFFFFF14",
       "borde": "#FFFFFFDD",
-      "borde_grosor": 2
+      "borde_grosor": 2,
+      "grupo": "05 · Cuadrícula",
+      "etiqueta": "Grid cursor"
     },
     {
       "visible": true,
@@ -253,7 +287,9 @@
       "capa": 4,
       "color": "#32241CFF",
       "borde": "#916442FF",
-      "borde_grosor": 6
+      "borde_grosor": 6,
+      "grupo": "01 · Portada",
+      "etiqueta": "Cover label"
     },
     {
       "visible": true,
@@ -268,7 +304,9 @@
       "texto": "LIBRETA",
       "tamano": 25,
       "color": "#FAF8F0FF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "01 · Portada",
+      "etiqueta": "Cover title"
     },
     {
       "visible": true,
@@ -283,7 +321,9 @@
       "texto": "DE INVESTIGACION",
       "tamano": 15,
       "color": "#FAF8F0FF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "01 · Portada",
+      "etiqueta": "Cover subtitle"
     },
     {
       "visible": true,
@@ -298,7 +338,9 @@
       "texto": "VERMEIL",
       "tamano": 10,
       "color": "#D5C29EFF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "01 · Portada",
+      "etiqueta": "Cover brand"
     },
     {
       "visible": true,
@@ -313,7 +355,9 @@
       "texto": "Arcana",
       "tamano": 12,
       "color": "#FAF8F0FF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Tab arcane label"
     },
     {
       "visible": true,
@@ -328,7 +372,9 @@
       "texto": "Aurea",
       "tamano": 12,
       "color": "#FAF8F0FF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Tab golden label"
     },
     {
       "visible": true,
@@ -343,7 +389,9 @@
       "texto": "MOVER / ACEPTAR / ATRAS",
       "tamano": 12,
       "color": "#FAF8F0FF",
-      "alineacion": "centro"
+      "alineacion": "centro",
+      "grupo": "06 · Navegación",
+      "etiqueta": "Footer hint"
     },
     {
       "id": "notebook_subtitle",
@@ -358,7 +406,9 @@
       "color": "#DACDB8",
       "sombra": "#201810",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Cabecera y pestañas",
+      "etiqueta": "Notebook subtitle"
     }
   ],
   "biblioteca": {
