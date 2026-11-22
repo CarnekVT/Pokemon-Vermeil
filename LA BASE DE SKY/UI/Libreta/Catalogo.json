@@ -344,6 +344,21 @@
       "tamano": 12,
       "color": "#FAF8F0FF",
       "alineacion": "centro"
+    },
+    {
+      "id": "notebook_subtitle",
+      "tipo": "texto",
+      "x": 20,
+      "y": 38,
+      "ancho": 210,
+      "alto": 15,
+      "capa": 20,
+      "texto": "Notas sobre energía arcana",
+      "tamano": 10,
+      "color": "#DACDB8",
+      "sombra": "#201810",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
