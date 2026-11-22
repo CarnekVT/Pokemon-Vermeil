@@ -255,6 +255,11 @@ module VermeilInterfaceLayout
     return unless canvas && canvas.respond_to?(:font) && canvas.font
     prev_size=canvas.font.size
     prev_bold=(canvas.font.bold rescue nil)
+    prev_offset=(canvas.text_offset_y rescue nil)
+    # mkxp-z subtracts text_offset_y when drawing. pbSetSystemFont leaves
+    # this at 8, shifting the authored labels above their boxes and allowing
+    # two different text renderers to overlap. The editor assumes zero.
+    canvas.text_offset_y=0 if canvas.respond_to?(:text_offset_y=)
     size=data["tamano"].to_i
     canvas.font.size=[[size,8].max,54].min if size>0
     canvas.font.bold=(data["negrita"]==true) if canvas.font.respond_to?(:bold=)
@@ -279,6 +284,8 @@ module VermeilInterfaceLayout
     canvas.font.size=prev_size if prev_size && canvas && canvas.font
     canvas.font.bold=prev_bold if !prev_bold.nil? && canvas && canvas.font &&
                                    canvas.font.respond_to?(:bold=)
+    canvas.text_offset_y=prev_offset if !prev_offset.nil? && canvas &&
+                                            canvas.respond_to?(:text_offset_y=)
   end
 
   def render_component(canvas,layout,id,x,y,width=nil,height=nil)
