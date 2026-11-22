@@ -27,7 +27,13 @@ module VermeilInterfaceLayout
                             footer_bar book_spine grid_cell grid_cell_selected
                             grid_cursor cover_label cover_title cover_subtitle
                             cover_brand tab_arcane_label tab_golden_label
-                            footer_hint notebook_subtitle],
+                            footer_hint notebook_subtitle
+                            focus_arcane_ability_caption focus_arcane_ability_name
+                            focus_arcane_types_label focus_arcane_status_label
+                            focus_golden_types_label focus_golden_types_unknown
+                            focus_golden_affinity_label focus_golden_affinity_unknown
+                            focus_golden_status_label focus_status_bg focus_status_text
+                            grid_species_count grid_sort_label grid_page_label],
     "Libreta/Ficha" => %w[detail_panel card_template
                          detail_arcane_title detail_ability_name detail_arcane_note
                          detail_power_title detail_power_note detail_form_title
@@ -265,6 +271,14 @@ module VermeilInterfaceLayout
     size=data["tamano"].to_i
     canvas.font.size=[[size,8].max,54].min if size>0
     canvas.font.bold=(data["negrita"]==true) if canvas.font.respond_to?(:bold=)
+    # Never overlap another native component if translated or form names
+    # exceed the authored width. Pixel fonts scale in whole-point steps only.
+    if canvas.respond_to?(:text_size)
+      available=[data["ancho"].to_i-4,4].max
+      while canvas.font.size>10 && canvas.text_size(value.to_s).width>available
+        canvas.font.size-=1
+      end
+    end
     w=[data["ancho"].to_i,1].max
     h=[data["alto"].to_i,1].max
     align=case data["alineacion"]

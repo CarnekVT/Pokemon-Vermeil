@@ -354,9 +354,43 @@ export function montarEspacio(editor, M) {
     editor.seleccion=last;
     editor.marcarSucio();editor.refrescarTodo();setPalette(false);
   }
+  // Preview the actual parts before inserting. Components stay 100% editable.
+  function presetPreview(parts) {
+    const preview=node("canvas","ui-studio-preset-preview");
+    preview.width=160;preview.height=96;
+    const ctx=preview.getContext("2d");
+    if(!ctx)return preview;
+    ctx.imageSmoothingEnabled=false;
+    ctx.fillStyle="#151e2a";ctx.fillRect(0,0,160,96);
+    const rects=parts.map(([type,p])=>({
+      type,p,x:Number(p.x)||0,y:Number(p.y)||0,
+      w:Math.max(1,Number(p.ancho)||80),h:Math.max(1,Number(p.alto)||26)
+    }));
+    const minX=Math.min(...rects.map(r=>r.x)),minY=Math.min(...rects.map(r=>r.y));
+    const maxX=Math.max(...rects.map(r=>r.x+r.w)),maxY=Math.max(...rects.map(r=>r.y+r.h));
+    const scale=Math.min(144/Math.max(1,maxX-minX),80/Math.max(1,maxY-minY),2.0);
+    const tx=(160-(maxX-minX)*scale)/2-minX*scale;
+    const ty=(96-(maxY-minY)*scale)/2-minY*scale;
+    for(const r of rects) {
+      const x=Math.round(tx+r.x*scale),y=Math.round(ty+r.y*scale);
+      const w=Math.max(1,Math.round(r.w*scale)),h=Math.max(1,Math.round(r.h*scale));
+      const color=/^#[0-9a-f]{6}/i.test(r.p.color||"")?r.p.color.slice(0,7):"#9eb0c6";
+      ctx.fillStyle=color;
+      if(r.type==="texto"){
+        ctx.font=Math.max(9,Math.round((r.p.tamano||16)*scale))+"px sans-serif";
+        ctx.textBaseline="middle";
+        ctx.fillText(String(r.p.texto||"TEXTO"),x+2,y+h/2,Math.max(1,w-4));
+      }else{
+        ctx.fillRect(x,y,w,h);
+        if(r.p.borde){ctx.strokeStyle=r.p.borde.slice(0,7);ctx.strokeRect(x+.5,y+.5,w-1,h-1);}
+      }
+    }
+    return preview;
+  }
   for(const [name,parts] of componentPresets){
-    const b=btn(name,()=>addPreset(parts),"ui-studio-preset-item");
+    const b=btn("",()=>addPreset(parts),"ui-studio-preset-item");
     b.dataset.search=name.toLocaleLowerCase("es");
+    b.append(presetPreview(parts),node("strong",null,name));
     paletteItems.append(b);
   }
   const emptyCategory=node("div","ui-studio-palette-caption","ELEMENTOS INDIVIDUALES");
@@ -450,10 +484,9 @@ export function montarEspacio(editor, M) {
       lastName=n;
       gallerySearch.value="";
     }
-    if(state.library && editor.nombre && editor.diseno) {
-      const canvas=galleryBody.querySelector('[data-screen="'+CSS.escape(editor.nombre)+'"] canvas');
-      if(canvas)renderThumb(canvas,editor.diseno);
-    }
+    // Gallery cards are redrawn on file selection/save only, never every
+    // inspector/animation tick: the previous implementation could queue
+    // multiple asynchronous image loads and make the editor feel sluggish.
   }
 
   setTimeline(false);update();

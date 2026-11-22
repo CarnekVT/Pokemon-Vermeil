@@ -905,13 +905,13 @@ module ResearchNotebook
       used = ResearchNotebook.progress.arcane_used?(base)
       potential = ResearchNotebook.progress.arcane_potential_known?(base)
       ability = notebook_arcane_ability(base)
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y, FOCUS_W - 36, 16, ResearchNotebook.t("HABILIDAD ARCANA"), 10, ARCANE_2, 0, true)
+      draw_editor_text(bmp,"focus_arcane_ability_caption",layout_position("focus_panel","x",FOCUS_X)+18,y,FOCUS_W-36,16,ResearchNotebook.t("HABILIDAD ARCANA"),10,ARCANE_2,0,true)
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y + 17, FOCUS_W - 36, 26, name, 17, INK, 0, true)
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y + 54, 70, 15, ResearchNotebook.t("TIPOS"), 9, MUTED, 0, true)
+      draw_editor_text(bmp,"focus_arcane_ability_name",layout_position("focus_panel","x",FOCUS_X)+18,y+17,FOCUS_W-36,26,name,17,INK,0,true)
+      draw_editor_text(bmp,"focus_arcane_types_label",layout_position("focus_panel","x",FOCUS_X)+18,y+54,70,15,ResearchNotebook.t("TIPOS"),9,MUTED,0,true)
       draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), layout_position("focus_panel", "x", FOCUS_X) + 18, y + 71, 64, 28)
       status = used ? ResearchNotebook.t("PROBADA") : (unlocked ? ResearchNotebook.t("DESPERTADA") : (potential ? ResearchNotebook.t("POR DESPERTAR") : ResearchNotebook.t("SIN OBSERVAR")))
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 166, y + 54, 104, 15, ResearchNotebook.t("ESTADO"), 9, MUTED, 0, true)
+      draw_editor_text(bmp,"focus_arcane_status_label",layout_position("focus_panel","x",FOCUS_X)+166,y+54,104,15,ResearchNotebook.t("ESTADO"),9,MUTED,0,true)
       draw_status_chip(bmp, layout_position("focus_panel", "x", FOCUS_X) + 166, y + 71, 104, 23, status, ARCANE)
     end
 
@@ -923,23 +923,22 @@ module ResearchNotebook
       form_used = ResearchNotebook.progress.golden_form_used?(base)
       form_known = form_seen || form_used
       # Primera fila: los tipos REALES de la forma, no el tipo de su Poder Dorado.
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y, FOCUS_W - 36, 16,
-                ResearchNotebook.t("TIPOS · FORMA DORADA"), 10, GOLDEN_2, 0, true)
+      draw_editor_text(bmp,"focus_golden_types_label",layout_position("focus_panel","x",FOCUS_X)+18,y,FOCUS_W-36,16,ResearchNotebook.t("TIPOS · FORMA DORADA"),10,GOLDEN_2,0,true)
       if form_known && ResearchNotebook::Repository.golden_form_configured?(entry)
         draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry),
                         layout_position("focus_panel", "x", FOCUS_X) + 18, y + 19, 64, 28)
       else
-        draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y + 19, 145, 23, "????", 14, MUTED, 0, true)
+        draw_editor_text(bmp,"focus_golden_types_unknown",layout_position("focus_panel","x",FOCUS_X)+18,y+19,145,23,"????",14,MUTED,0,true)
       end
       # Segunda fila: la afinidad es una propiedad distinta de la forma.
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y + 55, 140, 15, ResearchNotebook.t("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
+      draw_editor_text(bmp,"focus_golden_affinity_label",layout_position("focus_panel","x",FOCUS_X)+18,y+55,140,15,ResearchNotebook.t("AFINIDAD ÁUREA"),9,MUTED,0,true)
       gtype = ResearchNotebook::Repository.golden_type(entry)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], layout_position("focus_panel", "x", FOCUS_X) + 18, y + 72, 64, 28)
       else
-        draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 18, y + 72, 74, 23, "????", 13, MUTED, 0, true)
+        draw_editor_text(bmp,"focus_golden_affinity_unknown",layout_position("focus_panel","x",FOCUS_X)+18,y+72,74,23,"????",13,MUTED,0,true)
       end
-      draw_text(bmp, layout_position("focus_panel", "x", FOCUS_X) + 170, y + 55, 104, 15, ResearchNotebook.t("ESTADO FORMA"), 9, MUTED, 0, true)
+      draw_editor_text(bmp,"focus_golden_status_label",layout_position("focus_panel","x",FOCUS_X)+170,y+55,104,15,ResearchNotebook.t("ESTADO FORMA"),9,MUTED,0,true)
       status = if !ResearchNotebook::Repository.golden_form_configured?(entry)
                  ResearchNotebook.t("NO POSEE")
                elsif form_used
@@ -957,9 +956,9 @@ module ResearchNotebook
     def draw_grid_panel(bmp)
       color = section_color
       bmp.fill_rect(layout_position("grid_panel", "x", GRID_X), 59, GRID_W, 1, Color.new(255, 255, 255, 45))
-      draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 3, 59, 134, 18, ResearchNotebook.t("Especies: {1}", @species.length), 11, MUTED, 0, false)
-      draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 138, 59, 103, 18, ResearchNotebook.t("Orden: {1}", ResearchNotebook.t(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
-      draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 242, 59, 62, 18, ResearchNotebook.t("{1}/{2}", current_page_number, total_pages), 11, color, 2, true)
+      draw_editor_text(bmp,"grid_species_count",layout_position("grid_panel","x",GRID_X)+3,59,134,18,ResearchNotebook.t("Especies: {1}",@species.length),11,MUTED,0,false)
+      draw_editor_text(bmp,"grid_sort_label",layout_position("grid_panel","x",GRID_X)+138,59,103,18,ResearchNotebook.t("Orden: {1}",ResearchNotebook.t(SORT_LABELS[@sort_mode]||@sort_mode.to_s)),11,INK,1,true)
+      draw_editor_text(bmp,"grid_page_label",layout_position("grid_panel","x",GRID_X)+242,59,62,18,ResearchNotebook.t("{1}/{2}",current_page_number,total_pages),11,color,2,true)
 
       page_start = current_page_start
       PAGE_SIZE.times do |slot|
@@ -1698,8 +1697,15 @@ module ResearchNotebook
     end
 
     def draw_status_chip(bmp, x, y, w, h, text, color)
-      bmp.fill_rect(x, y, w, h, color)
-      draw_text(bmp, x + 3, y + 12, w - 6, h - 13, text, 10, INK, 1, true)
+      # A shared status template is authored in the same UI library, for both
+      # the focus card and detail pages. Live status is the only Ruby input.
+      painted=VermeilInterfaceLayout.render_component(bmp,@interface_layout,
+                          "focus_status_bg",x,y,w,h)
+      bmp.fill_rect(x,y,w,h,color) unless painted
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        "Libreta/Catalogo",%w[focus_status_text],
+        {"focus_status_text"=>{"texto"=>text.to_s,"x"=>x+2,"y"=>y+3,
+                               "ancho"=>w-4,"alto"=>h-4}})
     end
 
     def draw_progress_dots(bmp, x, y, total, active, color)

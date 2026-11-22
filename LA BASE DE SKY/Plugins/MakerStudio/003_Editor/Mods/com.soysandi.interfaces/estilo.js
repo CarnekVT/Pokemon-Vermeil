@@ -443,6 +443,14 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
   line-height:1.3;text-align:center;cursor:pointer;white-space:normal}
 .ui-studio-preset-item:hover{border-color:var(--accent,#619fee);
   background:var(--bg-hover,var(--studio-panel))}
+.ui-studio-v3 .ui-studio-preset-item{display:flex;flex-direction:column;
+  align-items:stretch;justify-content:flex-start;min-height:138px;padding:7px;
+  gap:8px;text-align:left;overflow:hidden}
+.ui-studio-preset-preview{display:block;width:100%;height:93px;
+  image-rendering:pixelated;object-fit:contain;border-radius:5px;
+  background:#151e2a}
+.ui-studio-preset-item strong{font-size:12px;font-weight:650;
+  padding:0 5px 4px;white-space:normal;line-height:1.35}
 /* Resolution in one small popover. */
 .ui-studio-canvas-popover{position:absolute;top:57px;right:135px;
   z-index:90;width:min(430px,92vw);max-height:calc(100% - 70px);overflow:auto;
