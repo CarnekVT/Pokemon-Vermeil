@@ -29,7 +29,9 @@
       },
       "color": "#E9DBC0FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Tarjetas",
+      "etiqueta": "Detail panel"
     },
     {
       "visible": true,
@@ -43,7 +45,9 @@
       "capa": 2,
       "color": "#F0E6D0FF",
       "borde": "#A8936EBB",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Tarjetas",
+      "etiqueta": "Card template"
     },
     {
       "id": "detail_arcane_title",
@@ -57,7 +61,9 @@
       "tamano": 18,
       "color": "#644888",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Información arcana",
+      "etiqueta": "Detail arcane title"
     },
     {
       "id": "detail_ability_name",
@@ -71,7 +77,9 @@
       "tamano": 18,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail ability name"
     },
     {
       "id": "detail_arcane_note",
@@ -85,7 +93,9 @@
       "tamano": 13,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Información arcana",
+      "etiqueta": "Detail arcane note"
     },
     {
       "id": "detail_power_title",
@@ -99,7 +109,9 @@
       "tamano": 18,
       "color": "#946718",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail power title"
     },
     {
       "id": "detail_power_note",
@@ -113,7 +125,9 @@
       "tamano": 13,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail power note"
     },
     {
       "id": "detail_form_title",
@@ -127,7 +141,9 @@
       "tamano": 18,
       "color": "#946718",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail form title"
     },
     {
       "id": "detail_form_ability",
@@ -141,7 +157,9 @@
       "tamano": 16,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail form ability"
     },
     {
       "id": "detail_moves_title",
@@ -155,7 +173,9 @@
       "tamano": 17,
       "color": "#946718",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail moves title"
     },
     {
       "id": "detail_form_note",
@@ -169,7 +189,9 @@
       "tamano": 13,
       "color": "#352C27",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Información áurea",
+      "etiqueta": "Detail form note"
     }
   ],
   "biblioteca": {
