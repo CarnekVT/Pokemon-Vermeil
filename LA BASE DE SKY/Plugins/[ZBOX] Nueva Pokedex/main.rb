@@ -1318,16 +1318,10 @@ class PokemonPokedexNueva_Scene
     draw_editor_label(bmp,"detail_name",20,20,
                      [name_w+8,265].min,32,entry[:name],
                      NuevaPokedex::COLOR_ACCENT,NuevaPokedex::COLOR_SHADOW)
-    if entry[:form].to_i > 0 && entry[:form_name]
-      form_x = 20 + name_w + 12
-      if form_x + bmp.text_size(entry[:form_name]).width < 500
-        # Forma alineada en altura con el nombre (mismo centro vertical)
-        pbDrawShadowText(bmp, form_x, 25, 400, 22, entry[:form_name],
-                         NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
-      else
-        pbDrawShadowText(bmp, 20, 42, 440, 16, entry[:form_name],
-                         NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
-      end
+    if entry[:form].to_i>0 && entry[:form_name] && !entry[:form_name].to_s.empty?
+      VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+        "Pokedex/Ficha",%w[entry_form_name],
+        {"entry_form_name"=>entry[:form_name].to_s})
     end
     # Bola de captura (arriba a la derecha)
     owned = NuevaPokedex.slot_owned?(entry[:species])
@@ -1341,7 +1335,12 @@ class PokemonPokedexNueva_Scene
     draw_editor_label(bmp,"detail_category",304,100,300,20,
                      NuevaPokedex.t("Categoría: {1}",entry[:category]),
                      NuevaPokedex::COLOR_TEXT_DIM,NuevaPokedex::COLOR_SHADOW)
-    draw_entry_types(bmp, entry[:types], 304, 132)
+    types_layout=NuevaPokedex.interface_layout
+    tx=NuevaPokedex.layout_position("entry_types","x",304)
+    ty=NuevaPokedex.layout_position("entry_types","y",132)
+    tw=VermeilInterfaceLayout.number(types_layout,"entry_types","ancho",168).to_i
+    th=VermeilInterfaceLayout.number(types_layout,"entry_types","alto",35).to_i
+    draw_type_icons(bmp,entry[:types],tx,ty,[[tw-8,16].max/2,1].max,th,8)
     draw_editor_label(bmp,"detail_height",304,178,200,20,
                      NuevaPokedex.t("Altura: {1} m",entry[:height]/10.0),
                      NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
@@ -1432,23 +1431,44 @@ class PokemonPokedexNueva_Scene
                      Color.new(248, 248, 248), NuevaPokedex::COLOR_SHADOW, 1)
   end
 
+  # Content and pagination are live GameData values, while every text box
+  # (including the full four-line paragraph) uses editor-authored typography.
   def draw_entry_description(bmp, text)
-    text_w = NuevaPokedex::ENTRY_DESC_W - 16
-    tmp = Bitmap.new(text_w, 20)
-    lines, _ = NuevaPokedexWordWrap.wrap_text(tmp, text, text_w, 20)
+    layout=NuevaPokedex.interface_layout
+    desc=VermeilInterfaceLayout.element(layout,"entry_description_text") || {}
+    line_x=NuevaPokedex.layout_position("entry_description_text","x",28)
+    line_y=NuevaPokedex.layout_position("entry_description_text","y",342)
+    text_w=VermeilInterfaceLayout.number(layout,"entry_description_text","ancho",
+                                         NuevaPokedex::ENTRY_DESC_W-16).to_i
+    line_h=VermeilInterfaceLayout.number(layout,"entry_description_text","alto",20).to_i
+    text_w=[text_w,1].max
+    line_h=[line_h,12].max
+    area_h=VermeilInterfaceLayout.number(layout,"entry_description","alto",118).to_i
+    lines_per_page=[[((area_h-35)/line_h),1].max,5].min
+    # Use the same font size as the editor when calculating line wraps.
+    tmp=Bitmap.new(text_w,line_h)
+    pbSetSystemFont(tmp) if defined?(pbSetSystemFont)
+    font_size=desc["tamano"].to_i
+    tmp.font.size=font_size if font_size>0
+    lines, = NuevaPokedexWordWrap.wrap_text(tmp,text,text_w,line_h)
     tmp.dispose
-    lines_per_page = 4
-    total_pages = [(lines.length.to_f / lines_per_page).ceil, 1].max
-    page_lines = lines.slice(@page * lines_per_page, lines_per_page) || []
-    page_lines.each_with_index do |line, i|
-      pbDrawShadowText(bmp, 28, NuevaPokedex.layout_position("entry_description", "y", NuevaPokedex::ENTRY_DESC_Y) + 12 + i * 20,
-                       text_w, 20, line,
-                       NuevaPokedex::COLOR_TEXT, NuevaPokedex::COLOR_SHADOW)
+    total_pages=[(lines.length.to_f/lines_per_page).ceil,1].max
+    @page=[[@page.to_i,0].max,total_pages-1].min
+    (lines.slice(@page*lines_per_page,lines_per_page)||[]).each_with_index do |line,i|
+      VermeilInterfaceLayout.render_document(bmp,layout,"Pokedex/Ficha",
+        %w[entry_description_text],
+        {"entry_description_text"=>{
+          "texto"=>line,
+          "x"=>line_x,
+          "y"=>line_y+i*line_h,
+          "ancho"=>text_w,
+          "alto"=>line_h
+        }})
     end
-    if total_pages > 1
-      pg = NuevaPokedex.t("{1}/{2}", @page + 1, total_pages)
-      pbDrawShadowText(bmp, 24 + 8, NuevaPokedex.layout_position("entry_description", "y", NuevaPokedex::ENTRY_DESC_Y) + NuevaPokedex::ENTRY_DESC_H - 16,
-                       200, 16, pg, NuevaPokedex::COLOR_TEXT_DIM, NuevaPokedex::COLOR_SHADOW)
+    if total_pages>1
+      VermeilInterfaceLayout.render_document(bmp,layout,"Pokedex/Ficha",
+        %w[entry_description_page],
+        {"entry_description_page"=>NuevaPokedex.t("{1}/{2}",@page+1,total_pages)})
     end
   end
 
