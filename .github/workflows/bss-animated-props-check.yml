@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Check Battle Scene Studio Ruby syntax
         run: |
           find 'LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime' -type f -name '*.rb' -print0 | xargs -0 -n1 ruby -c
