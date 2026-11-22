@@ -36,15 +36,18 @@ module VermeilInterfaceLayout
                          portrait_pokemon counter_panel scrollbar_track
                          list_row list_row_selected
                          pokedex_title seen_counter caught_counter
-                         list_total list_number list_name],
+                         list_total list_number list_name
+                         help_bar help_primary help_secondary],
     "Pokedex/Ficha" => %w[entry_page entry_sprite entry_description
                          detail_name detail_category detail_height detail_weight
                          entry_header entry_divider entry_description_rule
                          entry_sprite_frame entry_number entry_status
-                         entry_description_title],
-    "Pokedex/Area" => %w[area_page],
+                         entry_description_title
+                         help_bar help_primary help_secondary],
+    "Pokedex/Area" => %w[area_page help_bar help_primary help_secondary],
     "Pokedex/Formas" => %w[forms_page forms_list_panel forms_detail_panel
-                          forms_row forms_row_selected forms_title forms_name]
+                          forms_row forms_row_selected forms_title forms_name
+                          help_bar help_primary help_secondary]
   }.freeze
 
   EXTRA_TYPES = %w[imagen panel texto animado barra].freeze
