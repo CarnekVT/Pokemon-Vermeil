@@ -60,6 +60,7 @@ module VermeilInterfaceLayout
 
   def load(kind)
     result={}
+    pages={}
     loaded=0
     (FILES[kind] || []).each do |page|
       # The file visible in MakerStudio's UI/<Interface>/<Page> library is
@@ -82,17 +83,24 @@ module VermeilInterfaceLayout
           next
         end
         loaded+=1
+        page_elements={}
         data["elementos"].each do |element|
           next unless element.is_a?(Hash)
           id=element["id"].to_s
           next if id.empty?
-          result[id]=element.merge("__page"=>page)
+          value=element.merge("__page"=>page)
+          page_elements[id]=value
+          # Retain flat access for the legacy native anchor calls. Every
+          # page-specific render uses the scoped table instead.
+          result[id]=value unless result.key?(id)
         end
+        pages[page]=page_elements
       rescue StandardError=>error
         report("#{filename}: #{error.class}: #{error.message}")
       end
     end
-    report("#{kind}: #{loaded} perfiles leidos / #{result.length} elementos") if $DEBUG
+    result["__pages"]=pages
+    report("#{kind}: #{loaded} perfiles leidos / #{pages.values.sum(&:length)} elementos") if $DEBUG
     result
   end
 
@@ -200,7 +208,12 @@ module VermeilInterfaceLayout
   def render_document(canvas,layout,page,ids,values={},origin_x=0,origin_y=0)
     return [] unless canvas && layout && ids && !ids.empty?
     allowed=ids.map(&:to_s)
-    layers=layout.map do |id,data|
+    page_layout=if layout.is_a?(Hash) && layout["__pages"].is_a?(Hash)
+                  layout["__pages"][page] || {}
+                else
+                  layout
+                end
+    layers=page_layout.map do |id,data|
       next unless allowed.include?(id) && data.is_a?(Hash) &&
                   data["__page"]==page && data["visible"]!=false
       [id,data]
@@ -212,7 +225,7 @@ module VermeilInterfaceLayout
       y=data["y"].to_i-origin_y.to_i
       case data["tipo"]
       when "panel","imagen"
-        painted << id if paint_native(canvas,layout,id,x,y)
+        painted << id if paint_native(canvas,page_layout,id,x,y)
       when "texto"
         override=values[id]
         if override.is_a?(Hash)
@@ -309,7 +322,9 @@ module VermeilInterfaceLayout
     native=NATIVE_IDS[page] || []
     result=[]
     notes=[]
-    layout.each do |id, data|
+    scoped=layout.is_a?(Hash) && layout["__pages"].is_a?(Hash) ?
+           (layout["__pages"][page] || {}) : layout
+    scoped.each do |id, data|
       next unless data.is_a?(Hash) && data["__page"] == page
       next if native.include?(id)
       next unless EXTRA_TYPES.include?(data["tipo"].to_s)
