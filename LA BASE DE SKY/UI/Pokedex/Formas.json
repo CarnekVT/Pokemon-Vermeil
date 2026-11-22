@@ -15,19 +15,97 @@
   "elementos": [
     {
       "id": "forms_page",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 0,
       "x": 0,
       "y": 0,
       "ancho": 640,
       "alto": 480,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/forms_page",
       "entrada": {
         "efecto": "desde_derecha",
         "duracion": 0.19,
         "suavizado": "suave",
         "distancia": 48
-      }
+      },
+      "color": "#121C2AFF"
+    },
+    {
+      "id": "forms_list_panel",
+      "tipo": "panel",
+      "x": 318,
+      "y": 24,
+      "ancho": 310,
+      "alto": 400,
+      "capa": 4,
+      "color": "#1C2A3CFF",
+      "borde": "#536B8DFF",
+      "borde_grosor": 1,
+      "visible": true
+    },
+    {
+      "id": "forms_detail_panel",
+      "tipo": "panel",
+      "x": 24,
+      "y": 318,
+      "ancho": 262,
+      "alto": 138,
+      "capa": 4,
+      "color": "#1C2A3CFF",
+      "borde": "#536B8DFF",
+      "borde_grosor": 1,
+      "visible": true
+    },
+    {
+      "id": "forms_row",
+      "tipo": "panel",
+      "x": 330,
+      "y": 46,
+      "ancho": 290,
+      "alto": 36,
+      "capa": 10,
+      "color": "#243349FF",
+      "visible": true
+    },
+    {
+      "id": "forms_row_selected",
+      "tipo": "panel",
+      "x": 330,
+      "y": 46,
+      "ancho": 290,
+      "alto": 36,
+      "capa": 11,
+      "color": "#344A68FF",
+      "borde": "#F46A72FF",
+      "borde_grosor": 2,
+      "visible": true
+    },
+    {
+      "id": "forms_title",
+      "tipo": "texto",
+      "x": 330,
+      "y": 22,
+      "ancho": 290,
+      "alto": 18,
+      "capa": 20,
+      "texto": "Formas de Bulbasaur",
+      "tamano": 16,
+      "color": "#F46A72",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "forms_name",
+      "tipo": "texto",
+      "x": 342,
+      "y": 54,
+      "ancho": 170,
+      "alto": 20,
+      "capa": 21,
+      "texto": "Forma base",
+      "tamano": 15,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
