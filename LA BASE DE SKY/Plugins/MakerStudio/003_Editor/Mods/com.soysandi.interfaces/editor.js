@@ -589,6 +589,7 @@ export class EditorInterfaces {
       this.pintarSucio();
       await this.recargarLista();
       this.selDiseno.value = this.nombre;
+      this.espacio?.saved?.(this.nombre);
       const destino = /^(Libreta\/|vermeil_libreta)/i.test(this.nombre) ? "la Libreta" :
         /^(Pokedex\/|vermeil_pokedex)/i.test(this.nombre) ? "la Pokédex" : null;
       this.toast(destino ?
