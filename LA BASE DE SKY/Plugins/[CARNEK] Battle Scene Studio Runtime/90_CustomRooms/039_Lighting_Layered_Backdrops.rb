@@ -11,7 +11,13 @@ module BSSLayeredLighting
 
   def config_value(data, key, fallback=nil)
     return fallback unless data.is_a?(Hash)
-    val=data[key] || data[key.to_sym]
+    # An explicit false is authoritative. Using || silently discards it,
+    # enabling outdoor sky layers in indoor fights.
+    val=if data.key?(key)
+          data[key]
+        else
+          data[key.to_sym]
+        end
     val.nil? ? fallback : val
   end
 
