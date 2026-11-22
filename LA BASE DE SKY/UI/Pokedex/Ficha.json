@@ -15,19 +15,19 @@
   "elementos": [
     {
       "id": "entry_page",
-      "tipo": "imagen",
+      "tipo": "panel",
       "capa": 0,
       "x": 0,
       "y": 0,
       "ancho": 640,
       "alto": 480,
-      "imagen": "Graphics/UI/Vermeil/NewPokedex/entry_page",
       "entrada": {
         "efecto": "desde_derecha",
         "duracion": 0.19,
         "suavizado": "suave",
         "distancia": 48
-      }
+      },
+      "color": "#121C2AFF"
     },
     {
       "id": "entry_sprite",
@@ -106,6 +106,94 @@
       "texto": "Peso:",
       "tamano": 16,
       "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "entry_header",
+      "tipo": "panel",
+      "x": 0,
+      "y": 0,
+      "ancho": 640,
+      "alto": 56,
+      "capa": 5,
+      "color": "#1A293AFF",
+      "visible": true
+    },
+    {
+      "id": "entry_divider",
+      "tipo": "panel",
+      "x": 295,
+      "y": 69,
+      "ancho": 2,
+      "alto": 236,
+      "capa": 5,
+      "color": "#536B8DFF",
+      "visible": true
+    },
+    {
+      "id": "entry_description_rule",
+      "tipo": "panel",
+      "x": 304,
+      "y": 255,
+      "ancho": 304,
+      "alto": 2,
+      "capa": 5,
+      "color": "#536B8DFF",
+      "visible": true
+    },
+    {
+      "id": "entry_sprite_frame",
+      "tipo": "panel",
+      "x": 20,
+      "y": 52,
+      "ancho": 264,
+      "alto": 264,
+      "capa": 4,
+      "color": "#1D2A3EFF",
+      "borde": "#F46A72FF",
+      "borde_grosor": 3,
+      "visible": true
+    },
+    {
+      "id": "entry_number",
+      "tipo": "texto",
+      "x": 20,
+      "y": 3,
+      "ancho": 160,
+      "alto": 16,
+      "capa": 20,
+      "texto": "No 001",
+      "tamano": 13,
+      "color": "#A9BCD4",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "entry_status",
+      "tipo": "texto",
+      "x": 304,
+      "y": 70,
+      "ancho": 300,
+      "alto": 20,
+      "capa": 20,
+      "texto": "OBTENIDO",
+      "tamano": 16,
+      "color": "#B5D5B5",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "entry_description_title",
+      "tipo": "texto",
+      "x": 24,
+      "y": 310,
+      "ancho": 120,
+      "alto": 18,
+      "capa": 20,
+      "texto": "POKÉDEX",
+      "tamano": 16,
+      "color": "#F46A72",
       "alineacion": "izquierda",
       "visible": true
     }
