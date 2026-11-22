@@ -82,12 +82,12 @@ Dir.chdir(File.expand_path("../LA BASE DE SKY", __dir__)) do
     @rendered << [species, slot]
   end
   notebook.refresh_grid_icons
-  check(notebook.instance_variable_get(:@pending_grid_icons).length == 8,
-        "La cuadrícula aplaza la carga de las 8 imágenes")
+  check(notebook.instance_variable_get(:@pending_grid_icons).empty? &&
+        notebook.instance_variable_get(:@rendered).length == 8,
+        "La cuadrícula carga todos los iconos antes de presentarse")
   notebook.render_next_grid_icons(2)
-  check(notebook.instance_variable_get(:@rendered).length == 2 &&
-        notebook.instance_variable_get(:@pending_grid_icons).length == 6,
-        "Se procesa solo el presupuesto de iconos por fotograma")
+  check(notebook.instance_variable_get(:@rendered).length == 8,
+        "Nunca se debe rellenar la cuadrícula progresivamente al navegar")
   def notebook.refresh
     @test_refreshed = true
   end
