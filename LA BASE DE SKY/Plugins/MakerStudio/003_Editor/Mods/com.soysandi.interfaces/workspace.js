@@ -441,6 +441,11 @@ export function montarEspacio(editor, M) {
   setTimeline(false);update();
   return {
     update,
+    saved(name){
+      cached.delete(name);
+      if(state.library)rebuildGallery();
+      update();
+    },
     fitOnOpen(){if(!state.library)requestAnimationFrame(()=>editor.lienzo.encajar());},
     openPalette(){setPalette(true);},
     nextScreen(){
