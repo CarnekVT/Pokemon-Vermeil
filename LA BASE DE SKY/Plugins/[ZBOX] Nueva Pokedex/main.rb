@@ -1564,9 +1564,8 @@ class PokemonPokedexNueva_Scene
   end
 
   def draw_area_footer(bmp, map_name, names, has_points)
-    y=NuevaPokedex::SCREEN_HEIGHT-62
-    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,62,NuevaPokedex::COLOR_PANEL)
-    bmp.fill_rect(0,y,NuevaPokedex::SCREEN_WIDTH,2,NuevaPokedex::COLOR_ACCENT)
+    # Area information reuses an authored JSON caption; neither an extra
+    # black rectangle nor an ad-hoc red line is painted by the code.
     text=if has_points
            names.empty? ? map_name.to_s : names.join(" · ")
          elsif names.empty?
@@ -1579,8 +1578,8 @@ class PokemonPokedexNueva_Scene
     while text.length>2 && bmp.text_size(text).width>NuevaPokedex::SCREEN_WIDTH-36
       text=text[0...-2]+"…"
     end
-    pbDrawShadowText(bmp,16,y+5,NuevaPokedex::SCREEN_WIDTH-32,19,text,
-                     NuevaPokedex::COLOR_TEXT,NuevaPokedex::COLOR_SHADOW)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Area",%w[location_label],{"location_label"=>text})
   ensure
     bmp.font.size=previous if previous && bmp && bmp.font
   end
@@ -1668,8 +1667,8 @@ class PokemonPokedexNueva_Scene
     base = entry[:base_species]
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
       "Pokedex/Formas",%w[forms_page forms_list_panel forms_detail_panel])
-    # Panel derecha: lista de formas con su número de slot (si lo tienen)
-    draw_panel(bmp, 318, 24, 310, 400)
+    # forms_list_panel is painted once by Pokedex/Formas.json.
+    # Only real dynamic form rows are appended below.
     x = 330
     y = 46
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
