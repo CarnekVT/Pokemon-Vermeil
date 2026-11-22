@@ -1010,29 +1010,18 @@ class PokemonPokedexNueva_Scene
   # size, color and visibility are authored by the active MakerStudio page.
   # Reserved native IDs do not create a second static Elemento text sprite.
   def draw_editor_label(bmp,id,x,y,w,h,value,color,shadow,align=0)
-    original_size=(bmp.font.size rescue nil)
-    if defined?(VermeilInterfaceLayout)
-      layout=NuevaPokedex.interface_layout
-      data=VermeilInterfaceLayout.element(layout,id)
-      if data && data["tipo"]=="texto"
-        return if data["visible"]==false
-        x=VermeilInterfaceLayout.position(layout,id,"x",x)
-        y=VermeilInterfaceLayout.position(layout,id,"y",y)
-        w=VermeilInterfaceLayout.number(layout,id,"ancho",w).to_i
-        h=VermeilInterfaceLayout.number(layout,id,"alto",h).to_i
-        size=VermeilInterfaceLayout.number(layout,id,"tamano",original_size || 18).to_i
-        bmp.font.size=size if bmp.font && size>0
-        color=VermeilInterfaceLayout.color(data["color"],color)
-        align=case data["alineacion"]
-              when "centro" then 1
-              when "derecha" then 2
-              else 0
-              end
-      end
+    # Editor JSON owns typography, position and visibility for all native
+    # labels; this code supplies only actual species data from GameData.
+    layout=NuevaPokedex.interface_layout
+    data=VermeilInterfaceLayout.element(layout,id)
+    if data && data["tipo"]=="texto"
+      rendered=VermeilInterfaceLayout.render_document(bmp,layout,
+        data["__page"],[id],{id=>value.to_s})
+      return unless rendered.empty?
+      return if data["visible"]==false
     end
+    # An old project without the authored component remains readable.
     pbDrawShadowText(bmp,x,y,w,h,value.to_s,color,shadow,align) if w.to_i>0 && h.to_i>0
-  ensure
-    bmp.font.size=original_size if original_size && bmp && bmp.font
   end
 
   def draw_counters
