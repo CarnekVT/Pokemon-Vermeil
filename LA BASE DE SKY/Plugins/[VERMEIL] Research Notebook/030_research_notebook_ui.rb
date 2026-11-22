@@ -975,14 +975,14 @@ module ResearchNotebook
 
     def draw_grid_cell(bmp, x, y, idx, selected)
       if idx >= @species.length
-        @skin.draw(bmp,:grid_cell,x,y) if @skin
+        VermeilInterfaceLayout.render_component(bmp,@interface_layout,"grid_cell",x,y)
         return
       end
       species = @species[idx]
       known = species_identity_known?(species)
       fill = selected ? Color.new(section_color.red, section_color.green, section_color.blue, 70) : PAPER_2
       asset = selected ? :grid_cell_selected : :grid_cell
-      unless @skin && @skin.draw(bmp, asset, x, y)
+      unless VermeilInterfaceLayout.render_component(bmp,@interface_layout,asset.to_s,x,y)
         bmp.fill_rect(x, y, CELL_W, CELL_H, Color.new(154, 135, 103, 110))
         bmp.fill_rect(x + 1, y + 1, CELL_W - 2, CELL_H - 2, fill)
       end
@@ -1378,7 +1378,7 @@ module ResearchNotebook
     def build_cursor_bitmap
       bmp=@sprites["cursor"].bitmap
       bmp.clear
-      return if @skin && @skin.draw(bmp,:grid_cursor,0,0)
+      return if VermeilInterfaceLayout.render_component(bmp,@interface_layout,"grid_cursor",0,0)
       # Only for old projects without the editable cursor component.
       bmp.fill_rect(0,0,CELL_W,2,Color.new(255,255,255,220))
       bmp.fill_rect(0,CELL_H-2,CELL_W,2,Color.new(255,255,255,220))
