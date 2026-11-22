@@ -44,7 +44,7 @@ module VermeilInterfaceLayout
                          entry_sprite_frame entry_number entry_status
                          entry_description_title
                          help_bar help_primary help_secondary],
-    "Pokedex/Area" => %w[area_page help_bar help_primary help_secondary],
+    "Pokedex/Area" => %w[area_page help_bar help_primary help_secondary location_label],
     "Pokedex/Formas" => %w[forms_page forms_list_panel forms_detail_panel
                           forms_row forms_row_selected forms_title forms_name
                           help_bar help_primary help_secondary]
