@@ -429,8 +429,15 @@ export class Inspector {
   //---------------------------------------------------------------------------
   pintarGenerales(el) {
     this.cuerpo.appendChild(titulillo(M.NOMBRE_TIPO[el.tipo] || el.tipo));
-    this.cuerpo.appendChild(fila("Nombre",
-      h("span", { textContent: el.id, title: "Doble clic en la lista de capas para cambiarlo" })));
+    this.cuerpo.appendChild(fila("ID nativo",
+      h("span", { textContent: el.id,
+        title: "Doble clic en Capas para renombrarlo. No alteres IDs vinculados del juego." })));
+    this.cuerpo.appendChild(fila("Nombre visible",
+      campoTexto(el.etiqueta||"",v=>this.fijar(el,"etiqueta",v||null),
+                 "P. ej. Panel de especies")));
+    this.cuerpo.appendChild(fila("Grupo en Capas",
+      campoTexto(el.grupo||"",v=>this.fijar(el,"grupo",v||null),
+                 "P. ej. Cabecera / Datos")));
     this.cuerpo.appendChild(fila("Capa",
       campoNumero(M.num(el.capa, 0), (v) => this.fijar(el, "capa", Math.round(v || 0)))));
   }
