@@ -190,11 +190,11 @@ export function montarEspacio(editor, M) {
     for(const el of items) {
       const x=Number(el.x)||0,y=Number(el.y)||0;
       const w=Math.max(0,Number(el.ancho)||0),h=Math.max(0,Number(el.alto)||0);
-      const fill=el.color&&/^#[0-9a-fA-F]{6}/.test(el.color)?el.color.slice(0,7):"#27374c";
+      const fill=el.color&&/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(el.color)?el.color:"#27374c";
       if(el.tipo==="panel"&&w&&h){
         context.fillStyle=fill;context.fillRect(x,y,w,h);
         if(el.borde&&/^#[0-9a-fA-F]{6}/.test(el.borde)){
-          context.strokeStyle=el.borde.slice(0,7);
+          context.strokeStyle=el.borde;
           context.lineWidth=Math.max(1,Number(el.borde_grosor)||1);
           context.strokeRect(x,y,w,h);
         }
