@@ -537,4 +537,17 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
 .ui-layer-group-head:hover{background:var(--bg-hover)}
 .ui-layer-group .ui-capa{padding-left:6px}
 .ui-native-navigation-help{font-size:11px;line-height:1.45}
+
+.ui-preset-library{border-top:1px solid var(--border);margin-top:8px;padding:10px 2px 4px;}
+.ui-preset-title{font-size:11px;letter-spacing:.08em;color:var(--text-tertiary);}
+.ui-preset-list{display:grid;grid-template-columns:repeat(2,minmax(115px,1fr));gap:6px;margin-top:8px;}
+.ui-preset-card{
+ display:flex;align-items:center;gap:8px!important;
+ min-height:48px;padding:7px!important;border-radius:8px!important;
+ border:1px solid var(--border)!important;background:var(--bg-secondary)!important;
+ color:var(--text-primary)!important;text-align:left!important;
+}
+.ui-preset-card:hover{background:var(--bg-hover)!important;border-color:var(--accent)!important}
+.ui-preset-glyph{font-size:21px;opacity:.65;color:var(--accent);width:23px;text-align:center}
+.ui-preset-card-label{font-size:11px;font-weight:600;line-height:1.25}
 `;
