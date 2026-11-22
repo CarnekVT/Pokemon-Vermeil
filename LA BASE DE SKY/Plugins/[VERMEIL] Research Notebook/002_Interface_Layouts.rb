@@ -254,6 +254,7 @@ module VermeilInterfaceLayout
   def paint_text(canvas,data,x,y,value)
     return unless canvas && canvas.respond_to?(:font) && canvas.font
     prev_size=canvas.font.size
+    prev_color=(canvas.font.color rescue nil)
     prev_bold=(canvas.font.bold rescue nil)
     prev_offset=(canvas.text_offset_y rescue nil)
     # mkxp-z subtracts text_offset_y when drawing. pbSetSystemFont leaves
@@ -281,6 +282,7 @@ module VermeilInterfaceLayout
       canvas.draw_text(x,y,w,h,value.to_s,align)
     end
   ensure
+    canvas.font.color=prev_color if prev_color && canvas && canvas.font
     canvas.font.size=prev_size if prev_size && canvas && canvas.font
     canvas.font.bold=prev_bold if !prev_bold.nil? && canvas && canvas.font &&
                                    canvas.font.respond_to?(:bold=)
