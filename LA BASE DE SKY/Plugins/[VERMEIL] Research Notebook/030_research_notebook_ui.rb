@@ -695,20 +695,13 @@ module ResearchNotebook
     #===========================================================================
     # The UI/Libreta/Catalogo profile owns all page chrome and backgrounds.
     # Ruby supplies state and dynamic fields only, never a second paper layer.
+    # The on-screen book is a JSON document, not a second Ruby-made mockup.
     def draw_static
       bmp=@sprites["paper"].bitmap
       bmp.clear
-      @skin.draw(bmp,:background,0,0) if @skin
-      @skin.draw(bmp,:pages,layout_position("pages","x",BOOK_X),
-                            layout_position("pages","y",BOOK_Y)) if @skin
-      @skin.draw(bmp,:book_spine,
-                 layout_position("book_spine","x",308),
-                 layout_position("book_spine","y",BOOK_Y)) if @skin
-      @skin.draw(bmp,:header_bar,0,0) if @skin
-      @skin.draw(bmp,:footer_bar,0,FOOTER_Y) if @skin
-      draw_editor_text(bmp,"notebook_title",18,10,286,30,
-                       ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"),
-                       19,WHITE,0,true)
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        "Libreta/Catalogo",
+        %w[background pages book_spine header_bar footer_bar notebook_title])
     end
 
     def refresh
@@ -721,6 +714,12 @@ module ResearchNotebook
       draw_static
       bmp = @sprites["overlay"].bitmap
       bmp.clear
+      # Render ordered authored panels first, then live species data on top.
+      page=@detail_open ? "Libreta/Ficha" : "Libreta/Catalogo"
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        "Libreta/Catalogo",%w[focus_panel])
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        page,[@detail_open ? "detail_panel" : "grid_panel"])
       draw_header(bmp)
       if @species.empty?
         hide_pokemon_sprite
@@ -743,24 +742,29 @@ module ResearchNotebook
 
     def draw_header(bmp)
       return if @sections.empty?
-      x = 318
-      @sections.each_with_index do |entry, i|
-        label = entry[1]
-        w = (306 / @sections.length.to_f).floor
-        xx = x + i * w
-        active = (i == @section_index)
-        color = entry[0] == :arcane ? ARCANE : GOLDEN
-        tab_key = entry[0] == :arcane ? :tab_arcane : :tab_golden
-        xx = layout_position(tab_key.to_s, "x", xx)
-        ty = layout_position(tab_key.to_s, "y", 8)
-        tab_drawn=(@skin && @skin.draw(bmp,tab_key,xx,ty))
-        bmp.fill_rect(xx,ty,w-4,37,active ? color : Color.new(87,70,55)) if !tab_drawn
-        bmp.fill_rect(xx,ty+34,w-4,3,color) if active
-        draw_editor_text(bmp,"#{tab_key}_label",xx+4,ty+16,w-12,17,
-                         label,12,WHITE,1,true)
+      text_values={}
+      tab_ids=[]
+      @sections.each do |entry|
+        id=entry[0]==:arcane ? "tab_arcane" : "tab_golden"
+        tab_ids << id
+        tab_ids << "#{id}_label"
+        text_values["#{id}_label"]=entry[1]
       end
-      subtitle = current_section == :arcane ? ResearchNotebook.t("Notas sobre energía arcana") : ResearchNotebook.t("Notas sobre energía áurea")
-      draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        "Libreta/Catalogo",tab_ids,text_values)
+      # The active tab marker is a native state indicator; all tab art,
+      # colors, borders, and label typography remain authored in JSON.
+      selected=current_section==:arcane ? "tab_arcane" : "tab_golden"
+      x=layout_position(selected,"x",318)
+      y=layout_position(selected,"y",8)
+      w=VermeilInterfaceLayout.number(@interface_layout,selected,"ancho",149).to_i
+      color=section_color
+      bmp.fill_rect(x,y+35,w,2,color)
+      subtitle=current_section==:arcane ?
+        ResearchNotebook.t("Notas sobre energía arcana") :
+        ResearchNotebook.t("Notas sobre energía áurea")
+      draw_editor_text(bmp,"notebook_subtitle",20,38,210,15,
+                       subtitle,10,WHITE,0,false)
     end
 
     def draw_empty_state
@@ -792,32 +796,18 @@ module ResearchNotebook
     # actual text style/box is controlled by MakerStudio's JSON. ID is a
     # reserved native binding, so no duplicate static text sprite is created.
     def draw_editor_text(bmp,id,x,y,w,h,content,size,color,alignment=0,bold=false)
-      if defined?(VermeilInterfaceLayout)
-        data=VermeilInterfaceLayout.element(@interface_layout,id)
-        if data && data["tipo"]=="texto"
-          x=VermeilInterfaceLayout.position(@interface_layout,id,"x",x)
-          y=VermeilInterfaceLayout.position(@interface_layout,id,"y",y)
-          w=VermeilInterfaceLayout.number(@interface_layout,id,"ancho",w).to_i
-          h=VermeilInterfaceLayout.number(@interface_layout,id,"alto",h).to_i
-          size=VermeilInterfaceLayout.number(@interface_layout,id,"tamano",size).to_i
-          color=VermeilInterfaceLayout.color(data["color"],color)
-          # Fixed captions are authored in the editor; dynamic species text
-          # always takes its actual value from game state.
-          if (["notebook_title","cover_title","cover_subtitle","cover_brand",
-                "tab_arcane_label","tab_golden_label"].include?(id) ||
-              (id.start_with?("detail_") && id.end_with?("_title"))) &&
-             data["texto"].to_s!=""
-            content=data["texto"].to_s
-          end
-          alignment=case data["alineacion"]
-                    when "centro" then 1
-                    when "derecha" then 2
-                    else alignment
-                    end
-          return if data["visible"]==false
-        end
+      data=VermeilInterfaceLayout.element(@interface_layout,id)
+      if data && data["tipo"]=="texto"
+        # Fixed labels belong to the author; data-driven species fields are
+        # bound to the actual save state. Both use the exact same JSON painter.
+        static=%w[notebook_title notebook_subtitle cover_title
+                  cover_subtitle cover_brand]
+        values=static.include?(id) ? {} : {id=>content.to_s}
+        VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+                                               data["__page"],[id],values)
+      else
+        draw_text(bmp,x,y,w,h,content,size,color,alignment,bold)
       end
-      draw_text(bmp,x,y,w,h,content,size,color,alignment,bold)
     end
 
     def draw_editor_wrapped(bmp,id,x,y,w,text,size,color,line_height,max_lines)
@@ -842,14 +832,6 @@ module ResearchNotebook
       base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       known = species_identity_known?(entry)
       color = section_color
-      # One authority for this panel: authored MakerStudio geometry OR the
-      # legacy Ruby fallback, never both drawn on top of each other.
-      fx=layout_position("focus_panel","x",FOCUS_X)
-      fy=layout_position("focus_panel","y",FOCUS_Y)
-      unless @skin && @skin.draw(bmp,:focus_panel,fx,fy)
-        draw_card(bmp,fx,fy,FOCUS_W,FOCUS_H,PAPER_2)
-      end
-
       num = dex_number(entry)
       number = num > 0 ? format("#%03d", num) : "#---"
       name = known ? ResearchNotebook::Repository.species_name(entry) : "???"
@@ -974,12 +956,6 @@ module ResearchNotebook
 
     def draw_grid_panel(bmp)
       color = section_color
-      unless @skin && @skin.draw(bmp,:grid_panel,
-             layout_position("grid_panel","x",GRID_X),
-             layout_position("grid_panel","y",GRID_Y))
-        draw_card(bmp,layout_position("grid_panel","x",GRID_X),
-                      layout_position("grid_panel","y",GRID_Y),GRID_W,GRID_H,PAPER_2)
-      end
       bmp.fill_rect(layout_position("grid_panel", "x", GRID_X), 59, GRID_W, 1, Color.new(255, 255, 255, 45))
       draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 3, 59, 134, 18, ResearchNotebook.t("Especies: {1}", @species.length), 11, MUTED, 0, false)
       draw_text(bmp, layout_position("grid_panel", "x", GRID_X) + 138, 59, 103, 18, ResearchNotebook.t("Orden: {1}", ResearchNotebook.t(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
@@ -1029,9 +1005,6 @@ module ResearchNotebook
       y = layout_position("detail_panel", "y", 61)
       w = GRID_W
       h = 365
-      unless @skin && @skin.draw(bmp,:detail_panel,x,y)
-        draw_card(bmp,x,y,w,h,PAPER_2)
-      end
       color = section_color
       bmp.fill_rect(x, y, 4, h, color)
       entry = selected_species
@@ -1497,7 +1470,8 @@ module ResearchNotebook
       pages.z=88
       pages.x=layout_position("cover","x",BOOK_X)
       pages.y=layout_position("cover","y",BOOK_Y)
-      @skin.draw(pages.bitmap,:pages,0,0) if @skin
+      VermeilInterfaceLayout.render_document(pages.bitmap,@interface_layout,
+        "Libreta/Catalogo",%w[pages],{},pages.x,pages.y)
 
       @sprites["front_cover"]=BitmapSprite.new(BOOK_W,BOOK_H,@viewport)
       cover=@sprites["front_cover"]
@@ -1508,19 +1482,10 @@ module ResearchNotebook
       cover.zoom_x=1.0
       pbSetSystemFont(cover.bitmap) if defined?(pbSetSystemFont)
       bmp=cover.bitmap
-      # Every visible part of this folding book cover is authored by
-      # MakerStudio and folds in the same bitmap, instead of separately
-      # drawing a second hardcoded cover with overlapping graphics.
-      @skin.draw(bmp,:cover,0,0) if @skin
-      @skin.draw(bmp,:cover_label,
-                 layout_position("cover_label","x",178),
-                 layout_position("cover_label","y",94)) if @skin
-      draw_editor_text(bmp,"cover_title",194,118,238,34,
-                       ResearchNotebook.t("LIBRETA"),25,WHITE,1,true)
-      draw_editor_text(bmp,"cover_subtitle",194,153,238,28,
-                       ResearchNotebook.t("DE INVESTIGACION"),15,WHITE,1,true)
-      draw_editor_text(bmp,"cover_brand",194,331,238,20,
-                       ResearchNotebook.t("VERMEIL"),10,WHITE,1,true)
+      VermeilInterfaceLayout.render_document(bmp,@interface_layout,
+        "Libreta/Catalogo",
+        %w[cover cover_label cover_title cover_subtitle cover_brand],
+        {},cover.x,cover.y)
       pages.visible=false
       cover.visible=true
       shadow.visible=true
