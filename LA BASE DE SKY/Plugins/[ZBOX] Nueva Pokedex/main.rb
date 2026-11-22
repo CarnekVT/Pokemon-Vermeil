@@ -967,8 +967,7 @@ class PokemonPokedexNueva_Scene
     bmp.clear
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
       "Pokedex/Lista",
-      %w[background header list_panel counter_panel scrollbar_track
-         pokedex_title],
+      %w[background header list_panel pokedex_title],
       {"pokedex_title"=>NuevaPokedex.dex_name_for(@region)})
     draw_counters
     draw_navigation_hint(bmp,
@@ -1655,7 +1654,7 @@ class PokemonPokedexNueva_Scene
     return if form_ids.length <= 1
     base = entry[:base_species]
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
-      "Pokedex/Formas",%w[forms_page forms_list_panel forms_detail_panel])
+      "Pokedex/Formas",%w[forms_page forms_list_panel])
     # forms_list_panel is painted once by Pokedex/Formas.json.
     # Only real dynamic form rows are appended below.
     x = 330
