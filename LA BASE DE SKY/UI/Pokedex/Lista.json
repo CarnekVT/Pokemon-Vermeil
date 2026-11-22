@@ -23,7 +23,9 @@
       "alto": 480,
       "color": "#101824FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Fondo y cabecera",
+      "etiqueta": "Background"
     },
     {
       "id": "header",
@@ -35,7 +37,9 @@
       "alto": 44,
       "color": "#1C293BFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Fondo y cabecera",
+      "etiqueta": "Header"
     },
     {
       "id": "list_panel",
@@ -47,7 +51,9 @@
       "alto": 420,
       "color": "#1C2A3CFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List panel"
     },
     {
       "id": "portrait_panel",
@@ -59,7 +65,9 @@
       "alto": 256,
       "color": "#1C2A3CFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "04 · Pokémon",
+      "etiqueta": "Portrait panel"
     },
     {
       "id": "portrait_pokemon",
@@ -71,7 +79,9 @@
       "alto": 48,
       "color": "#ED404055",
       "borde": "#FFFFFF88",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "04 · Pokémon",
+      "etiqueta": "Portrait pokemon"
     },
     {
       "id": "counter_panel",
@@ -83,7 +93,9 @@
       "alto": 48,
       "color": "#1C293BFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "03 · Progreso",
+      "etiqueta": "Counter panel"
     },
     {
       "id": "scrollbar_track",
@@ -95,7 +107,9 @@
       "alto": 420,
       "color": "#394D67FF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Fondo y cabecera",
+      "etiqueta": "Scrollbar track"
     },
     {
       "id": "list_row",
@@ -105,7 +119,9 @@
       "y": 0,
       "ancho": 326,
       "alto": 36,
-      "color": "#243349FF"
+      "color": "#243349FF",
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List row"
     },
     {
       "id": "list_row_selected",
@@ -117,7 +133,9 @@
       "alto": 36,
       "color": "#344A68FF",
       "borde": "#F46A72AA",
-      "borde_grosor": 2
+      "borde_grosor": 2,
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List row selected"
     },
     {
       "id": "pokedex_title",
@@ -131,7 +149,9 @@
       "tamano": 18,
       "color": "#F46A72",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Fondo y cabecera",
+      "etiqueta": "Pokedex title"
     },
     {
       "id": "seen_counter",
@@ -145,7 +165,9 @@
       "tamano": 15,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Progreso",
+      "etiqueta": "Seen counter"
     },
     {
       "id": "caught_counter",
@@ -159,7 +181,9 @@
       "tamano": 15,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Progreso",
+      "etiqueta": "Caught counter"
     },
     {
       "id": "list_total",
@@ -173,7 +197,9 @@
       "tamano": 15,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List total"
     },
     {
       "id": "list_number",
@@ -187,7 +213,9 @@
       "tamano": 16,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List number"
     },
     {
       "id": "list_name",
@@ -201,7 +229,9 @@
       "tamano": 18,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Lista de especies",
+      "etiqueta": "List name"
     },
     {
       "id": "help_bar",
@@ -214,7 +244,9 @@
       "color": "#1E2A3CFF",
       "borde": "#F46A72FF",
       "borde_grosor": 2,
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help bar"
     },
     {
       "id": "help_primary",
@@ -228,7 +260,9 @@
       "tamano": 13,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help primary"
     },
     {
       "id": "help_secondary",
@@ -242,7 +276,9 @@
       "tamano": 13,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help secondary"
     }
   ],
   "biblioteca": {
