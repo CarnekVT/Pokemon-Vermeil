@@ -1,4 +1,5 @@
 import { auditBasProject } from "./animation_forensics.js";
+import { preflightBasProject } from "./performance_preflight.js";
 
 // This is a timeline inspector for Vermeil data. Origin HeartGold appears only
 // as source-cited QA methodology, not as a fake animation/preset provider.
@@ -37,6 +38,7 @@ export function openAnimationForensicsDialog(showDialog, project, initialAnimati
     if (!project || !Array.isArray(project.animations) || !project.animations.length) return null;
     const en = String(language||"es").toLowerCase().startsWith("en");
     const report = auditBasProject(project);
+    const performance = preflightBasProject(project);
     let dialog = null;
     dialog = showDialog({
         title: en ? "Animation forensic analysis · Timelines and QA" : "Desglose de animaciones · Timeline y QA",
@@ -144,6 +146,7 @@ export function openAnimationForensicsDialog(showDialog, project, initialAnimati
             const render = () => {
                 const i = Math.max(0,Math.min(report.animations.length-1,Number(sel.value)||0));
                 const data = report.animations[i];
+                const perf = performance.animations[i].report;
                 const animation = project.animations[i];
                 const issues = $("issues");
                 const timeline = $("timeline");
@@ -162,7 +165,10 @@ export function openAnimationForensicsDialog(showDialog, project, initialAnimati
                     "SFX/events: "+data.totalEvents,
                     (en?"Estimated particle peak":"Pico estimado de partículas")+": "+data.peakParticles,
                     "Move: "+(data.source.move||"—"),
-                    "Scope: "+(data.source.scope||"—")
+                    "Scope: "+(data.source.scope||"—"),
+                    (en?"Peak particles 1v1/2v2/3v3":"Pico estimado 1v1/2v2/3v3")+": "+perf.scenarios.map(x=>x.peak).join(" / "),
+                    (en?"Worst case":"Peor caso")+": "+perf.worst.format+" · F"+perf.worst.peakFrame,
+                    (en?"Total spawn estimate":"Emisiones estimadas")+": "+perf.worst.totalSpawns
                 ];
                 dataPoints.forEach(value=>metrics.appendChild(textNode("span",value)));
                 const warnings = data.issues.filter(x=>x.severity!=="info").length;
@@ -190,6 +196,20 @@ export function openAnimationForensicsDialog(showDialog, project, initialAnimati
                     timeline.appendChild(lane);
                 }
                 if (!data.rows.length) timeline.appendChild(textNode("p",en?"No clips in this animation.":"Esta animación no tiene clips."));
+                for (const issue of perf.issues) {
+                    const line=textNode("div","","bas-forensic-issue "+issue.severity);
+                    line.appendChild(textNode("strong",issue.severity==="warning"?"CARGA":"MODELO"));
+                    line.appendChild(textNode("span",issue.message));
+                    issues.appendChild(line);
+                }
+                if (perf.issues.length) {
+                    for(const advice of perf.recommendations) {
+                        const line=textNode("div","","bas-forensic-issue info");
+                        line.appendChild(textNode("strong",en?"TIP":"CONSEJO"));
+                        line.appendChild(textNode("span",advice));
+                        issues.appendChild(line);
+                    }
+                }
                 for (const issue of data.issues) {
                     const line=textNode("div","","bas-forensic-issue "+issue.severity);
                     line.appendChild(textNode("strong",issue.severity==="error"?"ERROR":issue.severity==="warning"?"AVISO":"INFO"));
