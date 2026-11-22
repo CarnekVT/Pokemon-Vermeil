@@ -221,7 +221,7 @@ module BSSScriptedSpeakerComposition
         next unless foe && !(foe.disposed? rescue true)
         foe.z if foe.respond_to?(:z)
       end
-      trainer.z=foes.map(&:to_i).min-1 if !foes.empty? && trainer.respond_to?(:z=)
+      trainer.z=[foes.map(&:to_i).max+2,160].max if !foes.empty? && trainer.respond_to?(:z=)
     elsif @bss_scripted_trainer_restore && @bss_scripted_trainer_restore.key?(trainer.object_id)
       bss_scripted_restore_trainer_actor
     end
@@ -229,19 +229,36 @@ module BSSScriptedSpeakerComposition
     BSS064.log("BSS real trainer depth: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
+  # One real trainer actor: the reverse of its 8-frame appearance. Restore
+  # the old anchor AFTER hiding the sprite, never while it is still visible.
+  # This path is also reused by normal (nonanimated) scripted speech.
   def bss_scripted_restore_trainer_actor
-    snapshot=@bss_scripted_trainer_restore || {}
+    snapshot=@bss_scripted_trainer_restore
+    return unless snapshot && !snapshot.empty?
+    @bss_scripted_trainer_restore=nil
     snapshot.each_value do |row|
       trainer,visible,x,y,z,opacity=row
       next unless trainer && !(trainer.disposed? rescue true)
+      unless visible
+        original_alpha=(trainer.opacity rescue 255).to_f
+        8.times do |step|
+          t=(step+1)/8.0
+          eased=t*t*(3.0-2.0*t)
+          trainer.opacity=(original_alpha*(1.0-eased)).round if trainer.respond_to?(:opacity=)
+          Graphics.update
+        end
+        trainer.visible=false if trainer.respond_to?(:visible=)
+      end
       trainer.x=x if !x.nil? && trainer.respond_to?(:x=)
       trainer.y=y if !y.nil? && trainer.respond_to?(:y=)
       trainer.z=z if !z.nil? && trainer.respond_to?(:z=)
       trainer.opacity=opacity if !opacity.nil? && trainer.respond_to?(:opacity=)
       trainer.visible=visible if trainer.respond_to?(:visible=)
     end
-    @bss_scripted_trainer_restore=nil
     @bss_scripted_trainer_fade_started=nil
+  rescue StandardError => e
+    BSS064.log("BSS trainer disappearance: #{e.class}: #{e.message}") if defined?(BSS064)
+    @bss_scripted_trainer_restore=nil
   end
 
   def pbUpdate(*args,&block)
