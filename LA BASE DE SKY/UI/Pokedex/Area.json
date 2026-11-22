@@ -30,6 +30,47 @@
       "color": "#101824FF",
       "borde": "#536B8D4D",
       "borde_grosor": 1
+    },
+    {
+      "id": "help_bar",
+      "tipo": "panel",
+      "x": 0,
+      "y": 442,
+      "ancho": 640,
+      "alto": 38,
+      "capa": 11,
+      "color": "#1E2A3CFF",
+      "borde": "#F46A72FF",
+      "borde_grosor": 2,
+      "visible": true
+    },
+    {
+      "id": "help_primary",
+      "tipo": "texto",
+      "x": 16,
+      "y": 445,
+      "ancho": 608,
+      "alto": 16,
+      "capa": 20,
+      "texto": "CONTROLES",
+      "tamano": 13,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "help_secondary",
+      "tipo": "texto",
+      "x": 16,
+      "y": 463,
+      "ancho": 608,
+      "alto": 16,
+      "capa": 20,
+      "texto": "ACEPTAR / ATRAS",
+      "tamano": 13,
+      "color": "#A9BCD4",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
