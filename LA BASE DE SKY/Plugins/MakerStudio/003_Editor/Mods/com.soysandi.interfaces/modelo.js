@@ -940,7 +940,7 @@ export function idLibre(diseno, base) {
 // editarla, y los diffs de git enseñan lo que cambio de verdad y no un baile de
 // lineas.
 //=============================================================================
-const ORDEN = ["id", "tipo", "repetir", "hueco", "capa", "ancla", "x", "y", "ancho", "alto",
+const ORDEN = ["id", "etiqueta", "grupo", "tipo", "repetir", "hueco", "capa", "ancla", "x", "y", "ancho", "alto",
   "imagen", "imagen_encima", "imagen_pulsado", "imagen_apagado",
   "fotogramas", "ancho_fotograma", "alto_fotograma", "velocidad", "bucle",
   "marco",
