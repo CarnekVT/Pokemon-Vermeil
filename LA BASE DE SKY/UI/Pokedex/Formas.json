@@ -27,7 +27,9 @@
         "suavizado": "suave",
         "distancia": 48
       },
-      "color": "#121C2AFF"
+      "color": "#121C2AFF",
+      "grupo": "01 · Diseño",
+      "etiqueta": "Forms page"
     },
     {
       "id": "forms_list_panel",
@@ -40,7 +42,9 @@
       "color": "#1C2A3CFF",
       "borde": "#536B8DFF",
       "borde_grosor": 1,
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Diseño",
+      "etiqueta": "Forms list panel"
     },
     {
       "id": "forms_detail_panel",
@@ -53,7 +57,9 @@
       "color": "#1C2A3CFF",
       "borde": "#536B8DFF",
       "borde_grosor": 1,
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Diseño",
+      "etiqueta": "Forms detail panel"
     },
     {
       "id": "forms_row",
@@ -64,7 +70,9 @@
       "alto": 36,
       "capa": 10,
       "color": "#243349FF",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Formas",
+      "etiqueta": "Forms row"
     },
     {
       "id": "forms_row_selected",
@@ -77,7 +85,9 @@
       "color": "#344A68FF",
       "borde": "#F46A72FF",
       "borde_grosor": 2,
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Formas",
+      "etiqueta": "Forms row selected"
     },
     {
       "id": "forms_title",
@@ -91,7 +101,9 @@
       "tamano": 16,
       "color": "#F46A72",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Rótulos",
+      "etiqueta": "Forms title"
     },
     {
       "id": "forms_name",
@@ -105,7 +117,9 @@
       "tamano": 15,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Formas",
+      "etiqueta": "Forms name"
     },
     {
       "id": "help_bar",
@@ -118,7 +132,9 @@
       "color": "#1E2A3CFF",
       "borde": "#F46A72FF",
       "borde_grosor": 2,
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help bar"
     },
     {
       "id": "help_primary",
@@ -132,7 +148,9 @@
       "tamano": 13,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help primary"
     },
     {
       "id": "help_secondary",
@@ -146,7 +164,9 @@
       "tamano": 13,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help secondary"
     }
   ],
   "biblioteca": {
