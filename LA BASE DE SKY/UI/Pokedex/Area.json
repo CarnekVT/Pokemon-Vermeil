@@ -79,6 +79,23 @@
       "visible": true,
       "grupo": "90 · Navegación",
       "etiqueta": "Help secondary"
+    },
+    {
+      "id": "location_label",
+      "etiqueta": "Ubicaciones",
+      "grupo": "02 · Datos del mapa",
+      "tipo": "texto",
+      "x": 16,
+      "y": 420,
+      "ancho": 608,
+      "alto": 20,
+      "capa": 20,
+      "texto": "Ubicación desconocida",
+      "tamano": 15,
+      "color": "#F0F5FB",
+      "sombra": "#121923",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
