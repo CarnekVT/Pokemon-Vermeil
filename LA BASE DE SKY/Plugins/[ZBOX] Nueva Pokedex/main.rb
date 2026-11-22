@@ -1296,7 +1296,7 @@ class PokemonPokedexNueva_Scene
     draw_scrollbar
     draw_counters
     update_sprite_icon
-    draw_shiny_status(@view.bitmaps["sprite_bg"], 14, 226)
+    # El indicador de color solo se dibuja en la capa JSON de Ficha.
   end
 
   # === INFO STATE ===
@@ -1350,7 +1350,14 @@ class PokemonPokedexNueva_Scene
     VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
       "Pokedex/Ficha",%w[entry_description_title])
     draw_entry_description(bmp, entry[:description])
-    draw_shiny_status(bmp, 461, 33)
+    VermeilInterfaceLayout.render_document(bmp,NuevaPokedex.interface_layout,
+      "Pokedex/Ficha",%w[shiny_label],
+      {"shiny_label"=>NuevaPokedex.t("Color: {1}",
+        case shiny_mode_for(entry)
+        when 1 then NuevaPokedex.t("Shiny")
+        when 2 then NuevaPokedex.t("Super Shiny")
+        else NuevaPokedex.t("Normal")
+        end)})
     draw_section_navigation_hint(bmp,
       "IZQ/DER: Pestaña   ARR/ABA: Pokémon   ATRAS: Lista")
   end
