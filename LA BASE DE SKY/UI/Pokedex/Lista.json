@@ -160,6 +160,48 @@
       "color": "#F0F5FB",
       "alineacion": "izquierda",
       "visible": true
+    },
+    {
+      "id": "list_total",
+      "tipo": "texto",
+      "x": 292,
+      "y": 26,
+      "ancho": 316,
+      "alto": 16,
+      "capa": 20,
+      "texto": "POKEDEX - 66",
+      "tamano": 15,
+      "color": "#A9BCD4",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "list_number",
+      "tipo": "texto",
+      "x": 315,
+      "y": 48,
+      "ancho": 49,
+      "alto": 32,
+      "capa": 25,
+      "texto": "#001",
+      "tamano": 16,
+      "color": "#A9BCD4",
+      "alineacion": "izquierda",
+      "visible": true
+    },
+    {
+      "id": "list_name",
+      "tipo": "texto",
+      "x": 368,
+      "y": 48,
+      "ancho": 235,
+      "alto": 32,
+      "capa": 25,
+      "texto": "Bulbasaur",
+      "tamano": 18,
+      "color": "#F0F5FB",
+      "alineacion": "izquierda",
+      "visible": true
     }
   ],
   "biblioteca": {
