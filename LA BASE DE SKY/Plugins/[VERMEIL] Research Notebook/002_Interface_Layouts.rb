@@ -206,8 +206,18 @@ module VermeilInterfaceLayout
       when "panel","imagen"
         painted << id if paint_native(canvas,layout,id,x,y)
       when "texto"
-        value=values.key?(id) ? values[id] : data["texto"].to_s
-        paint_text(canvas,data,x,y,value)
+        override=values[id]
+        if override.is_a?(Hash)
+          # Repeated native rows bind a live datum and a row offset without
+          # changing the author-defined font/colors/original template.
+          local=data.merge(override)
+          dx=local["x"].to_i-origin_x.to_i
+          dy=local["y"].to_i-origin_y.to_i
+          paint_text(canvas,local,dx,dy,local["texto"])
+        else
+          value=values.key?(id) ? override : data["texto"].to_s
+          paint_text(canvas,data,x,y,value)
+        end
         painted << id
       end
     end
