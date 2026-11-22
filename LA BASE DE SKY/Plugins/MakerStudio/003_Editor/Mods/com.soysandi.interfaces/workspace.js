@@ -170,54 +170,69 @@ export function montarEspacio(editor, M) {
     }
   }
 
+  // Prepare image assets BEFORE touching the canvas; asynchronous paints
+  // previously interleaved with subsequent refreshes and corrupted layers.
   async function renderThumb(canvas,design) {
     if(!canvas.isConnected)return;
-    const context=canvas.getContext("2d");
-    if(!context)return;
-    const logicalWidth=Number(design?.lienzo?.ancho)||640;
-    const logicalHeight=Number(design?.lienzo?.alto)||480;
-    const scaleX=canvas.width/logicalWidth,scaleY=canvas.height/logicalHeight;
-    context.save();
-    context.imageSmoothingEnabled=false;
-    context.fillStyle="#151d2a";
-    context.fillRect(0,0,canvas.width,canvas.height);
-    context.scale(scaleX,scaleY);
-    let items=Array.isArray(design?.elementos)?design.elementos:[];
-    items=items.filter(x=>x.visible!==false)
+    const token=(canvas._uiPreviewToken||0)+1;
+    canvas._uiPreviewToken=token;
+    const width=Number(design?.lienzo?.ancho)||640;
+    const height=Number(design?.lienzo?.alto)||480;
+    const items=(Array.isArray(design?.elementos)?design.elementos:[])
+      .filter(el=>el.visible!==false)
       .map((el,i)=>({el,i}))
       .sort((a,b)=>(Number(a.el.capa)||0)-(Number(b.el.capa)||0)||a.i-b.i)
-      .map(x=>x.el);
-    for(const el of items) {
-      const x=Number(el.x)||0,y=Number(el.y)||0;
-      const w=Math.max(0,Number(el.ancho)||0),h=Math.max(0,Number(el.alto)||0);
-      const fill=el.color&&/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(el.color)?el.color:"#27374c";
-      if(el.tipo==="panel"&&w&&h){
-        context.fillStyle=fill;context.fillRect(x,y,w,h);
-        if(el.borde&&/^#[0-9a-fA-F]{6}/.test(el.borde)){
-          context.strokeStyle=el.borde;
-          context.lineWidth=Math.max(1,Number(el.borde_grosor)||1);
-          context.strokeRect(x,y,w,h);
+      .map(v=>v.el);
+    const imageRows=items.filter(el=>
+      (el.tipo==="imagen"||el.tipo==="animado")&&el.imagen);
+    const images=new Map();
+    await Promise.all(imageRows.map(async el=>{
+      try{images.set(el,G.imagenEnCache(el.imagen)||await G.imagenDibujable(el.imagen));}
+      catch{images.set(el,null);}
+    }));
+    if(!canvas.isConnected||token!==canvas._uiPreviewToken)return;
+    const context=canvas.getContext("2d");
+    if(!context)return;
+    const scaleX=canvas.width/width,scaleY=canvas.height/height;
+    context.save();
+    try{
+      context.setTransform(1,0,0,1,0,0);
+      context.imageSmoothingEnabled=false;
+      context.clearRect(0,0,canvas.width,canvas.height);
+      context.fillStyle="#151d2a";
+      context.fillRect(0,0,canvas.width,canvas.height);
+      context.scale(scaleX,scaleY);
+      for(const el of items){
+        const x=Number(el.x)||0,y=Number(el.y)||0;
+        const w=Math.max(0,Number(el.ancho)||0);
+        const h=Math.max(0,Number(el.alto)||0);
+        const fill=el.color&&/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(el.color)?
+          el.color:"#27374c";
+        if(el.tipo==="panel"&&w&&h){
+          context.fillStyle=fill;
+          context.fillRect(x,y,w,h);
+          if(el.borde&&/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(el.borde)){
+            context.strokeStyle=el.borde;
+            context.lineWidth=Math.max(1,Number(el.borde_grosor)||1);
+            context.strokeRect(x,y,w,h);
+          }
+        }else if(el.tipo==="texto"&&el.texto){
+          const size=Math.max(9,Number(el.tamano)||16);
+          context.font=(el.negrita?"bold ":"")+G.fuenteSegunTamano(size);
+          context.fillStyle=fill;
+          context.textBaseline="middle";
+          context.save();
+          context.beginPath();context.rect(x,y,w||160,h||size+4);context.clip();
+          context.fillText(String(el.texto),x+2,y+(h||size+4)/2,w||200);
+          context.restore();
+        }else if((el.tipo==="imagen"||el.tipo==="animado")&&el.imagen){
+          const src=images.get(el);
+          if(src?.img)context.drawImage(src.img,x,y,w||src.ancho,h||src.alto);
+        }else if(el.tipo==="boton"&&w&&h){
+          context.fillStyle=fill;context.fillRect(x,y,w,h);
         }
-      }else if(el.tipo==="texto"&&el.texto){
-        const size=Math.max(9,Number(el.tamano)||16);
-        context.font=(el.negrita?"bold ":"")+G.fuenteSegunTamano(size);
-        context.fillStyle=fill;
-        context.textBaseline="middle";
-        context.save();
-        context.beginPath();context.rect(x,y,w||160,h||size+4);context.clip();
-        context.fillText(String(el.texto),x+2,y+(h||size+4)/2,w||200);
-        context.restore();
-      }else if((el.tipo==="imagen"||el.tipo==="animado")&&el.imagen){
-        try{
-          const src=await G.imagenDibujable(el.imagen);
-          if(src?.img&&canvas.isConnected)
-            context.drawImage(src.img,x,y,w||src.ancho,h||src.alto);
-        }catch{}
-      }else if(el.tipo==="boton"&&w&&h){
-        context.fillStyle=fill;context.fillRect(x,y,w,h);
       }
-    }
-    context.restore();
+    }finally{context.restore();}
   }
 
   const refreshFolders=()=>{
