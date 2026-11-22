@@ -187,7 +187,7 @@ export function montarEspacio(editor, M) {
       (el.tipo==="imagen"||el.tipo==="animado")&&el.imagen);
     const images=new Map();
     await Promise.all(imageRows.map(async el=>{
-      try{images.set(el,G.imagenEnCache(el.imagen)||await G.imagenDibujable(el.imagen));}
+      try{const cached=G.imagenEnCache(el.imagen);images.set(el,cached?.img?cached:await G.imagenDibujable(el.imagen));}
       catch{images.set(el,null);}
     }));
     if(!canvas.isConnected||token!==canvas._uiPreviewToken)return;
