@@ -42,7 +42,7 @@ module VermeilInterfaceLayout
                          detail_name detail_category detail_height detail_weight
                          entry_header entry_divider entry_description_rule
                          entry_sprite_frame entry_number entry_status
-                         entry_description_title entry_types entry_form_name
+                         entry_description_title shiny_label entry_types entry_form_name
                          entry_description_text entry_description_page
                          help_bar help_primary help_secondary],
     "Pokedex/Area" => %w[area_page help_bar help_primary help_secondary location_label],
