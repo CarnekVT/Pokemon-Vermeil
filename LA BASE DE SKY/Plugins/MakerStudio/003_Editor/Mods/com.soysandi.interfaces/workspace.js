@@ -273,11 +273,54 @@ export function montarEspacio(editor, M) {
   editor.capas.el.insertBefore(library,editor.capas.buscar);
   let treeSignature="";
   const openedFolders=new Set(["Libreta","Pokedex"]);
+  const previewCache=new Map();
+  const previewCanvases=new Map();
+  const drawMini=(canvas,diseno)=>{
+    const ctx=canvas.getContext("2d");
+    if(!ctx)return;
+    const width=Number(diseno?.lienzo?.ancho)||640;
+    const height=Number(diseno?.lienzo?.alto)||480;
+    const sx=canvas.width/width,sy=canvas.height/height;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#131b27";ctx.fillRect(0,0,canvas.width,canvas.height);
+    const elements=[...(diseno?.elementos||[])].filter(e=>e.visible!==false);
+    elements.sort((a,b)=>(Number(a.capa)||0)-(Number(b.capa)||0));
+    for(const el of elements){
+      if(el.tipo!=="panel"&&el.tipo!=="texto"&&el.tipo!=="imagen")continue;
+      const x=(Number(el.x)||0)*sx,y=(Number(el.y)||0)*sy;
+      const w=Math.max(1,(Number(el.ancho)||60)*sx),h=Math.max(1,(Number(el.alto)||20)*sy);
+      if(el.tipo==="texto"){
+        ctx.fillStyle=el.color?.slice(0,7)||"#dce7f7";
+        ctx.fillRect(x,y+Math.min(h,3),Math.min(w,canvas.width-x),Math.max(1,Math.min(2,h)));
+      }else{
+        ctx.fillStyle=el.tipo==="imagen"?"#526d92":(el.color?.slice(0,7)||"#243349");
+        ctx.fillRect(x,y,w,h);
+        if(el.borde){
+          ctx.strokeStyle=el.borde.slice(0,7);
+          ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+        }
+      }
+    }
+  };
+  const fetchPreview=async(name,canvas)=>{
+    if(previewCache.has(name)){
+      drawMini(canvas,previewCache.get(name));
+      return;
+    }
+    try{
+      const data=JSON.parse(await editor.ctx.fs.readProjectFile("UI/"+name+".json"));
+      previewCache.set(name,data);
+      if(canvas.isConnected)drawMini(canvas,data);
+    }catch{
+      drawMini(canvas,null);
+    }
+  };
   const syncLibrary=names=>{
     const signature=names.join("|");
     if(signature!==treeSignature){
       treeSignature=signature;
       tree.replaceChildren();
+      previewCanvases.clear();
       const byFolder=new Map();
       for(const full of names){
         const slash=full.indexOf("/");
@@ -297,10 +340,20 @@ export function montarEspacio(editor, M) {
         group.append(title);
         const body=node("div","ui-library-folder-content");
         for(const item of entries){
-          const button=action(item.label,()=>goScreen(item.id),"Abrir "+item.id);
-          button.classList.add("ui-library-screen");
+          const button=action("",()=>goScreen(item.id),"Abrir "+item.id);
+          button.classList.add("ui-library-screen","ui-library-card");
           button.dataset.screen=item.id;
+          const preview=node("canvas","ui-library-preview");
+          preview.width=88;
+          preview.height=66;
+          preview.setAttribute("aria-hidden","true");
+          const info=node("span","ui-library-card-info");
+          info.append(node("strong",null,item.label),
+                      node("small",null,folder==="Compatibilidad"?"Antiguo":"Diseño editable"));
+          button.append(preview,info);
           body.append(button);
+          previewCanvases.set(item.id,preview);
+          fetchPreview(item.id,preview);
         }
         if(folder!=="Compatibilidad"&&folder!=="Sin carpeta"){
           const add=action("+ Pantalla",()=>editor.nuevoEnCarpeta(folder),
@@ -320,6 +373,15 @@ export function montarEspacio(editor, M) {
       b.classList.toggle("ui-native-active",active);
       b.setAttribute("aria-current",active?"page":"false");
     });
+    // Active thumbnail shows the ACTUAL editor canvas, including PNG assets,
+    // rather than a speculative drawing of the saved file.
+    const active=previewCanvases.get(editor.nombre);
+    const source=editor.lienzo?.canvas;
+    if(active&&source?.width&&source?.height){
+      const ctx=active.getContext("2d");
+      ctx?.clearRect(0,0,active.width,active.height);
+      ctx?.drawImage(source,0,0,active.width,active.height);
+    }
   };
   let lastNames="";
   const navUpdate=()=>{
