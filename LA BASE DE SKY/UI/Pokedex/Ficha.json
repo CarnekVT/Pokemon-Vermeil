@@ -27,7 +27,9 @@
         "suavizado": "suave",
         "distancia": 48
       },
-      "color": "#121C2AFF"
+      "color": "#121C2AFF",
+      "grupo": "01 · Diseño de ficha",
+      "etiqueta": "Entry page"
     },
     {
       "id": "entry_sprite",
@@ -39,7 +41,9 @@
       "alto": 256,
       "color": "#E8C76B55",
       "borde": "#FFFFFF88",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "02 · Sprite",
+      "etiqueta": "Entry sprite"
     },
     {
       "id": "entry_description",
@@ -51,7 +55,9 @@
       "alto": 118,
       "color": "#1B283CFF",
       "borde": "#536B8D4D",
-      "borde_grosor": 1
+      "borde_grosor": 1,
+      "grupo": "01 · Diseño de ficha",
+      "etiqueta": "Entry description"
     },
     {
       "id": "detail_name",
@@ -65,7 +71,9 @@
       "tamano": 19,
       "color": "#F46A72",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Detail name"
     },
     {
       "id": "detail_category",
@@ -79,7 +87,9 @@
       "tamano": 16,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Detail category"
     },
     {
       "id": "detail_height",
@@ -93,7 +103,9 @@
       "tamano": 16,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Detail height"
     },
     {
       "id": "detail_weight",
@@ -107,7 +119,9 @@
       "tamano": 16,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Detail weight"
     },
     {
       "id": "entry_header",
@@ -118,7 +132,9 @@
       "alto": 56,
       "capa": 5,
       "color": "#1A293AFF",
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Diseño de ficha",
+      "etiqueta": "Entry header"
     },
     {
       "id": "entry_divider",
@@ -129,7 +145,9 @@
       "alto": 236,
       "capa": 5,
       "color": "#536B8DFF",
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Diseño de ficha",
+      "etiqueta": "Entry divider"
     },
     {
       "id": "entry_description_rule",
@@ -140,7 +158,9 @@
       "alto": 2,
       "capa": 5,
       "color": "#536B8DFF",
-      "visible": true
+      "visible": true,
+      "grupo": "01 · Diseño de ficha",
+      "etiqueta": "Entry description rule"
     },
     {
       "id": "entry_sprite_frame",
@@ -153,7 +173,9 @@
       "color": "#1D2A3EFF",
       "borde": "#F46A72FF",
       "borde_grosor": 3,
-      "visible": true
+      "visible": true,
+      "grupo": "02 · Sprite",
+      "etiqueta": "Entry sprite frame"
     },
     {
       "id": "entry_number",
@@ -167,7 +189,9 @@
       "tamano": 13,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Entry number"
     },
     {
       "id": "entry_status",
@@ -181,7 +205,9 @@
       "tamano": 16,
       "color": "#B5D5B5",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Entry status"
     },
     {
       "id": "entry_description_title",
@@ -195,7 +221,9 @@
       "tamano": 16,
       "color": "#F46A72",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "03 · Datos de especie",
+      "etiqueta": "Entry description title"
     },
     {
       "id": "help_bar",
@@ -208,7 +236,9 @@
       "color": "#1E2A3CFF",
       "borde": "#F46A72FF",
       "borde_grosor": 2,
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help bar"
     },
     {
       "id": "help_primary",
@@ -222,7 +252,9 @@
       "tamano": 13,
       "color": "#F0F5FB",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help primary"
     },
     {
       "id": "help_secondary",
@@ -236,7 +268,9 @@
       "tamano": 13,
       "color": "#A9BCD4",
       "alineacion": "izquierda",
-      "visible": true
+      "visible": true,
+      "grupo": "90 · Navegación",
+      "etiqueta": "Help secondary"
     }
   ],
   "biblioteca": {
