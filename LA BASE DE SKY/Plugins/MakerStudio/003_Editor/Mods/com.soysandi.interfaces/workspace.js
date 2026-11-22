@@ -1,558 +1,462 @@
-// Mejoras no destructivas del espacio de trabajo. Mantiene el modelo, el
-// inspector, las animaciones y el formato UI/*.json originales de SoySandi.
+// Interface Studio 3 — a single visual workspace, not a stack of toolbars.
+// The existing Lienzo/Capas/Inspector/Tiempo/Resolucion are the data editors.
+// This module owns navigation, the visual UI library and component insertion.
+import * as G from "./graficos.js";
+
 export function montarEspacio(editor, M) {
-  const root = editor.raiz;
-  const disposers = [];
-  const state = { focus:false, layers:true, inspector:true, timeline:false };
-  const sceneGroups=[
-    {name:"Libreta",pages:[["Libreta/Catalogo","Catálogo"],["Libreta/Ficha","Ficha"]]},
-    {name:"Pokédex",pages:[["Pokedex/Lista","Listado"],["Pokedex/Ficha","Ficha"],
-                           ["Pokedex/Area","Área"],["Pokedex/Formas","Formas"]]}
-  ];
-  const node = (tag, cls, text) => {
-    const n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  const root=editor.raiz;
+  root.classList.add("ui-studio-v3");
+  const unsub=[];
+  const state={library:true,timeline:false,palette:false,preview:false,folder:"Todos"};
+  const cached=new Map();
+  let listSignature="",lastName="",lastGallerySignature="",lastZoomScreen="";
+  const node=(tag,cls,text)=>{
+    const el=document.createElement(tag);
+    if(cls)el.className=cls;
+    if(text!==undefined)el.textContent=text;
+    return el;
   };
-  const action = (label, callback, title) => {
-    const b = node("button","ui-btn ui-workspace-btn",label);
-    b.type="button";if(title)b.title=title;
-    b.addEventListener("click",callback);
-    return b;
+  const btn=(label,act,cls,title)=>{
+    const el=node("button",cls||"ui-btn",label);
+    el.type="button";
+    if(title)el.title=title;
+    el.addEventListener("click",act);
+    return el;
   };
-  const closeMenus = (except=null) => {
-    root.querySelectorAll("details.ui-workspace-menu[open]").forEach(d=>{
-      if (d!==except) d.open=false;
-    });
+  const searchable=(placeholder)=>{
+    const e=node("input","ui-txt ui-studio-search");
+    e.type="search";e.placeholder=placeholder;
+    e.setAttribute("aria-label",placeholder);
+    return e;
   };
-  const menu = (title, contents) => {
-    const d=node("details","ui-workspace-menu");
-    const summary=node("summary",null,title);
-    const body=node("div","ui-workspace-dropdown");
-    d.append(summary,body);
-    contents.forEach(c=>body.append(c));
-    body.addEventListener("click",ev=>{if(ev.target.closest("button"))d.open=false;});
-    summary.addEventListener("click",()=>closeMenus(d));
-    d.addEventListener("toggle",()=>{if(d.open)closeMenus(d);});
-    return { d, body };
-  };
-  const original = Array.from(editor.barra.children);
-  const byText = t => original.find(x=>x.tagName==="BUTTON" && x.textContent.trim()===t);
-  const newButton=byText("Nuevo..."),copyButton=byText("Duplicar..."),deleteButton=byText("Borrar...");
-  const openingsButton=byText("Mapa de aperturas");
-  const badge=node("div","ui-workspace-brand");
-  badge.append(node("strong",null,"INTERFACE STUDIO"),node("small",null,"Editor de Interfaces · Essentials"));
-  editor.barra.prepend(badge);
-  const fileMenu=menu("Archivo ▾",[newButton,copyButton,deleteButton].filter(Boolean));
-  editor.barra.insertBefore(fileMenu.d,editor.etiquetaSucio);
-  if(openingsButton){
-    const tools=menu("Herramientas ▾",[openingsButton]);
-    editor.barra.insertBefore(tools.d,editor.avisosBtn);
-  }
-  const copy=action("⎘ Copiar llamada",async()=>{
-    const name=editor.nombre;
-    if(!name){editor.toast("Primero guarda este diseño para asignarle un nombre.","warning");return;}
-    const command="pbInterfaz("+JSON.stringify(name)+")";
-    try{
-      if(!navigator?.clipboard?.writeText)throw new Error("Clipboard no disponible");
-      await navigator.clipboard.writeText(command);
-      editor.toast("Comando para evento copiado: "+command,"success");
-    }catch(_){
-      // Mostrar el texto sin inventar que se copió.
-      try{
-        const result=window.prompt("Copia la llamada y pégala en un comando Script del evento:",command);
-        if(result!=null)editor.toast("Llamada mostrada: "+command,"info");
-      }catch(_2){editor.toast("Comando: "+command,"info");}
-    }
-  },"Para eventos Ruby: pbInterfaz(\"nombre\")");
-  editor.barra.insertBefore(copy,editor.avisosBtn);
-  // Convertir los ocho botones de creación originales en una paleta buscable:
-  // se MUEVEN los nodos (y sus handlers), nunca se recrea su funcionalidad.
-  const originalAdd=Array.from(editor.barraAnadir.children).filter(n=>n.tagName==="BUTTON" &&
+  const folderOf=name=>name.includes("/")?name.split("/")[0]:
+      name.startsWith("vermeil_")?"Compatibilidad":"Otras pantallas";
+  const pageOf=name=>name.includes("/")?name.slice(name.indexOf("/")+1):name;
+  const readableFolder=name=>name==="Pokedex"?"Pokédex":name;
+  const firstButton=tag=>Array.from(editor.barra.children).find(x=>x.tagName==="BUTTON"&&x.textContent.trim()===tag);
+  const originalAdd=Array.from(editor.barraAnadir.children).filter(n=>n.tagName==="BUTTON"&&
     M.TIPOS.some(t=>M.NOMBRE_TIPO[t]===n.textContent.trim()));
-  const search=node("input","ui-txt ui-workspace-search");
-  search.type="search";search.placeholder="Buscar elemento…";search.setAttribute("aria-label","Buscar tipo de elemento");
-  const choices=node("div","ui-workspace-choices");
-  originalAdd.forEach((button,i)=>{
-    button.classList.add("ui-workspace-option");
-    button.dataset.search=String(M.NOMBRE_TIPO[M.TIPOS[i]]||button.textContent).toLocaleLowerCase("es");
-    choices.append(button);
-    button.addEventListener("click",()=>{palette.d.open=false;search.value="";filter();});
-  });
-  const filter=()=>{
-    const term=search.value.trim().toLocaleLowerCase("es");
-    let count=0;
-    originalAdd.forEach(b=>{const show=b.dataset.search.includes(term);b.hidden=!show;if(show)count++;});
-    empty.hidden=count!==0;
-  };
-  const empty=node("p","ui-ayuda","No se encontraron componentes.");
-  empty.hidden=true;
-  const background=action("▧ Fondo de pantalla",()=>{editor.anadirFondo();palette.d.open=false;},"Crear una imagen detrás de todos los elementos, ajustada al lienzo");
-  choices.append(background);
-  // Ready-to-edit, reusable design components, similar to BAS/BSS presets.
-  // Each preset is native JSON components, not a visual mock that cannot run.
-  const presets=[
-    ["Cabecera", "Estructura", [
-      ["panel",{x:0,y:0,ancho:640,alto:54,color:"#1D293AFF",grupo:"01 · Cabecera",etiqueta:"Fondo de cabecera"}],
-      ["texto",{x:20,y:12,ancho:420,alto:32,texto:"TÍTULO DE PANTALLA",tamano:21,color:"#F0F5FB",grupo:"01 · Cabecera",etiqueta:"Título"}]
-    ]],
-    ["Tarjeta de información", "Ficha", [
-      ["panel",{x:24,y:84,ancho:256,alto:240,color:"#26364BFF",borde:"#5F7797FF",borde_grosor:2,grupo:"02 · Contenido",etiqueta:"Tarjeta"}],
-      ["texto",{x:39,y:96,ancho:228,alto:27,texto:"INFORMACIÓN",tamano:18,color:"#F0F5FB",grupo:"02 · Contenido",etiqueta:"Título de tarjeta"}],
-      ["texto",{x:39,y:139,ancho:228,alto:100,texto:"Descripción editable",tamano:15,color:"#B9CBDF",grupo:"02 · Contenido",etiqueta:"Descripción"}]
-    ]],
-    ["Fila de listado", "Listado", [
-      ["panel",{x:310,y:102,ancho:310,alto:40,color:"#304159FF",grupo:"03 · Listado",etiqueta:"Fondo de fila"}],
-      ["texto",{x:325,y:109,ancho:285,alto:26,texto:"Elemento del listado",tamano:16,color:"#F0F5FB",grupo:"03 · Listado",etiqueta:"Nombre"}]
-    ]],
-    ["Cuadro de Pokémon", "Ficha", [
-      ["panel",{x:24,y:80,ancho:256,alto:256,color:"#1D2B3EFF",borde:"#6A88AFFF",borde_grosor:3,grupo:"04 · Pokémon",etiqueta:"Marco del sprite"}],
-      ["texto",{x:38,y:342,ancho:226,alto:22,texto:"POKÉMON",tamano:17,color:"#F0F5FB",grupo:"04 · Pokémon",etiqueta:"Rótulo"}]
-    ]],
-    ["Barra de ayuda", "Navegación", [
-      ["panel",{x:0,y:440,ancho:640,alto:40,color:"#1C293AFF",grupo:"90 · Navegación",etiqueta:"Barra de controles"}],
-      ["texto",{x:16,y:452,ancho:608,alto:22,texto:"ACEPTAR: Elegir   ATRÁS: Volver",tamano:14,color:"#CFD9E8",grupo:"90 · Navegación",etiqueta:"Ayuda"}]
-    ]],
-    ["Botón de menú", "Interacción", [
-      ["boton",{x:440,y:375,ancho:164,alto:36,texto:"Aceptar",grupo:"80 · Botones",etiqueta:"Botón principal"}]
-    ]]
-  ];
-  const presetBar=node("div","ui-preset-library");
-  presetBar.append(node("strong","ui-preset-title","COMPONENTES LISTOS"));
-  const presetList=node("div","ui-preset-list");
-  for(const [label,kind,parts] of presets){
-    const btn=action("",()=>{
-      if(!editor.diseno)return;
-      editor.apuntarDeshacer();
-      const elements=editor.diseno.elementos;
-      let layer=elements.reduce((v,e)=>Math.max(v,Number(e.capa)||0),0);
-      let lastId=null;
-      for(const [type,props] of parts){
-        const id=M.idLibre(editor.diseno,type);
-        const item={...M.elementoNuevo(type,id,props.x,props.y),...props};
-        layer+=10;item.capa=layer;
-        elements.push(item);lastId=id;
-      }
-      editor.seleccion=lastId;
-      editor.marcarSucio();editor.refrescarTodo();
-      palette.d.open=false;
-    },"Crear "+label+" como componentes editables");
-    btn.classList.add("ui-preset-card");
-    btn.append(node("span","ui-preset-glyph",kind==="Listado"?"▤":kind==="Ficha"?"▧":"▣"),
-               node("span","ui-preset-card-label",label));
-    presetList.append(btn);
-  }
-  presetBar.append(presetList);
-  const palette=menu("＋ Elemento ▾",[search,choices,empty,presetBar]);
-  const addLabel=editor.barraAnadir.querySelector(".ui-capa-tipo");
-  editor.barraAnadir.classList.add("ui-add-toolbar");
-  editor.barraAnadir.insertBefore(palette.d,addLabel||editor.barraAnadir.firstChild);
-  if(addLabel)addLabel.remove();
-  palette.d.addEventListener("toggle",()=>{if(palette.d.open){search.value="";filter();search.focus();}});
-  search.addEventListener("input",filter);
-  search.addEventListener("keydown",ev=>{
-    if(ev.key==="Escape"){palette.d.open=false;editor.raiz.focus();ev.preventDefault();}
-    if(ev.key==="Enter"){
-      const first=originalAdd.find(b=>!b.hidden);
-      if(first){first.click();ev.preventDefault();}
-    }
-  });
-  // Un solo encabezado: el toolbar original se conserva a nivel de handlers,
-  // pero sus acciones pasan a la barra principal.
-  editor.barra.insertBefore(palette.d,fileMenu.d.nextSibling);
-  const editButtons=Array.from(editor.barraAnadir.querySelectorAll("button"))
-    .filter(b=>!choices.contains(b));
-  const editMenu=menu("Editar ▾",editButtons);
-  editor.barra.insertBefore(editMenu.d,palette.d.nextSibling);
-  editor.barraAnadir.remove();
-  // El bloque de resolución sigue siendo el componente original (instancia
-  // Resolucion); se muestra como panel emergente en vez de ocho filas.
-  const res=editor.resolucion;
-  const layout=res.el;
-  const group=(title,children)=>{
-    const section=node("section","ui-resolution-group");
-    section.append(node("h4",null,title));
-    children.forEach(n=>section.append(n));
-    return section;
-  };
-  const sizeInputs=node("div","ui-resolution-sizes");
-  res.ancho.setAttribute("aria-label","Ancho del lienzo en píxeles");
-  res.alto.setAttribute("aria-label","Alto del lienzo en píxeles");
-  res.estrategia.setAttribute("aria-label","Cómo adaptar los elementos al cambiar la resolución");
-  res.modo.setAttribute("aria-label","Modo de escalado del lienzo");
-  sizeInputs.append(res.ancho,node("span",null,"×"),res.alto,res.info);
-  const strategyRow=node("div","ui-resolution-action");
-  strategyRow.append(res.estrategia,res.btnAplicar);
-  const checkRow=node("div","ui-resolution-checks");
-  checkRow.append(res.pixel,res.entera,res.segura,res.bloqueo);
-  layout.replaceChildren(
-    group("Tamaño lógico del juego",[res.preset,sizeInputs]),
-    group("Al cambiar el tamaño",[strategyRow,
-      node("p","ui-resolution-note","El tamaño solo cambia al pulsar Aplicar; la vista previa mantiene sus píxeles lógicos.")]),
-    group("Presentación",[node("span","ui-resolution-label","Modo de escalado"),res.modo,checkRow])
+  const originalAddMap=new Map();
+  originalAdd.forEach((b,i)=>originalAddMap.set(M.TIPOS[i],b));
+
+  // --- One app header: no supplementary navigation bars. -------------------
+  const header=editor.barra;
+  header.classList.add("ui-studio-header");
+  const brand=node("div","ui-studio-brand");
+  brand.append(node("strong",null,"INTERFACE STUDIO"),
+               node("small",null,"Vermeil · Visual UI"));
+  const libraryButton=btn("Biblioteca",()=>showLibrary(),"ui-btn ui-studio-nav","Ver todas las interfaces y sus pantallas");
+  const editButton=btn("Editar pantalla",()=>showEditor(),"ui-btn ui-studio-nav");
+  const crumb=node("span","ui-studio-breadcrumb","");
+  const spacer=node("span","ui-barra-hueco");
+  const paletteButton=btn("＋ Elemento",()=>setPalette(true),"ui-btn ui-studio-primary","Crear o reutilizar un componente");
+  const undo=btn("↶",()=>editor.deshacer(),"ui-btn","Deshacer");
+  const redo=btn("↷",()=>editor.rehacer(),"ui-btn","Rehacer");
+  const canvasButton=btn("Lienzo",()=>togglePanel(canvasPanel),"ui-btn","Resolución, escala y guías");
+  const timelineButton=btn("Animación",()=>setTimeline(!state.timeline),"ui-btn","Mostrar u ocultar línea de tiempo");
+  const fileMenu=node("details","ui-studio-menu");
+  fileMenu.append(node("summary",null,"Archivo"));
+  const fileActions=node("div","ui-studio-menu-actions");
+  fileActions.append(
+    btn("Nueva interfaz",()=>{showEditor();editor.nuevo();fileMenu.open=false;}),
+    btn("Nueva carpeta",()=>{editor.nuevaCarpeta();fileMenu.open=false;}),
+    btn("Duplicar pantalla",()=>{editor.duplicar();fileMenu.open=false;}),
+    btn("Borrar pantalla",()=>{editor.borrar();fileMenu.open=false;}),
+    btn("Mapa de aperturas",()=>{editor.mostrarMapaAperturas();fileMenu.open=false;}),
+    btn("Copiar llamada Ruby",async()=>{
+      if(!editor.nombre)return;
+      const cmd="pbInterfaz("+JSON.stringify(editor.nombre)+")";
+      try{await navigator.clipboard.writeText(cmd);editor.toast("Copiado: "+cmd,"success");}
+      catch{window.prompt("Copia la llamada Ruby:",cmd);}
+      fileMenu.open=false;
+    })
   );
-  const canvasMenu=menu("▣ Lienzo ▾",[layout]);
-  canvasMenu.d.classList.add("ui-canvas-menu");
-  editor.barra.insertBefore(canvasMenu.d,editMenu.d.nextSibling);
-  editor.barra.insertBefore(copy,editor.btnGuardar);
-  const copyLabel=copy.textContent;
-  copy.textContent="⎘ Llamada";
-  copy.title=copyLabel+" · "+copy.title;
-  const canvasTitle=canvasMenu.d.querySelector("summary");
-  const resLabel=()=>{
-    const l=editor.diseno?.lienzo;
-    canvasTitle.textContent=l?"▣ Lienzo "+l.ancho+"×"+l.alto+" ▾":"▣ Lienzo ▾";
-  };
+  fileMenu.append(fileActions);
+  const hidden=node("div","ui-studio-compat-controls");
+  hidden.append(editor.selDiseno);
+  header.replaceChildren(brand,libraryButton,editButton,crumb,spacer,
+      undo,redo,canvasButton,timelineButton,paletteButton,
+      fileMenu,editor.avisosBtn,editor.etiquetaSucio,editor.btnGuardar,hidden);
 
-  // Herramientas para el workspace estilo BAS/BSS. No superpone una ventana a
-  // los diálogos del editor: maximizar aquí es concentrar el espacio útil.
-  const bar=node("div","ui-workspace-bar");
-  const section=node("div","ui-workspace-caption");
-  section.append(node("b",null,"VISTA"),node("span",null,"Ajusta el espacio"));
-  bar.append(section);
-  const divider=node("div","ui-workspace-divider");
-  bar.append(divider);
-  const toggles={};
-  const drawState=()=>{
-    root.classList.toggle("ui-workspace-focus",state.focus);
-    root.classList.toggle("ui-workspace-hide-layers",!state.layers);
-    root.classList.toggle("ui-workspace-hide-inspector",!state.inspector);
-    root.classList.toggle("ui-workspace-hide-timeline",!state.timeline);
-    for(const [key,b] of Object.entries(toggles)){
-      const active=key==="focus"?state.focus:state[key];
-      b.classList.toggle("ui-workspace-selected",active);
-      b.setAttribute("aria-pressed",String(active));
-    }
+  const canvasPanel=node("div","ui-studio-canvas-popover");
+  canvasPanel.hidden=true;
+  const canvasTitle=node("div","ui-studio-modal-title","Opciones de lienzo");
+  canvasPanel.append(canvasTitle,editor.resolucion.el);
+  root.append(canvasPanel);
+  const togglePanel=panel=>{
+    panel.hidden=!panel.hidden;
+    if(!panel.hidden)fileMenu.open=false;
   };
-  const toggle=(key)=>{
-    state[key]=!state[key];
-    if(key==="focus" && state.focus){state.layers=false;state.inspector=false;}
-    else if(key==="focus" && !state.focus){state.layers=true;state.inspector=true;}
-    if((key==="layers"||key==="inspector")&&state.focus&&state.layers&&state.inspector)state.focus=false;
-    drawState();
-    // Ajustar después del reflow, no antes de cambiar las dimensiones reales.
-    // Preserve canvas position and zoom when opening/closing tool panes.
+  const onOutside=e=>{
+    if(!canvasPanel.hidden&&!canvasPanel.contains(e.target)&&e.target!==canvasButton)
+      canvasPanel.hidden=true;
+    if(fileMenu.open&&!fileMenu.contains(e.target))fileMenu.open=false;
   };
-  for(const [key,label,title] of [
-    ["layers","Capas","Mostrar u ocultar la lista de capas"],
-    ["inspector","Propiedades","Mostrar u ocultar las propiedades"],
-    ["timeline","Línea de tiempo","Mostrar u ocultar el editor de animaciones · F7"],
-    ["focus","Solo lienzo","Concentrarse en el dibujo sin cerrar cuadros de diálogo · F6"]
-  ]){
-    const b=action(label,()=>toggle(key),title);toggles[key]=b;bar.append(b);
-  }
-  bar.append(node("span","ui-barra-hueco"));
-  // Reubicar el control real de zoom y el botón original "Encajar" evita
-  // duplicados entre el pie de canvas y la barra de vista.
-  const zoomLabel=editor.selZoom.previousElementSibling;
-  if(zoomLabel?.textContent?.trim()==="Zoom")zoomLabel.remove();
-  const fit=Array.from(editor.pie.querySelectorAll("button"))
-    .find(b=>b.textContent.trim()==="Encajar");
-  bar.append(node("span","ui-workspace-zoom-label","Zoom"),editor.selZoom);
-  if(fit){fit.classList.add("ui-workspace-btn");bar.append(fit);}
-  else bar.append(action("⤢ Encajar",()=>editor.lienzo.encajar(),
-    "Ajustar el canvas sin modificar su resolución"));
-  const help=action("Atajos ?",async()=>{
-    const content=[
-      "Alt+← / Alt+→: navegar entre pantallas.  Ctrl+J: buscar pantalla.",
-      "Ctrl+K: buscar y añadir elemento.  F6: lienzo amplio.  F7: mostrar/ocultar animaciones.",
-      "Ctrl+S: guardar.  Ctrl+D: duplicar.  Ctrl+Z / Ctrl+Mayús+Z: deshacer / rehacer.",
-      "Ctrl/Mayús+clic: selección múltiple.  Arrastrar hueco: selección rectangular.",
-      "Flechas: mover 1 px; Mayús+flechas: 8 px.  Alt+arrastrar: sin imán.",
-      "Ctrl+rueda: zoom al puntero.  Espacio+arrastrar o botón central: desplazar canvas.",
-      "Mayús+esquina: conservar proporción.  Mayús+rotación: pasos de 15°.",
-      "Los datos y condiciones siguen en el Inspector. El JSON se guarda en UI/."
-    ].join("\n");
-    try{await editor.ctx.ui.showConfirmDialog({title:"Atajos de Interface Studio",message:content});}
-    catch(_){editor.toast("Ctrl+K paleta · F6 lienzo amplio · F7 animaciones · Ctrl+S guardar","info");}
-  },"Ver guía rápida de manejo");
-  bar.append(help);
-  root.insertBefore(bar,editor.cuerpo);
-  // Persistent, low-motion navigation between the REAL in-game screens.
-  const nav=node("nav","ui-native-navigation");
-  const navTop=node("div","ui-native-navigation-top");
-  const searchScreens=node("input","ui-txt ui-native-screen-search");
-  searchScreens.type="search";
-  searchScreens.placeholder="Buscar pantalla…";
-  searchScreens.setAttribute("aria-label","Buscar pantalla por nombre");
-  const datalist=document.createElement("datalist");
-  datalist.id="ui-vermeil-screen-options";
-  searchScreens.setAttribute("list",datalist.id);
-  const goScreen=async id=>{
-    if(!id||id===editor.nombre)return;
-    await editor.abrir(id);
-    if(editor.nombre===id)searchScreens.value="";
-    navUpdate();
-  };
-  const currentGroup=()=>sceneGroups.find(g=>g.pages.some(([id])=>id===editor.nombre));
-  const pageOptions=()=>{
-    const g=currentGroup();
-    return g?g.pages.map(([id])=>id).filter(id=>editor.disponibles.includes(id)):
-             [...editor.disponibles];
-  };
-  const goRelative=delta=>{
-    const pages=pageOptions(),idx=pages.indexOf(editor.nombre);
-    if(idx+delta>=0 && idx+delta<pages.length)goScreen(pages[idx+delta]);
-  };
-  const prev=action("← Anterior",()=>goRelative(-1),"Pantalla anterior");
-  const next=action("Siguiente →",()=>goRelative(1),"Pantalla siguiente");
-  const groupsRow=node("div","ui-native-page-groups");
-  const helpLabel=node("span","ui-native-navigation-help");
-  const groupButtons=[];
-  for(const group of sceneGroups){
-    const block=node("div","ui-native-page-group");
-    block.append(node("span","ui-native-page-caption",group.name));
-    for(const [id,label] of group.pages){
-      const b=action(label,()=>goScreen(id),"Abrir "+group.name+" · "+label);
-      b.classList.add("ui-native-page");
-      b.dataset.screen=id;
-      block.append(b);
-      groupButtons.push(b);
-    }
-    groupsRow.append(block);
-  }
-  navTop.append(node("strong",null,"PANTALLAS"),searchScreens,datalist,prev,next);
-  nav.append(navTop,groupsRow,helpLabel);
-  root.insertBefore(nav,bar);
+  document.addEventListener("pointerdown",onOutside,true);
+  unsub.push(()=>document.removeEventListener("pointerdown",onOutside,true));
 
-  // Full library in the left sidebar: physical UI/<folder>/<screen>.json.
-  // Each folder is one interface, containing all the screens required.
-  const library=node("section","ui-interface-library");
-  const libraryTitle=node("div","ui-library-title");
-  const newFolder=action("+ Carpeta",()=>editor.nuevaCarpeta(),"Crear una nueva interfaz y su carpeta UI/");
-  libraryTitle.append(node("strong",null,"BIBLIOTECA"),newFolder);
-  const tree=node("div","ui-library-tree");
-  library.append(libraryTitle,tree);
-  editor.capas.el.insertBefore(library,editor.capas.buscar);
-  let treeSignature="";
-  const openedFolders=new Set(["Libreta","Pokedex"]);
-  const previewCache=new Map();
-  const previewCanvases=new Map();
-  const drawMini=(canvas,diseno)=>{
-    const ctx=canvas.getContext("2d");
-    if(!ctx)return;
-    const width=Number(diseno?.lienzo?.ancho)||640;
-    const height=Number(diseno?.lienzo?.alto)||480;
-    const sx=canvas.width/width,sy=canvas.height/height;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="#131b27";ctx.fillRect(0,0,canvas.width,canvas.height);
-    const elements=[...(diseno?.elementos||[])].filter(e=>e.visible!==false);
-    elements.sort((a,b)=>(Number(a.capa)||0)-(Number(b.capa)||0));
-    for(const el of elements){
-      if(el.tipo!=="panel"&&el.tipo!=="texto"&&el.tipo!=="imagen")continue;
-      const x=(Number(el.x)||0)*sx,y=(Number(el.y)||0)*sy;
-      const w=Math.max(1,(Number(el.ancho)||60)*sx),h=Math.max(1,(Number(el.alto)||20)*sy);
-      if(el.tipo==="texto"){
-        ctx.fillStyle=el.color?.slice(0,7)||"#dce7f7";
-        ctx.fillRect(x,y+Math.min(h,3),Math.min(w,canvas.width-x),Math.max(1,Math.min(2,h)));
-      }else{
-        ctx.fillStyle=el.tipo==="imagen"?"#526d92":(el.color?.slice(0,7)||"#243349");
-        ctx.fillRect(x,y,w,h);
-        if(el.borde){
-          ctx.strokeStyle=el.borde.slice(0,7);
-          ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  // --- A single compact tool strip, present only while editing. -------------
+  const toolbar=editor.barraAnadir;
+  toolbar.classList.add("ui-studio-toolstrip");
+  const screenLabel=node("strong","ui-studio-current","");
+  const miniStatus=node("span","ui-studio-mini-status","");
+  const selectLabel=node("span",null,"Elegido");
+  const zoomLabel=node("span",null,"Zoom");
+  const zoomReset=btn("100%",()=>editor.lienzo.fijarZoom(1),"ui-btn","Zoom real 1:1");
+  const fit=btn("Encajar",()=>editor.lienzo.encajar(),"ui-btn","Mostrar el lienzo completo");
+  const gridToggle=btn("Rejilla",()=>{
+    editor.lienzo.fijarRejilla(!editor.lienzo.rejilla);update();
+  },"ui-btn");
+  const snapToggle=btn("Imán",()=>{
+    editor.lienzo.fijarImantar(!editor.lienzo.imantar);update();
+  },"ui-btn");
+  const previewToggle=btn("Vista limpia",()=>{
+    state.preview=!state.preview;
+    editor.lienzo.capa.style.visibility=state.preview?"hidden":"visible";
+    update();
+  },"ui-btn");
+  toolbar.replaceChildren(screenLabel,miniStatus,node("span","ui-barra-hueco"),
+      selectLabel,editor.selElegido,zoomLabel,editor.selZoom,zoomReset,fit,
+      gridToggle,snapToggle,previewToggle);
+  const groupTools=node("details","ui-studio-group-tools");
+  groupTools.append(node("summary",null,"Alinear y distribuir selección"));
+  groupTools.append(editor.barraGrupo);
+  toolbar.append(groupTools);
+
+  // --- Left sidebar: choose between folder navigation and real layer tree. ---
+  const aside=editor.capas.el;
+  const layerNodes=Array.from(aside.children);
+  const tabs=node("div","ui-studio-side-tabs");
+  const folderTab=btn("Biblioteca",()=>showLibrary(),"ui-studio-side-tab");
+  const layerTab=btn("Capas",()=>showEditor(),"ui-studio-side-tab");
+  tabs.append(folderTab,layerTab);
+  aside.prepend(tabs);
+  const libraryAside=node("div","ui-studio-library-aside");
+  const folderTitle=node("div","ui-studio-side-caption","INTERFACES");
+  const newFolder=btn("＋ Carpeta",()=>editor.nuevaCarpeta(),"ui-btn ui-studio-new-folder");
+  const folderMenu=node("div","ui-studio-folder-list");
+  libraryAside.append(folderTitle,newFolder,folderMenu);
+  aside.insertBefore(libraryAside,tabs.nextSibling);
+
+  // --- Full-size visual gallery, rendered directly from the saved UI JSON. ---
+  const gallery=node("div","ui-studio-gallery");
+  const galleryHead=node("div","ui-studio-gallery-head");
+  const galleryTitle=node("div","ui-studio-gallery-title");
+  galleryTitle.append(node("strong",null,"Biblioteca de interfaces"),
+                      node("p",null,"Cada carpeta es una interfaz. Sus pantallas se editan de forma independiente."));
+  const gallerySearch=searchable("Buscar pantallas, carpetas o componentes...");
+  const galleryNew=btn("＋ Nueva pantalla",async()=>{
+    const folder=state.folder==="Todos"?null:state.folder;
+    if(folder && folder!=="Compatibilidad" && folder!=="Otras pantallas")
+      await editor.nuevoEnCarpeta(folder);
+    else await editor.nuevo();
+    if(editor.diseno)showEditor();
+  },"ui-btn ui-studio-primary");
+  galleryHead.append(galleryTitle,gallerySearch,galleryNew);
+  const galleryBody=node("div","ui-studio-gallery-body");
+  gallery.append(galleryHead,galleryBody);
+  editor.centro.prepend(gallery);
+
+  async function loadSaved(name) {
+    if(name===editor.nombre && editor.diseno)return editor.diseno;
+    if(cached.has(name))return cached.get(name);
+    try{
+      const raw=await editor.ctx.fs.readProjectFile("UI/"+name+".json");
+      const design=JSON.parse(raw);
+      cached.set(name,design);
+      return design;
+    }catch{
+      return null;
+    }
+  }
+
+  async function renderThumb(canvas,design) {
+    if(!canvas.isConnected)return;
+    const context=canvas.getContext("2d");
+    if(!context)return;
+    const logicalWidth=Number(design?.lienzo?.ancho)||640;
+    const logicalHeight=Number(design?.lienzo?.alto)||480;
+    const scaleX=canvas.width/logicalWidth,scaleY=canvas.height/logicalHeight;
+    context.save();
+    context.imageSmoothingEnabled=false;
+    context.fillStyle="#151d2a";
+    context.fillRect(0,0,canvas.width,canvas.height);
+    context.scale(scaleX,scaleY);
+    let items=Array.isArray(design?.elementos)?design.elementos:[];
+    items=items.filter(x=>x.visible!==false)
+      .map((el,i)=>({el,i}))
+      .sort((a,b)=>(Number(a.el.capa)||0)-(Number(b.el.capa)||0)||a.i-b.i)
+      .map(x=>x.el);
+    for(const el of items) {
+      const x=Number(el.x)||0,y=Number(el.y)||0;
+      const w=Math.max(0,Number(el.ancho)||0),h=Math.max(0,Number(el.alto)||0);
+      const fill=el.color&&/^#[0-9a-fA-F]{6}/.test(el.color)?el.color.slice(0,7):"#27374c";
+      if(el.tipo==="panel"&&w&&h){
+        context.fillStyle=fill;context.fillRect(x,y,w,h);
+        if(el.borde&&/^#[0-9a-fA-F]{6}/.test(el.borde)){
+          context.strokeStyle=el.borde.slice(0,7);
+          context.lineWidth=Math.max(1,Number(el.borde_grosor)||1);
+          context.strokeRect(x,y,w,h);
         }
+      }else if(el.tipo==="texto"&&el.texto){
+        const size=Math.max(9,Number(el.tamano)||16);
+        context.font=(el.negrita?"bold ":"")+size+"px sans-serif";
+        context.fillStyle=fill;
+        context.textBaseline="middle";
+        context.save();
+        context.beginPath();context.rect(x,y,w||160,h||size+4);context.clip();
+        context.fillText(String(el.texto),x+2,y+(h||size+4)/2,w||200);
+        context.restore();
+      }else if((el.tipo==="imagen"||el.tipo==="animado")&&el.imagen){
+        try{
+          const src=await G.imagenDibujable(el.imagen);
+          if(src?.img&&canvas.isConnected)
+            context.drawImage(src.img,x,y,w||src.ancho,h||src.alto);
+        }catch{}
+      }else if(el.tipo==="boton"&&w&&h){
+        context.fillStyle=fill;context.fillRect(x,y,w,h);
       }
     }
+    context.restore();
+  }
+
+  const refreshFolders=()=>{
+    folderMenu.replaceChildren();
+    const names=editor.disponibles||[];
+    const count=new Map();
+    for(const name of names){
+      const folder=folderOf(name);
+      count.set(folder,(count.get(folder)||0)+1);
+    }
+    for(const folder of ["Todos",...[...count.keys()].sort((a,b)=>a.localeCompare(b,"es"))]){
+      const amount=folder==="Todos"?names.length:count.get(folder);
+      const b=btn("",()=>{state.folder=folder;refreshFolders();rebuildGallery();},
+                  "ui-studio-folder"+(state.folder===folder?" active":""));
+      b.append(node("span",null,folder==="Todos"?"▦":"▣"),
+               node("strong",null,readableFolder(folder)),
+               node("small",null,String(amount)));
+      folderMenu.append(b);
+    }
   };
-  const fetchPreview=async(name,canvas)=>{
-    if(previewCache.has(name)){
-      drawMini(canvas,previewCache.get(name));
+
+  async function rebuildGallery() {
+    const names=editor.disponibles||[];
+    const query=gallerySearch.value.trim().toLocaleLowerCase("es");
+    const selected=names.filter(n=>
+      (state.folder==="Todos"||folderOf(n)===state.folder)&&
+      (!query||n.toLocaleLowerCase("es").includes(query)||
+      (cached.get(n)?.elementos||[]).some(e=>
+        String(e.etiqueta||e.id||"").toLocaleLowerCase("es").includes(query))));
+    galleryBody.replaceChildren();
+    if(!selected.length){
+      galleryBody.append(node("div","ui-studio-no-pages",
+        "No hay pantallas con este filtro. Cambia de carpeta o crea una."));
       return;
     }
-    try{
-      const data=JSON.parse(await editor.ctx.fs.readProjectFile("UI/"+name+".json"));
-      previewCache.set(name,data);
-      if(canvas.isConnected)drawMini(canvas,data);
-    }catch{
-      drawMini(canvas,null);
+    const grouped=new Map();
+    for(const name of selected){
+      const f=folderOf(name);
+      if(!grouped.has(f))grouped.set(f,[]);
+      grouped.get(f).push(name);
     }
-  };
-  const syncLibrary=names=>{
-    const signature=names.join("|");
-    if(signature!==treeSignature){
-      treeSignature=signature;
-      tree.replaceChildren();
-      previewCanvases.clear();
-      const byFolder=new Map();
-      for(const full of names){
-        const slash=full.indexOf("/");
-        const folder=slash<0?(full.startsWith("vermeil_")?"Compatibilidad":"Sin carpeta"):
-          full.slice(0,slash);
-        const page=slash<0?full:full.slice(slash+1);
-        if(!byFolder.has(folder))byFolder.set(folder,[]);
-        byFolder.get(folder).push({id:full,label:page});
+    for(const [folder,entries] of grouped) {
+      const section=node("section","ui-studio-gallery-section");
+      const title=node("div","ui-studio-gallery-section-title");
+      title.append(node("strong",null,readableFolder(folder)),
+                   node("span",null,entries.length+" pantallas"));
+      section.append(title);
+      const grid=node("div","ui-studio-card-grid");
+      for(const name of entries) {
+        const card=btn("",async()=>{
+          await editor.abrir(name);
+          if(editor.nombre===name)showEditor();
+        },"ui-studio-screen-card");
+        card.dataset.screen=name;
+        const frame=node("div","ui-studio-thumb-frame");
+        const canvas=node("canvas","ui-studio-screen-thumb");
+        canvas.width=320;canvas.height=240;
+        frame.append(canvas);
+        const label=node("div","ui-studio-screen-label");
+        label.append(node("strong",null,pageOf(name)),
+                     node("small",null,"UI/"+name+".json"));
+        card.append(frame,label);
+        grid.append(card);
+        loadSaved(name).then(d=>renderThumb(canvas,d));
       }
-      for(const [folder,entries] of [...byFolder.entries()].sort((a,b)=>a[0].localeCompare(b[0],"es"))){
-        const group=node("details","ui-library-folder");
-        const current=entries.some(x=>x.id===editor.nombre);
-        group.open=openedFolders.has(folder)||current;
-        const title=node("summary","ui-library-folder-title");
-        title.append(node("span",null,folder==="Pokedex"?"Pokédex":folder),
-                     node("small",null,String(entries.length)));
-        group.append(title);
-        const body=node("div","ui-library-folder-content");
-        for(const item of entries){
-          const button=action("",()=>goScreen(item.id),"Abrir "+item.id);
-          button.classList.add("ui-library-screen","ui-library-card");
-          button.dataset.screen=item.id;
-          const preview=node("canvas","ui-library-preview");
-          preview.width=88;
-          preview.height=66;
-          preview.setAttribute("aria-hidden","true");
-          const info=node("span","ui-library-card-info");
-          info.append(node("strong",null,item.label),
-                      node("small",null,folder==="Compatibilidad"?"Antiguo":"Diseño editable"));
-          button.append(preview,info);
-          body.append(button);
-          previewCanvases.set(item.id,preview);
-          fetchPreview(item.id,preview);
-        }
-        if(folder!=="Compatibilidad"&&folder!=="Sin carpeta"){
-          const add=action("+ Pantalla",()=>editor.nuevoEnCarpeta(folder),
-                           "Crear otra pantalla en UI/"+folder);
-          add.classList.add("ui-library-add-page");
-          body.append(add);
-        }
-        group.append(body);
-        group.addEventListener("toggle",()=>{
-          if(group.open)openedFolders.add(folder);else openedFolders.delete(folder);
-        });
-        tree.append(group);
-      }
+      section.append(grid);
+      galleryBody.append(section);
     }
-    tree.querySelectorAll(".ui-library-screen").forEach(b=>{
-      const active=b.dataset.screen===editor.nombre;
-      b.classList.toggle("ui-native-active",active);
-      b.setAttribute("aria-current",active?"page":"false");
-    });
-    // Active thumbnail shows the ACTUAL editor canvas, including PNG assets,
-    // rather than a speculative drawing of the saved file.
-    const active=previewCanvases.get(editor.nombre);
-    const source=editor.lienzo?.canvas;
-    if(active&&source?.width&&source?.height){
-      const ctx=active.getContext("2d");
-      ctx?.clearRect(0,0,active.width,active.height);
-      ctx?.drawImage(source,0,0,active.width,active.height);
-    }
-  };
-  let lastNames="";
-  const navUpdate=()=>{
-    const names=editor.disponibles||[],signature=names.join("|");
-    syncLibrary(names);
-    if(signature!==lastNames){
-      lastNames=signature;
-      datalist.replaceChildren(...names.map(name=>{
-        const option=document.createElement("option");option.value=name;return option;
-      }));
-    }
-    const pages=pageOptions(),index=pages.indexOf(editor.nombre);
-    prev.disabled=index<=0;
-    next.disabled=index<0||index>=pages.length-1;
-    groupButtons.forEach(b=>{
-      b.hidden=!names.includes(b.dataset.screen);
-      const active=b.dataset.screen===editor.nombre;
-      b.classList.toggle("ui-native-active",active);
-      b.setAttribute("aria-current",active?"page":"false");
-    });
-    groupsRow.hidden=!names.some(n=>n.startsWith("Libreta/")||n.startsWith("Pokedex/"));
-    helpLabel.textContent=currentGroup()?
-      "Interfaz nativa conectada: los cambios del JSON se aplican al reabrir el juego.":
-      "Selecciona una capa, edítala en Propiedades y guarda con Ctrl+S.";
-    copy.hidden=!!currentGroup();
-  };
-  searchScreens.addEventListener("keydown",ev=>{
-    if(ev.key==="Escape"){searchScreens.value="";searchScreens.blur();ev.preventDefault();}
-    if(ev.key!=="Enter")return;
-    const term=searchScreens.value.trim().toLocaleLowerCase("es");
-    const matches=(editor.disponibles||[]).filter(n=>n.toLocaleLowerCase("es").includes(term));
-    if(matches.length){goScreen(matches[0]);ev.preventDefault();}
-  });
-  // Evitar robar las teclas a otros diálogos: el editor sólo debe
-  // recibir atajos tras interactuar con SU propio lienzo.
-  root.tabIndex=0;
-  const focusCanvas=()=>root.focus({preventScroll:true});
-  editor.lienzo.el.addEventListener("pointerdown",focusCanvas,true);
-  disposers.push(()=>editor.lienzo.el.removeEventListener("pointerdown",focusCanvas,true));
-  // La barra de estado resume la selección actual sin tocar el modelo.
-  const status=node("div","ui-workspace-status");
-  const statusLeft=node("span");
-  const statusRight=node("span");
-  status.append(statusLeft,statusRight);
-  root.insertBefore(status,editor.tiempo.el);
-  const update=()=>{
-    resLabel();
-    navUpdate();
-    const d=editor.diseno,els=d?.elementos||[],selected=editor.extra?.size||0;
-    statusLeft.textContent=(editor.nombre||"Sin guardar")+" · "+els.length+" elementos"+(selected?" · "+selected+" seleccionados":"");
-    statusRight.textContent=d?.lienzo?d.lienzo.ancho+"×"+d.lienzo.alto+" · "+(editor.sucio?"Cambios pendientes":"Guardado"):"Configura un diseño";
-  };
-  // Redimensionadores acoplados al mismo cuerpo; no alteran canvas ni JSON.
-  const resizers=[];
-  for(const [side,pane] of [["left",editor.capas.el],["right",editor.inspector.el]]){
-    const handle=node("div","ui-workspace-resizer "+side);
-    handle.setAttribute("role","separator");handle.setAttribute("aria-orientation","vertical");
-    handle.title="Arrastrar para cambiar tamaño · doble clic para restablecer";
-    if(side==="left")editor.cuerpo.insertBefore(handle,editor.centro);
-    else editor.cuerpo.insertBefore(handle,editor.inspector.el);
-    const defaultWidth=side==="left"?220:300;
-    const down=ev=>{
-      if(ev.button!==0)return;ev.preventDefault();
-      const startX=ev.clientX,start=pane.getBoundingClientRect().width;
-      const min=side==="left"?175:255,max=side==="left"?430:600;
-      handle.setPointerCapture(ev.pointerId);
-      const move=event=>{
-        const delta=(event.clientX-startX)*(side==="left"?1:-1);
-        pane.style.width=Math.max(min,Math.min(max,start+delta))+"px";
-      };
-      const up=()=>{
-        // Keep the current zoom after resizing the side panels.
-        handle.removeEventListener("pointermove",move);
-        handle.removeEventListener("pointerup",up);
-        handle.removeEventListener("pointercancel",up);
-      };
-      handle.addEventListener("pointermove",move);
-      handle.addEventListener("pointerup",up);
-      handle.addEventListener("pointercancel",up);
-    };
-    handle.addEventListener("pointerdown",down);
-    const reset=()=>{pane.style.width=defaultWidth+"px";};
-    handle.addEventListener("dblclick",reset);
-    disposers.push(()=>{handle.removeEventListener("pointerdown",down);handle.removeEventListener("dblclick",reset);});
-    resizers.push(handle);
   }
-  const outside=ev=>{if(!root.contains(ev.target))closeMenus();};
-  document.addEventListener("pointerdown",outside,true);
-  disposers.push(()=>document.removeEventListener("pointerdown",outside,true));
-  // El timeline permanece disponible como transporte compacto mientras
-  // sus pistas de animación están cerradas. Sus controles avanzados no ocupan
-  // una segunda o tercera fila hasta que el usuario quiera animar.
-  editor.tiempo.selPropiedad.classList.add("ui-timeline-advanced");
-  editor.tiempo.btnAnadir.classList.add("ui-timeline-advanced");
-  drawState();update();
-  let hasFitted=false;
-  const fitOnOpen=()=>requestAnimationFrame(()=>{
-    if(root.isConnected&&editor.diseno&&!hasFitted){
-      hasFitted=true;
-      editor.lienzo.encajar();
+
+  // --- Component palette: common elements and coherent reusable blocks. -----
+  const palette=node("div","ui-studio-palette");
+  palette.hidden=true;
+  palette.setAttribute("role","dialog");
+  palette.setAttribute("aria-label","Añadir componente");
+  const shade=btn("",()=>setPalette(false),"ui-studio-palette-shade","Cerrar");
+  const paletteContent=node("section","ui-studio-palette-content");
+  const paletteTop=node("div","ui-studio-palette-top");
+  const paletteSearch=searchable("Buscar texto, panel, imagen, ficha...");
+  const paletteClose=btn("Cerrar",()=>setPalette(false),"ui-btn");
+  paletteTop.append(node("strong",null,"Añadir componentes"),paletteSearch,paletteClose);
+  const paletteItems=node("div","ui-studio-palette-items");
+  paletteContent.append(paletteTop,paletteItems);
+  palette.append(shade,paletteContent);
+  root.append(palette);
+  const componentPresets=[
+    ["Cabecera",[
+      ["panel",{x:0,y:0,ancho:640,alto:56,color:"#1d293aff",etiqueta:"Fondo de cabecera",grupo:"01 · Cabecera"}],
+      ["texto",{x:18,y:10,ancho:420,alto:35,texto:"TÍTULO",tamano:24,color:"#f2f6ff",etiqueta:"Título",grupo:"01 · Cabecera"}]
+    ]],
+    ["Ficha de especie",[
+      ["panel",{x:24,y:60,ancho:270,alto:330,color:"#233449ff",etiqueta:"Panel de ficha",grupo:"02 · Ficha"}],
+      ["texto",{x:38,y:72,ancho:245,alto:30,texto:"ESPECIE",tamano:22,color:"#f2f6ff",etiqueta:"Nombre",grupo:"02 · Ficha"}],
+      ["texto",{x:38,y:338,ancho:245,alto:32,texto:"Descripción",tamano:18,color:"#a8bad1",etiqueta:"Descripción",grupo:"02 · Ficha"}]
+    ]],
+    ["Fila de lista",[
+      ["panel",{x:310,y:74,ancho:300,alto:38,color:"#34455cff",etiqueta:"Fila",grupo:"03 · Lista"}],
+      ["texto",{x:328,y:82,ancho:270,alto:22,texto:"Elemento de lista",tamano:18,color:"#f2f6ff",etiqueta:"Nombre de fila",grupo:"03 · Lista"}]
+    ]],
+    ["Barra de controles",[
+      ["panel",{x:0,y:442,ancho:640,alto:38,color:"#1d2a3cff",etiqueta:"Barra de controles",grupo:"90 · Controles"}],
+      ["texto",{x:16,y:450,ancho:608,alto:24,texto:"ACEPTAR · Elegir    ATRÁS · Volver",tamano:16,color:"#d3dfef",etiqueta:"Instrucciones",grupo:"90 · Controles"}]
+    ]]
+  ];
+  function addPreset(parts) {
+    if(!editor.diseno)return;
+    editor.apuntarDeshacer();
+    let layer=editor.diseno.elementos.reduce((max,e)=>Math.max(max,Number(e.capa)||0),0);
+    let last=null;
+    for(const [type,props] of parts){
+      const id=M.idLibre(editor.diseno,type);
+      const el={...M.elementoNuevo(type,id,props.x,props.y),...props};
+      el.capa=layer+=10;
+      editor.diseno.elementos.push(el);last=id;
     }
+    editor.seleccion=last;
+    editor.marcarSucio();editor.refrescarTodo();setPalette(false);
+  }
+  for(const [name,parts] of componentPresets){
+    const b=btn(name,()=>addPreset(parts),"ui-studio-preset-item");
+    b.dataset.search=name.toLocaleLowerCase("es");
+    paletteItems.append(b);
+  }
+  const emptyCategory=node("div","ui-studio-palette-caption","ELEMENTOS INDIVIDUALES");
+  paletteItems.append(emptyCategory);
+  originalAdd.forEach((button,i)=>{
+    button.classList.add("ui-studio-preset-item");
+    button.dataset.search=(M.NOMBRE_TIPO[M.TIPOS[i]]||button.textContent).toLocaleLowerCase("es");
+    button.addEventListener("click",()=>setPalette(false));
+    paletteItems.append(button);
   });
-  return {
-    update,fitOnOpen,
-    openPalette(){palette.d.open=true;search.focus();},
-    nextScreen(){goRelative(1);},
-    previousScreen(){goRelative(-1);},
-    focusScreenSearch(){searchScreens.focus();searchScreens.select();},
-    toggleFocus(){toggle("focus");},
-    toggleTimeline(){toggle("timeline");},
-    showTimeline(){
-      if(!state.timeline){
-        state.timeline=true;
-        drawState();
-        // The current zoom and scroll remain unchanged.
+  paletteSearch.addEventListener("input",()=>{
+    const q=paletteSearch.value.trim().toLocaleLowerCase("es");
+    paletteItems.querySelectorAll(".ui-studio-preset-item").forEach(el=>{
+      el.hidden=!el.dataset.search.includes(q);
+    });
+  });
+  function setPalette(open){
+    state.palette=!!open;
+    palette.hidden=!state.palette;
+    if(open){paletteSearch.value="";paletteSearch.dispatchEvent(new Event("input"));paletteSearch.focus();}
+  }
+
+  // --- View state and simple navigation. ------------------------------------
+  gallerySearch.addEventListener("input",rebuildGallery);
+  function showLibrary() {
+    state.library=true;update();
+    rebuildGallery();
+  }
+  function showEditor() {
+    state.library=false;update();
+    requestAnimationFrame(()=>{
+      if(editor.diseno && lastZoomScreen!==editor.nombre){
+        lastZoomScreen=editor.nombre;
+        editor.lienzo.encajar();
       }
+    });
+  }
+  function setTimeline(on) {
+    state.timeline=!!on;
+    editor.tiempo.el.hidden=!state.timeline;
+    timelineButton.classList.toggle("active",state.timeline);
+  }
+  const helpStatus=node("div","ui-studio-status");
+  root.insertBefore(helpStatus,editor.tiempo.el);
+  const keyboard=e=>{
+    if(!root.contains(e.target))return;
+    if(e.ctrlKey&&e.key.toLowerCase()==="k"){
+      e.preventDefault();showLibrary();gallerySearch.focus();gallerySearch.select();
+    }
+    if(e.key==="Escape"){
+      if(state.palette){setPalette(false);e.preventDefault();}
+      else if(!canvasPanel.hidden){canvasPanel.hidden=true;e.preventDefault();}
+      else if(state.library){showEditor();e.preventDefault();}
+    }
+  };
+  document.addEventListener("keydown",keyboard,true);
+  unsub.push(()=>document.removeEventListener("keydown",keyboard,true));
+
+  function update() {
+    const names=editor.disponibles||[];
+    const sig=names.join("|");
+    if(sig!==listSignature){
+      listSignature=sig;refreshFolders();
+      if(state.library)rebuildGallery();
+    }
+    const n=editor.nombre||"Sin guardar";
+    const folder=folderOf(n);
+    crumb.textContent=editor.nombre?readableFolder(folder)+" / "+pageOf(n):"Nueva pantalla";
+    screenLabel.textContent=pageOf(n);
+    miniStatus.textContent=(editor.diseno?.elementos?.length||0)+" capas";
+    editor.centro.style.minWidth="0";
+    gallery.hidden=!state.library;
+    editor.lienzo.el.hidden=state.library;
+    editor.pie.hidden=state.library;
+    editor.inspector.el.hidden=state.library;
+    layerNodes.forEach(el=>{el.hidden=state.library;});
+    libraryAside.hidden=!state.library;
+    editButton.classList.toggle("active",!state.library);
+    libraryButton.classList.toggle("active",state.library);
+    folderTab.classList.toggle("active",state.library);
+    layerTab.classList.toggle("active",!state.library);
+    toolbar.hidden=state.library;
+    editor.barraGrupo.hidden=state.library;
+    gridToggle.classList.toggle("active",!!editor.lienzo.rejilla);
+    snapToggle.classList.toggle("active",!!editor.lienzo.imantar);
+    previewToggle.classList.toggle("active",!!state.preview);
+    helpStatus.textContent=state.library?
+      (names.length+" pantallas · selecciona una miniatura para editar") :
+      (n+" · "+(editor.sucio?"CAMBIOS SIN GUARDAR":"Guardado")+" · doble clic en Capas para renombrar");
+    if(!state.library&&lastName!==n){
+      lastName=n;
+      gallerySearch.value="";
+    }
+    if(state.library && editor.nombre && editor.diseno) {
+      const canvas=galleryBody.querySelector('[data-screen="'+CSS.escape(editor.nombre)+'"] canvas');
+      if(canvas)renderThumb(canvas,editor.diseno);
+    }
+  }
+
+  setTimeline(false);update();
+  return {
+    update,
+    fitOnOpen(){if(!state.library)requestAnimationFrame(()=>editor.lienzo.encajar());},
+    openPalette(){setPalette(true);},
+    nextScreen(){
+      const names=editor.disponibles||[];
+      const i=names.indexOf(editor.nombre);
+      if(i>=0&&i<names.length-1)editor.abrir(names[i+1]).then(showEditor);
     },
-    destroy(){disposers.forEach(fn=>fn());closeMenus();}
+    previousScreen(){
+      const names=editor.disponibles||[];
+      const i=names.indexOf(editor.nombre);
+      if(i>0)editor.abrir(names[i-1]).then(showEditor);
+    },
+    focusScreenSearch(){showLibrary();gallerySearch.focus();gallerySearch.select();},
+    toggleFocus(){state.preview=!state.preview;editor.lienzo.capa.style.visibility=state.preview?"hidden":"visible";update();},
+    toggleTimeline(){setTimeline(!state.timeline);},
+    showTimeline(){setTimeline(true);},
+    destroy(){unsub.forEach(fn=>fn());}
   };
 }
