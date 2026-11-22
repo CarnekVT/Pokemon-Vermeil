@@ -178,6 +178,9 @@ export function montarEspacio(editor, M) {
     canvas._uiPreviewToken=token;
     const width=Number(design?.lienzo?.ancho)||640;
     const height=Number(design?.lienzo?.alto)||480;
+    const previewHeight=Math.max(60,Math.round(canvas.width*height/width));
+    if(canvas.height!==previewHeight)canvas.height=previewHeight;
+    if(canvas.parentElement)canvas.parentElement.style.aspectRatio=width+" / "+height;
     const items=(Array.isArray(design?.elementos)?design.elementos:[])
       .filter(el=>el.visible!==false)
       .map((el,i)=>({el,i}))
