@@ -111,7 +111,7 @@ export class SceneDirectorEditor{
   addMedia(data,at=null){
     const s=this.scene();if(!s||!data?.type)return;
     const extra={};if(data.filename){extra.filename=data.filename;if(["image_clip","show"].includes(data.type)){extra.x=this.resolution.width/2;extra.y=this.resolution.height/2;extra.origin="center";if(data.type==="image_clip"){extra.endX=extra.x;extra.endY=extra.y;}this.imageTab="image";this.preview.isolateGraphic=false;this.updateGraphicMode()}}if(data.name)extra.name=data.name;
-    if(["image_clip","show"].includes(data.type)&&s.commands.length===0){this.snapshot();s.commands.push(cmd("fade_from_black",{duration:1}),cmd(data.type,extra));this.mark();this.selectCmd(s.commands[1].id);return}this.addCommand(data.type,at,extra);
+    this.addCommand(data.type,at,extra);
   }
   insertAt(from,index){
     const s=this.scene(),a=s.commands.findIndex(c=>c.id===from);if(a<0)return;

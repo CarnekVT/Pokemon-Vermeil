@@ -92,3 +92,6 @@ Ctrl+Z, Ctrl+Y y Ctrl+Shift+Z restauran proyecto, selección y cabezal. Botones 
 
 ## v0.9.0
 Control de escena: finalizar, encadenar, reservar evento común al salir, esperar confirmación, cambiar interruptor/variable y condiciones por acción. Activación secuencial, por tiempo en grupos compatibles, al inicio o tras confirmar un diálogo. Las acciones paralelas compatibles esperan su final real; las no compatibles esperan el grupo completo. Preview no ejecuta eventos ni evalúa condiciones del juego. Spritesheet en el clip: columnas/filas, rango, FPS, bucle, una pasada, ida/vuelta, manual mediante clave de fotograma. Recorte nativo de textura. Mantener visible conserva la última pose y celda. Encadenar limpia la escena anterior y detecta bucles.
+
+## v0.9.1
+Las escenas ejecutadas por SceneDirector.play inician con el overlay negro transparente. Los guiones originales de SceneEngine conservan su inicio negro por defecto; los fundidos explícitos siguen funcionando. El editor inicia con el mismo estado y ya no añade un fundido automático al primer gráfico. Los errores al cargar una imagen en SDS muestran su ruta y error en lugar de ocultar el fallo silenciosamente. No es necesario regenerar los JSON ya exportados para cambiar el estado inicial del overlay, pero sí actualizar los plugins Ruby.

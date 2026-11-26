@@ -56,7 +56,7 @@ module SceneDirector
         key = scene["key"] || scene["id"]
         raise "Scene Director: bucle entre escenas '#{key}'." if visited[key]
         visited[key] = true
-        player = SceneEngine::Player.new(dialogue_data: {})
+        player = SceneEngine::Player.new(dialogue_data: {}, start_black: false, strict_assets: true)
         player.run do
           instance_eval(code, "SceneDirector/#{key}", 1)
         end

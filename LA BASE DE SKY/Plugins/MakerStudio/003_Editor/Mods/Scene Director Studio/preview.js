@@ -34,7 +34,7 @@ export class ScenePreview{
   fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:0,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";

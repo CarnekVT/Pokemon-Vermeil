@@ -1,6 +1,8 @@
 # encoding: utf-8
 class SceneEngine::Player
-  def initialize(dialogue_data: nil)
+  def initialize(dialogue_data: nil, start_black: true, strict_assets: false)
+    @scene_start_black = start_black
+    @scene_strict_assets = strict_assets
     @dialog_data = dialogue_data || {}
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99_999
@@ -28,7 +30,7 @@ class SceneEngine::Player
     @sprites[:black] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     @sprites[:black].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
     @sprites[:black].z = SceneEngine::Settings::LAYER_OVERLAY
-    @sprites[:black].opacity = 255
+    @sprites[:black].opacity = @scene_start_black ? 255 : 0
 
     @sprites[:white] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     @sprites[:white].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(255, 255, 255))
@@ -267,13 +269,14 @@ class SceneEngine::Player
 
   def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left, zoom: 1, z: nil)
     key = filename.to_s
-    @image_sprites[key]&.dispose
+    @image_sprites.delete(key)&.dispose
 
     s = Sprite.new(@viewport)
     begin
       s.bitmap = AnimatedBitmap.new(filename).deanimate
-    rescue
+    rescue => e
       s.dispose
+      raise "Scene Director: no se pudo cargar el gráfico '#{filename}': #{e.message}" if @scene_strict_assets
       return
     end
 

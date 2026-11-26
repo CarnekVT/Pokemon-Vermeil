@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Control de escena, dependencias de diálogo, condiciones y spritesheets integrados en clips.",
+  "description": "Control de escena, spritesheets integrados y arranque sin capa negra implícita.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
