@@ -31,7 +31,7 @@ export function defaultsFor(type){
     case "stop_bgs": return {};
     case "fade_from_black": case "fade_to_black": case "to_white": return {duration:20};
     case "from_white": return {duration:20,se:""};
-    case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255};
+    case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255,keys:[]};
     case "show": return {filename:"",x:0,y:0,fade:20,origin:"top_left",zoom:1,z:null,store:""};
     case "hide": return {filename:"",fade:0};
     case "hide_all": return {fade:0};
@@ -97,7 +97,7 @@ export function commandToRuby(c){
     case "fade_from_black": case "fade_to_black": case "to_white": return `${c.type} ${n(c.duration)}`;
     case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}`:""}`;
     case "show_textbox": case "hide_textbox": return `${c.type} ${n(c.duration)}`;
-    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}`;}
+    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}`;}
     case "show": { const opts=[]; if(c.fade!==undefined)opts.push(`fade: ${n(c.fade)}`); if(c.origin)opts.push(`origin: ${sym(c.origin)}`); if(c.zoom!==undefined)opts.push(`zoom: ${n(c.zoom)}`); if(c.z!==null&&c.z!==undefined&&c.z!=="")opts.push(`z: ${n(c.z)}`); return `${pre}show ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}`;
     case "hide_all": return `hide_all fade: ${n(c.fade)}`;

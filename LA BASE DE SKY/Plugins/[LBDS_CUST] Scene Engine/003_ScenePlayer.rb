@@ -300,7 +300,7 @@ class SceneEngine::Player
                  opacity: 255, z: nil, duration: 120, enter: "fade", in_frames: 24,
                  exit: "none", out_frames: 24, keep: true, motion: "none", distance: 64,
                  easing: "smooth", end_x: nil, end_y: nil, end_zoom: nil,
-                 end_angle: nil, end_opacity: nil)
+                 end_angle: nil, end_opacity: nil, keys: [])
     duration = [[duration.to_i, 1].max, 360000].min
     in_frames = enter == "none" ? 0 : [[in_frames.to_i, 0].max, duration].min
     out_frames = keep || exit == "none" ? 0 : [[out_frames.to_i, 0].max, duration - in_frames].min
@@ -320,6 +320,36 @@ class SceneEngine::Player
     distance = [distance.to_f, 0].max
     zoom = [[zoom.to_f, 0.01].max, 30].min
     opacity = [[opacity.to_f, 0].max, 255].min
+    key_tracks = {}
+    Array(keys).each do |row|
+      next unless row.is_a?(Array) && row.length >= 3 && ["x", "y", "zoom", "angle", "opacity"].include?(row[0])
+      (key_tracks[row[0]] ||= []) << row
+    end
+    key_tracks.each_value { |rows| rows.sort_by! { |row| row[1].to_f } }
+    key_ease = lambda do |t, mode|
+      t = [[t, 0.0].max, 1.0].min
+      case mode
+      when "hold" then t >= 1.0 ? 1.0 : 0.0
+      when "linear" then t
+      when "ease_in" then t*t
+      when "ease_out" then 1-(1-t)*(1-t)
+      else t < 0.5 ? 2*t*t : 1-(-2*t+2)**2/2
+      end
+    end
+    key_value = lambda do |prop, f, base|
+      rows = key_tracks[prop]
+      next base unless rows && !rows.empty?
+      first, last = rows.first, rows.last
+      if f < first[1].to_f
+        next base + (first[2].to_f-base)*key_ease.call(f.to_f/first[1].to_f,"ease_both")
+      end
+      next last[2].to_f if f >= last[1].to_f
+      pair = rows.each_cons(2).find { |a,b| f >= a[1].to_f && f <= b[1].to_f }
+      next base unless pair
+      a,b = pair
+      t = key_ease.call((f-a[1].to_f)/[b[1].to_f-a[1].to_f,0.0001].max,a[3])
+      a[2].to_f+(b[2].to_f-a[2].to_f)*t
+    end
     sample = lambda do |f|
       p = ease.call(f.to_f / duration)
       mix = ->(a,b) { a + (b-a)*p }
@@ -337,6 +367,11 @@ class SceneEngine::Player
         ar = mix.call(ar,(end_angle || angle).to_f)
         ao = mix.call(ao,[[(end_opacity || opacity).to_f,0].max,255].min)
       end
+      ax = key_value.call("x", f, x.to_f) if key_tracks["x"]
+      ay = key_value.call("y", f, y.to_f) if key_tracks["y"]
+      az = key_value.call("zoom", f, zoom) if key_tracks["zoom"]
+      ar = key_value.call("angle", f, angle.to_f) if key_tracks["angle"]
+      ao = key_value.call("opacity", f, opacity) if key_tracks["opacity"]
       effect = lambda do |k,t|
         next if k == "none"
         case k

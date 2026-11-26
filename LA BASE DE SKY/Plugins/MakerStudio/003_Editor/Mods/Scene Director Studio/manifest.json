@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Navegador de gráficos unificado, selección visual y edición de imágenes simplificada.",
+  "description": "Keyframes independientes por propiedad al estilo BAS y CapCut; vista de edición sin fundidos que oculten la escena.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
