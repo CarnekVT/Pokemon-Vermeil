@@ -32,9 +32,10 @@ export function setKey(c,prop,frame,value,easing){
  frame=clamp(Math.round(n(frame)),0,clipLength(c));value=n(value,baseValue(c,prop,frame));
  if(prop==="zoom")value=clamp(value,.01,30);if(prop==="opacity")value=clamp(value,0,255);
  c.keys=Array.isArray(c.keys)?c.keys:[];
+ if(frame>0&&!c.keys.some(k=>k[0]===prop&&k[1]===0)){const initial=baseValue(c,prop,0);c.keys.push([prop,0,initial,easing||"ease_both"])}
  const k=c.keys.find(k=>k[0]===prop&&k[1]===frame);if(k){k[2]=value;if(easing)k[3]=easing}else c.keys.push([prop,frame,value,easing||"ease_both"]);
  c.keys.sort((a,b)=>a[1]-b[1]||KEY_PROPS.indexOf(a[0])-KEY_PROPS.indexOf(b[0]));
 }
-export function removeKey(c,prop,frame){c.keys=(c.keys||[]).filter(k=>k[0]!==prop||k[1]!==frame)}
+export function removeKey(c,prop,frame){const initial=baseValue(c,prop,0);c.keys=(c.keys||[]).filter(k=>k[0]!==prop||k[1]!==frame);if(frame===0)c[prop]=initial}
 export function moveKey(c,prop,from,to){const k=keysFor(c,prop).find(k=>k[1]===from);if(!k||from===to)return;const v=k[2],e=k[3];removeKey(c,prop,from);setKey(c,prop,to,v,e)}
 export function resizeKeys(c){const max=clipLength(c),old=Array.isArray(c.keys)?c.keys.slice():[];c.keys=[];for(const k of old)if(KEY_PROPS.includes(k[0]))setKey(c,k[0],Math.min(k[1],max),k[2],k[3])}

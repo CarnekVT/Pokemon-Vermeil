@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Eventos paralelos en clips y pausas, precisión de fotogramas y cuadros de texto Windowskins.",
+  "description": "Historial de edición con atajos y keyframes iniciales explícitos; auto key y navegación local.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
