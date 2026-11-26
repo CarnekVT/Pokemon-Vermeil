@@ -94,6 +94,11 @@ class SceneEngine::Player
   # El juego puede renderizar a 120 FPS. El guion, textos y efectos
   # trabajan a 60 pasos lógicos por segundo, sin depender del refresco.
   def update
+    if @scene_parallel_fiber && Fiber.current == @scene_parallel_fiber
+      Fiber.yield
+      return
+    end
+    @sprites[:text_box].update if @sprites[:text_box].is_a?(SpriteWindow_Base)
     update_float
     update_aura_particles
     update_scrolling
@@ -420,7 +425,75 @@ class SceneEngine::Player
     frames.times { update }
   end
 
-  def text_inline(text, speaker: nil, speed: :normal, format_args: nil)
+  # Each eligible lane advances at the same 60 Hz logical clock.
+  def parallel_scene(rows)
+    pending = rows.each_with_index.sort_by { |row, i| [row[0].to_i, i] }.map(&:first)
+    active = []
+    frame = 0
+    until pending.empty? && active.empty?
+      busy = active.map { |task| task[0] }
+      ready = []
+      pending.delete_if do |row|
+        offset, lane, block = row
+        if offset.to_i <= frame && !busy.include?(lane)
+          busy << lane
+          ready << [lane, Fiber.new { block.call }]
+          true
+        else
+          false
+        end
+      end
+      active.concat(ready)
+      active.each do |task|
+        fiber = task[1]
+        next unless fiber.alive?
+        @scene_parallel_fiber = fiber
+        begin
+          fiber.resume
+        ensure
+          @scene_parallel_fiber = nil
+        end
+      end
+      active.reject! { |task| !task[1].alive? }
+      break if active.empty? && pending.empty?
+      update
+      frame += 1
+    end
+  ensure
+    @scene_parallel_fiber = nil
+  end
+
+  def set_scene_textbox(skin = "")
+    skin = skin.to_s
+    return if @scene_textbox_skin == skin
+    old = @sprites[:text_box]
+    alpha = old && !old.disposed? ? old.opacity : 0
+    if skin.empty?
+      path = "#{SceneEngine::Settings::SCENES_DIR}/#{SceneEngine::Settings::TEXT_BOX_FILE}"
+      next_box = Sprite.new(@viewport)
+      begin
+        next_box.bitmap = AnimatedBitmap.new(path).deanimate
+      rescue
+        next_box.bitmap = Bitmap.new(Graphics.width, SceneEngine::Settings::TEXT_BOX_H)
+        next_box.bitmap.fill_rect(0, 0, Graphics.width, SceneEngine::Settings::TEXT_BOX_H, Color.new(20,20,30))
+      end
+      next_box.y = SceneEngine::Settings::TEXT_BOX_Y
+    else
+      return unless pbResolveBitmap(skin)
+      next_box = SpriteWindow_Base.new(0, SceneEngine::Settings::TEXT_BOX_Y, Graphics.width, SceneEngine::Settings::TEXT_BOX_H)
+      next_box.viewport = @viewport
+      next_box.setSkin(skin)
+      next_box.back_opacity = 255
+    end
+    next_box.z = SceneEngine::Settings::LAYER_TEXTBOX
+    next_box.opacity = alpha
+    old.dispose if old && !old.disposed?
+    @sprites[:text_box] = next_box
+    @scene_textbox_skin = skin
+  end
+
+  def text_inline(text, speaker: nil, speed: :normal, format_args: nil, skin: nil)
+    set_scene_textbox(skin) unless skin.nil?
     text = apply_format(text, format_args) if format_args
     show_page_text(text, speaker, speed)
   end

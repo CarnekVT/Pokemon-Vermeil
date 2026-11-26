@@ -1,3 +1,4 @@
+import {timelineGroups} from "./timing.js";
 export const FORMAT_VERSION = 1;
 export const SAVE_DIR = "Data/SceneDirector";
 export const SAVE_FILE = `${SAVE_DIR}/scenes.json`;
@@ -35,7 +36,8 @@ export function defaultsFor(type){
     case "show": return {filename:"",x:0,y:0,fade:20,origin:"top_left",zoom:1,z:null,store:""};
     case "hide": return {filename:"",fade:0};
     case "hide_all": return {fade:0};
-    case "text_inline": return {text:"",speaker:"",speed:"normal",formatArgs:[]};
+    case "textbox_style": return {skin:""};
+    case "text_inline": return {text:"",speaker:"",speed:"normal",formatArgs:[],skin:""};
     case "show_centered_text": return {text:"",speed:"normal",color:[0,0,0]};
     case "hide_centered_text": return {};
     case "show_textbox": case "hide_textbox": return {duration:10};
@@ -70,7 +72,7 @@ export function normalizeProject(p){
 export function commandStateSignature(c){
   const clean={};
   for(const [k,v] of Object.entries(c||{})){
-    if(k==="id"||k==="sourceRuby"||k==="sourceState"||k==="sourceLine"||k==="sourceFile")continue;
+    if(k==="overlapParent"||k==="offsetFrames"||k==="id"||k==="sourceRuby"||k==="sourceState"||k==="sourceLine"||k==="sourceFile")continue;
     clean[k]=v;
   }
   return JSON.stringify(clean);
@@ -101,7 +103,8 @@ export function commandToRuby(c){
     case "show": { const opts=[]; if(c.fade!==undefined)opts.push(`fade: ${n(c.fade)}`); if(c.origin)opts.push(`origin: ${sym(c.origin)}`); if(c.zoom!==undefined)opts.push(`zoom: ${n(c.zoom)}`); if(c.z!==null&&c.z!==undefined&&c.z!=="")opts.push(`z: ${n(c.z)}`); return `${pre}show ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}`;
     case "hide_all": return `hide_all fade: ${n(c.fade)}`;
-    case "text_inline": { const opts=[]; if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }
+    case "textbox_style": return `set_scene_textbox ${q(c.skin||"")}`;
+    case "text_inline": { const opts=[]; if(c.skin)opts.push(`skin: ${q(c.skin)}`); if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "show_centered_text": return `show_centered_text ${q(c.text)}, speed: ${sym(c.speed)}, color: ${rubyColor(c.color)}`;
     case "hide_centered_text": return `hide_centered_text`;
     case "transfer_player": return `transfer_player ${n(c.mapId)}, ${n(c.x)}, ${n(c.y)}, ${n(c.direction)}`;
@@ -124,14 +127,18 @@ export function commandToRuby(c){
     default: return `# Unsupported command: ${c.type}`;
   }
 }
-export function compileScene(scene){ return (scene.commands||[]).map(commandToRuby).join("\n\n"); }
+export function compileScene(scene){return timelineGroups(scene).map(g=>{
+ if(!g.events.length)return commandToRuby(g.root);
+ const rows=[{c:g.root,offset:0,lane:"main"},...g.events.map(e=>({c:e.c,offset:e.requested,lane:e.lane}))];
+ return "parallel_scene([\n"+rows.map(e=>"  ["+e.offset+", "+q(e.lane)+", proc {\n"+commandToRuby(e.c).split("\n").map(s=>"    "+s).join("\n")+"\n  }]").join(",\n")+"\n])";
+ }).join("\n\n")}
 export function compileProject(project){ const p=clone(project); p.scenes.forEach(s=>s.compiledRuby=compileScene(s)); return p; }
 
 export const COMMAND_GROUPS=[
   {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Nombre vanilla"],["custom_name_input","✦ Nombre Vermeil"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["image_clip","▣ Clip de imagen"],["show","▣ Mostrar imagen (instantánea)"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
-  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
+  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["textbox_style","▭ Estilo de cuadro"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
   {id:"motion",label:"FX",items:[["start_scrolling","⇢ Scroll"],["stop_scrolling","■ Detener scroll"],["start_aura","✦ Aura"],["stop_aura","✦ Detener aura"],["fade_in_scrolling","⇢ Fade in scroll"],["fade_out_scrolling","⇢ Fade out scroll"],["fade_out_floating","↕ Fade out flotantes"],["fade_out_images","▣ Fade out imágenes"],["fade_out_sprites","◫ Fade refs Ruby"]]},
   {id:"audio",label:"Audio",items:[["bgm","♫ BGM"],["bgs","≈ BGS"],["se","♪ SE"],["stop_bgm","♫ Detener BGM"],["stop_bgs","≈ Detener BGS"]]}
 ];

@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Keyframes independientes por propiedad al estilo BAS y CapCut; vista de edición sin fundidos que oculten la escena.",
+  "description": "Eventos paralelos en clips y pausas, precisión de fotogramas y cuadros de texto Windowskins.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

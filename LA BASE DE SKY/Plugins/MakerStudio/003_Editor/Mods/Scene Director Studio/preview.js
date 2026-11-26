@@ -1,5 +1,6 @@
 import { loadProjectBlobUrl, mimeFor } from "./project.js";
 import { sample, clipLength, spans } from "./animation.js";
+import {timelineGroups} from "./timing.js";
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -33,7 +34,7 @@ export class ScenePreview{
   fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -103,7 +104,7 @@ export class ScenePreview{
 
     if(s.textbox>0.001){
       const y=e.textBoxY??286,h=e.textBoxH??178,padX=e.textPadX??48,padTop=e.textPadYTop??42,lineH=e.textLineH??32;
-      push(500,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);if(this.textBoxImg)g.drawImage(this.textBoxImg,0,y);else{g.fillStyle="rgba(14,15,24,.92)";g.fillRect(0,y,this.w,h);g.strokeStyle="rgba(255,255,255,.22)";g.strokeRect(.5,y+.5,this.w-1,h-1)}g.restore()});
+      push(500,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);if(s.skin)this.drawWindowSkin(s.skin,0,y,this.w,h);else if(this.textBoxImg)g.drawImage(this.textBoxImg,0,y);else{g.fillStyle="rgba(14,15,24,.92)";g.fillRect(0,y,this.w,h);g.strokeStyle="rgba(255,255,255,.22)";g.strokeRect(.5,y+.5,this.w-1,h-1)}g.restore()});
       if(s.text)push(510,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);this.gameFont();const sp=s.text.speaker||"",map=e.speakerColorMap||{},pair=map[sp],spColor=this.rgba(pair?.[0],e.speakerColor||[248,208,48]),spShadow=this.rgba(pair?.[1],e.speakerShadow||[120,96,16]);if(sp)this.drawShadowText(sp,padX,y+12,spColor,spShadow);const tc=this.rgba(e.textColor,[248,248,248]),ts=this.rgba(e.textShadow,[72,72,72]),lines=s.text.pageLines||[],revealed=Math.floor(s.text.revealed??0);lines.forEach((ln,i)=>{const part=this.partialLine(ln,i,lines,revealed);if(part)this.drawShadowText(part,padX,y+padTop+i*lineH,tc,ts)});g.restore()});
       if(s.text&&s.indicator)push(511,()=>{if(Math.floor(s.frame)%40>=20)return;const c=e.textColor||[248,248,248],sc=e.textShadow||[72,72,72],x=this.w-padX-14,iy=y+h-24;g.save();const rect=(dx,dy,w,hh,col)=>{g.fillStyle=this.rgba(col,[255,255,255]);g.fillRect(x+dx,iy+dy,w,hh)};rect(1,1,14,2,sc);rect(3,3,10,2,sc);rect(5,5,6,2,sc);rect(7,7,2,2,sc);rect(0,0,14,2,c);rect(2,2,10,2,c);rect(4,4,6,2,c);rect(6,6,2,2,c);g.restore()});
     }
@@ -247,9 +248,35 @@ export class ScenePreview{
 
   stop(){this.playToken++;this.livePlayback=false;this.seeking=false;this.onionSnapshots=null;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
   async reset(){this.stop();this.resetState();this.draw();}
+  drawWindowSkin(im,x,y,w,h){
+  const g=this.g,iw=im.width,ih=im.height;
+  if((iw===192||iw===128)&&ih===128){const vx=iw===128,b=vx?64:128,t=vx?64:128,edge=16;g.drawImage(im,0,0,b,b,x,y,w,h);const parts=[[0,0,16,16,0,0,16,16],[48,0,16,16,w-16,0,16,16],[0,48,16,16,0,h-16,16,16],[48,48,16,16,w-16,h-16,16,16],[16,0,32,16,16,0,w-32,16],[16,48,32,16,16,h-16,w-32,16],[0,16,16,32,0,16,16,h-32],[48,16,16,32,w-16,16,16,h-32]];for(const [sx,sy,sw,sh,dx,dy,dw,dh] of parts)g.drawImage(im,t+sx,sy,sw,sh,x+dx,y+dy,dw,dh);return}
+  const l=Math.max(0,Math.floor((iw-16)/2)),t=Math.max(0,Math.floor((ih-16)/2)),r=iw-l-Math.min(16,iw),b=ih-t-Math.min(16,ih);
+  const sx=[0,l,iw-r,iw],sy=[0,t,ih-b,ih],dx=[x,x+Math.min(l,w/2),x+w-Math.min(r,w/2),x+w],dy=[y,y+Math.min(t,h/2),y+h-Math.min(b,h/2),y+h];
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++){const sw=sx[i+1]-sx[i],sh=sy[j+1]-sy[j];if(sw>0&&sh>0)g.drawImage(im,sx[i],sy[j],sw,sh,dx[i],dy[j],dx[i+1]-dx[i],dy[j+1]-dy[j])}
+ }
+  async setSkin(path,token){const im=path?await this.image(path):null;if(token===this.playToken)this.state.skin=im}
+  async playGroup(g,token){
+  const start=this.state.frame,lanes=new Map();
+  for(const e of g.events){if(!lanes.has(e.lane))lanes.set(e.lane,[]);lanes.get(e.lane).push(e)}
+  const jobs=[this.apply(g.root,false,token)];
+  for(const events of lanes.values())jobs.push((async()=>{for(const e of events){if(token!==this.playToken)return;const left=start+e.requested-this.state.frame;if(left>0)await this.frames(left,null,false,token);if(token===this.playToken)await this.apply(e.c,false,token)}})());
+  await Promise.all(jobs);
+ }
+  async seekGroup(g,frame,token){
+  const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
+  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&s.images.get(g.root.filename))s.images.get(g.root.filename).visible=false}
+  else if(g.root.type!=="wait")await this.apply(g.root,true,token);
+  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)break;s.frame=base+e.offset;await this.apply(e.c,true,token)}
+  if(token===this.playToken)s.frame=base+f;
+ }
+  async seekParallel(scene,index,clipFrame){
+  this.stop();const token=++this.playToken;this.seeking=true;this.resetState();const target=scene.commands[index],groups=timelineGroups(scene);
+  try{for(const g of groups){if(token!==this.playToken)return;const e=g.events.find(e=>e.c.id===target?.id);if(g.root.id===target?.id||e){if(g.events.length)await this.seekGroup(g,e?e.offset:(clipFrame??g.length),token);else if(g.root.type==="image_clip")await this.applyImageClip(g.root,true,token,clipFrame??spans(g.root).enter);else await this.apply(g.root,true,token);break}if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token)}}finally{if(token===this.playToken){this.seeking=false;this.draw()}}
+ }
   async play(scene,{from=0}={}){
    this.stop();const token=++this.playToken;this.livePlayback=true;this.editClip=null;this.onionSnapshots=null;this.resetState();
-   try{for(let i=0;i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;if(i<from){await this.apply(scene.commands[i],true,token);continue}this.onCommand?.(i,scene.commands[i]);await this.apply(scene.commands[i],false,token)}}finally{if(token===this.playToken)this.livePlayback=false}
+   try{const groups=timelineGroups(scene),target=scene.commands[from],start=Math.max(0,groups.findIndex(g=>g.root.id===target?.id||g.events.some(e=>e.c.id===target?.id)));for(let i=0;i<groups.length;i++){if(token!==this.playToken)return;const g=groups[i];if(i<start){if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token);continue}this.onCommand?.(scene.commands.indexOf(g.root),g.root);if(g.events.length)await this.playGroup(g,token);else await this.apply(g.root,false,token)}}finally{if(token===this.playToken)this.livePlayback=false}
  }
   cloneState(value,seen=new Map()){
    if(!value||typeof value!=="object")return value;if(seen.has(value))return seen.get(value);
@@ -285,6 +312,7 @@ export class ScenePreview{
   selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.filename):null}
   drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=it.img.width*it.zoom,h=it.img.height*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}g.translate(it.x+ax,it.y+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,0,0,w,h);g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
   async runTo(scene,index,clipFrame=null){
+   if(scene.commands.some(c=>c.overlapParent))return this.seekParallel(scene,index,clipFrame);
    this.stop();const token=++this.playToken;this.seeking=true;this.onionSnapshots=null;this.resetState();
    const commands=scene.commands||[],at=Math.max(-1,Math.min(index,commands.length-1));let previous=[];
    try{
@@ -341,6 +369,7 @@ export class ScenePreview{
   async hideTextboxFade(skip,token,frames=10){if(this.state.textbox<=0)return;if(skip){this.state.textbox=0;this.state.indicator=false;return}const from=this.state.textbox;this.state.indicator=false;await this.frames(frames,p=>this.state.textbox=from*(1-p),false,token);this.state.textbox=0;}
 
   async pageText(obj,skip,token){
+    if(obj.skin)await this.setSkin(obj.skin,token);if(token!==this.playToken)return;
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,this.w-(e.textPadX??48)*2),max=Math.max(1,e.textMaxLines||4),pages=this.paginateLines(lines,max);
     const target={speaker:obj.speaker||"",pageLines:pages[0],revealed:0,page:0};this.state.text=target;
     await this.showTextboxFade(skip,token,10);
@@ -421,6 +450,7 @@ export class ScenePreview{
         const im=await this.image(c.filename);if(im){let x=this.num(c.x,0),y=this.num(c.y,0),zoom=this.num(c.zoom,1);if(c.origin==="center"){x-=im.width*zoom/2;y-=im.height*zoom/2}else if(c.origin==="bottom"){x-=im.width*zoom/2;y-=im.height*zoom}const fade=this.num(c.fade,20),it={img:im,x,y,anchorX:c.origin==="center"||c.origin==="bottom"?im.width*zoom/2:0,anchorY:c.origin==="center"?im.height*zoom/2:c.origin==="bottom"?im.height*zoom:0,z:this.num(c.z??200+s.images.size,200+s.images.size),zoom,opacity:fade>0?0:255,visible:true};s.images.set(c.filename,it);if(fade>0)await this.frames(fade,p=>it.opacity=255*p,skip,token);it.opacity=255;}break;}
       case"hide":{const a=c.filename?[s.images.get(c.filename)]:[...s.images.values()];const targets=a.filter(Boolean);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
       case"hide_all":{const targets=[...s.images.values()];if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
+      case"textbox_style":await this.setSkin(c.skin,token);break;
       case"text_inline":await this.pageText(c,skip,token);break;
       case"treatment_text":{const option=s.vars.get("treatment")||"neutro";await this.pageText({text:c[option]||c.neutro||"",speaker:c.speaker||"",speed:c.speed||"normal"},skip,token);break;}
       case"show_centered_text":await this.centeredText(c,skip,token);break;
