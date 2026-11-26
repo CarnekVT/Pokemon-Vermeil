@@ -1,13 +1,13 @@
-# Scene Director Studio v0.4.1 — guía rápida
+# Scene Director Studio v0.5.0 — guía rápida
 
 Editor visual de escenas de Pokémon Vermeil para MakerStudio. Utiliza el mismo runtime de Scene Engine; no sustituye scripts Ruby ni reescribe el juego original.
 
 ## Flujo básico
 
 1. Abre **Mods → Scene Director Studio** y crea una escena o importa `010_Intro.rb`.
-2. En **Secuencia**, selecciona el bloque anterior a la posición donde quieres insertar uno nuevo.
-3. Pulsa **＋ Añadir comando** o **Ctrl+K**. El buscador muestra categorías, nombres y descripciones; puedes buscar «diálogo», «imagen», «fade», «música» o «Ruby».
-4. Edita el bloque en el **Inspector**. El Ruby efectivo se ve abajo y se puede copiar. Arrastra bloques en la secuencia o timeline para reordenarlos.
+2. Busca gráficos, audio o acciones en **Biblioteca**; haz clic para insertar después del clip seleccionado o arrastra a la línea de tiempo.
+3. Pulsa **＋ Todas las acciones** o **Ctrl+K**. El buscador muestra categorías, nombres y descripciones; puedes buscar «diálogo», «imagen», «fade», «música» o «Ruby».
+4. Edita el clip en **Propiedades**. El Ruby efectivo está plegado en Ruby avanzado y se puede copiar. Arrastra bloques en la secuencia o timeline para reordenarlos.
 5. Usa **▶ Reproducir** para previsualizar. El botón **Ocultar timeline** deja más espacio; el mismo botón vuelve a mostrarlo.
 6. **Guardar / Ctrl+S** escribe `Data/SceneDirector/scenes.json`. Los cambios no aparecen en el juego hasta guardarse.
 7. **⎘ Copiar llamada** genera el comando Ruby necesario para ejecutar la escena desde un evento o plugin.
@@ -60,3 +60,10 @@ El workspace usa el mismo nivel base de BAS y BSS (`z-index: 5000`, en vez del a
 Las notificaciones del Studio aparecen dentro del espacio ampliado para que no queden ocultas. El editor sigue siendo utilizable en pantalla normal y el fullscreen no necesita la Fullscreen API del navegador.
 
 **Validación:** sintaxis estática y prueba aislada del cambio de capa y restauración. Pendiente contrastar con una sesión real de MakerStudio.
+
+## v0.5.0 · Workspace audiovisual
+
+- Biblioteca por gráficos, audio, acciones y secuencia; búsqueda, miniaturas paginadas y arrastre a cualquier punto de inserción.
+- Timeline con regla en segundos aproximados, zoom independiente, playhead de selección, ajuste de altura y arrastre con indicador de inserción. Los bordes ajustan únicamente esperas/fades/duraciones soportadas por el runtime.
+- Preview con controles debajo y edición directa de la posición de imágenes `show` seleccionadas (cuando contienen coordenadas numéricas). Paneles laterales redimensionables.
+- Se preserva `formatVersion=1`, el orden de comandos y Ruby importado sin cambios. El timeline muestra posiciones estimadas de ejecución, no pistas simultáneas ni keyframes independientes. Los diálogos con input y Ruby arbitrario no tienen duración determinista. El click en la regla reconstruye el estado al final del comando elegido, no hace seek exacto por frame. Los gráficos se cargan de 30 en 30, en lotes de cuatro, y se liberan al cambiar de pestaña o cerrar.
