@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor de cinemáticas: gráficos de todo el proyecto, timeline con navegación y papel cebolla de sprites.",
+  "description": "Clips de imagen con edición visual, presets de entrada, movimiento y salida, previsualización y runtime.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

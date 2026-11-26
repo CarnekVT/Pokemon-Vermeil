@@ -1,4 +1,5 @@
 import { loadProjectBlobUrl, mimeFor } from "./project.js";
+import { sample, clipLength, spans } from "./animation.js";
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -79,7 +80,7 @@ export class ScenePreview{
   draw(){
     const g=this.g,s=this.state,e=this.settings(),queue=[];let seq=0;const push=(z,fn)=>queue.push({z:Number(z)||0,seq:seq++,fn});
     g.save();g.clearRect(0,0,this.w,this.h);g.fillStyle="#000";g.fillRect(0,0,this.w,this.h);
-    const drawImg=(it,yoff=0)=>{if(!it?.img||it.visible===false)return;g.save();g.globalAlpha=clamp((it.opacity??255)/255,0,1);const zoom=it.zoom??1;let x=it.x||0,y=(it.baseY??it.y??0)+yoff;g.translate(x,y);g.scale(it.mirror?-1:1,1);if(it.mirror)g.translate(-it.img.width*zoom,0);g.drawImage(it.img,0,0,it.img.width*zoom,it.img.height*zoom);g.restore();};
+    const drawImg=(it,yoff=0)=>{if(!it?.img||it.visible===false)return;g.save();g.globalAlpha=clamp((it.opacity??255)/255,0,1);const zoom=it.zoom??1;let x=it.x||0,y=(it.baseY??it.y??0)+yoff;g.translate(x,y);if(it.angle){const ax=it.anchorX||0,ay=it.anchorY||0;g.translate(ax,ay);g.rotate(it.angle*Math.PI/180);g.translate(-ax,-ay)}g.scale(it.mirror?-1:1,1);if(it.mirror)g.translate(-it.img.width*zoom,0);g.drawImage(it.img,0,0,it.img.width*zoom,it.img.height*zoom);g.restore();};
 
     for(const it of s.images.values())push(it.z??200,()=>drawImg(it));
     for(const it of s.scrolling){
@@ -219,7 +220,7 @@ export class ScenePreview{
     });
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
-    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();this.renderOnion();
+    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();this.drawHandles();this.renderOnion();
   }
 
   wordWrapAll(text,maxWidth){
@@ -247,7 +248,7 @@ export class ScenePreview{
   stop(){this.playToken++;this.livePlayback=false;this.seeking=false;this.onionSnapshots=null;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
   async reset(){this.stop();this.resetState();this.draw();}
   async play(scene,{from=0}={}){
-   this.stop();const token=++this.playToken;this.livePlayback=true;this.onionSnapshots=null;this.resetState();
+   this.stop();const token=++this.playToken;this.livePlayback=true;this.editClip=null;this.onionSnapshots=null;this.resetState();
    try{for(let i=0;i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;if(i<from){await this.apply(scene.commands[i],true,token);continue}this.onCommand?.(i,scene.commands[i]);await this.apply(scene.commands[i],false,token)}}finally{if(token===this.playToken)this.livePlayback=false}
  }
   cloneState(value,seen=new Map()){
@@ -279,14 +280,18 @@ export class ScenePreview{
    if(this.onionMode!=="next")draw(this.onionSnapshots.previous,"#ff777a");
    if(this.onionMode!=="previous")draw(this.onionSnapshots.next,"#71dbff");
  }
-  async runTo(scene,index){
+  pose(item,c,f){const a=sample(c,f),w=item.img.width*a.zoom,h=item.img.height*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:a.opacity,visible:true})}
+  async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};state.images.set(c.filename,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
+  selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.filename):null}
+  drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=it.img.width*it.zoom,h=it.img.height*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h)}g.translate(it.x+ax,it.y+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=(it.opacity??255)/255;g.drawImage(it.img,0,0,w,h);g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
+  async runTo(scene,index,clipFrame=null){
    this.stop();const token=++this.playToken;this.seeking=true;this.onionSnapshots=null;this.resetState();
    const commands=scene.commands||[],at=Math.max(-1,Math.min(index,commands.length-1));let previous=[];
    try{
-     for(let i=0;i<=at;i++){if(token!==this.playToken)return;if(i===at&&this.onionEnabled)previous=this.onionSprites(this.state);await this.apply(commands[i],true,token)}
+     for(let i=0;i<=at;i++){if(token!==this.playToken)return;if(i===at&&this.onionEnabled)previous=this.onionSprites(this.state);if(i===at&&commands[i].type==="image_clip")await this.applyImageClip(commands[i],true,token,clipFrame??spans(commands[i]).enter);else await this.apply(commands[i],true,token)}
      if(token!==this.playToken)return;
      if(this.onionEnabled){
-       const current=this.state;let next=[];
+       const current=this.state;let next=[];if(commands[at]?.type==="image_clip"){const c=commands[at],f=clipFrame??spans(c).enter,it=current.images.get(c.filename);if(it){const a=this.cloneState(current),b=this.cloneState(current);this.pose(a.images.get(c.filename),c,Math.max(0,f-6));this.pose(b.images.get(c.filename),c,Math.min(clipLength(c),f+6));this.onionSnapshots={previous:this.onionSprites(a),next:this.onionSprites(b)};return}}
        if(at+1<commands.length&&this.onionMode!=="previous"){this.state=this.cloneState(current);await this.apply(commands[at+1],true,token);if(token!==this.playToken)return;next=this.onionSprites(this.state);this.state=current}
        this.onionSnapshots={previous,next};
      }
@@ -411,6 +416,7 @@ export class ScenePreview{
       case"fade_to_black":s.black=0;await this.frames(c.duration,p=>s.black=255*p,skip,token);break;
       case"to_white":s.white=0;await this.frames(c.duration,p=>s.white=255*p,skip,token);break;
       case"from_white":s.white=255;if(c.se&&!skip)await this.playAudio("SE",c.se);await this.frames(c.duration,p=>s.white=255*(1-p),skip,token);break;
+      case"image_clip":{await this.applyImageClip(c,skip,token);break;}
       case"show":{
         const im=await this.image(c.filename);if(im){let x=this.num(c.x,0),y=this.num(c.y,0),zoom=this.num(c.zoom,1);if(c.origin==="center"){x-=im.width*zoom/2;y-=im.height*zoom/2}else if(c.origin==="bottom"){x-=im.width*zoom/2;y-=im.height*zoom}const fade=this.num(c.fade,20),it={img:im,x,y,z:this.num(c.z,200+s.images.size),zoom,opacity:fade>0?0:255,visible:true};s.images.set(c.filename,it);if(fade>0)await this.frames(fade,p=>it.opacity=255*p,skip,token);it.opacity=255;}break;}
       case"hide":{const a=c.filename?[s.images.get(c.filename)]:[...s.images.values()];const targets=a.filter(Boolean);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}

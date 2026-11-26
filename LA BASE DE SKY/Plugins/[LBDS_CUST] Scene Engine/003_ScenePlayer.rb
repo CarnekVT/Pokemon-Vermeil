@@ -296,6 +296,75 @@ class SceneEngine::Player
     s.opacity = 255
   end
 
+  def image_clip(filename, x = 320, y = 240, origin: "center", zoom: 1, angle: 0,
+                 opacity: 255, z: nil, duration: 120, enter: "fade", in_frames: 24,
+                 exit: "none", out_frames: 24, keep: true, motion: "none", distance: 64,
+                 easing: "smooth", end_x: nil, end_y: nil, end_zoom: nil,
+                 end_angle: nil, end_opacity: nil)
+    duration = [[duration.to_i, 1].max, 360000].min
+    in_frames = enter == "none" ? 0 : [[in_frames.to_i, 0].max, duration].min
+    out_frames = keep || exit == "none" ? 0 : [[out_frames.to_i, 0].max, duration - in_frames].min
+    show(filename, x, y, fade: 0, origin: :top_left, zoom: zoom, z: z)
+    sprite = @image_sprites[filename.to_s]
+    return wait(duration) if !sprite || sprite.disposed?
+    sprite.ox = ["center", "bottom"].include?(origin) ? sprite.bitmap.width / 2 : 0
+    sprite.oy = origin == "center" ? sprite.bitmap.height / 2 : origin == "bottom" ? sprite.bitmap.height : 0
+    ease = lambda do |p|
+      case easing
+      when "linear" then p
+      when "in" then p * p
+      when "out" then 1 - (1 - p) * (1 - p)
+      else p * p * (3 - 2 * p)
+      end
+    end
+    distance = [distance.to_f, 0].max
+    zoom = [[zoom.to_f, 0.01].max, 30].min
+    opacity = [[opacity.to_f, 0].max, 255].min
+    sample = lambda do |f|
+      p = ease.call(f.to_f / duration)
+      mix = ->(a,b) { a + (b-a)*p }
+      ax, ay, az, ar, ao = x.to_f, y.to_f, zoom, angle.to_f, opacity
+      case motion
+      when "float" then ay += Math.sin(f*0.08)*distance*0.25
+      when "shake" then ax += Math.sin(f*1.8)*distance*0.12
+      when "pulse" then az *= 1+Math.sin(f*0.11)*0.12
+      when "zoom_out" then az *= mix.call(1,0.5)
+      when "zoom_in" then az *= mix.call(1,1.5)
+      when "custom"
+        ax = mix.call(ax,(end_x || x).to_f)
+        ay = mix.call(ay,(end_y || y).to_f)
+        az = mix.call(az,[[(end_zoom || zoom).to_f,0.01].max,30].min)
+        ar = mix.call(ar,(end_angle || angle).to_f)
+        ao = mix.call(ao,[[(end_opacity || opacity).to_f,0].max,255].min)
+      end
+      effect = lambda do |k,t|
+        next if k == "none"
+        case k
+        when "left" then ax -= distance*t
+        when "right" then ax += distance*t
+        when "up" then ay -= distance*t
+        when "down" then ay += distance*t
+        when "zoom" then az *= 1-0.8*t
+        when "pop" then az *= [0.08,1-0.92*t+Math.sin(Math::PI*t)*0.38].max
+        when "rotate"
+          ar -= 90*t
+          az *= 1-0.4*t
+        end
+        ao *= 1-t
+      end
+      effect.call(enter,1-ease.call(f.to_f/in_frames)) if in_frames > 0 && f < in_frames
+      effect.call(exit,ease.call((f-duration+out_frames).to_f/out_frames)) if out_frames > 0 && f > duration-out_frames
+      sprite.x, sprite.y = ax.round, ay.round
+      sprite.zoom_x = sprite.zoom_y = az
+      sprite.angle = -ar
+      sprite.opacity = ao.round
+    end
+    sample.call(0)
+    duration.times { |i| sample.call(i+1); update }
+    sprite.visible = false unless keep
+    sprite
+  end
+
   def hide(filename = nil, fade: 0)
     targets = filename ? [filename.to_s] : @image_sprites.keys
     targets.each do |k|

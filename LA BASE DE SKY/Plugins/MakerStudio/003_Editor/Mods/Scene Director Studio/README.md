@@ -1,4 +1,4 @@
-# Scene Director Studio v0.5.1 — guía rápida
+# Scene Director Studio v0.6.0 — guía rápida
 
 Editor visual de escenas de Pokémon Vermeil para MakerStudio. Utiliza el mismo runtime de Scene Engine; no sustituye scripts Ruby ni reescribe el juego original.
 
@@ -74,3 +74,6 @@ Las notificaciones del Studio aparecen dentro del espacio ampliado para que no q
 - El importador crea `Graphics/Scenes/Imported` (o la ruta configurada de escenas) si falta y evita sobrescribir nombres existentes. `+` en la biblioteca importa un archivo externo. Las miniaturas se cargan por página.
 - Timeline: rueda horizontal o Shift+rueda; Ctrl+rueda amplía alrededor del puntero; botón central arrastra el área; barra inferior desplaza toda la secuencia; regla arrastrable, zoom de .02 a 8 px/frame, centrar y seguimiento opcional. Flechas izquierda/derecha avanzan por comandos, Home/End van a extremos. Desde aquí reproduce a partir del comando elegido.
 - Papel cebolla: rojo para sprites del estado anterior, cian para el siguiente, ambos o individual y opacidad regulable. Se excluyen sprites sin cambios y no se guarda ni ejecuta en el juego. Se desactiva durante la reproducción. El estado se obtiene en límites de comandos; no equivale a muestreo de fotogramas o pistas simultáneas.
+
+## v0.6.0
+Añadir Imagen crea clips editables. Seleccionar Imagen permite transformar, alinear y encajar el recurso; Animación ofrece entrada, movimiento y salida, duración e interpolación. El cursor local y la prueba de animación permiten visualizar el resultado. Solo imagen aísla el gráfico para editar bajo otros elementos. El runtime reproduce los nuevos clips; mantener visible conserva su pose final. Los clips siguen siendo secuenciales, no pistas paralelas; la intro Ruby original no cambia. La conversión de show es opcional.
