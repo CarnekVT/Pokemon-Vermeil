@@ -1,4 +1,4 @@
-# Scene Director Studio v0.5.0 — guía rápida
+# Scene Director Studio v0.5.1 — guía rápida
 
 Editor visual de escenas de Pokémon Vermeil para MakerStudio. Utiliza el mismo runtime de Scene Engine; no sustituye scripts Ruby ni reescribe el juego original.
 
@@ -67,3 +67,10 @@ Las notificaciones del Studio aparecen dentro del espacio ampliado para que no q
 - Timeline con regla en segundos aproximados, zoom independiente, playhead de selección, ajuste de altura y arrastre con indicador de inserción. Los bordes ajustan únicamente esperas/fades/duraciones soportadas por el runtime.
 - Preview con controles debajo y edición directa de la posición de imágenes `show` seleccionadas (cuando contienen coordenadas numéricas). Paneles laterales redimensionables.
 - Se preserva `formatVersion=1`, el orden de comandos y Ruby importado sin cambios. El timeline muestra posiciones estimadas de ejecución, no pistas simultáneas ni keyframes independientes. Los diálogos con input y Ruby arbitrario no tienen duración determinista. El click en la regla reconstruye el estado al final del comando elegido, no hace seek exacto por frame. Los gráficos se cargan de 30 en 30, en lotes de cuatro, y se liberan al cambiar de pestaña o cerrar.
+
+## v0.5.1 · Recursos y navegación
+
+- Gráficos de toda la jerarquía `Graphics` (incluye `Pictures`, `Battlers`, `Pokemon`, `Characters`, etc.). La búsqueda filtra la carpeta abierta; se entra con clic y se sube con ↑. El selector del inspector usa el mismo navegador. Los gráficos existentes se referencian por ruta relativa sin copiarse.
+- El importador crea `Graphics/Scenes/Imported` (o la ruta configurada de escenas) si falta y evita sobrescribir nombres existentes. `+` en la biblioteca importa un archivo externo. Las miniaturas se cargan por página.
+- Timeline: rueda horizontal o Shift+rueda; Ctrl+rueda amplía alrededor del puntero; botón central arrastra el área; barra inferior desplaza toda la secuencia; regla arrastrable, zoom de .02 a 8 px/frame, centrar y seguimiento opcional. Flechas izquierda/derecha avanzan por comandos, Home/End van a extremos. Desde aquí reproduce a partir del comando elegido.
+- Papel cebolla: rojo para sprites del estado anterior, cian para el siguiente, ambos o individual y opacidad regulable. Se excluyen sprites sin cambios y no se guarda ni ejecuta en el juego. Se desactiva durante la reproducción. El estado se obtiene en límites de comandos; no equivale a muestreo de fotogramas o pistas simultáneas.

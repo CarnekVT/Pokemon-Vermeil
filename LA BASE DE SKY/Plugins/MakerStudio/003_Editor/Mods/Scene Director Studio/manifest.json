@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor de cinemáticas centrado en timeline: biblioteca visual, arrastrar recursos, recortar esperas y fades, posición en canvas y paneles ajustables.",
+  "description": "Editor de cinemáticas: gráficos de todo el proyecto, timeline con navegación y papel cebolla de sprites.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

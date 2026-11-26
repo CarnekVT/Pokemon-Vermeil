@@ -7,7 +7,7 @@ export async function writeBinaryAbsolute(path,bytes){const a=bytes instanceof U
 export async function loadProjectBlobUrl(ctx,path,mime="application/octet-stream"){
   const root=gameRoot(ctx); if(!root)return null; try{const b=await readBinaryAbsolute(`${root}/${norm(path)}`);return URL.createObjectURL(new Blob([b],{type:mime}))}catch{return null}
 }
-export function mimeFor(path){const e=ext(path);if(e==="png")return"image/png";if(e==="jpg"||e==="jpeg")return"image/jpeg";if(e==="webp")return"image/webp";if(e==="gif")return"image/gif";if(e==="ogg")return"audio/ogg";if(e==="wav")return"audio/wav";if(e==="mp3")return"audio/mpeg";if(e==="ttf")return"font/ttf";if(e==="otf")return"font/otf";if(e==="woff")return"font/woff";if(e==="woff2")return"font/woff2";return"application/octet-stream"}
+export function mimeFor(path){const e=ext(path);if(e==="png")return"image/png";if(e==="bmp")return"image/bmp";if(e==="jpg"||e==="jpeg")return"image/jpeg";if(e==="webp")return"image/webp";if(e==="gif")return"image/gif";if(e==="ogg")return"audio/ogg";if(e==="wav")return"audio/wav";if(e==="mp3")return"audio/mpeg";if(e==="ttf")return"font/ttf";if(e==="otf")return"font/otf";if(e==="woff")return"font/woff";if(e==="woff2")return"font/woff2";return"application/octet-stream"}
 export async function listRecursive(ctx,base,{extensions=null,max=6000}={}){
   const out=[]; const seen=new Set();
   async function walk(dir){if(out.length>=max||seen.has(dir.toLowerCase()))return;seen.add(dir.toLowerCase());let entries=[];try{entries=await ctx.fs.listProjectDir(dir)}catch{return}
@@ -15,9 +15,31 @@ export async function listRecursive(ctx,base,{extensions=null,max=6000}={}){
   }
   await walk(norm(base)); return out.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}));
 }
+export const GRAPHIC_EXTENSIONS=["png","jpg","jpeg","bmp","webp","gif"];
+export async function listGraphicsFolder(ctx,folder="Graphics"){
+  folder=norm(folder);if(!/^Graphics(?:\/|$)/i.test(folder)||folder.split("/").includes(".."))throw new Error("Carpeta gráfica inválida");
+  const entries=await ctx.fs.listProjectDir(folder),dirs=[],files=[];
+  for(const e of entries||[]){
+    let name=typeof e==="string"?e:(e.name||e.path||"");if(!name)continue;
+    let path=norm(name);if(!path.toLowerCase().startsWith(folder.toLowerCase()+"/"))path=norm(folder+"/"+path);
+    if(path===folder||path.split("/").includes(".."))continue;
+    const isDir=typeof e==="object"?(e.isDirectory===true||e.is_dir===true||e.kind==="directory"||e.type==="directory"||e.type==="dir"):false;
+    if(isDir||(!ext(path)&&!(typeof e==="object"&&(e.isDirectory===false||e.is_dir===false||e.type==="file"))))dirs.push(path);
+    else if(GRAPHIC_EXTENSIONS.includes(ext(path)))files.push(path);
+  }
+  const sort=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"});
+  return {dirs:[...new Set(dirs)].sort(sort),files:[...new Set(files)].sort(sort)};
+}
 export async function copyExternalFileToProject(ctx,file,destDir){
-  const root=gameRoot(ctx); if(!root)throw new Error("No pude resolver la raíz del proyecto"); const safe=String(file.name||"asset").replace(/[<>:\"|?*]/g,"_");
-  const dest=norm(`${destDir}/${safe}`); const bytes=new Uint8Array(await file.arrayBuffer()); await writeBinaryAbsolute(`${root}/${dest}`,bytes); return dest;
+  const root=gameRoot(ctx);if(!root)throw new Error("No pude resolver la raíz del proyecto");
+  const dir=norm(destDir);if(!/^Graphics(?:\/|$)/i.test(dir)||dir.split("/").some(p=>p===".."||p==="."))throw new Error("Destino gráfico inválido");
+  const safe=String(file.name||"asset.png").split(/[\\/]/).pop().replace(/[<>:"|?*\x00-\x1f]/g,"_").replace(/[. ]+$/g,"");
+  if(!safe||!GRAPHIC_EXTENSIONS.includes(ext(safe)))throw new Error("Formato de imagen no admitido");
+  let current="";
+  for(const part of dir.split("/")){current=current?current+"/"+part:part;if(!await ctx.fs.projectExists(current)){try{await ctx.fs.projectMkdir(current)}catch(e){if(!await ctx.fs.projectExists(current))throw e}}}
+  const dot=safe.lastIndexOf("."),stem=safe.slice(0,dot),suffix=safe.slice(dot);let dest=dir+"/"+safe,i=2;
+  while(await ctx.fs.projectExists(dest))dest=dir+"/"+stem+" ("+(i++)+")"+suffix;
+  const bytes=new Uint8Array(await file.arrayBuffer());await writeBinaryAbsolute(root+"/"+dest,bytes);return dest;
 }
 export async function detectSceneEngine(ctx){
   const result={found:false,name:"Scene Engine",version:"?",folder:"",settings:{scenesDir:"Graphics/Scenes",textBoxFile:"txt",textBoxY:286,textBoxH:178,textPadX:48,textPadYTop:42,textLineH:32,textMaxLines:4,textColor:[248,248,248],textShadow:[72,72,72],speakerColor:[248,208,48],speakerShadow:[120,96,16],speakerColorMap:{},speeds:{instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.20},fontName:"Power Green",fontSize:29,fontFile:""},methods:[]};

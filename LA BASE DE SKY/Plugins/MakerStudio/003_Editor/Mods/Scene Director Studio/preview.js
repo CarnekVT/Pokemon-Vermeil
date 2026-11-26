@@ -8,7 +8,7 @@ export class ScenePreview{
     this.ctx=ctx;this.host=host;this.getEngine=getEngine;this.w=640;this.h=480;this.zoom=1;
     this.canvas=document.createElement("canvas");this.canvas.className="sd-canvas";this.host.appendChild(this.canvas);this.g=this.canvas.getContext("2d");
     this.cache=new Map();this.urls=[];this.playToken=0;this.onCommand=null;this.onWaiting=null;this.autoAdvance=false;this.audio={bgm:null,bgs:null,ses:new Set()};this.textBoxImg=null;this.gameFontFace=null;this.gameFontFamily='"Power Green", "Arial Narrow", Arial, sans-serif';this.whiteCache=new WeakMap();this.portraitBoundsCache=new WeakMap();
-    this.inputSerial=0;this.resetState();this.resize(640,480);this.last=performance.now();this.raf=requestAnimationFrame(()=>this.tick());this.refreshEngineAssets();
+    this.inputSerial=0;this.onionEnabled=false;this.onionMode="both";this.onionOpacity=.35;this.livePlayback=false;this.seeking=false;this.resetState();this.resize(640,480);this.last=performance.now();this.raf=requestAnimationFrame(()=>this.tick());this.refreshEngineAssets();
   }
   resize(w,h){this.w=w;this.h=h;this.canvas.width=w;this.canvas.height=h;this.fit();}
   settings(){return this.getEngine?.()?.settings||{};}
@@ -37,9 +37,9 @@ export class ScenePreview{
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path);if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
     const pr=(async()=>{const url=await loadProjectBlobUrl(this.ctx,p,mimeFor(p));if(!url)return null;this.urls.push(url);const im=new Image();await new Promise((ok,fail)=>{im.onload=ok;im.onerror=fail;im.src=url});return im})().catch(()=>null);
-    this.cache.set(path,pr);return pr;
+    this.cache.set(path,pr);pr.then(im=>{if(!im&&this.cache.get(path)===pr)this.cache.delete(path)});return pr;
   }
-  tick(){const now=performance.now(),dt=Math.min(.05,(now-this.last)/1000);this.last=now;this.state.frame+=dt*60;this.draw();this.raf=requestAnimationFrame(()=>this.tick());}
+  tick(){const now=performance.now(),dt=Math.min(.05,(now-this.last)/1000);this.last=now;if(!this.seeking&&this.host.getClientRects().length){if(this.livePlayback)this.state.frame+=dt*60;this.draw();}this.raf=requestAnimationFrame(()=>this.tick());}
   gameFont(size=null){const px=Number(size||this.settings().fontSize||29);this.g.font=`${px}px ${this.gameFontFamily}`;this.g.textBaseline="top";}
   rgba(c,fallback){const a=Array.isArray(c)?c:fallback;return `rgb(${a?.[0]??255},${a?.[1]??255},${a?.[2]??255})`;}
   drawShadowText(text,x,y,color,shadow){const g=this.g;g.fillStyle=shadow;g.fillText(text,x+2,y+2);g.fillStyle=color;g.fillText(text,x,y);}
@@ -219,7 +219,7 @@ export class ScenePreview{
     });
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
-    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
+    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();this.renderOnion();
   }
 
   wordWrapAll(text,maxWidth){
@@ -244,10 +244,54 @@ export class ScenePreview{
   }
   formatText(text,args){let out=String(text||"");(args||[]).forEach((arg,i)=>{let v=arg;if(v&&typeof v==="object"&&v.kind==="var")v=this.state.vars.get(v.value)??`{${v.value}}`;else if(v&&typeof v==="object"&&v.kind==="ruby")v=this.state.vars.get(v.value)??v.value;out=out.split(`{${i+1}}`).join(String(v??""));});return out;}
 
-  stop(){this.playToken++;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
+  stop(){this.playToken++;this.livePlayback=false;this.seeking=false;this.onionSnapshots=null;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
   async reset(){this.stop();this.resetState();this.draw();}
-  async play(scene,{from=0}={}){this.stop();const token=++this.playToken;this.resetState();for(let i=0;i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;if(i<from){await this.apply(scene.commands[i],true,token);continue}this.onCommand?.(i,scene.commands[i]);await this.apply(scene.commands[i],false,token);}}
-  async runTo(scene,index){this.stop();const token=++this.playToken;this.resetState();for(let i=0;i<=index&&i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;await this.apply(scene.commands[i],true,token);}this.draw();}
+  async play(scene,{from=0}={}){
+   this.stop();const token=++this.playToken;this.livePlayback=true;this.onionSnapshots=null;this.resetState();
+   try{for(let i=0;i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;if(i<from){await this.apply(scene.commands[i],true,token);continue}this.onCommand?.(i,scene.commands[i]);await this.apply(scene.commands[i],false,token)}}finally{if(token===this.playToken)this.livePlayback=false}
+ }
+  cloneState(value,seen=new Map()){
+   if(!value||typeof value!=="object")return value;if(seen.has(value))return seen.get(value);
+   if(value instanceof Map){const copy=new Map();seen.set(value,copy);for(const [k,v] of value)copy.set(k,this.cloneState(v,seen));return copy}
+   if(Array.isArray(value)){const copy=[];seen.set(value,copy);value.forEach(x=>copy.push(this.cloneState(x,seen)));return copy}
+   if(Object.getPrototypeOf(value)!==Object.prototype)return value;
+   const copy={};seen.set(value,copy);for(const [k,v] of Object.entries(value))copy[k]=this.cloneState(v,seen);return copy;
+ }
+  onionSprites(s){
+   const items=[];
+   const add=(key,it,dy=0)=>{if(!it?.img||it.visible===false||(it.opacity??255)<=0)return;const z=it.zoom??1;items.push({key,img:it.img,x:it.x||0,y:(it.baseY??it.y??0)+dy,w:it.img.width*z,h:it.img.height*z,sx:0,sy:0,sw:it.img.width,sh:it.img.height,mirror:!!it.mirror,z:it.z??0})};
+   for(const [key,it] of s.images)add("image:"+key,it);
+   s.floating.forEach((it,i)=>add("floating:"+(it.varName||i),it,Math.sin(Math.max(0,s.frame-(it.startFrame||0))*(it.speed||0))*this.num(it.amplitude,8)));
+   if(s.float?.img&&s.float.visible!==false){const f=s.float,old=this.state;this.state=s;const m=this.floatMetrics(f);this.state=old;items.push({key:"float",img:f.img,x:f.x,y:m.sy,w:f.fw,h:f.fh,sx:m.frame*f.fw,sy:0,sw:f.fw,sh:f.fh,z:400})}
+   return items;
+ }
+  renderOnion(){
+   if(!this.onionEnabled||this.livePlayback||this.seeking||!this.onionSnapshots)return;
+   const current=new Map(this.onionSprites(this.state).map(x=>[x.key,x]));
+   const same=(a,b)=>b&&a.img===b.img&&a.x===b.x&&a.y===b.y&&a.w===b.w&&a.h===b.h&&a.sx===b.sx&&a.sy===b.sy&&a.mirror===b.mirror;
+   const g=this.g,alpha=this.onionOpacity??.35;
+   this.onionBuffer||=document.createElement("canvas");const b=this.onionBuffer;if(b.width!==this.w||b.height!==this.h){b.width=this.w;b.height=this.h}
+   const bg=b.getContext("2d");bg.imageSmoothingEnabled=false;
+   const draw=(items,color)=>{if(!items?.length)return;bg.clearRect(0,0,this.w,this.h);bg.globalCompositeOperation="source-over";let count=0;
+     for(const it of items){if(same(it,current.get(it.key)))continue;count++;bg.save();if(it.mirror){bg.translate(it.x+it.w,it.y);bg.scale(-1,1);bg.drawImage(it.img,it.sx,it.sy,it.sw,it.sh,0,0,it.w,it.h)}else bg.drawImage(it.img,it.sx,it.sy,it.sw,it.sh,it.x,it.y,it.w,it.h);bg.restore()}
+     if(!count)return;bg.globalCompositeOperation="source-in";bg.fillStyle=color;bg.fillRect(0,0,this.w,this.h);bg.globalCompositeOperation="source-over";g.save();g.globalAlpha=alpha;g.drawImage(b,0,0);g.restore();
+   };
+   if(this.onionMode!=="next")draw(this.onionSnapshots.previous,"#ff777a");
+   if(this.onionMode!=="previous")draw(this.onionSnapshots.next,"#71dbff");
+ }
+  async runTo(scene,index){
+   this.stop();const token=++this.playToken;this.seeking=true;this.onionSnapshots=null;this.resetState();
+   const commands=scene.commands||[],at=Math.max(-1,Math.min(index,commands.length-1));let previous=[];
+   try{
+     for(let i=0;i<=at;i++){if(token!==this.playToken)return;if(i===at&&this.onionEnabled)previous=this.onionSprites(this.state);await this.apply(commands[i],true,token)}
+     if(token!==this.playToken)return;
+     if(this.onionEnabled){
+       const current=this.state;let next=[];
+       if(at+1<commands.length&&this.onionMode!=="previous"){this.state=this.cloneState(current);await this.apply(commands[at+1],true,token);if(token!==this.playToken)return;next=this.onionSprites(this.state);this.state=current}
+       this.onionSnapshots={previous,next};
+     }
+   }finally{if(token===this.playToken){this.seeking=false;this.draw()}}
+ }
   async frames(n,fn,skip,token){n=Math.max(0,Math.round(Number(n)||0));if(skip){this.state.frame+=n;fn?.(1);return}if(!n){fn?.(1);return}const start=this.state.frame;while(this.state.frame-start<n){if(token!==this.playToken)return;fn?.(Math.min(1,(this.state.frame-start)/n));await new Promise(resolve=>requestAnimationFrame(resolve));}fn?.(1);}
 
   async playAudio(kind,name){
