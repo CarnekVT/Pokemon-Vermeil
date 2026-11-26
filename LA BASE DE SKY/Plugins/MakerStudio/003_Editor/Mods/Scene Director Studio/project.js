@@ -18,12 +18,12 @@ export async function listRecursive(ctx,base,{extensions=null,max=6000}={}){
 export const GRAPHIC_EXTENSIONS=["png","jpg","jpeg","bmp","webp","gif"];
 export async function listGraphicsFolder(ctx,folder="Graphics"){
   folder=norm(folder);if(!/^Graphics(?:\/|$)/i.test(folder)||folder.split("/").includes(".."))throw new Error("Carpeta gráfica inválida");
-  const entries=await ctx.fs.listProjectDir(folder),dirs=[],files=[];
+  const raw=await ctx.fs.listProjectDir(folder),entries=Array.isArray(raw)?raw:(raw?.entries||raw?.items||[]),dirs=[],files=[];
   for(const e of entries||[]){
-    let name=typeof e==="string"?e:(e.name||e.path||"");if(!name)continue;
-    let path=norm(name);if(!path.toLowerCase().startsWith(folder.toLowerCase()+"/"))path=norm(folder+"/"+path);
+    let name=typeof e==="string"?e:(e.name||e.path||e.fileName||e.filename||"");if(!name)continue;
+    let path=norm(name),root=gameRoot(ctx);if(root&&path.toLowerCase().startsWith(root.toLowerCase()+"/"))path=path.slice(root.length+1);const match=path.match(/(?:^|\/)Graphics\//i);if(match)path=path.slice(match.index+(match[0].startsWith("/")?1:0));if(!path.toLowerCase().startsWith(folder.toLowerCase()+"/"))path=norm(folder+"/"+path);
     if(path===folder||path.split("/").includes(".."))continue;
-    const isDir=typeof e==="object"?(e.isDirectory===true||e.is_dir===true||e.kind==="directory"||e.type==="directory"||e.type==="dir"):false;
+    const isDir=typeof e==="object"?(e.isDirectory===true||e.is_dir===true||e.isDir===true||e.is_directory===true||e.kind==="directory"||e.kind==="dir"||e.type==="directory"||e.type==="dir"):false;
     if(isDir||(!ext(path)&&!(typeof e==="object"&&(e.isDirectory===false||e.is_dir===false||e.type==="file"))))dirs.push(path);
     else if(GRAPHIC_EXTENSIONS.includes(ext(path)))files.push(path);
   }

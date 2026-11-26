@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Clips de imagen con edición visual, presets de entrada, movimiento y salida, previsualización y runtime.",
+  "description": "Navegador de gráficos unificado, selección visual y edición de imágenes simplificada.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
