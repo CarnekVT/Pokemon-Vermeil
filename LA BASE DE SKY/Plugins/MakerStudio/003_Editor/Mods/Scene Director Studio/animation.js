@@ -14,14 +14,15 @@ export function sample(c,frame){
  if(enter&&f<enter)effect(c.enter,1-ease(f/enter,c.easing));if(exit&&f>duration-exit)effect(c.exit,ease((f-duration+exit)/exit,c.easing));return a;
 }
 
-export const KEY_PROPS=["x","y","zoom","angle","opacity"];
-export const KEY_LABELS={x:"Posición X",y:"Posición Y",zoom:"Escala",angle:"Rotación",opacity:"Opacidad"};
+export const KEY_PROPS=["x","y","zoom","angle","opacity","sheetFrame"];
+export const KEY_LABELS={x:"Posición X",y:"Posición Y",zoom:"Escala",angle:"Rotación",opacity:"Opacidad",sheetFrame:"Fotograma del spritesheet"};
 export const KEY_EASING=[["linear","Lineal"],["ease_in","Acelerar"],["ease_out","Desacelerar"],["ease_both","Suave"],["hold","Mantener"]];
 export function easeKey(t,mode){t=clamp(t,0,1);if(mode==="hold")return t>=1?1:0;if(mode==="linear")return t;if(mode==="ease_in")return t*t;if(mode==="ease_out")return 1-(1-t)*(1-t);return t<.5?2*t*t:1-(-2*t+2)**2/2}
 export function keysFor(c,prop){return (Array.isArray(c.keys)?c.keys:[]).filter(k=>Array.isArray(k)&&k[0]===prop&&Number.isFinite(Number(k[1]))&&Number.isFinite(Number(k[2]))).sort((a,b)=>a[1]-b[1])}
 export function baseValue(c,prop,frame){
- const fallback=prop==="zoom"?1:prop==="opacity"?255:0,v=n(c[prop],fallback),ks=keysFor(c,prop);
+ const fallback=prop==="zoom"?1:prop==="opacity"?255:prop==="sheetFrame"?1:0,v=n(c[prop],fallback),ks=keysFor(c,prop);
  if(!ks.length)return v;
+ if(prop==="sheetFrame")return ks.filter(k=>k[1]<=frame).at(-1)?.[2]??v;
  if(frame<ks[0][1]){if(ks[0][1]===0)return ks[0][2];return v+(ks[0][2]-v)*easeKey(frame/ks[0][1],"ease_both")}
  if(frame>=ks[ks.length-1][1])return ks[ks.length-1][2];
  for(let i=0;i<ks.length-1;i++){const a=ks[i],b=ks[i+1];if(frame>=a[1]&&frame<=b[1])return a[2]+(b[2]-a[2])*easeKey((frame-a[1])/Math.max(.0001,b[1]-a[1]),a[3])}
@@ -30,7 +31,7 @@ export function baseValue(c,prop,frame){
 export function setKey(c,prop,frame,value,easing){
  if(!KEY_PROPS.includes(prop))return;
  frame=clamp(Math.round(n(frame)),0,clipLength(c));value=n(value,baseValue(c,prop,frame));
- if(prop==="zoom")value=clamp(value,.01,30);if(prop==="opacity")value=clamp(value,0,255);
+ if(prop==="zoom")value=clamp(value,.01,30);if(prop==="opacity")value=clamp(value,0,255);if(prop==="sheetFrame"){value=Math.max(1,Math.round(value));easing="hold"}
  c.keys=Array.isArray(c.keys)?c.keys:[];
  if(frame>0&&!c.keys.some(k=>k[0]===prop&&k[1]===0)){const initial=baseValue(c,prop,0);c.keys.push([prop,0,initial,easing||"ease_both"])}
  const k=c.keys.find(k=>k[0]===prop&&k[1]===frame);if(k){k[2]=value;if(easing)k[3]=easing}else c.keys.push([prop,frame,value,easing||"ease_both"]);
@@ -39,3 +40,14 @@ export function setKey(c,prop,frame,value,easing){
 export function removeKey(c,prop,frame){const initial=baseValue(c,prop,0);c.keys=(c.keys||[]).filter(k=>k[0]!==prop||k[1]!==frame);if(frame===0)c[prop]=initial}
 export function moveKey(c,prop,from,to){const k=keysFor(c,prop).find(k=>k[1]===from);if(!k||from===to)return;const v=k[2],e=k[3];removeKey(c,prop,from);setKey(c,prop,to,v,e)}
 export function resizeKeys(c){const max=clipLength(c),old=Array.isArray(c.keys)?c.keys.slice():[];c.keys=[];for(const k of old)if(KEY_PROPS.includes(k[0]))setKey(c,k[0],Math.min(k[1],max),k[2],k[3])}
+
+export function sheetRect(c,img,frame){
+ if(c.resourceType!=="sheet")return {sx:0,sy:0,sw:img.width,sh:img.height,index:0};
+ const cols=clamp(Math.round(n(c.columns,1)),1,img.width),rows=clamp(Math.round(n(c.rows,1)),1,img.height),sw=Math.floor(img.width/cols),sh=Math.floor(img.height/rows),max=cols*rows;
+ const start=clamp(Math.round(n(c.sheetStart,1))-1,0,max-1),end=clamp(Math.round(n(c.sheetEnd,max)||max)-1,start,max-1),count=end-start+1,tick=Math.max(0,Math.floor(frame*clamp(n(c.sheetFps,8),1,60)/60));let i;
+ if(c.sheetMode==="manual")i=clamp(Math.floor(baseValue(c,"sheetFrame",frame))-1,start,end);
+ else if(c.sheetMode==="once")i=start+Math.min(count-1,tick);
+ else if(c.sheetMode==="ping"){const period=Math.max(1,2*count-2),t=tick%period;i=start+(t<count?t:period-t)}
+ else i=start+tick%count;
+ return {sx:(i%cols)*sw,sy:Math.floor(i/cols)*sh,sw,sh,index:i};
+}

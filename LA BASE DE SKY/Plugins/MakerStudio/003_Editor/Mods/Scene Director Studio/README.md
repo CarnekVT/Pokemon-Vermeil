@@ -89,3 +89,6 @@ El cabezal admite segundos decimales (1.5 o 1,5), a 60 pasos/s. Arrastra diálog
 
 ## v0.8.1
 Ctrl+Z, Ctrl+Y y Ctrl+Shift+Z restauran proyecto, selección y cabezal. Botones visibles y estado del historial. Al añadir una clave posterior a frame 0 se guarda explícitamente el valor inicial de esa propiedad. Auto key permite animar desde Imagen y la manipulación en canvas; las propiedades ya animadas actualizan su clave en el fotograma actual. Inicio/fin y tiempo local decimal facilitan el zoom. Las claves antiguas se mantienen; al editar una propiedad con claves se materializa su inicio.
+
+## v0.9.0
+Control de escena: finalizar, encadenar, reservar evento común al salir, esperar confirmación, cambiar interruptor/variable y condiciones por acción. Activación secuencial, por tiempo en grupos compatibles, al inicio o tras confirmar un diálogo. Las acciones paralelas compatibles esperan su final real; las no compatibles esperan el grupo completo. Preview no ejecuta eventos ni evalúa condiciones del juego. Spritesheet en el clip: columnas/filas, rango, FPS, bucle, una pasada, ida/vuelta, manual mediante clave de fotograma. Recorte nativo de textura. Mantener visible conserva la última pose y celda. Encadenar limpia la escena anterior y detecta bucles.

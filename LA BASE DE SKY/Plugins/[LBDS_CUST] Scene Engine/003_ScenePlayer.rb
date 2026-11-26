@@ -13,9 +13,11 @@ class SceneEngine::Player
     @floating_sprites = []
   end
 
+  attr_reader :scene_next_key, :scene_event_id
+
   def run(&block)
     setup_sprites
-    instance_eval(&block) if block
+    catch(:scene_director_end) { instance_eval(&block) if block }
   ensure
     cleanup
   end
@@ -305,15 +307,24 @@ class SceneEngine::Player
                  opacity: 255, z: nil, duration: 120, enter: "fade", in_frames: 24,
                  exit: "none", out_frames: 24, keep: true, motion: "none", distance: 64,
                  easing: "smooth", end_x: nil, end_y: nil, end_zoom: nil,
-                 end_angle: nil, end_opacity: nil, keys: [])
+                 end_angle: nil, end_opacity: nil, keys: [], resource_type: "static", columns: 1, rows: 1,
+                 sheet_fps: 8, sheet_mode: "loop", sheet_start: 1, sheet_end: 0, sheet_frame: 1)
     duration = [[duration.to_i, 1].max, 360000].min
     in_frames = enter == "none" ? 0 : [[in_frames.to_i, 0].max, duration].min
     out_frames = keep || exit == "none" ? 0 : [[out_frames.to_i, 0].max, duration - in_frames].min
     show(filename, x, y, fade: 0, origin: :top_left, zoom: zoom, z: z)
     sprite = @image_sprites[filename.to_s]
     return wait(duration) if !sprite || sprite.disposed?
-    sprite.ox = ["center", "bottom"].include?(origin) ? sprite.bitmap.width / 2 : 0
-    sprite.oy = origin == "center" ? sprite.bitmap.height / 2 : origin == "bottom" ? sprite.bitmap.height : 0
+    cols = resource_type == "sheet" ? [[columns.to_i,1].max,sprite.bitmap.width].min : 1
+    row_count = resource_type == "sheet" ? [[rows.to_i,1].max,sprite.bitmap.height].min : 1
+    fw, fh = sprite.bitmap.width / cols, sprite.bitmap.height / row_count
+    total = cols * row_count
+    first_frame = [[sheet_start.to_i-1,0].max,total-1].min
+    last_frame = [[(sheet_end.to_i > 0 ? sheet_end.to_i : total)-1,first_frame].max,total-1].min
+    count = last_frame-first_frame+1
+    fps = [[sheet_fps.to_f,1].max,60].min
+    sprite.ox = ["center", "bottom"].include?(origin) ? fw / 2 : 0
+    sprite.oy = origin == "center" ? fh / 2 : origin == "bottom" ? fh : 0
     ease = lambda do |p|
       case easing
       when "linear" then p
@@ -327,7 +338,7 @@ class SceneEngine::Player
     opacity = [[opacity.to_f, 0].max, 255].min
     key_tracks = {}
     Array(keys).each do |row|
-      next unless row.is_a?(Array) && row.length >= 3 && ["x", "y", "zoom", "angle", "opacity"].include?(row[0])
+      next unless row.is_a?(Array) && row.length >= 3 && ["x", "y", "zoom", "angle", "opacity", "sheetFrame"].include?(row[0])
       (key_tracks[row[0]] ||= []) << row
     end
     key_tracks.each_value { |rows| rows.sort_by! { |row| row[1].to_f } }
@@ -394,6 +405,21 @@ class SceneEngine::Player
       end
       effect.call(enter,1-ease.call(f.to_f/in_frames)) if in_frames > 0 && f < in_frames
       effect.call(exit,ease.call((f-duration+out_frames).to_f/out_frames)) if out_frames > 0 && f > duration-out_frames
+      if resource_type == "sheet"
+        tick = (f * fps / 60.0).floor
+        idx = case sheet_mode
+        when "once" then first_frame + [tick,count-1].min
+        when "ping"
+          period = [1,count*2-2].max
+          t = tick % period
+          first_frame + (t < count ? t : period-t)
+        when "manual"
+          key = (key_tracks["sheetFrame"] || []).select { |row| row[1].to_f <= f }.last
+          [[(key ? key[2].to_i : sheet_frame.to_i)-1,first_frame].max,last_frame].min
+        else first_frame + tick % count
+        end
+        sprite.src_rect.set((idx % cols)*fw,(idx / cols)*fh,fw,fh)
+      end
       sprite.x, sprite.y = ax.round, ay.round
       sprite.zoom_x = sprite.zoom_y = az
       sprite.angle = -ar
@@ -429,15 +455,16 @@ class SceneEngine::Player
   def parallel_scene(rows)
     pending = rows.each_with_index.sort_by { |row, i| [row[0].to_i, i] }.map(&:first)
     active = []
+    completed = {}
     frame = 0
     until pending.empty? && active.empty?
       busy = active.map { |task| task[0] }
       ready = []
       pending.delete_if do |row|
-        offset, lane, block = row
-        if offset.to_i <= frame && !busy.include?(lane)
+        offset, lane, block, task_id, after_id = row
+        if offset.to_i <= frame && !busy.include?(lane) && (!after_id || completed[after_id])
           busy << lane
-          ready << [lane, Fiber.new { block.call }]
+          ready << [lane, Fiber.new { block.call }, task_id]
           true
         else
           false
@@ -454,13 +481,40 @@ class SceneEngine::Player
           @scene_parallel_fiber = nil
         end
       end
-      active.reject! { |task| !task[1].alive? }
+      throw :scene_director_end if @scene_end_requested
+      active.reject! do |task|
+        done = !task[1].alive?
+        completed[task[2]] = true if done && task[2]
+        done
+      end
       break if active.empty? && pending.empty?
       update
       frame += 1
     end
   ensure
     @scene_parallel_fiber = nil
+  end
+
+  def end_scene
+    @scene_end_requested = true
+    throw :scene_director_end unless @scene_parallel_fiber
+  end
+
+  def next_scene(key)
+    @scene_next_key = key.to_s
+    end_scene
+  end
+
+  def scene_common_event(id)
+    id = id.to_i
+    @scene_event_id = id if id > 0 && $data_common_events[id]
+  end
+
+  def scene_wait_confirm
+    loop do
+      update
+      break if Input.trigger?(Input::USE) || Input.trigger?(Input::C) || Input.trigger?(Input::ACTION)
+    end
   end
 
   def set_scene_textbox(skin = "")

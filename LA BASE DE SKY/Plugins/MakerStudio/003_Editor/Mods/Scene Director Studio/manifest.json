@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Historial de edición con atajos y keyframes iniciales explícitos; auto key y navegación local.",
+  "description": "Control de escena, dependencias de diálogo, condiciones y spritesheets integrados en clips.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

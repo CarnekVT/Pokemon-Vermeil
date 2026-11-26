@@ -50,10 +50,25 @@ module SceneDirector
       raise "Scene Director: escena '#{id}' no encontrada en #{DATA_FILE}." unless scene
       code = scene["compiledRuby"].to_s
       raise "Scene Director: la escena '#{id}' no tiene compiledRuby. Ábrela y guarda desde el Studio." if code.empty?
-      player = SceneEngine::Player.new(dialogue_data: {})
-      player.run do
-        instance_eval(code, "SceneDirector/#{scene['key'] || scene['id']}", 1)
+      visited = {}
+      reserved_event = nil
+      loop do
+        key = scene["key"] || scene["id"]
+        raise "Scene Director: bucle entre escenas '#{key}'." if visited[key]
+        visited[key] = true
+        player = SceneEngine::Player.new(dialogue_data: {})
+        player.run do
+          instance_eval(code, "SceneDirector/#{key}", 1)
+        end
+        reserved_event = player.scene_event_id || reserved_event
+        target = player.scene_next_key
+        break if !target || target.empty?
+        scene = find(target)
+        raise "Scene Director: escena '#{target}' no encontrada." unless scene
+        code = scene["compiledRuby"].to_s
+        raise "Scene Director: guarda la escena '#{target}' desde el Studio." if code.empty?
       end
+      $game_temp.common_event_id = reserved_event if reserved_event && $game_temp
       true
     end
 

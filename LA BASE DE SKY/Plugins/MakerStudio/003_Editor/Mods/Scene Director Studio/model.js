@@ -32,7 +32,7 @@ export function defaultsFor(type){
     case "stop_bgs": return {};
     case "fade_from_black": case "fade_to_black": case "to_white": return {duration:20};
     case "from_white": return {duration:20,se:""};
-    case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255,keys:[]};
+    case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255,keys:[],resourceType:"static",columns:1,rows:1,sheetFps:8,sheetMode:"loop",sheetStart:1,sheetEnd:0,sheetFrame:1};
     case "show": return {filename:"",x:0,y:0,fade:20,origin:"top_left",zoom:1,z:null,store:""};
     case "hide": return {filename:"",fade:0};
     case "hide_all": return {fade:0};
@@ -41,6 +41,11 @@ export function defaultsFor(type){
     case "show_centered_text": return {text:"",speed:"normal",color:[0,0,0]};
     case "hide_centered_text": return {};
     case "show_textbox": case "hide_textbox": return {duration:10};
+    case "end_scene": case "wait_confirm": return {};
+    case "next_scene": return {sceneKey:""};
+    case "common_event": return {eventId:1};
+    case "set_switch": return {switchId:1,value:true};
+    case "set_variable": return {variableId:1,value:0};
     case "transfer_player": return {mapId:1,x:0,y:0,direction:2};
     case "name_input": case "custom_name_input": return {default:"Solen",min:1,max:12,store:"player_name"};
     case "treatment_input": return {default:"neutro",store:"treatment"};
@@ -72,7 +77,7 @@ export function normalizeProject(p){
 export function commandStateSignature(c){
   const clean={};
   for(const [k,v] of Object.entries(c||{})){
-    if(k==="overlapParent"||k==="offsetFrames"||k==="id"||k==="sourceRuby"||k==="sourceState"||k==="sourceLine"||k==="sourceFile")continue;
+    if(k==="afterId"||k.startsWith("condition")||k==="overlapParent"||k==="offsetFrames"||k==="id"||k==="sourceRuby"||k==="sourceState"||k==="sourceLine"||k==="sourceFile")continue;
     clean[k]=v;
   }
   return JSON.stringify(clean);
@@ -88,7 +93,8 @@ function rubyLiteral(v){
   if(v===null||v===undefined)return "nil"; if(typeof v==="boolean")return v?"true":"false"; if(typeof v==="number")return n(v); if(Array.isArray(v))return `[${v.map(rubyLiteral).join(", ")}]`; return q(v);
 }
 function formatArgRuby(v){ if(v&&typeof v==="object"&&v.kind==="var")return String(v.value||"nil"); return rubyLiteral(v&&typeof v==="object"&&"value" in v?v.value:v); }
-export function commandToRuby(c){
+export function commandToRuby(c){const code=commandBody(c);if(!c.conditionKind||c.conditionKind==="none")return code;const id=Math.max(1,Math.round(Number(c.conditionId)||1));const test=c.conditionKind==="switch"?`$game_switches[${id}] == ${c.conditionSwitch!==false}`:`$game_variables[${id}] ${["==","!=","<",">","<=",">="].includes(c.conditionOp)?c.conditionOp:"=="} ${Number(c.conditionValue)||0}`;return `if ${test}\n${code.split("\n").map(s=>"  "+s).join("\n")}\nend`;}
+function commandBody(c){
   if(c?.sourceRuby && c?.sourceState && c.sourceState===commandStateSignature(c)) return String(c.sourceRuby);
   const pre=c.store&&/^[a-z_]\w*$/i.test(c.store)?`${c.store} = `:"";
   switch(c.type){
@@ -99,7 +105,7 @@ export function commandToRuby(c){
     case "fade_from_black": case "fade_to_black": case "to_white": return `${c.type} ${n(c.duration)}`;
     case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}`:""}`;
     case "show_textbox": case "hide_textbox": return `${c.type} ${n(c.duration)}`;
-    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}`;}
+    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys","resourceType","columns","rows","sheetFps","sheetMode","sheetStart","sheetEnd","sheetFrame"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}`;}
     case "show": { const opts=[]; if(c.fade!==undefined)opts.push(`fade: ${n(c.fade)}`); if(c.origin)opts.push(`origin: ${sym(c.origin)}`); if(c.zoom!==undefined)opts.push(`zoom: ${n(c.zoom)}`); if(c.z!==null&&c.z!==undefined&&c.z!=="")opts.push(`z: ${n(c.z)}`); return `${pre}show ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}`;
     case "hide_all": return `hide_all fade: ${n(c.fade)}`;
@@ -107,6 +113,12 @@ export function commandToRuby(c){
     case "text_inline": { const opts=[]; if(c.skin)opts.push(`skin: ${q(c.skin)}`); if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "show_centered_text": return `show_centered_text ${q(c.text)}, speed: ${sym(c.speed)}, color: ${rubyColor(c.color)}`;
     case "hide_centered_text": return `hide_centered_text`;
+    case "end_scene": return "end_scene";
+    case "next_scene": return `next_scene ${q(c.sceneKey)}`;
+    case "common_event": return `scene_common_event ${n(c.eventId)}`;
+    case "set_switch": return `$game_switches[${n(c.switchId)}] = ${!!c.value}`;
+    case "set_variable": return `$game_variables[${n(c.variableId)}] = ${n(c.value)}`;
+    case "wait_confirm": return "scene_wait_confirm";
     case "transfer_player": return `transfer_player ${n(c.mapId)}, ${n(c.x)}, ${n(c.y)}, ${n(c.direction)}`;
     case "treatment_input": return `treatment_input(default: ${sym(c.default||"neutro")})`;
     case "treatment_text": return `treatment_text(masculino: ${q(c.masculino||"")}, femenino: ${q(c.femenino||"")}, neutro: ${q(c.neutro||"")}, speaker: ${q(c.speaker||"")}, speed: ${sym(c.speed||"normal")})`;
@@ -129,12 +141,13 @@ export function commandToRuby(c){
 }
 export function compileScene(scene){return timelineGroups(scene).map(g=>{
  if(!g.events.length)return commandToRuby(g.root);
- const rows=[{c:g.root,offset:0,lane:"main"},...g.events.map(e=>({c:e.c,offset:e.requested,lane:e.lane}))];
- return "parallel_scene([\n"+rows.map(e=>"  ["+e.offset+", "+q(e.lane)+", proc {\n"+commandToRuby(e.c).split("\n").map(s=>"    "+s).join("\n")+"\n  }]").join(",\n")+"\n])";
+ const rows=[{c:g.root,offset:0,lane:"main"},...g.events.map(e=>({c:e.c,offset:e.requested,lane:e.lane,after:e.after}))];
+ return "parallel_scene([\n"+rows.map(e=>"  ["+e.offset+", "+q(e.lane)+", proc {\n"+commandToRuby(e.c).split("\n").map(s=>"    "+s).join("\n")+"\n  }, "+q(e.c.id)+", "+(e.after?q(e.after):"nil")+"]").join(",\n")+"\n])";
  }).join("\n\n")}
 export function compileProject(project){ const p=clone(project); p.scenes.forEach(s=>s.compiledRuby=compileScene(s)); return p; }
 
 export const COMMAND_GROUPS=[
+  {id:"control",label:"Control de escena",items:[["end_scene","■ Finalizar escena"],["next_scene","▶ Reproducir otra escena"],["common_event","↪ Evento común al salir"],["wait_confirm","◇ Esperar confirmación"],["set_switch","✓ Cambiar interruptor"],["set_variable","= Cambiar variable"],["hide_textbox","▭ Cerrar diálogo"],["transfer_player","↪ Transferir jugador"]]},
   {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Nombre vanilla"],["custom_name_input","✦ Nombre Vermeil"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["image_clip","▣ Clip de imagen"],["show","▣ Mostrar imagen (instantánea)"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
