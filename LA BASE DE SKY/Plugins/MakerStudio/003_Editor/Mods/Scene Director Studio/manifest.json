@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Vinculación de clips con acciones simultáneas y desaparición al confirmar diálogo.",
+  "description": "Consumo de confirmación al volver al mapa, spritesheets infinitos y salidas configurables.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

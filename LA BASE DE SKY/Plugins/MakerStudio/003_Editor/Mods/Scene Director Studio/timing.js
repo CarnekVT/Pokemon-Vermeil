@@ -1,6 +1,7 @@
 import {clipLength} from "./animation.js";
 export function duration(c){
   if(c.type==="parallel_anchor")return 0;
+  if(c.type==="end_scene")return Math.max(1,(Number(c.holdFrames)||0)+(c.endStyle==="fade"?(Number(c.fadeFrames)||0):0)+(Number(c.breathFrames)||0));
   if(c.type==="image_clip")return clipLength(c);
   if(c.type==="wait")return Math.max(0,Number(c.frames)||0);
   if(/fade|white|textbox/.test(c.type))return Math.max(1,Number(c.duration??c.fade)||10);

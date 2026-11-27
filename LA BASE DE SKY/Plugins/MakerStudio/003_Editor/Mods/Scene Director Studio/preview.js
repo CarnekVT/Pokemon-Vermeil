@@ -35,7 +35,7 @@ export class ScenePreview{
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${Math.max(1,Math.round(this.w*this.zoom))}px`;this.canvas.style.height=`${Math.max(1,Math.round(this.h*this.zoom))}px`;this.canvas.style.imageRendering="pixelated";if(manual)this.host.dataset.manualZoom="1";this.onZoom?.(this.zoom);}
   stepZoom(dir){const levels=[.25,.5,.75,1,1.5,2,3,4];const next=dir>0?levels.find(z=>z>this.zoom+1e-6):levels.slice().reverse().find(z=>z<this.zoom-1e-6);this.setZoom(next??(dir>0?4:.25));}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:0,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -80,7 +80,7 @@ export class ScenePreview{
     const dw=Math.max(1,Math.round(fw*zoom)),dh=Math.max(1,Math.round(fh*zoom));x=Math.round(x);y=Math.round(y);if(white)g.drawImage(src,0,0,fw,fh,x,y,dw,dh);else g.drawImage(src,sx,0,fw,fh,x,y,dw,dh);g.restore();
   }
   draw(){
-    const g=this.g,s=this.state,e=this.settings(),queue=[];let seq=0;const push=(z,fn)=>queue.push({z:Number(z)||0,seq:seq++,fn});
+    const g=this.g,s=this.state,e=this.settings(),queue=[];for(const it of s.images.values())if(it.persistent&&it.visible&&!it.hidden){const elapsed=Math.max(0,s.frame-it.sheetStartFrame);Object.assign(it,sheetRect(it.persistent,it.img,elapsed))}let seq=0;const push=(z,fn)=>queue.push({z:Number(z)||0,seq:seq++,fn});
     g.imageSmoothingEnabled=false;g.save();g.clearRect(0,0,this.w,this.h);g.fillStyle=this.showTransitions?"#000":"#393e48";g.fillRect(0,0,this.w,this.h);if(!this.showTransitions){g.fillStyle="#454b57";for(let y=0;y<this.h;y+=24)for(let x=0;x<this.w;x+=24)if((x/24+y/24)%2===0)g.fillRect(x,y,24,24)}
     const drawImg=(it,yoff=0)=>{if(!it?.img||it.visible===false)return;g.save();g.globalAlpha=clamp((it.opacity??255)/255,0,1);const zoom=it.zoom??1;let x=it.x||0,y=(it.baseY??it.y??0)+yoff;if(!it.angle){x=Math.round(x);y=Math.round(y)}g.translate(x,y);if(it.angle){const ax=it.anchorX||0,ay=it.anchorY||0;g.translate(ax,ay);g.rotate(it.angle*Math.PI/180);g.translate(-ax,-ay)}g.scale(it.mirror?-1:1,1);const dw=(it.sw||it.img.width)*zoom,dh=(it.sh||it.img.height)*zoom,ww=it.angle?dw:Math.max(1,Math.round(dw)),hh=it.angle?dh:Math.max(1,Math.round(dh));if(it.mirror)g.translate(-ww,0);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,ww,hh);g.restore();};
 
@@ -222,7 +222,7 @@ export class ScenePreview{
     });
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
-    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();this.drawHandles();this.renderOnion();
+    queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();if(s.endAlpha<1){g.save();g.globalAlpha=1-s.endAlpha;g.fillStyle="#393e48";g.fillRect(0,0,this.w,this.h);g.restore()}if(!s.finished){this.drawHandles();this.renderOnion()}
   }
 
   wordWrapAll(text,maxWidth){
@@ -261,14 +261,14 @@ export class ScenePreview{
   const start=this.state.frame,lanes=new Map(),done=new Map();for(const e of g.events){let resolve;const promise=new Promise(r=>resolve=r);done.set(e.c.id,{promise,resolve})}
   for(const e of g.events){if(!lanes.has(e.lane))lanes.set(e.lane,[]);lanes.get(e.lane).push(e)}
   const jobs=[this.apply(g.root,false,token)];
-  for(const events of lanes.values())jobs.push((async()=>{for(const e of events){if(token!==this.playToken){done.get(e.c.id)?.resolve();continue}if(e.after&&done.has(e.after))await done.get(e.after).promise;const left=start+e.requested-this.state.frame;if(left>0)await this.frames(left,null,false,token);try{if(token===this.playToken)await this.apply(e.c,false,token)}finally{done.get(e.c.id)?.resolve()}}})());
+  for(const events of lanes.values())jobs.push((async()=>{for(const e of events){if(token!==this.playToken){done.get(e.c.id)?.resolve();continue}if(e.after&&done.has(e.after))await done.get(e.after).promise;const left=start+e.requested-this.state.frame;if(left>0)await this.frames(left,null,false,token);try{if(token===this.playToken&&!this.state.finished)await this.apply(e.c,false,token)}finally{done.get(e.c.id)?.resolve()}}})());
   await Promise.all(jobs);
  }
   async seekGroup(g,frame,token){
   const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
-  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&s.images.get(g.root.id))s.images.get(g.root.id).visible=false}
+  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&!s.images.get(g.root.id)?.persistent&&s.images.get(g.root.id))s.images.get(g.root.id).visible=false}
   else if(!["wait","parallel_anchor"].includes(g.root.type))await this.apply(g.root,true,token);
-  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)continue;s.frame=base+e.offset;if(e.c.type==="image_clip"){const elapsed=Math.min(e.length,Math.max(0,f-e.offset));await this.applyImageClip(e.c,true,token,elapsed);if(elapsed>=e.length&&!e.c.keep&&s.images.get(e.c.id))s.images.get(e.c.id).visible=false}else await this.apply(e.c,true,token)}
+  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)continue;s.frame=base+e.offset;if(e.c.type==="image_clip"){const elapsed=Math.min(e.length,Math.max(0,f-e.offset));await this.applyImageClip(e.c,true,token,elapsed);if(elapsed>=e.length&&!e.c.keep&&!s.images.get(e.c.id)?.persistent&&s.images.get(e.c.id))s.images.get(e.c.id).visible=false}else await this.apply(e.c,true,token)}
   if(token===this.playToken)s.frame=base+f;
  }
   async seekParallel(scene,index,clipFrame){
@@ -309,7 +309,7 @@ export class ScenePreview{
    if(this.onionMode!=="previous")draw(this.onionSnapshots.next,"#71dbff");
  }
   pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:(item.hidden||item.hiding)?item.opacity:a.opacity,visible:!item.hidden})}
-  async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};item.filename=c.filename;state.images.set(c.id,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
+  async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};item.filename=c.filename;if(c.resourceType==="sheet"&&c.sheetPersistent&&["loop","ping"].includes(c.sheetMode||"loop")){item.persistent=c;item.sheetStartFrame=state.frame}state.images.set(c.id,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep&&!item.persistent)item.visible=false}
   selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.type==="image_clip"?c.id:c.filename):null}
   drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=(it.sw||it.img.width)*it.zoom,h=(it.sh||it.img.height)*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}const dx=it.angle?it.x:Math.round(it.x),dy=it.angle?it.y:Math.round(it.y);g.translate(dx+ax,dy+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
   async runTo(scene,index,clipFrame=null){
@@ -452,7 +452,8 @@ export class ScenePreview{
       case"hide":{const targets=(c.targetId?[s.images.get(c.targetId)]:[...s.images.entries()].filter(([k,v])=>!c.filename||k===c.filename||v.filename===c.filename).map(([k,v])=>v)).filter(Boolean).map(x=>({x,alpha:x.opacity??255}));targets.forEach(({x})=>x.hiding=true);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(({x,alpha})=>{x.opacity=alpha*(1-p)}),skip,token);targets.forEach(({x})=>{x.hiding=false;x.hidden=true;x.visible=false});break;}
       case"hide_all":{await this.apply({...c,type:"hide",filename:"",targetId:""},skip,token);break;}
       case"parallel_anchor":break;
-      case"end_scene":case"next_scene":if(!skip)this.stop();break;
+      case"end_scene":{if(skip){s.endAlpha=0;s.finished=true;break}await this.frames(c.holdFrames||0,null,false,token);if(token!==this.playToken)break;s.finished=true;if(c.endStyle==="fade")await this.frames(c.fadeFrames||0,p=>s.endAlpha=1-p,false,token);if(token!==this.playToken)break;s.endAlpha=0;await this.frames(c.breathFrames||0,null,false,token);if(token===this.playToken)this.stop();break;}
+      case"next_scene":if(!skip)this.stop();break;
       case"wait_confirm":if(!skip){this.onWaiting?.(true);await this.waitInput(token,this.inputSerial);this.onWaiting?.(false)}break;
       case"common_event":case"set_switch":case"set_variable":break;
       case"textbox_style":await this.setSkin(c.skin,token);break;

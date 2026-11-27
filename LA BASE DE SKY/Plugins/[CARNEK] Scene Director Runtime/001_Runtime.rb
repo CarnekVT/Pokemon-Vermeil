@@ -60,10 +60,29 @@ module SceneDirector
       return false if @playing
       @playing = true
       begin
-      play_internal(id)
+        result = play_internal(id)
+        release_scene_input
+        result
       ensure
         @playing = false
       end
+    end
+
+    # The map interpreter returns into Scene_Map#update on the same tick.
+    # Drain the dialogue press before the map can interpret it as an interaction.
+    def release_scene_input
+      buttons = [:USE, :C, :ACTION, :BACK, :B].filter_map do |name|
+        Input.const_get(name) if Input.const_defined?(name)
+      end.uniq
+      $game_temp.interact_calling = false if $game_temp
+      Input.update
+      while buttons.any? { |button| Input.press?(button) }
+        Graphics.update
+        Input.update
+      end
+      # Clear the trigger/release edge as well as a queued map interaction.
+      2.times { Graphics.update; Input.update }
+      $game_temp.interact_calling = false if $game_temp
     end
 
     def play_internal(id)

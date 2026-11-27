@@ -9,6 +9,7 @@ class SceneEngine::Player
     @image_sprites = {}
     @scene_image_files = {}
     @scene_hidden_images = {}
+    @scene_persistent_sheets = {}
     @sprites = {}
     @float_anim = nil
     @float_ghosts = []
@@ -22,6 +23,7 @@ class SceneEngine::Player
   def run(&block)
     setup_sprites
     catch(:scene_director_end) { instance_eval(&block) if block }
+    finish_scene_transition if @scene_end_requested
   ensure
     cleanup
   end
@@ -105,10 +107,13 @@ class SceneEngine::Player
       return
     end
     @sprites[:text_box].update if @sprites[:text_box].is_a?(SpriteWindow_Base)
-    update_float
-    update_aura_particles
-    update_scrolling
-    update_floating
+    unless @scene_finishing
+      update_float
+      update_aura_particles
+      update_scrolling
+      update_floating
+    end
+    update_scene_sheets
     # Graphics.frame_rate no siempre representa los FPS reales de mkxp-z.
     # mkxp.json fija 120; los guiones se escriben a 60 pasos/segundo.
     @scene_frame_remainder ||= 0.0
@@ -273,6 +278,7 @@ class SceneEngine::Player
     key = instance_id ? instance_id.to_s : filename.to_s
     @scene_image_files[key] = filename.to_s
     @scene_hidden_images.delete(key)
+    @scene_persistent_sheets.delete(key)
     @image_sprites.delete(key)&.dispose
 
     s = Sprite.new(@viewport)
@@ -315,8 +321,10 @@ class SceneEngine::Player
                  exit: "none", out_frames: 24, keep: true, motion: "none", distance: 64,
                  easing: "smooth", end_x: nil, end_y: nil, end_zoom: nil,
                  end_angle: nil, end_opacity: nil, keys: [], resource_type: "static", columns: 1, rows: 1,
-                 sheet_fps: 8, sheet_mode: "loop", sheet_start: 1, sheet_end: 0, sheet_frame: 1, instance_id: nil)
+                 sheet_fps: 8, sheet_mode: "loop", sheet_start: 1, sheet_end: 0, sheet_frame: 1, sheet_persistent: false, instance_id: nil)
     duration = [[duration.to_i, 1].max, 360000].min
+    persistent = resource_type == "sheet" && sheet_persistent && ["loop", "ping"].include?(sheet_mode)
+    keep = true if persistent
     in_frames = enter == "none" ? 0 : [[in_frames.to_i, 0].max, duration].min
     out_frames = keep || exit == "none" ? 0 : [[out_frames.to_i, 0].max, duration - in_frames].min
     show(filename, x, y, fade: 0, origin: :top_left, zoom: zoom, z: z, instance_id: instance_id)
@@ -434,7 +442,11 @@ class SceneEngine::Player
       sprite.opacity = ao.round unless @scene_hidden_images[key]
     end
     sample.call(0)
+    started_at = @scene_logic_frame || 0
     duration.times { |i| sample.call(i+1); update }
+    if persistent && !@scene_hidden_images[key] && !sprite.disposed?
+      @scene_persistent_sheets[key] = { sprite: sprite, start: started_at, cols: cols, fw: fw, fh: fh, first: first_frame, count: count, fps: fps, mode: sheet_mode }
+    end
     sprite.visible = false unless keep
     sprite
   end
@@ -459,6 +471,7 @@ class SceneEngine::Player
       update
     end
     targets.each { |s, _| s.visible = false unless s.disposed? }
+    keys.each { |key| @scene_persistent_sheets.delete(key) }
   end
 
   def hide_all(fade: 0)
@@ -516,9 +529,62 @@ class SceneEngine::Player
     @scene_parallel_fiber = nil
   end
 
-  def end_scene
+  def update_scene_sheets
+    @scene_persistent_sheets.delete_if do |key, data|
+      sprite = data[:sprite]
+      if sprite.disposed? || !sprite.visible
+        true
+      else
+        elapsed = [(@scene_logic_frame || 0) - data[:start], 0].max
+        tick = (elapsed * data[:fps] / 60.0).floor
+        count = data[:count]
+        if data[:mode] == "ping"
+          phase = tick % [1, 2 * count - 2].max
+          index = data[:first] + (phase < count ? phase : 2 * count - 2 - phase)
+        else
+          index = data[:first] + tick % count
+        end
+        sprite.src_rect.set((index % data[:cols]) * data[:fw], (index / data[:cols]) * data[:fh], data[:fw], data[:fh])
+        false
+      end
+    end
+  end
+
+  def end_scene(style: "cut", fade_frames: 0, hold_frames: 0, breath_frames: 0)
+    @scene_end_options = { style: style.to_s, fade: [[fade_frames.to_i,0].max,36000].min,
+                           hold: [[hold_frames.to_i,0].max,36000].min, breath: [[breath_frames.to_i,0].max,36000].min }
     @scene_end_requested = true
     throw :scene_director_end unless @scene_parallel_fiber
+  end
+
+  # Called on the main fiber after the parallel scheduler has stopped.
+  # The map remains frozen throughout the exit, including the breathing pause.
+  def finish_scene_transition
+    opts = @scene_end_options || { style: "cut", fade: 0, hold: 0, breath: 0 }
+    opts[:hold].times { update }
+    @scene_finishing = true
+    sprites = @sprites.values + @image_sprites.values + @float_ghosts
+    sprites += @aura_particles.map { |p| p[:sprite] }
+    sprites += @floating_sprites.map { |p| p[:sprite] }
+    sprites += @scrolling_sprites.flat_map { |p| p[:sprites] || [] }
+    sprites += [@float_anim[:sprite], @float_anim[:glow]] if @float_anim
+    targets = sprites.compact.uniq.select { |s| s.respond_to?(:opacity) && !s.disposed? }
+    initial = targets.map { |s| [s, s.opacity, s.respond_to?(:contents_opacity) ? s.contents_opacity : nil] }
+    if opts[:style] == "fade" && opts[:fade] > 0
+      opts[:fade].times do |i|
+        alpha = 1.0 - (i + 1).to_f / opts[:fade]
+        initial.each do |s, opacity, contents|
+          next if s.disposed?
+          s.opacity = (opacity * alpha).round
+          s.contents_opacity = (contents * alpha).round unless contents.nil?
+        end
+        update
+      end
+    end
+    targets.each { |s| s.opacity = 0 unless s.disposed? }
+    targets.each { |s| s.visible = false if !s.disposed? && s.respond_to?(:visible=) }
+    @scene_persistent_sheets.clear
+    opts[:breath].times { update }
   end
 
   def next_scene(key)
