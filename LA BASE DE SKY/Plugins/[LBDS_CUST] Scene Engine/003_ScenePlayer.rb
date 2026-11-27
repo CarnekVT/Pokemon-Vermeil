@@ -7,6 +7,8 @@ class SceneEngine::Player
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99_999
     @image_sprites = {}
+    @scene_image_files = {}
+    @scene_hidden_images = {}
     @sprites = {}
     @float_anim = nil
     @float_ghosts = []
@@ -267,8 +269,10 @@ class SceneEngine::Player
     end
   end
 
-  def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left, zoom: 1, z: nil)
-    key = filename.to_s
+  def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left, zoom: 1, z: nil, instance_id: nil)
+    key = instance_id ? instance_id.to_s : filename.to_s
+    @scene_image_files[key] = filename.to_s
+    @scene_hidden_images.delete(key)
     @image_sprites.delete(key)&.dispose
 
     s = Sprite.new(@viewport)
@@ -311,12 +315,13 @@ class SceneEngine::Player
                  exit: "none", out_frames: 24, keep: true, motion: "none", distance: 64,
                  easing: "smooth", end_x: nil, end_y: nil, end_zoom: nil,
                  end_angle: nil, end_opacity: nil, keys: [], resource_type: "static", columns: 1, rows: 1,
-                 sheet_fps: 8, sheet_mode: "loop", sheet_start: 1, sheet_end: 0, sheet_frame: 1)
+                 sheet_fps: 8, sheet_mode: "loop", sheet_start: 1, sheet_end: 0, sheet_frame: 1, instance_id: nil)
     duration = [[duration.to_i, 1].max, 360000].min
     in_frames = enter == "none" ? 0 : [[in_frames.to_i, 0].max, duration].min
     out_frames = keep || exit == "none" ? 0 : [[out_frames.to_i, 0].max, duration - in_frames].min
-    show(filename, x, y, fade: 0, origin: :top_left, zoom: zoom, z: z)
-    sprite = @image_sprites[filename.to_s]
+    show(filename, x, y, fade: 0, origin: :top_left, zoom: zoom, z: z, instance_id: instance_id)
+    key = instance_id ? instance_id.to_s : filename.to_s
+    sprite = @image_sprites[key]
     return wait(duration) if !sprite || sprite.disposed?
     cols = resource_type == "sheet" ? [[columns.to_i,1].max,sprite.bitmap.width].min : 1
     row_count = resource_type == "sheet" ? [[rows.to_i,1].max,sprite.bitmap.height].min : 1
@@ -426,7 +431,7 @@ class SceneEngine::Player
       sprite.x, sprite.y = ax.round, ay.round
       sprite.zoom_x = sprite.zoom_y = az
       sprite.angle = -ar
-      sprite.opacity = ao.round
+      sprite.opacity = ao.round unless @scene_hidden_images[key]
     end
     sample.call(0)
     duration.times { |i| sample.call(i+1); update }
@@ -434,16 +439,26 @@ class SceneEngine::Player
     sprite
   end
 
-  def hide(filename = nil, fade: 0)
-    targets = filename ? [filename.to_s] : @image_sprites.keys
-    targets.each do |k|
-      s = @image_sprites[k]
-      next unless s
-      if fade > 0
-        fade.times { |i| s.opacity = 255 - (255 * (i + 1) / fade); update }
-      end
-      s.visible = false
+  def hide(filename = nil, fade: 0, instance_id: nil)
+    keys = if instance_id && !instance_id.to_s.empty?
+      [instance_id.to_s]
+    elsif filename
+      @image_sprites.keys.select { |k| k == filename.to_s || @scene_image_files[k] == filename.to_s }
+    else
+      @image_sprites.keys
     end
+    targets = keys.filter_map do |k|
+      s = @image_sprites[k]
+      next if !s || s.disposed?
+      @scene_hidden_images[k] = true
+      [s, s.opacity]
+    end
+    fade = [fade.to_i,0].max
+    fade.times do |i|
+      targets.each { |s, alpha| s.opacity = (alpha * (1.0 - (i + 1).to_f / fade)).round unless s.disposed? }
+      update
+    end
+    targets.each { |s, _| s.visible = false unless s.disposed? }
   end
 
   def hide_all(fade: 0)
@@ -474,6 +489,9 @@ class SceneEngine::Player
         end
       end
       active.concat(ready)
+      if active.empty? && !pending.empty? && pending.none? { |row| !row[4] || completed[row[4]] }
+        raise "Scene Director: dependencia de acción inválida o circular."
+      end
       active.each do |task|
         fiber = task[1]
         next unless fiber.alive?
@@ -565,7 +583,15 @@ class SceneEngine::Player
     pbDrawShadowText(bmp, 0, 4, bmp.width, 32, speaker, scolor, sshadow, 0)
   end
 
+  def scene_resolve_text(text)
+    trainer = defined?($player) && $player ? $player : (defined?($Trainer) ? $Trainer : nil)
+    name = trainer && trainer.respond_to?(:name) ? trainer.name.to_s : ""
+    text.to_s.gsub(/\\PN/i) { name }
+  end
+
   def show_page_text(text, speaker, speed)
+    text = scene_resolve_text(text)
+    speaker = scene_resolve_text(speaker) unless speaker.nil?
     cpf = speed_to_chars(speed).to_f
     max_lines = SceneEngine::Settings::TEXT_MAX_LINES
     bmp = @sprites[:text].bitmap
@@ -641,6 +667,7 @@ class SceneEngine::Player
   end
 
   def show_centered_text(text, speed: :normal, color: Color.new(0, 0, 0))
+    text = scene_resolve_text(text)
     hide_centered_text
     bmp = Bitmap.new(Graphics.width, Graphics.height)
     pbSetSystemFont(bmp)

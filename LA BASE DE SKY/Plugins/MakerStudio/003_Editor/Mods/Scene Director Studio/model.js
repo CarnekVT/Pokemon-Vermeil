@@ -34,7 +34,7 @@ export function defaultsFor(type){
     case "from_white": return {duration:20,se:""};
     case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255,keys:[],resourceType:"static",columns:1,rows:1,sheetFps:8,sheetMode:"loop",sheetStart:1,sheetEnd:0,sheetFrame:1};
     case "show": return {filename:"",x:0,y:0,fade:20,origin:"top_left",zoom:1,z:null,store:""};
-    case "hide": return {filename:"",fade:0};
+    case "hide": return {filename:"",fade:0,targetId:""};
     case "hide_all": return {fade:0};
     case "textbox_style": return {skin:""};
     case "text_inline": return {text:"",speaker:"",speed:"normal",formatArgs:[],skin:""};
@@ -105,9 +105,9 @@ function commandBody(c){
     case "fade_from_black": case "fade_to_black": case "to_white": return `${c.type} ${n(c.duration)}`;
     case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}`:""}`;
     case "show_textbox": case "hide_textbox": return `${c.type} ${n(c.duration)}`;
-    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys","resourceType","columns","rows","sheetFps","sheetMode","sheetStart","sheetEnd","sheetFrame"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}`;}
+    case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys","resourceType","columns","rows","sheetFps","sheetMode","sheetStart","sheetEnd","sheetFrame"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}, instance_id: ${q(c.id)}`;}
     case "show": { const opts=[]; if(c.fade!==undefined)opts.push(`fade: ${n(c.fade)}`); if(c.origin)opts.push(`origin: ${sym(c.origin)}`); if(c.zoom!==undefined)opts.push(`zoom: ${n(c.zoom)}`); if(c.z!==null&&c.z!==undefined&&c.z!=="")opts.push(`z: ${n(c.z)}`); return `${pre}show ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}${opts.length?`, ${opts.join(", ")}`:""}`; }
-    case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}`;
+    case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}${c.targetId?`, instance_id: ${q(c.targetId)}`:""}`;
     case "hide_all": return `hide_all fade: ${n(c.fade)}`;
     case "textbox_style": return `set_scene_textbox ${q(c.skin||"")}`;
     case "text_inline": { const opts=[]; if(c.skin)opts.push(`skin: ${q(c.skin)}`); if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }

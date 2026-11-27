@@ -244,7 +244,7 @@ export class ScenePreview{
     if(pages.length>1&&pages[pages.length-1].length===1&&pages[pages.length-2].length>2)pages[pages.length-1].unshift(pages[pages.length-2].pop());
     return pages;
   }
-  formatText(text,args){let out=String(text||"");(args||[]).forEach((arg,i)=>{let v=arg;if(v&&typeof v==="object"&&v.kind==="var")v=this.state.vars.get(v.value)??`{${v.value}}`;else if(v&&typeof v==="object"&&v.kind==="ruby")v=this.state.vars.get(v.value)??v.value;out=out.split(`{${i+1}}`).join(String(v??""));});return out;}
+  formatText(text,args){let out=String(text||"");(args||[]).forEach((arg,i)=>{let v=arg;if(v&&typeof v==="object"&&v.kind==="var")v=this.state.vars.get(v.value)??`{${v.value}}`;else if(v&&typeof v==="object"&&v.kind==="ruby")v=this.state.vars.get(v.value)??v.value;out=out.split(`{${i+1}}`).join(String(v??""));});return out.replace(/\\PN/gi,()=>String(this.state.vars.get("player_name")||this.state.playerName||"Jugador"));}
 
   stop(){this.playToken++;this.livePlayback=false;this.seeking=false;this.onionSnapshots=null;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
   async reset(){this.stop();this.resetState();this.draw();}
@@ -265,14 +265,14 @@ export class ScenePreview{
  }
   async seekGroup(g,frame,token){
   const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
-  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&s.images.get(g.root.filename))s.images.get(g.root.filename).visible=false}
+  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&s.images.get(g.root.id))s.images.get(g.root.id).visible=false}
   else if(g.root.type!=="wait")await this.apply(g.root,true,token);
-  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)break;s.frame=base+e.offset;await this.apply(e.c,true,token)}
+  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)continue;s.frame=base+e.offset;if(e.c.type==="image_clip"){const elapsed=Math.min(e.length,Math.max(0,f-e.offset));await this.applyImageClip(e.c,true,token,elapsed);if(elapsed>=e.length&&!e.c.keep&&s.images.get(e.c.id))s.images.get(e.c.id).visible=false}else await this.apply(e.c,true,token)}
   if(token===this.playToken)s.frame=base+f;
  }
   async seekParallel(scene,index,clipFrame){
   this.stop();const token=++this.playToken;this.seeking=true;this.resetState();const target=scene.commands[index],groups=timelineGroups(scene);
-  try{for(const g of groups){if(token!==this.playToken)return;const e=g.events.find(e=>e.c.id===target?.id);if(g.root.id===target?.id||e){if(g.events.length)await this.seekGroup(g,e?e.offset:(clipFrame??g.length),token);else if(g.root.type==="image_clip")await this.applyImageClip(g.root,true,token,clipFrame??spans(g.root).enter);else await this.apply(g.root,true,token);break}if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token)}}finally{if(token===this.playToken){this.seeking=false;this.draw()}}
+  try{for(const g of groups){if(token!==this.playToken)return;const e=g.events.find(e=>e.c.id===target?.id);if(g.root.id===target?.id||e){if(g.events.length)await this.seekGroup(g,e?e.offset+(e.c.type==="image_clip"?(clipFrame??0):0):(clipFrame??g.length),token);else if(g.root.type==="image_clip")await this.applyImageClip(g.root,true,token,clipFrame??spans(g.root).enter);else await this.apply(g.root,true,token);break}if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token)}}finally{if(token===this.playToken){this.seeking=false;this.draw()}}
  }
   async play(scene,{from=0}={}){
    this.stop();const token=++this.playToken;this.livePlayback=true;this.editClip=null;this.onionSnapshots=null;this.resetState();
@@ -307,9 +307,9 @@ export class ScenePreview{
    if(this.onionMode!=="next")draw(this.onionSnapshots.previous,"#ff777a");
    if(this.onionMode!=="previous")draw(this.onionSnapshots.next,"#71dbff");
  }
-  pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:a.opacity,visible:true})}
-  async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};state.images.set(c.filename,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
-  selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.filename):null}
+  pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:item.hidden?item.opacity:a.opacity,visible:!item.hidden})}
+  async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};item.filename=c.filename;state.images.set(c.id,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
+  selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.type==="image_clip"?c.id:c.filename):null}
   drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=(it.sw||it.img.width)*it.zoom,h=(it.sh||it.img.height)*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}g.translate(it.x+ax,it.y+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,w,h);g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
   async runTo(scene,index,clipFrame=null){
    if(scene.commands.some(c=>c.overlapParent))return this.seekParallel(scene,index,clipFrame);
@@ -319,7 +319,7 @@ export class ScenePreview{
      for(let i=0;i<=at;i++){if(token!==this.playToken)return;if(i===at&&this.onionEnabled)previous=this.onionSprites(this.state);if(i===at&&commands[i].type==="image_clip")await this.applyImageClip(commands[i],true,token,clipFrame??spans(commands[i]).enter);else await this.apply(commands[i],true,token)}
      if(token!==this.playToken)return;
      if(this.onionEnabled){
-       const current=this.state;let next=[];if(commands[at]?.type==="image_clip"){const c=commands[at],f=clipFrame??spans(c).enter,it=current.images.get(c.filename);if(it){const a=this.cloneState(current),b=this.cloneState(current);this.pose(a.images.get(c.filename),c,Math.max(0,f-6));this.pose(b.images.get(c.filename),c,Math.min(clipLength(c),f+6));this.onionSnapshots={previous:this.onionSprites(a),next:this.onionSprites(b)};return}}
+       const current=this.state;let next=[];if(commands[at]?.type==="image_clip"){const c=commands[at],f=clipFrame??spans(c).enter,it=current.images.get(c.id);if(it){const a=this.cloneState(current),b=this.cloneState(current);this.pose(a.images.get(c.id),c,Math.max(0,f-6));this.pose(b.images.get(c.id),c,Math.min(clipLength(c),f+6));this.onionSnapshots={previous:this.onionSprites(a),next:this.onionSprites(b)};return}}
        if(at+1<commands.length&&this.onionMode!=="previous"){this.state=this.cloneState(current);await this.apply(commands[at+1],true,token);if(token!==this.playToken)return;next=this.onionSprites(this.state);this.state=current}
        this.onionSnapshots={previous,next};
      }
@@ -371,7 +371,7 @@ export class ScenePreview{
   async pageText(obj,skip,token){
     if(obj.skin)await this.setSkin(obj.skin,token);if(token!==this.playToken)return;
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,this.w-(e.textPadX??48)*2),max=Math.max(1,e.textMaxLines||4),pages=this.paginateLines(lines,max);
-    const target={speaker:obj.speaker||"",pageLines:pages[0],revealed:0,page:0};this.state.text=target;
+    const target={speaker:this.formatText(obj.speaker||"",[]),pageLines:pages[0],revealed:0,page:0};this.state.text=target;
     await this.showTextboxFade(skip,token,10);
     if(skip){target.page=pages.length-1;target.pageLines=pages[target.page];target.revealed=target.pageLines.join("\n").length;return;}
     const cpf=e.speeds?.[obj.speed||"normal"]??1.5;
@@ -448,8 +448,8 @@ export class ScenePreview{
       case"image_clip":{await this.applyImageClip(c,skip,token);break;}
       case"show":{
         const im=await this.image(c.filename);if(im){let x=this.num(c.x,0),y=this.num(c.y,0),zoom=this.num(c.zoom,1);if(c.origin==="center"){x-=im.width*zoom/2;y-=im.height*zoom/2}else if(c.origin==="bottom"){x-=im.width*zoom/2;y-=im.height*zoom}const fade=this.num(c.fade,20),it={img:im,x,y,anchorX:c.origin==="center"||c.origin==="bottom"?im.width*zoom/2:0,anchorY:c.origin==="center"?im.height*zoom/2:c.origin==="bottom"?im.height*zoom:0,z:this.num(c.z??200+s.images.size,200+s.images.size),zoom,opacity:fade>0?0:255,visible:true};s.images.set(c.filename,it);if(fade>0)await this.frames(fade,p=>it.opacity=255*p,skip,token);it.opacity=255;}break;}
-      case"hide":{const a=c.filename?[s.images.get(c.filename)]:[...s.images.values()];const targets=a.filter(Boolean);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
-      case"hide_all":{const targets=[...s.images.values()];if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
+      case"hide":{const targets=(c.targetId?[s.images.get(c.targetId)]:[...s.images.entries()].filter(([k,v])=>!c.filename||k===c.filename||v.filename===c.filename).map(([k,v])=>v)).filter(Boolean).map(x=>({x,alpha:x.opacity??255}));targets.forEach(({x})=>x.hidden=true);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(({x,alpha})=>{x.visible=true;x.opacity=alpha*(1-p)}),skip,token);targets.forEach(({x})=>x.visible=false);break;}
+      case"hide_all":{await this.apply({...c,type:"hide",filename:"",targetId:""},skip,token);break;}
       case"end_scene":case"next_scene":if(!skip)this.stop();break;
       case"wait_confirm":if(!skip){this.onWaiting?.(true);await this.waitInput(token,this.inputSerial);this.onWaiting?.(false)}break;
       case"common_event":case"set_switch":case"set_variable":break;
@@ -494,10 +494,10 @@ export class ScenePreview{
           if(token!==this.playToken)return;
           await this.frames(15,p=>s.naming.alpha=1-p,false,token);
         }
-        if(c.store)s.vars.set(c.store,s.naming.text.trim());
+        s.playerName=s.naming.text.trim();if(c.store)s.vars.set(c.store,s.playerName);s.vars.set("player_name",s.playerName);
         s.naming=null;break;
       }
-      case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
+      case"name_input":s.playerName=c.default||"Solen";s.vars.set("player_name",s.playerName);if(c.store)s.vars.set(c.store,s.playerName);break;
       case"show_floating":{
         const im=await this.image(c.filename);if(im){const it={img:im,x:this.num(c.x,0),y:this.num(c.y,0),baseY:this.num(c.y,0),amplitude:this.num(c.amplitude,8),speed:this.num(c.speed,.05),zoom:this.num(c.zoom,1),opacity:c.fade>0?0:this.num(c.opacity,255),z:this.num(c.z,260),startFrame:s.frame,visible:true,varName:c.store||""};s.floating.push(it);if(c.store)s.refs.set(c.store,it);if(c.fade>0)await this.frames(c.fade,p=>it.opacity=this.num(c.opacity,255)*p,skip,token);it.opacity=this.num(c.opacity,255);}break;}
       case"hide_floating":s.floating=[];s.refs=new Map([...s.refs].filter(([,v])=>!v||!v.img));break;

@@ -44,7 +44,29 @@ module SceneDirector
       scenes.find { |s| s["id"].to_s == key || s["key"].to_s == key || s["name"].to_s == key }
     end
 
+    def play_once(id, map_id, event_id, self_switch = "A")
+      key = [map_id.to_i, event_id.to_i, self_switch.to_s.upcase]
+      raise "Scene Director: play_once requiere un evento de mapa válido." if key[0] <= 0 || key[1] <= 0 || !["A","B","C","D"].include?(key[2])
+      return false if $game_self_switches[key] || @playing
+      result = play(id)
+      if result
+        $game_self_switches[key] = true
+        $game_map.need_refresh = true if $game_map && $game_map.map_id == key[0]
+      end
+      result
+    end
+
     def play(id)
+      return false if @playing
+      @playing = true
+      begin
+      play_internal(id)
+      ensure
+        @playing = false
+      end
+    end
+
+    def play_internal(id)
       raise "Scene Engine no está cargado." unless defined?(SceneEngine::Player)
       scene = find(id)
       raise "Scene Director: escena '#{id}' no encontrada en #{DATA_FILE}." unless scene

@@ -15,16 +15,16 @@ export function duration(c){
 }
 export const overlapRoots=new Set(["image_clip","wait"]);
 const lanes={end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"dialog",hide_textbox:"dialog",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
-export const overlapLane=c=>!c?.sourceRuby&&!c?.store?lanes[c?.type]||null:null;
+export const overlapLane=c=>!c?.sourceRuby&&!c?.store?(c?.type==="image_clip"?"image:"+(c.id||"new"):lanes[c?.type]||null):null;
 export const frameValue=v=>Math.max(0,Math.round((Number(String(v).trim().replace(",","."))||0)*60));
 export function timelineGroups(scene){
  const commands=scene.commands||[],byId=new Map(commands.map(c=>[c.id,c])),children=new Map(),attached=new Set();
  for(const c of commands){const root=byId.get(c.overlapParent);if(root&&root!==c&&overlapRoots.has(root.type)&&!root.overlapParent&&overlapLane(c)){if(!children.has(root.id))children.set(root.id,[]);children.get(root.id).push(c);attached.add(c.id)}}
  let start=0;const groups=[];
- for(const root of commands){if(attached.has(root.id))continue;const length=Math.max(1,duration(root)),events=(children.get(root.id)||[]).map(c=>({c,offset:Math.max(0,Math.min(length,Math.round(Number(c.offsetFrames)||0))),lane:overlapLane(c),length:Math.max(1,duration(c))})).sort((a,b)=>a.offset-b.offset||Number(!!a.c.afterId)-Number(!!b.c.afterId));
- const free={},ends=new Map();for(const e of events){e.after=events.some(x=>x.c.id===e.c.afterId&&x!==e&& !x.c.afterId)?e.c.afterId:null;e.requested=e.offset;e.offset=Math.max(e.offset,free[e.lane]||0,ends.get(e.after)||0);free[e.lane]=e.offset+e.length;ends.set(e.c.id,e.offset+e.length)}
+ for(const root of commands){if(attached.has(root.id))continue;const length=Math.max(1,duration(root)),events=(children.get(root.id)||[]).map(c=>({c,offset:Math.max(0,Math.min(360000,Math.round(Number(c.offsetFrames)||0))),lane:overlapLane(c),length:Math.max(1,duration(c))})).sort((a,b)=>a.offset-b.offset||Number(!!a.c.afterId)-Number(!!b.c.afterId));
+ const free={},ends=new Map(),pending=events.slice(),ordered=[];while(pending.length){let i=pending.findIndex(e=>!e.c.afterId||!events.some(x=>x!==e&&x.c.id===e.c.afterId)||ends.has(e.c.afterId));if(i<0)i=0;const e=pending.splice(i,1)[0];e.after=ends.has(e.c.afterId)?e.c.afterId:null;e.requested=e.offset;e.offset=Math.max(e.offset,free[e.lane]||0,ends.get(e.after)||0);free[e.lane]=e.offset+e.length;ends.set(e.c.id,e.offset+e.length);ordered.push(e)}events.splice(0,events.length,...ordered);
  const total=Math.max(length,...events.map(e=>e.offset+e.length));groups.push({root,start,length,events,total});start+=total}
  return groups;
 }
 export function layoutTimeline(scene){const groups=timelineGroups(scene),entries=[];for(const g of groups){entries.push({c:g.root,start:g.start,length:g.length,group:g});for(const e of g.events)entries.push({c:e.c,start:g.start+e.offset,length:e.length,group:g,parallel:true,requested:g.start+e.requested})}return {groups,entries,total:groups.length?groups.at(-1).start+groups.at(-1).total:0}}
-export function anchorAt(scene,frame){return timelineGroups(scene).find(g=>overlapRoots.has(g.root.type)&&frame>=g.start&&frame<g.start+g.length)||null}
+export function anchorAt(scene,frame){return timelineGroups(scene).find(g=>overlapRoots.has(g.root.type)&&frame>=g.start&&frame<g.start+g.total)||null}
