@@ -8,11 +8,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 export class ScenePreview{
   constructor(ctx,host,getEngine){
     this.ctx=ctx;this.host=host;this.getEngine=getEngine;this.w=640;this.h=480;this.zoom=1;
-    this.canvas=document.createElement("canvas");this.canvas.className="sd-canvas";this.host.appendChild(this.canvas);this.g=this.canvas.getContext("2d");
+    this.canvas=document.createElement("canvas");this.canvas.className="sd-canvas";this.host.appendChild(this.canvas);this.g=this.canvas.getContext("2d");this.g.imageSmoothingEnabled=false;
     this.cache=new Map();this.urls=[];this.playToken=0;this.onCommand=null;this.onWaiting=null;this.autoAdvance=false;this.audio={bgm:null,bgs:null,ses:new Set()};this.textBoxImg=null;this.gameFontFace=null;this.gameFontFamily='"Power Green", "Arial Narrow", Arial, sans-serif';this.whiteCache=new WeakMap();this.portraitBoundsCache=new WeakMap();
     this.inputSerial=0;this.showTransitions=false;this.onionEnabled=false;this.onionMode="both";this.onionOpacity=.35;this.livePlayback=false;this.seeking=false;this.resetState();this.resize(640,480);this.last=performance.now();this.raf=requestAnimationFrame(()=>this.tick());this.refreshEngineAssets();
   }
-  resize(w,h){this.w=w;this.h=h;this.canvas.width=w;this.canvas.height=h;this.fit();}
+  resize(w,h){this.w=w;this.h=h;this.canvas.width=w;this.canvas.height=h;this.g.imageSmoothingEnabled=false;this.fit();}
   settings(){return this.getEngine?.()?.settings||{};}
   num(v,fallback=0){
     if(v&&typeof v==="object"&&v.kind==="ruby"){
@@ -31,8 +31,9 @@ export class ScenePreview{
       try{const url=await loadProjectBlobUrl(this.ctx,e.fontFile,mimeFor(e.fontFile));if(url){this.urls.push(url);const fam=`SceneDirectorGameFont_${Date.now()}`;const face=new FontFace(fam,`url(${url})`);await face.load();document.fonts.add(face);this.gameFontFace=face;this.gameFontFamily=`"${fam}", ${this.gameFontFamily}`;}}catch{}
     }
   }
-  fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
-  setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
+  fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);delete this.host.dataset.manualZoom;}
+  setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${Math.max(1,Math.round(this.w*this.zoom))}px`;this.canvas.style.height=`${Math.max(1,Math.round(this.h*this.zoom))}px`;this.canvas.style.imageRendering="pixelated";if(manual)this.host.dataset.manualZoom="1";this.onZoom?.(this.zoom);}
+  stepZoom(dir){const levels=[.25,.5,.75,1,1.5,2,3,4];const next=dir>0?levels.find(z=>z>this.zoom+1e-6):levels.slice().reverse().find(z=>z<this.zoom-1e-6);this.setZoom(next??(dir>0?4:.25));}
   resetState(){
     this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:0,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
@@ -54,7 +55,7 @@ export class ScenePreview{
   }
   whiteFrame(img,sx,sy,sw,sh){
     let byImg=this.whiteCache.get(img);if(!byImg){byImg=new Map();this.whiteCache.set(img,byImg)}const key=`${sx},${sy},${sw},${sh}`;if(byImg.has(key))return byImg.get(key);
-    const c=document.createElement("canvas");c.width=sw;c.height=sh;const x=c.getContext("2d");x.drawImage(img,sx,sy,sw,sh,0,0,sw,sh);x.globalCompositeOperation="source-in";x.fillStyle="#fff";x.fillRect(0,0,sw,sh);x.globalCompositeOperation="source-over";byImg.set(key,c);return c;
+    const c=document.createElement("canvas");c.width=sw;c.height=sh;const x=c.getContext("2d");x.imageSmoothingEnabled=false;x.drawImage(img,sx,sy,sw,sh,0,0,sw,sh);x.globalCompositeOperation="source-in";x.fillStyle="#fff";x.fillRect(0,0,sw,sh);x.globalCompositeOperation="source-over";byImg.set(key,c);return c;
   }
   visibleBox(img){
     if(!img)return null;
@@ -76,12 +77,12 @@ export class ScenePreview{
   }
   drawFrame(img,frame,fw,fh,x,y,{alpha=1,zoom=1,white=false,additive=false}={}){
     if(!img||alpha<=0)return;const g=this.g,sx=Math.max(0,frame|0)*fw,src=white?this.whiteFrame(img,sx,0,fw,fh):img;g.save();g.globalAlpha=clamp(alpha,0,1);if(additive)g.globalCompositeOperation="lighter";
-    if(white)g.drawImage(src,0,0,fw,fh,x,y,fw*zoom,fh*zoom);else g.drawImage(src,sx,0,fw,fh,x,y,fw*zoom,fh*zoom);g.restore();
+    const dw=Math.max(1,Math.round(fw*zoom)),dh=Math.max(1,Math.round(fh*zoom));x=Math.round(x);y=Math.round(y);if(white)g.drawImage(src,0,0,fw,fh,x,y,dw,dh);else g.drawImage(src,sx,0,fw,fh,x,y,dw,dh);g.restore();
   }
   draw(){
     const g=this.g,s=this.state,e=this.settings(),queue=[];let seq=0;const push=(z,fn)=>queue.push({z:Number(z)||0,seq:seq++,fn});
-    g.save();g.clearRect(0,0,this.w,this.h);g.fillStyle=this.showTransitions?"#000":"#393e48";g.fillRect(0,0,this.w,this.h);if(!this.showTransitions){g.fillStyle="#454b57";for(let y=0;y<this.h;y+=24)for(let x=0;x<this.w;x+=24)if((x/24+y/24)%2===0)g.fillRect(x,y,24,24)}
-    const drawImg=(it,yoff=0)=>{if(!it?.img||it.visible===false)return;g.save();g.globalAlpha=clamp((it.opacity??255)/255,0,1);const zoom=it.zoom??1;let x=it.x||0,y=(it.baseY??it.y??0)+yoff;g.translate(x,y);if(it.angle){const ax=it.anchorX||0,ay=it.anchorY||0;g.translate(ax,ay);g.rotate(it.angle*Math.PI/180);g.translate(-ax,-ay)}g.scale(it.mirror?-1:1,1);if(it.mirror)g.translate(-(it.sw||it.img.width)*zoom,0);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,(it.sw||it.img.width)*zoom,(it.sh||it.img.height)*zoom);g.restore();};
+    g.imageSmoothingEnabled=false;g.save();g.clearRect(0,0,this.w,this.h);g.fillStyle=this.showTransitions?"#000":"#393e48";g.fillRect(0,0,this.w,this.h);if(!this.showTransitions){g.fillStyle="#454b57";for(let y=0;y<this.h;y+=24)for(let x=0;x<this.w;x+=24)if((x/24+y/24)%2===0)g.fillRect(x,y,24,24)}
+    const drawImg=(it,yoff=0)=>{if(!it?.img||it.visible===false)return;g.save();g.globalAlpha=clamp((it.opacity??255)/255,0,1);const zoom=it.zoom??1;let x=it.x||0,y=(it.baseY??it.y??0)+yoff;if(!it.angle){x=Math.round(x);y=Math.round(y)}g.translate(x,y);if(it.angle){const ax=it.anchorX||0,ay=it.anchorY||0;g.translate(ax,ay);g.rotate(it.angle*Math.PI/180);g.translate(-ax,-ay)}g.scale(it.mirror?-1:1,1);const dw=(it.sw||it.img.width)*zoom,dh=(it.sh||it.img.height)*zoom,ww=it.angle?dw:Math.max(1,Math.round(dw)),hh=it.angle?dh:Math.max(1,Math.round(dh));if(it.mirror)g.translate(-ww,0);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,ww,hh);g.restore();};
 
     for(const it of s.images.values())push(it.z??200,()=>drawImg(it));
     for(const it of s.scrolling){
@@ -310,7 +311,7 @@ export class ScenePreview{
   pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:item.hidden?item.opacity:a.opacity,visible:!item.hidden})}
   async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};item.filename=c.filename;state.images.set(c.id,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
   selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.type==="image_clip"?c.id:c.filename):null}
-  drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=(it.sw||it.img.width)*it.zoom,h=(it.sh||it.img.height)*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}g.translate(it.x+ax,it.y+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,w,h);g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
+  drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=(it.sw||it.img.width)*it.zoom,h=(it.sh||it.img.height)*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}const dx=it.angle?it.x:Math.round(it.x),dy=it.angle?it.y:Math.round(it.y);g.translate(dx+ax,dy+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
   async runTo(scene,index,clipFrame=null){
    if(scene.commands.some(c=>c.overlapParent))return this.seekParallel(scene,index,clipFrame);
    this.stop();const token=++this.playToken;this.seeking=true;this.onionSnapshots=null;this.resetState();

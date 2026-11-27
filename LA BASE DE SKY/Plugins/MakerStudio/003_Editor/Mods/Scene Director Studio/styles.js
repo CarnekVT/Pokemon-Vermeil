@@ -102,4 +102,6 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-clip-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.sd-sheet-preview{max-width:100%;align-self:center;justify-self:center;image-rendering:pixelated;background:#252934;cursor:crosshair}.sd-clip-section details{display:grid;gap:5px}.sd-clip-section details summary{cursor:pointer}.sd-clip-section select[hidden]{display:none}
 
 .sd-track-dot[class*="image"]{background:#75a5cc}.sd-block.parallel.visual{border-style:solid}.sd-block.parallel.visual.active{outline:1px solid #e3d5ff}
+
+.sd-canvas{flex:0 0 auto;max-width:none;max-height:none;image-rendering:crisp-edges;image-rendering:pixelated}.sd-image-resource canvas,.sd-sheet-preview,.sd-gb-thumb img,.sd-gb-preview img,.sd-media-thumb img{image-rendering:crisp-edges;image-rendering:pixelated}
 `;

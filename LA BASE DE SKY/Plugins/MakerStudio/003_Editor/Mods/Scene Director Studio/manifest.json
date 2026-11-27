@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Pistas simultáneas de imagen, nombre del jugador, acciones tras diálogo y ejecución única por evento.",
+  "description": "Renderizado nítido de pixel art y spritesheets en el visor SDS; zoom de vista con escalas exactas.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
