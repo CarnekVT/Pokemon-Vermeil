@@ -7,7 +7,7 @@ export async function writeBinaryAbsolute(path,bytes){const a=bytes instanceof U
 export async function loadProjectBlobUrl(ctx,path,mime="application/octet-stream"){
   const root=gameRoot(ctx); if(!root)return null; try{const b=await readBinaryAbsolute(`${root}/${norm(path)}`);return URL.createObjectURL(new Blob([b],{type:mime}))}catch{return null}
 }
-export function mimeFor(path){const e=ext(path);if(e==="png")return"image/png";if(e==="bmp")return"image/bmp";if(e==="jpg"||e==="jpeg")return"image/jpeg";if(e==="webp")return"image/webp";if(e==="gif")return"image/gif";if(e==="ogg")return"audio/ogg";if(e==="wav")return"audio/wav";if(e==="mp3")return"audio/mpeg";if(e==="ttf")return"font/ttf";if(e==="otf")return"font/otf";if(e==="woff")return"font/woff";if(e==="woff2")return"font/woff2";return"application/octet-stream"}
+export function mimeFor(path){const e=ext(path);if(e==="png")return"image/png";if(e==="bmp")return"image/bmp";if(e==="jpg"||e==="jpeg")return"image/jpeg";if(e==="webp")return"image/webp";if(e==="gif")return"image/gif";if(e==="ogg")return"audio/ogg";if(e==="wav")return"audio/wav";if(e==="mp3")return"audio/mpeg";if(e==="m4a")return"audio/mp4";if(e==="flac")return"audio/flac";if(e==="mid"||e==="midi")return"audio/midi";if(e==="ttf")return"font/ttf";if(e==="otf")return"font/otf";if(e==="woff")return"font/woff";if(e==="woff2")return"font/woff2";return"application/octet-stream"}
 export async function listRecursive(ctx,base,{extensions=null,max=6000}={}){
   const out=[]; const seen=new Set();
   async function walk(dir){if(out.length>=max||seen.has(dir.toLowerCase()))return;seen.add(dir.toLowerCase());let entries=[];try{entries=await ctx.fs.listProjectDir(dir)}catch{return}
@@ -78,4 +78,25 @@ export async function detectResolution(ctx){
   let width=640,height=480; const files=await listRecursive(ctx,"Plugins",{extensions:["rb"],max:900});
   for(const p of files){let t="";try{t=String(await ctx.fs.readProjectFile(p)||"")}catch{continue};const mw=[...t.matchAll(/SCREEN_WIDTH\s*=\s*(\d+)/g)],mh=[...t.matchAll(/SCREEN_HEIGHT\s*=\s*(\d+)/g)];if(mw.length&&mh.length){width=Number(mw[mw.length-1][1]);height=Number(mh[mh.length-1][1]);}}
   return {width,height};
+}
+
+export const AUDIO_EXTENSIONS=["ogg","mp3","wav","m4a","mid","midi","flac"];
+export async function listAudioFiles(ctx,kind){
+ const base="Audio/"+kind,root=gameRoot(ctx),seen=new Set(),files=new Map(),pending=[base];
+ while(pending.length){
+  const folder=pending.shift(),key=folder.toLowerCase();if(seen.has(key))continue;seen.add(key);
+  let raw;try{raw=await ctx.fs.listProjectDir(folder)}catch{continue}
+  const entries=Array.isArray(raw)?raw:(raw?.entries||raw?.items||[]);
+  for(const e of entries){
+   const name=typeof e==="string"?e:(e.name||e.path||e.fileName||e.filename||"");if(!name)continue;
+   let path=norm(name);if(root&&path.toLowerCase().startsWith(root.toLowerCase()+"/"))path=path.slice(root.length+1);
+   const m=path.match(/(?:^|\/)Audio\//i);if(m)path=path.slice(m.index+(m[0].startsWith("/")?1:0));
+   if(!path.toLowerCase().startsWith(folder.toLowerCase()+"/"))path=norm(folder+"/"+path);
+   if(path===folder||path.split("/").some(v=>v===".."||v==="."))continue;
+   const dir=typeof e==="object"&&(e.isDirectory===true||e.is_dir===true||e.isDir===true||e.is_directory===true||["directory","dir"].includes(e.kind)||["directory","dir"].includes(e.type));
+   if(dir||(!ext(path)&&!(typeof e==="object"&&(e.isDirectory===false||e.is_dir===false||e.type==="file")))){pending.push(path);continue}
+   if(AUDIO_EXTENSIONS.includes(ext(path)))files.set(path.toLowerCase(),path);
+  }
+ }
+ return [...files.values()].sort((a,b)=>{const ar=a.slice(base.length+1),br=b.slice(base.length+1);return Number(ar.includes("/"))-Number(br.includes("/"))||ar.localeCompare(br,undefined,{numeric:true,sensitivity:"base"})});
 }

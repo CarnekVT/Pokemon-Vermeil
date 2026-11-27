@@ -525,3 +525,10 @@ export function fxParticle(c,i,elapsed){
  return {x,y,alpha,scale:Math.max(.01,Number(c.scale)||1),graphic:Math.floor((elapsed+i*3)/6)};
 }
 export function fxDuration(c){return c.type==="image_transform"?(c.transition==="cut"?1:Math.max(1,Math.round(Number(c.duration)||1))):c.type==="scene_fx"?Math.max(1,Math.round(Number(c.life)||0)):c.type==="scene_fx_stop"?Math.max(1,Math.round(Number(c.fade)||0)):1}
+
+export function auraGeometry(c,width=0,height=0){
+ const zoom=clamp(Number(c.auraScale??100)/100||0.01,0.01,20);
+ const fit=!!c.fitTarget&&width>0&&height>0;
+ const x=fit?Math.max(.05,width/110):1,y=fit?Math.max(.05,height/100):1;
+ return {...c,rangeX:(Number(c.rangeX)||0)*zoom*x,rangeY:(Number(c.rangeY)||0)*zoom*y,scale:(Number(c.scale)||1)*zoom*(fit?Math.sqrt(x*y):1)};
+}

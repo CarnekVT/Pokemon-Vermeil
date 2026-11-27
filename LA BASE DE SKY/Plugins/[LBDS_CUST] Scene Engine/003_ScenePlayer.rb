@@ -209,9 +209,12 @@ class SceneEngine::Player
     end
   end
 
-  def bgm(name); name.nil? || name.empty? ? pbBGMStop : pbBGMPlay(name); end
-  def bgs(name); name.nil? || name.empty? ? pbBGSStop : pbBGSPlay(name); end
-  def se(name); pbSEPlay(name) if name; end
+  def scene_audio_volume(volume)
+    volume.nil? ? nil : [[volume.to_i,0].max,100].min
+  end
+  def bgm(name, volume: nil); name.nil? || name.empty? ? pbBGMStop : pbBGMPlay(name, scene_audio_volume(volume)); end
+  def bgs(name, volume: nil); name.nil? || name.empty? ? pbBGSStop : pbBGSPlay(name, scene_audio_volume(volume)); end
+  def se(name, volume: nil); pbSEPlay(name, scene_audio_volume(volume)) if name && !name.empty?; end
   def stop_bgm(fade_secs = 0); fade_secs > 0 ? pbBGMFade(fade_secs) : pbBGMStop; end
   def stop_bgs; pbBGSStop; end
 
@@ -242,14 +245,16 @@ class SceneEngine::Player
     @sprites[:white].opacity = 255
   end
 
-  def from_white(dur = SceneEngine::Settings::FADE_DEFAULT, se: nil)
+  def from_white(dur = SceneEngine::Settings::FADE_DEFAULT, se: nil, se_volume: nil)
     dur = 1 if dur < 1
     @sprites[:white].opacity = 255
     se_vol = 0
+    # SDS plays a single sound at its configured level; preserve legacy intro behavior.
+    pbSEPlay(se, scene_audio_volume(se_volume)) if se && !se_volume.nil?
     dur.times do |i|
       progress = (i + 1).to_f / dur
       @sprites[:white].opacity = (255 * (1 - progress)).round
-      if se
+      if se && se_volume.nil?
         new_vol = (80 * progress).round
         Audio.se_play("Audio/SE/" + se, new_vol, 100) if new_vol != se_vol
         se_vol = new_vol
@@ -671,7 +676,7 @@ class SceneEngine::Player
   end
 
   def scene_fx(id, target, graphics, pattern: "rise", color: "#DD445B", blend: "normal", count: 12, cycle: 30,
-               range_x: 55, range_y: 100, scale: 1, sway: 1, opacity: 1, outline: 0, outline_color: "#DD445B",
+               range_x: 55, range_y: 100, scale: 1, aura_scale: 100, fit_target: false, sway: 1, opacity: 1, outline: 0, outline_color: "#DD445B",
                x: 320, y: 240, z: 450, life: 0)
     scene_fx_stop(id, fade: 0)
     paths = Array(graphics).reject { |path| path.to_s.empty? }
@@ -698,7 +703,7 @@ class SceneEngine::Player
     end
     @scene_fx[id] = {sprites: sprites, bitmaps: bitmaps, target: target, start: @scene_logic_frame || 0,
       pattern: pattern, count: count, cycle: [cycle.to_f,1].max, rx: range_x.to_f, ry: range_y.to_f,
-      scale: [scale.to_f,0.01].max, sway: sway.to_f, opacity: [[opacity.to_f,0].max,1].min,
+      scale: [scale.to_f,0.01].max, aura_scale: [[aura_scale.to_f/100.0,0.01].max,20].min, fit_target: fit_target == true, sway: sway.to_f, opacity: [[opacity.to_f,0].max,1].min,
       x: x.to_f,y: y.to_f,life: life.to_i,alpha: 1.0}
     update_scene_fx
     if life.to_i > 0
@@ -722,16 +727,23 @@ class SceneEngine::Player
       target = @image_sprites[fx[:target]]
       visible = fx[:target].to_s.empty? || (target && !target.disposed? && target.visible)
       cx,cy = fx[:x],fx[:y]
+      x_factor,y_factor = 1.0,1.0
       if target && !target.disposed?
         cx = target.x + (target.src_rect.width/2.0-target.ox)*target.zoom_x
         cy = target.y + (target.src_rect.height/2.0-target.oy)*target.zoom_y
+        if fx[:fit_target]
+          x_factor = [0.05,target.src_rect.width*target.zoom_x.abs/110.0].max
+          y_factor = [0.05,target.src_rect.height*target.zoom_y.abs/100.0].max
+        end
       end
+      area_scale = fx[:aura_scale] || 1.0
+      particle_scale = fx[:scale]*area_scale*Math.sqrt(x_factor*y_factor)
       fx[:sprites].each_with_index do |sprite,i|
         sprite.visible = !!visible
         next unless visible
         phase = ((elapsed+i*fx[:cycle]/fx[:count])%fx[:cycle])/fx[:cycle]
         angle = i*2.399963229728653+phase*Math::PI*2
-        rx,ry = fx[:rx],fx[:ry]
+        rx,ry = fx[:rx]*area_scale*x_factor,fx[:ry]*area_scale*y_factor
         dx,dy = case fx[:pattern]
         when "orbit" then [Math.cos(angle)*rx,Math.sin(angle)*ry*0.45]
         when "vortex" then [Math.cos(angle)*rx*(1-phase),ry*0.5-phase*ry]
@@ -748,7 +760,7 @@ class SceneEngine::Player
         end
         sprite.ox,sprite.oy = bitmap.width/2,bitmap.height/2
         sprite.x,sprite.y = (cx+dx).round,(cy+dy).round
-        sprite.zoom_x = sprite.zoom_y = fx[:scale]
+        sprite.zoom_x = sprite.zoom_y = particle_scale
         sprite.opacity = (255*Math.sin(phase*Math::PI)*fx[:opacity]*fx[:alpha]).round
       end
     end

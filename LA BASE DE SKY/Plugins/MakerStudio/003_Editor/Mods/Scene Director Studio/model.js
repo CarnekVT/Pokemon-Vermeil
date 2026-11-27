@@ -28,18 +28,18 @@ export function defaultsFor(type){
   switch(type){
     case "section": return {label:"Nueva sección"};
     case "image_transform": return {targetId:"",filename:"",duration:36,transition:"flash",sheetColumns:1,sheetRows:1,sheetFps:8};
-    case "scene_fx": {const a=AURA_PROFILES[0];return {targetId:"",profile:a.id,pattern:a.pattern,color:a.color,blend:a.blend,count:a.count,cycle:a.cycle,rangeX:a.rangeX,rangeY:a.rangeY,scale:a.scale,sway:a.sway,opacity:a.opacity,outline:a.outline,outlineColor:a.outlineColor,graphics:a.graphics.slice(),filename:"",x:320,y:240,z:450,life:0};}
+    case "scene_fx": {const a=AURA_PROFILES[0];return {targetId:"",profile:a.id,pattern:a.pattern,color:a.color,blend:a.blend,count:a.count,cycle:a.cycle,rangeX:a.rangeX,rangeY:a.rangeY,scale:a.scale,auraScale:100,fitTarget:true,sway:a.sway,opacity:a.opacity,outline:a.outline,outlineColor:a.outlineColor,graphics:a.graphics.slice(),filename:"",x:320,y:240,z:450,life:0};}
     case "scene_fx_stop": return {targetId:"",fade:18};
     case "scene_backdrop": return {color:"#000000",opacity:255,z:190};
     case "scene_player_form": return {playerId:1};
     case "parallel_anchor": return {};
     case "wait": return {frames:20};
-    case "bgm": case "bgs": case "se": return {name:""};
+    case "bgm": case "bgs": case "se": return {name:"",volume:100};
     case "stop_bgm": return {fadeSeconds:0};
     case "fade_bgm": return {fadeSeconds:1.5};
     case "stop_bgs": return {};
     case "fade_from_black": case "fade_to_black": case "to_white": return {duration:20};
-    case "from_white": return {duration:20,se:""};
+    case "from_white": return {duration:20,se:"",volume:80};
     case "image_clip": return {filename:"",x:320,y:240,origin:"center",zoom:1,angle:0,opacity:255,z:null,duration:120,enter:"fade",inFrames:24,exit:"none",outFrames:24,keep:true,motion:"none",distance:64,easing:"smooth",endX:320,endY:240,endZoom:1,endAngle:0,endOpacity:255,keys:[],resourceType:"static",columns:1,rows:1,sheetFps:8,sheetMode:"loop",sheetStart:1,sheetEnd:0,sheetFrame:1,sheetPersistent:false};
     case "show": return {filename:"",x:0,y:0,fade:20,origin:"top_left",zoom:1,z:null,store:""};
     case "hide": return {filename:"",fade:0,targetId:""};
@@ -109,17 +109,17 @@ function commandBody(c){
   switch(c.type){
     case "section": return `# ══════════ ${String(c.label||"SECCIÓN").toUpperCase()} ══════════`;
     case "image_transform": return `scene_transform ${q(c.targetId)}, ${q(c.filename)}, duration: ${n(c.duration)}, transition: ${q(c.transition)}, columns: ${n(c.sheetColumns)}, rows: ${n(c.sheetRows)}, fps: ${n(c.sheetFps)}`;
-    case "scene_fx": return `scene_fx ${q(c.id)}, ${q(c.targetId)}, ${rubyLiteral(c.filename?[c.filename]:c.graphics||[])}, ${["pattern","color","blend","count","cycle","rangeX","rangeY","scale","sway","opacity","outline","outlineColor","x","y","z","life"].map(k=>k.replace(/[A-Z]/g,m=>"_"+m.toLowerCase())+": "+rubyLiteral(c[k])).join(", ")}`;
+    case "scene_fx": return `scene_fx ${q(c.id)}, ${q(c.targetId)}, ${rubyLiteral(c.filename?[c.filename]:c.graphics||[])}, ${["pattern","color","blend","count","cycle","rangeX","rangeY","scale","auraScale","fitTarget","sway","opacity","outline","outlineColor","x","y","z","life"].map(k=>k.replace(/[A-Z]/g,m=>"_"+m.toLowerCase())+": "+rubyLiteral(k==="auraScale"?(c[k]??100):k==="fitTarget"?(c[k]??false):c[k])).join(", ")}`;
     case "scene_fx_stop": return `scene_fx_stop ${q(c.targetId||"")}, fade: ${n(c.fade)}`;
     case "scene_backdrop": return `scene_backdrop ${q(c.color)}, ${n(c.opacity)}, ${n(c.z)}`;
     case "scene_player_form": return `pbChangePlayer(${n(c.playerId)})`;
     case "parallel_anchor": return `wait ${Math.max(0,Number(c.frames)||0)}`;
     case "wait": return `wait ${n(c.frames)}`;
-    case "bgm": return `bgm ${q(c.name)}`; case "bgs": return `bgs ${q(c.name)}`; case "se": return `se ${q(c.name)}`;
+    case "bgm": case "bgs": case "se": return `${c.type} ${q(c.name)}, volume: ${Math.max(0,Math.min(100,Math.round(Number(c.volume??100)||0)))}`;
     case "fade_bgm": return `scene_fade_bgm ${n(c.fadeSeconds)}`;
     case "stop_bgm": return `stop_bgm ${n(c.fadeSeconds)}`; case "stop_bgs": return `stop_bgs`;
     case "fade_from_black": case "fade_to_black": case "to_white": return `${c.type} ${n(c.duration)}`;
-    case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}`:""}`;
+    case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}, se_volume: ${Math.max(0,Math.min(100,Math.round(Number(c.volume??80)||0)))}`:""}`;
     case "show_textbox": case "hide_textbox": return `${c.type} ${n(c.duration)}`;
     case "image_clip": {const keys=["origin","zoom","angle","opacity","z","duration","enter","inFrames","exit","outFrames","keep","motion","distance","easing","endX","endY","endZoom","endAngle","endOpacity","keys","resourceType","columns","rows","sheetFps","sheetMode","sheetStart","sheetEnd","sheetFrame","sheetPersistent"];return `image_clip ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${kw(c,keys)}, instance_id: ${q(c.id)}`;}
     case "show": { const opts=[]; if(c.fade!==undefined)opts.push(`fade: ${n(c.fade)}`); if(c.origin)opts.push(`origin: ${sym(c.origin)}`); if(c.zoom!==undefined)opts.push(`zoom: ${n(c.zoom)}`); if(c.z!==null&&c.z!==undefined&&c.z!=="")opts.push(`z: ${n(c.z)}`); return `${pre}show ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}${opts.length?`, ${opts.join(", ")}`:""}`; }

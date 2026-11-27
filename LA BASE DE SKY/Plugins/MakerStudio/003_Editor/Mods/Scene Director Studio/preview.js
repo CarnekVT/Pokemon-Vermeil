@@ -1,4 +1,4 @@
-import {fxParticle,FX_LIMIT} from "./scene-fx.js";
+import {fxParticle,FX_LIMIT,auraGeometry} from "./scene-fx.js";
 import { loadProjectBlobUrl, mimeFor } from "./project.js";
 import { sample, clipLength, spans, sheetRect } from "./animation.js";
 import {timelineGroups} from "./timing.js";
@@ -36,7 +36,7 @@ export class ScenePreview{
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${Math.max(1,Math.round(this.w*this.zoom))}px`;this.canvas.style.height=`${Math.max(1,Math.round(this.h*this.zoom))}px`;this.canvas.style.imageRendering="pixelated";if(manual)this.host.dataset.manualZoom="1";this.onZoom?.(this.zoom);}
   stepZoom(dir){const levels=[.25,.5,.75,1,1.5,2,3,4];const next=dir>0?levels.find(z=>z>this.zoom+1e-6):levels.slice().reverse().find(z=>z<this.zoom-1e-6);this.setZoom(next??(dir>0?4:.25));}
   resetState(){
-    this.state={frame:0,audioNames:{BGM:null,BGS:null},images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],sceneFX:new Map(),backdrop:null,endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,nameSkin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,audioNames:{BGM:null,BGS:null},audioVolumes:{BGM:100,BGS:100},images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],sceneFX:new Map(),backdrop:null,endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,nameSkin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -104,7 +104,7 @@ export class ScenePreview{
       if(f.glow&&f.glowVisible!==false){let ga=f.active?1:0;if(m.landed&&f.active)ga*=clamp(1-Math.max(0,m.elapsed-m.travel)/30,0,1);push(401,()=>this.drawFrame(f.img,m.frame,f.fw,f.fh,f.x,m.sy,{alpha:ga,white:true,additive:true}))}
     }
 
-    for(const [id,fx] of s.sceneFX){const c=fx.c,elapsed=Math.max(0,s.frame-fx.start);if(c.life>0&&elapsed>=c.life){s.sceneFX.delete(id);continue}const target=s.images.get(c.targetId);if(c.targetId&&(!target||!target.visible))continue;const cx=target?target.x+(target.sw||target.img.width)*target.zoom/2:Number(c.x),cy=target?target.y+(target.sh||target.img.height)*target.zoom/2:Number(c.y);push(c.z??450,()=>{for(let i=0;i<fx.count;i++){const p=fxParticle(c,i,elapsed),im=fx.images[((p.graphic%fx.images.length)+fx.images.length)%fx.images.length];if(!im)continue;g.save();g.globalAlpha=p.alpha*fx.alpha;if(c.blend==="additive")g.globalCompositeOperation="lighter";const w=im.width*p.scale,h=im.height*p.scale;g.drawImage(this.fxTint(im,c.color),Math.round(cx+p.x-w/2),Math.round(cy+p.y-h/2),Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));g.restore()}})}
+    for(const [id,fx] of s.sceneFX){const c=fx.c,elapsed=Math.max(0,s.frame-fx.start);if(c.life>0&&elapsed>=c.life){s.sceneFX.delete(id);continue}const target=s.images.get(c.targetId);if(c.targetId&&(!target||!target.visible))continue;const tw=target?(target.sw||target.img.width)*target.zoom:0,th=target?(target.sh||target.img.height)*target.zoom:0,cx=target?target.x+tw/2:Number(c.x),cy=target?target.y+th/2:Number(c.y),geometry=auraGeometry(c,tw,th);push(c.z??450,()=>{for(let i=0;i<fx.count;i++){const p=fxParticle(geometry,i,elapsed),im=fx.images[((p.graphic%fx.images.length)+fx.images.length)%fx.images.length];if(!im)continue;g.save();g.globalAlpha=p.alpha*fx.alpha;if(c.blend==="additive")g.globalCompositeOperation="lighter";const w=im.width*p.scale,h=im.height*p.scale;g.drawImage(this.fxTint(im,c.color),Math.round(cx+p.x-w/2),Math.round(cy+p.y-h/2),Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));g.restore()}})}
     for(const p of s.aura){push(450,()=>{if(!p.img)return;const elapsed=Math.max(0,s.frame-(p.startFrame||0)),phase=((p.phase0||0)+elapsed*(p.speed||1))%(p.duration||120),pr=phase/(p.duration||120),a=Math.sin(pr*Math.PI),f=s.float,m=f?this.floatMetrics(f):null,cx=f?f.x+f.fw/2:0,cy=f?(m.sy+f.fh/2):0;g.save();g.globalAlpha=clamp(a,0,1);g.drawImage(p.img,cx+p.xoff-p.fw/2,cy+p.rangeY-pr*(p.rangeY*2+p.fh),p.fw,p.fh);g.restore()})}
 
     if(s.textbox>0.001){
@@ -319,7 +319,7 @@ export class ScenePreview{
         if(elapsed>=job.length){const d=done.get(job.c.id);d.frame=base+job.offset+job.length;d.resolve()}
       }
       this.state.frame=base+at;
-      for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name)}
+      for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name,this.state.audioVolumes[kind])}
     }
     const live=async events=>{for(const job of events){
       const d=done.get(job.c.id);if(d.frame!==null)continue;
@@ -349,7 +349,7 @@ export class ScenePreview{
         if(token!==this.playToken)return;
         if(g.start+g.total<=requested){this.state.frame=g.start;await this.seekGroup(g,g.total,token);continue}
         const at=Math.max(0,requested-g.start);
-        if(!this.livePlayback){this.state.frame=g.start+at;if(!at)for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name)}}
+        if(!this.livePlayback){this.state.frame=g.start+at;if(!at)for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name,this.state.audioVolumes[kind])}}
         this.onCommand?.(scene.commands.indexOf(g.root),g.root);
         if(at>0||g.events.length)await this.playGroup(g,token,at);
         else{this.seeking=false;this.livePlayback=true;await this.apply(g.root,false,token)}
@@ -405,10 +405,10 @@ export class ScenePreview{
  }
   async frames(n,fn,skip,token){n=Math.max(0,Math.round(Number(n)||0));if(skip){this.state.frame+=n;fn?.(1);return}if(!n){fn?.(1);return}const start=this.state.frame;while(this.state.frame-start<n){if(token!==this.playToken)return;fn?.(Math.min(1,(this.state.frame-start)/n));await new Promise(resolve=>requestAnimationFrame(resolve));}fn?.(1);}
 
-  async playAudio(kind,name){
+  async playAudio(kind,name,volume=100){
     if(!name)return;let p=`Audio/${kind}/${name}`;if(!/\.[a-z0-9]+$/i.test(p))p+=".ogg";let url=await loadProjectBlobUrl(this.ctx,p,mimeFor(p));
     if(!url){for(const ex of [".ogg",".mp3",".wav"]){url=await loadProjectBlobUrl(this.ctx,p.replace(/\.[^.]+$/,ex),mimeFor(ex));if(url)break}}
-    if(!url)return;const a=new Audio(url);if(kind!=="SE")a.loop=true;try{await a.play()}catch{}
+    if(!url)return;const a=new Audio(url);a.volume=Math.max(0,Math.min(1,Number(volume??100)/100));if(kind!=="SE")a.loop=true;try{await a.play()}catch{}
     if(kind==="BGM"){this.audio.bgm?.pause();this.audio.bgm=a}else if(kind==="BGS"){this.audio.bgs?.pause();this.audio.bgs=a}else{this.audio.ses.add(a);a.onended=()=>this.audio.ses.delete(a)}
   }
   stopAudio(){for(const a of [this.audio.bgm,this.audio.bgs])try{a?.pause()}catch{};this.audio.bgm=this.audio.bgs=null;for(const a of this.audio.ses)try{a.pause()}catch{};this.audio.ses.clear();}
@@ -514,15 +514,15 @@ export class ScenePreview{
       case"section":break;
       case"script":await this.applyScriptPreview(c.code,skip,token);break;
       case"wait":await this.frames(c.frames,null,skip,token);break;
-      case"bgm":s.audioNames.BGM=c.name||null;if(!skip)await this.playAudio("BGM",c.name);break;
-      case"bgs":s.audioNames.BGS=c.name||null;if(!skip)await this.playAudio("BGS",c.name);break;
-      case"se":if(!skip)await this.playAudio("SE",c.name);break;
+      case"bgm":s.audioNames.BGM=c.name||null;s.audioVolumes.BGM=c.volume??100;if(!skip)await this.playAudio("BGM",c.name,c.volume??100);break;
+      case"bgs":s.audioNames.BGS=c.name||null;s.audioVolumes.BGS=c.volume??100;if(!skip)await this.playAudio("BGS",c.name,c.volume??100);break;
+      case"se":if(!skip)await this.playAudio("SE",c.name,c.volume??100);break;
       case"fade_bgm":case"stop_bgm":{s.audioNames.BGM=null;const audio=this.audio.bgm,frames=Math.max(0,Math.round((Number(c.fadeSeconds)||0)*60));if(audio&&!skip&&frames){const volume=audio.volume;await this.frames(frames,p=>audio.volume=Math.max(0,volume*(1-p)),false,token)}else if(c.type==="fade_bgm"&&frames)await this.frames(frames,null,skip,token);if(audio&&this.audio.bgm===audio){audio.pause();this.audio.bgm=null}break;}
       case"stop_bgs":s.audioNames.BGS=null;this.audio.bgs?.pause();this.audio.bgs=null;break;
       case"fade_from_black":s.black=255;await this.frames(c.duration,p=>s.black=255*(1-p),skip,token);break;
       case"fade_to_black":s.black=0;await this.frames(c.duration,p=>s.black=255*p,skip,token);break;
       case"to_white":s.white=0;await this.frames(c.duration,p=>s.white=255*p,skip,token);break;
-      case"from_white":s.white=255;if(c.se&&!skip)await this.playAudio("SE",c.se);await this.frames(c.duration,p=>s.white=255*(1-p),skip,token);break;
+      case"from_white":s.white=255;if(c.se&&!skip)await this.playAudio("SE",c.se,c.volume??80);await this.frames(c.duration,p=>s.white=255*(1-p),skip,token);break;
       case"image_clip":{await this.applyImageClip(c,skip,token);break;}
       case"show":{
         const im=await this.image(c.filename);if(im){let x=this.num(c.x,0),y=this.num(c.y,0),zoom=this.num(c.zoom,1);if(c.origin==="center"){x-=im.width*zoom/2;y-=im.height*zoom/2}else if(c.origin==="bottom"){x-=im.width*zoom/2;y-=im.height*zoom}const fade=this.num(c.fade,20),it={img:im,x,y,anchorX:c.origin==="center"||c.origin==="bottom"?im.width*zoom/2:0,anchorY:c.origin==="center"?im.height*zoom/2:c.origin==="bottom"?im.height*zoom:0,z:this.num(c.z??200+s.images.size,200+s.images.size),zoom,opacity:fade>0?0:255,visible:true};s.images.set(c.filename,it);if(fade>0)await this.frames(fade,p=>it.opacity=255*p,skip,token);it.opacity=255;}break;}
