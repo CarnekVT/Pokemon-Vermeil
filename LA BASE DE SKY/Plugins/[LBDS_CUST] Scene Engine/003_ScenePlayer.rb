@@ -106,7 +106,7 @@ class SceneEngine::Player
       Fiber.yield
       return
     end
-    @sprites[:text_box].update if @sprites[:text_box].is_a?(SpriteWindow_Base)
+    [:text_box, :name_box].each { |key| @sprites[key].update if @sprites[key].is_a?(SpriteWindow_Base) }
     unless @scene_finishing
       update_float
       update_aura_particles
@@ -210,6 +210,12 @@ class SceneEngine::Player
   def stop_bgm(fade_secs = 0); fade_secs > 0 ? pbBGMFade(fade_secs) : pbBGMStop; end
   def stop_bgs; pbBGSStop; end
 
+  def scene_fade_bgm(seconds = 1.5)
+    seconds = [[seconds.to_f,0].max,600].min
+    stop_bgm(seconds)
+    wait((seconds*60).round) if seconds > 0
+  end
+
   def fade_from_black(dur = SceneEngine::Settings::FADE_DEFAULT)
     dur = 1 if dur < 1
     @sprites[:black].opacity = 255
@@ -249,29 +255,30 @@ class SceneEngine::Player
   end
 
   # --- TRANSICIÓN FLUIDA PARA LA TEXTBOX ---
-  def show_textbox(fade_frames = 10)
-    return if @sprites[:text_box].opacity >= 255
-    fade_frames = 1 if fade_frames < 1
-    fade_frames.times do |i|
-      alpha = 255 * (i + 1) / fade_frames
-      @sprites[:text_box].opacity = alpha
-      @sprites[:text].opacity = alpha
-      @sprites[:speaker_text].opacity = alpha
-      update
+  def scene_textbox_alpha(alpha)
+    [:text_box, :text, :speaker_text, :name_box].each do |key|
+      sprite = @sprites[key]
+      next if !sprite || sprite.disposed?
+      sprite.opacity = alpha
     end
+    @sprites[:indicator].opacity = 0 if alpha <= 0
+  end
+
+  def show_textbox(fade_frames = 10)
+    from = @sprites[:text_box].opacity
+    return if from >= 255
+    frames = [fade_frames.to_i, 0].max
+    frames.times { |i| scene_textbox_alpha((from + (255-from)*(i+1).to_f/frames).round); update }
+    scene_textbox_alpha(255)
   end
 
   def hide_textbox(fade_frames = 10)
-    return if @sprites[:text_box].opacity <= 0
-    fade_frames = 1 if fade_frames < 1
+    from = @sprites[:text_box].opacity
+    return if from <= 0
     @sprites[:indicator].opacity = 0
-    fade_frames.times do |i|
-      alpha = 255 - (255 * (i + 1) / fade_frames)
-      @sprites[:text_box].opacity = alpha
-      @sprites[:text].opacity = alpha
-      @sprites[:speaker_text].opacity = alpha
-      update
-    end
+    frames = [fade_frames.to_i, 0].max
+    frames.times { |i| scene_textbox_alpha((from*(1-(i+1).to_f/frames)).round); update }
+    scene_textbox_alpha(0)
   end
 
   def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left, zoom: 1, z: nil, instance_id: nil)
@@ -631,21 +638,95 @@ class SceneEngine::Player
     old.dispose if old && !old.disposed?
     @sprites[:text_box] = next_box
     @scene_textbox_skin = skin
+    scene_layout_textbox
   end
 
-  def text_inline(text, speaker: nil, speed: :normal, format_args: nil, skin: nil)
+  def text_inline(text, speaker: nil, speed: :normal, format_args: nil, skin: nil, name_skin: nil, speaker_color: nil, speaker_shadow: nil)
+    @scene_speaker_color = speaker_color
+    @scene_speaker_shadow = speaker_shadow
+    @scene_name_skin = name_skin
     set_scene_textbox(skin) unless skin.nil?
+    scene_layout_textbox
     text = apply_format(text, format_args) if format_args
     show_page_text(text, speaker, speed)
   end
 
   # --- ASIGNACIÓN DE SPEAKER INDEPENDIENTE ---
+  def scene_skin_edges(window)
+    return [16,16,16,16] unless window.skinformat == 1
+    rect = window.skinrect
+    bitmap = window.windowskin
+    [rect.x, rect.y, bitmap.width-rect.x-rect.width, bitmap.height-rect.y-rect.height].map { |v| [v,0].max }
+  end
+
+  def scene_layout_textbox
+    box = @sprites[:text_box]
+    return unless box
+    settings = SceneEngine::Settings
+    if box.is_a?(SpriteWindow_Base)
+      l,t,r,b = scene_skin_edges(box)
+      x = l + 8
+      separate = @scene_name_skin && !@scene_name_skin.empty?
+      top = t + 6 + (separate ? 0 : 36)
+      width = [1, Graphics.width-l-r-16].max
+      height = [1, settings::TEXT_BOX_H-top-b-6].max
+      y = settings::TEXT_BOX_Y+top
+      @sprites[:indicator].x = Graphics.width-r-22
+      @sprites[:indicator].y = settings::TEXT_BOX_Y+settings::TEXT_BOX_H-b-12
+    else
+      x = settings::TEXT_PAD_X
+      y = settings::TEXT_BOX_Y+settings::TEXT_PAD_Y_TOP
+      width = Graphics.width-x*2
+      height = settings::TEXT_BOX_H-settings::TEXT_PAD_Y_TOP-settings::TEXT_PAD_Y_BOT
+      @sprites[:indicator].x = Graphics.width-x-14
+      @sprites[:indicator].y = settings::TEXT_BOX_Y+settings::TEXT_BOX_H-24
+    end
+    text = @sprites[:text]
+    if text.bitmap.width != width || text.bitmap.height != height
+      text.bitmap.dispose
+      text.bitmap = Bitmap.new(width,height)
+      pbSetSystemFont(text.bitmap)
+    end
+    text.x, text.y = x, y
+  end
+
+  def scene_hex_color(value, fallback)
+    return fallback unless value.is_a?(String) && value.match?(/\A#[0-9a-f]{6}\z/i)
+    Color.new(value[1,2].to_i(16),value[3,2].to_i(16),value[5,2].to_i(16))
+  end
+
   def set_speaker(speaker)
-    bmp = @sprites[:speaker_text].bitmap
+    old = @sprites.delete(:name_box)
+    old.dispose if old && !old.disposed?
+    sp = @sprites[:speaker_text]
+    bmp = sp.bitmap
     bmp.clear
-    return unless speaker
+    return if speaker.nil? || speaker.empty?
+    settings = SceneEngine::Settings
     scolor, sshadow = speaker_colors(speaker)
-    # Dibujado con margen Y=4 para que las letras no se rebanen por arriba
+    scolor = scene_hex_color(@scene_speaker_color,scolor)
+    sshadow = scene_hex_color(@scene_speaker_shadow,sshadow)
+    sp.x, sp.y = settings::TEXT_PAD_X, settings::TEXT_BOX_Y+8
+    box = @sprites[:text_box]
+    if @scene_name_skin && !@scene_name_skin.empty? && pbResolveBitmap(@scene_name_skin)
+      name_box = SpriteWindow_Base.new(0,0,160,64)
+      name_box.viewport = @viewport
+      name_box.setSkin(@scene_name_skin)
+      l,t,r,b = scene_skin_edges(name_box)
+      name_box.width = [[bmp.text_size(speaker).width+l+r+20, l+r+40].max,Graphics.width-16].min
+      name_box.height = t+b+38
+      name_box.x = 8
+      name_box.y = [0,settings::TEXT_BOX_Y-name_box.height].max
+      name_box.z = settings::LAYER_TEXTBOX+1
+      name_box.back_opacity = 255
+      name_box.opacity = box.opacity
+      @sprites[:name_box] = name_box
+      sp.x = name_box.x+l+8
+      sp.y = name_box.y+t+1
+    elsif box.is_a?(SpriteWindow_Base)
+      l,t,_,_ = scene_skin_edges(box)
+      sp.x, sp.y = l+8, settings::TEXT_BOX_Y+t+2
+    end
     pbDrawShadowText(bmp, 0, 4, bmp.width, 32, speaker, scolor, sshadow, 0)
   end
 
@@ -659,8 +740,8 @@ class SceneEngine::Player
     text = scene_resolve_text(text)
     speaker = scene_resolve_text(speaker) unless speaker.nil?
     cpf = speed_to_chars(speed).to_f
-    max_lines = SceneEngine::Settings::TEXT_MAX_LINES
     bmp = @sprites[:text].bitmap
+    max_lines = [[bmp.height / SceneEngine::Settings::TEXT_LINE_H,1].max,SceneEngine::Settings::TEXT_MAX_LINES].min
 
     set_speaker(speaker)
     bmp.clear 
@@ -711,7 +792,7 @@ class SceneEngine::Player
         end
 
         if revealed >= page_len
-          @sprites[:indicator].opacity = (@scene_logic_frame % 40 < 20) ? 255 : 0
+          @sprites[:indicator].opacity = (@sprites[:text_box].opacity > 0 && @scene_logic_frame % 40 < 20) ? @sprites[:text_box].opacity : 0
         else
           @sprites[:indicator].opacity = 0
         end

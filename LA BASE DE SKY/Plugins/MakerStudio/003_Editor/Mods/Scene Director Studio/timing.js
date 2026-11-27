@@ -1,6 +1,7 @@
 import {clipLength} from "./animation.js";
 export function duration(c){
-  if(c.type==="parallel_anchor")return 0;
+  if(c.type==="parallel_anchor")return Math.max(0,Number(c.frames)||0);
+  if(c.type==="fade_bgm")return Math.max(1,Math.round((Number(c.fadeSeconds)||0)*60));
   if(c.type==="end_scene")return Math.max(1,(Number(c.holdFrames)||0)+(c.endStyle==="fade"?(Number(c.fadeFrames)||0):0)+(Number(c.breathFrames)||0));
   if(c.type==="image_clip")return clipLength(c);
   if(c.type==="wait")return Math.max(0,Number(c.frames)||0);
@@ -16,7 +17,7 @@ export function duration(c){
   return 6;
 }
 export const overlapRoots=new Set(["image_clip","wait","parallel_anchor"]);
-const lanes={end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"dialog",hide_textbox:"dialog",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
+const lanes={end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"textbox",hide_textbox:"textbox",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",fade_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
 export const overlapLane=c=>!c?.sourceRuby&&!c?.store?(c?.type==="image_clip"?"image:"+(c.id||"new"):lanes[c?.type]||null):null;
 export const frameValue=v=>Math.max(0,Math.round((Number(String(v).trim().replace(",","."))||0)*60));
 export function timelineGroups(scene){
@@ -57,5 +58,28 @@ export function linkAfterDialogue(scene,action,dialogue,makeAnchor){
    commands.splice(commands.indexOf(root)+1,0,action);
  }
  action.afterId=dialogue.id;
+ return true;
+}
+
+export function moveTimed(scene,action,frame,makeAnchor){
+ const commands=scene.commands,layout=layoutTimeline(scene),entry=layout.entries.find(e=>e.c.id===action.id);
+ if(!entry||!overlapLane(action)||action.afterId)return false;
+ frame=Math.max(0,Math.min(360000,Math.round(frame)));
+ if(frame===entry.start)return true;
+ const target=layout.groups.find(g=>overlapRoots.has(g.root.type)&&frame>=g.start&&frame<g.start+g.total)
+   || (frame>=layout.total&&overlapRoots.has(layout.groups.at(-1)?.root.type)?layout.groups.at(-1):null);
+ if(!target)return false;
+ const source=entry.group;
+ // Explicit confirmation links cannot span scheduler groups.
+ if(target!==source&&(commands.some(c=>c.afterId===action.id)||action.afterId))return false;
+ let root=target.root;
+ if(source.root===action){
+   const anchor=makeAnchor();anchor.frames=source.total;
+   commands.splice(commands.indexOf(action),0,anchor);
+   for(const child of commands)if(child.overlapParent===action.id)child.overlapParent=anchor.id;
+   if(target===source)root=anchor;
+ }
+ action.overlapParent=root.id;
+ action.offsetFrames=Math.max(0,frame-target.start);
  return true;
 }

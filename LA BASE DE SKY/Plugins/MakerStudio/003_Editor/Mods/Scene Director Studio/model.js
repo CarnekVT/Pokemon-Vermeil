@@ -30,6 +30,7 @@ export function defaultsFor(type){
     case "wait": return {frames:20};
     case "bgm": case "bgs": case "se": return {name:""};
     case "stop_bgm": return {fadeSeconds:0};
+    case "fade_bgm": return {fadeSeconds:1.5};
     case "stop_bgs": return {};
     case "fade_from_black": case "fade_to_black": case "to_white": return {duration:20};
     case "from_white": return {duration:20,se:""};
@@ -38,7 +39,7 @@ export function defaultsFor(type){
     case "hide": return {filename:"",fade:0,targetId:""};
     case "hide_all": return {fade:0};
     case "textbox_style": return {skin:""};
-    case "text_inline": return {text:"",speaker:"",speed:"normal",formatArgs:[],skin:""};
+    case "text_inline": return {text:"",speaker:"",speed:"normal",formatArgs:[],skin:"",skinReset:false,nameSkin:"",speakerColor:"",speakerShadow:""};
     case "show_centered_text": return {text:"",speed:"normal",color:[0,0,0]};
     case "hide_centered_text": return {};
     case "show_textbox": case "hide_textbox": return {duration:10};
@@ -101,9 +102,10 @@ function commandBody(c){
   const pre=c.store&&/^[a-z_]\w*$/i.test(c.store)?`${c.store} = `:"";
   switch(c.type){
     case "section": return `# ══════════ ${String(c.label||"SECCIÓN").toUpperCase()} ══════════`;
-    case "parallel_anchor": return "wait 0";
+    case "parallel_anchor": return `wait ${Math.max(0,Number(c.frames)||0)}`;
     case "wait": return `wait ${n(c.frames)}`;
     case "bgm": return `bgm ${q(c.name)}`; case "bgs": return `bgs ${q(c.name)}`; case "se": return `se ${q(c.name)}`;
+    case "fade_bgm": return `scene_fade_bgm ${n(c.fadeSeconds)}`;
     case "stop_bgm": return `stop_bgm ${n(c.fadeSeconds)}`; case "stop_bgs": return `stop_bgs`;
     case "fade_from_black": case "fade_to_black": case "to_white": return `${c.type} ${n(c.duration)}`;
     case "from_white": return `from_white ${n(c.duration)}${c.se?`, se: ${q(c.se)}`:""}`;
@@ -113,7 +115,7 @@ function commandBody(c){
     case "hide": return `hide ${c.filename?q(c.filename):"nil"}, fade: ${n(c.fade)}${c.targetId?`, instance_id: ${q(c.targetId)}`:""}`;
     case "hide_all": return `hide_all fade: ${n(c.fade)}`;
     case "textbox_style": return `set_scene_textbox ${q(c.skin||"")}`;
-    case "text_inline": { const opts=[]; if(c.skin)opts.push(`skin: ${q(c.skin)}`); if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }
+    case "text_inline": { const opts=[]; if(c.skin||c.skinReset)opts.push(`skin: ${q(c.skin||"")}`); if(c.nameSkin)opts.push(`name_skin: ${q(c.nameSkin)}`); if(/^#[0-9a-f]{6}$/i.test(c.speakerColor||""))opts.push(`speaker_color: ${q(c.speakerColor)}`); if(/^#[0-9a-f]{6}$/i.test(c.speakerShadow||""))opts.push(`speaker_shadow: ${q(c.speakerShadow)}`); if(c.speaker)opts.push(`speaker: ${q(c.speaker)}`); opts.push(`speed: ${sym(c.speed)}`); if(c.formatArgs&&c.formatArgs.length)opts.push(`format_args: [${c.formatArgs.map(formatArgRuby).join(", ")}]`); return `text_inline ${q(c.text)}${opts.length?`, ${opts.join(", ")}`:""}`; }
     case "show_centered_text": return `show_centered_text ${q(c.text)}, speed: ${sym(c.speed)}, color: ${rubyColor(c.color)}`;
     case "hide_centered_text": return `hide_centered_text`;
     case "end_scene": return `end_scene style: ${q(c.endStyle||"cut")}, fade_frames: ${n(c.fadeFrames||0)}, hold_frames: ${n(c.holdFrames||0)}, breath_frames: ${n(c.breathFrames||0)}`;
@@ -154,7 +156,7 @@ export const COMMAND_GROUPS=[
   {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Nombre vanilla"],["custom_name_input","✦ Nombre Vermeil"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["image_clip","▣ Clip de imagen"],["show","▣ Mostrar imagen (instantánea)"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
-  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["textbox_style","▭ Estilo de cuadro"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
+  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["textbox_style","▭ Estilo de cuadro"],["show_textbox","▭ Reaparecer cuadro de texto"],["hide_textbox","▭ Desaparecer cuadro de texto"]]},
   {id:"motion",label:"FX",items:[["start_scrolling","⇢ Scroll"],["stop_scrolling","■ Detener scroll"],["start_aura","✦ Aura"],["stop_aura","✦ Detener aura"],["fade_in_scrolling","⇢ Fade in scroll"],["fade_out_scrolling","⇢ Fade out scroll"],["fade_out_floating","↕ Fade out flotantes"],["fade_out_images","▣ Fade out imágenes"],["fade_out_sprites","◫ Fade refs Ruby"]]},
-  {id:"audio",label:"Audio",items:[["bgm","♫ BGM"],["bgs","≈ BGS"],["se","♪ SE"],["stop_bgm","♫ Detener BGM"],["stop_bgs","≈ Detener BGS"]]}
+  {id:"audio",label:"Audio",items:[["bgm","♫ BGM"],["bgs","≈ BGS"],["se","♪ SE"],["fade_bgm","♫ Desvanecer música"],["stop_bgm","♫ Detener BGM"],["stop_bgs","≈ Detener BGS"]]}
 ];

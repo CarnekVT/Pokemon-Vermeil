@@ -35,7 +35,7 @@ export class ScenePreview{
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${Math.max(1,Math.round(this.w*this.zoom))}px`;this.canvas.style.height=`${Math.max(1,Math.round(this.h*this.zoom))}px`;this.canvas.style.imageRendering="pixelated";if(manual)this.host.dataset.manualZoom="1";this.onZoom?.(this.zoom);}
   stepZoom(dir){const levels=[.25,.5,.75,1,1.5,2,3,4];const next=dir>0?levels.find(z=>z>this.zoom+1e-6):levels.slice().reverse().find(z=>z<this.zoom-1e-6);this.setZoom(next??(dir>0?4:.25));}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,nameSkin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -104,10 +104,10 @@ export class ScenePreview{
     for(const p of s.aura){push(450,()=>{if(!p.img)return;const elapsed=Math.max(0,s.frame-(p.startFrame||0)),phase=((p.phase0||0)+elapsed*(p.speed||1))%(p.duration||120),pr=phase/(p.duration||120),a=Math.sin(pr*Math.PI),f=s.float,m=f?this.floatMetrics(f):null,cx=f?f.x+f.fw/2:0,cy=f?(m.sy+f.fh/2):0;g.save();g.globalAlpha=clamp(a,0,1);g.drawImage(p.img,cx+p.xoff-p.fw/2,cy+p.rangeY-pr*(p.rangeY*2+p.fh),p.fw,p.fh);g.restore()})}
 
     if(s.textbox>0.001){
-      const y=e.textBoxY??286,h=e.textBoxH??178,padX=e.textPadX??48,padTop=e.textPadYTop??42,lineH=e.textLineH??32;
+      const layout=this.textboxLayout(),{y,h,lineH,x:padX,top:padTop}=layout;
       push(500,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);if(s.skin)this.drawWindowSkin(s.skin,0,y,this.w,h);else if(this.textBoxImg)g.drawImage(this.textBoxImg,0,y);else{g.fillStyle="rgba(14,15,24,.92)";g.fillRect(0,y,this.w,h);g.strokeStyle="rgba(255,255,255,.22)";g.strokeRect(.5,y+.5,this.w-1,h-1)}g.restore()});
-      if(s.text)push(510,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);this.gameFont();const sp=s.text.speaker||"",map=e.speakerColorMap||{},pair=map[sp],spColor=this.rgba(pair?.[0],e.speakerColor||[248,208,48]),spShadow=this.rgba(pair?.[1],e.speakerShadow||[120,96,16]);if(sp)this.drawShadowText(sp,padX,y+12,spColor,spShadow);const tc=this.rgba(e.textColor,[248,248,248]),ts=this.rgba(e.textShadow,[72,72,72]),lines=s.text.pageLines||[],revealed=Math.floor(s.text.revealed??0);lines.forEach((ln,i)=>{const part=this.partialLine(ln,i,lines,revealed);if(part)this.drawShadowText(part,padX,y+padTop+i*lineH,tc,ts)});g.restore()});
-      if(s.text&&s.indicator)push(511,()=>{if(Math.floor(s.frame)%40>=20)return;const c=e.textColor||[248,248,248],sc=e.textShadow||[72,72,72],x=this.w-padX-14,iy=y+h-24;g.save();const rect=(dx,dy,w,hh,col)=>{g.fillStyle=this.rgba(col,[255,255,255]);g.fillRect(x+dx,iy+dy,w,hh)};rect(1,1,14,2,sc);rect(3,3,10,2,sc);rect(5,5,6,2,sc);rect(7,7,2,2,sc);rect(0,0,14,2,c);rect(2,2,10,2,c);rect(4,4,6,2,c);rect(6,6,2,2,c);g.restore()});
+      if(s.text)push(510,()=>{g.save();g.globalAlpha=clamp(s.textbox,0,1);this.gameFont();const sp=s.text.speaker||"",map=e.speakerColorMap||{},pair=map[sp],spColor=/^#[0-9a-f]{6}$/i.test(s.text.speakerColor||"")?s.text.speakerColor:this.rgba(pair?.[0],e.speakerColor||[248,208,48]),spShadow=/^#[0-9a-f]{6}$/i.test(s.text.speakerShadow||"")?s.text.speakerShadow:this.rgba(pair?.[1],e.speakerShadow||[120,96,16]);if(sp){if(s.nameSkin){const {l,t,r,b}=this.skinGeometry(s.nameSkin),nw=Math.min(this.w-16,Math.max(l+r+40,g.measureText(sp).width+l+r+20)),nh=t+b+38,ny=Math.max(0,y-nh);this.drawWindowSkin(s.nameSkin,8,ny,nw,nh);this.drawShadowText(sp,8+l+8,ny+t+5,spColor,spShadow)}else this.drawShadowText(sp,padX,s.skin?y+this.skinGeometry(s.skin).t+6:y+12,spColor,spShadow)}const tc=this.rgba(e.textColor,[248,248,248]),ts=this.rgba(e.textShadow,[72,72,72]),lines=s.text.pageLines||[],revealed=Math.floor(s.text.revealed??0);lines.forEach((ln,i)=>{const part=this.partialLine(ln,i,lines,revealed);if(part)this.drawShadowText(part,padX,y+padTop+i*lineH,tc,ts)});g.restore()});
+      if(s.text&&s.indicator)push(511,()=>{if(Math.floor(s.frame)%40>=20)return;const c=e.textColor||[248,248,248],sc=e.textShadow||[72,72,72],x=layout.indicatorX,iy=layout.indicatorY;g.save();const rect=(dx,dy,w,hh,col)=>{g.fillStyle=this.rgba(col,[255,255,255]);g.fillRect(x+dx,iy+dy,w,hh)};rect(1,1,14,2,sc);rect(3,3,10,2,sc);rect(5,5,6,2,sc);rect(7,7,2,2,sc);rect(0,0,14,2,c);rect(2,2,10,2,c);rect(4,4,6,2,c);rect(6,6,2,2,c);g.restore()});
     }
 
     if(this.showTransitions&&s.black>0)push(9000,()=>{g.fillStyle=`rgba(0,0,0,${clamp(s.black/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
@@ -249,13 +249,25 @@ export class ScenePreview{
 
   stop(){this.playToken++;this.livePlayback=false;this.seeking=false;this.onionSnapshots=null;this.stopAudio();this.state.indicator=false;this.onWaiting?.(false);}
   async reset(){this.stop();this.resetState();this.draw();}
+  skinGeometry(im){
+    if(!im)return {l:0,t:0,r:0,b:0};
+    const w=im.width,h=im.height;
+    if((w===192||w===128)&&h===128)return {l:16,t:16,r:16,b:16,x:0,y:0,sw:w===192?128:64,sh:w===192?128:64,standard:true};
+    const x=(w===80||w===96)&&h===48?32:w===80&&h===80?32:Math.max(0,Math.floor((w-16)/2)),y=(w===80||w===96)&&h===48?16:w===80&&h===80?32:Math.max(0,Math.floor((h-16)/2)),sw=Math.min(16,w-x),sh=Math.min(16,h-y);
+    return {l:x,t:y,r:w-x-sw,b:h-y-sh,x,y,sw,sh};
+  }
+  textboxLayout(){
+    const e=this.settings(),s=this.state,y=e.textBoxY??286,h=e.textBoxH??178,lineH=e.textLineH??32;
+    if(!s.skin)return {y,h,lineH,x:e.textPadX??48,top:e.textPadYTop??42,width:this.w-2*(e.textPadX??48),max:e.textMaxLines||4,indicatorX:this.w-(e.textPadX??48)-14,indicatorY:y+h-24};
+    const {l,t,r,b}=this.skinGeometry(s.skin),top=t+6+(s.nameSkin?0:36),height=Math.max(1,h-top-b-6);
+    return {y,h,lineH,x:l+8,top,width:Math.max(1,this.w-l-r-16),max:Math.max(1,Math.min(e.textMaxLines||4,Math.floor(height/lineH))),indicatorX:this.w-r-22,indicatorY:y+h-b-12};
+  }
   drawWindowSkin(im,x,y,w,h){
-  const g=this.g,iw=im.width,ih=im.height;
-  if((iw===192||iw===128)&&ih===128){const vx=iw===128,b=vx?64:128,t=vx?64:128,edge=16;g.drawImage(im,0,0,b,b,x,y,w,h);const parts=[[0,0,16,16,0,0,16,16],[48,0,16,16,w-16,0,16,16],[0,48,16,16,0,h-16,16,16],[48,48,16,16,w-16,h-16,16,16],[16,0,32,16,16,0,w-32,16],[16,48,32,16,16,h-16,w-32,16],[0,16,16,32,0,16,16,h-32],[48,16,16,32,w-16,16,16,h-32]];for(const [sx,sy,sw,sh,dx,dy,dw,dh] of parts)g.drawImage(im,t+sx,sy,sw,sh,x+dx,y+dy,dw,dh);return}
-  const l=Math.max(0,Math.floor((iw-16)/2)),t=Math.max(0,Math.floor((ih-16)/2)),r=iw-l-Math.min(16,iw),b=ih-t-Math.min(16,ih);
-  const sx=[0,l,iw-r,iw],sy=[0,t,ih-b,ih],dx=[x,x+Math.min(l,w/2),x+w-Math.min(r,w/2),x+w],dy=[y,y+Math.min(t,h/2),y+h-Math.min(b,h/2),y+h];
-  for(let i=0;i<3;i++)for(let j=0;j<3;j++){const sw=sx[i+1]-sx[i],sh=sy[j+1]-sy[j];if(sw>0&&sh>0)g.drawImage(im,sx[i],sy[j],sw,sh,dx[i],dy[j],dx[i+1]-dx[i],dy[j+1]-dy[j])}
- }
+    const g=this.g,a=this.skinGeometry(im),iw=im.width,ih=im.height;
+    if(a.standard){const trim=iw===128?64:128;g.drawImage(im,0,0,a.sw,a.sh,x,y,w,h);const parts=[[0,0,16,16,0,0,16,16],[48,0,16,16,w-16,0,16,16],[0,48,16,16,0,h-16,16,16],[48,48,16,16,w-16,h-16,16,16],[16,0,32,16,16,0,w-32,16],[16,48,32,16,16,h-16,w-32,16],[0,16,16,32,0,16,16,h-32],[48,16,16,32,w-16,16,16,h-32]];for(const [sx,sy,sw,sh,dx,dy,dw,dh] of parts)if(dw>0&&dh>0)g.drawImage(im,trim+sx,sy,sw,sh,x+dx,y+dy,dw,dh);return}
+    const l=Math.min(a.l,w/2),r=Math.min(a.r,w/2),t=Math.min(a.t,h/2),b=Math.min(a.b,h/2),sx=[0,a.x,a.x+a.sw,iw],sy=[0,a.y,a.y+a.sh,ih],dx=[x,x+l,x+w-r,x+w],dy=[y,y+t,y+h-b,y+h];
+    for(let i=0;i<3;i++)for(let j=0;j<3;j++){const sw=sx[i+1]-sx[i],sh=sy[j+1]-sy[j],dw=dx[i+1]-dx[i],dh=dy[j+1]-dy[j];if(sw>0&&sh>0&&dw>0&&dh>0)g.drawImage(im,sx[i],sy[j],sw,sh,dx[i],dy[j],dw,dh)}
+  }
   async setSkin(path,token){const im=path?await this.image(path):null;if(token===this.playToken)this.state.skin=im}
   async playGroup(g,token){
   const start=this.state.frame,lanes=new Map(),done=new Map();for(const e of g.events){let resolve;const promise=new Promise(r=>resolve=r);done.set(e.c.id,{promise,resolve})}
@@ -370,9 +382,9 @@ export class ScenePreview{
   async hideTextboxFade(skip,token,frames=10){if(this.state.textbox<=0)return;if(skip){this.state.textbox=0;this.state.indicator=false;return}const from=this.state.textbox;this.state.indicator=false;await this.frames(frames,p=>this.state.textbox=from*(1-p),false,token);this.state.textbox=0;}
 
   async pageText(obj,skip,token){
-    if(obj.skin)await this.setSkin(obj.skin,token);if(token!==this.playToken)return;
-    const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,this.w-(e.textPadX??48)*2),max=Math.max(1,e.textMaxLines||4),pages=this.paginateLines(lines,max);
-    const target={speaker:this.formatText(obj.speaker||"",[]),pageLines:pages[0],revealed:0,page:0};this.state.text=target;
+    if(obj.skin||obj.skinReset)await this.setSkin(obj.skin||"",token);const nameSkin=obj.nameSkin?await this.image(obj.nameSkin):null;if(token!==this.playToken)return;this.state.nameSkin=nameSkin;
+    const e=this.settings(),layout=this.textboxLayout(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,layout.width),max=layout.max,pages=this.paginateLines(lines,max);
+    const target={speaker:this.formatText(obj.speaker||"",[]),speakerColor:obj.speakerColor,speakerShadow:obj.speakerShadow,pageLines:pages[0],revealed:0,page:0};this.state.text=target;
     await this.showTextboxFade(skip,token,10);
     if(skip){target.page=pages.length-1;target.pageLines=pages[target.page];target.revealed=target.pageLines.join("\n").length;return;}
     const cpf=e.speeds?.[obj.speed||"normal"]??1.5;
@@ -440,7 +452,7 @@ export class ScenePreview{
       case"bgm":if(!skip)await this.playAudio("BGM",c.name);break;
       case"bgs":if(!skip)await this.playAudio("BGS",c.name);break;
       case"se":if(!skip)await this.playAudio("SE",c.name);break;
-      case"stop_bgm":this.audio.bgm?.pause();this.audio.bgm=null;break;
+      case"fade_bgm":case"stop_bgm":{const audio=this.audio.bgm,frames=Math.max(0,Math.round((Number(c.fadeSeconds)||0)*60));if(audio&&!skip&&frames){const volume=audio.volume;await this.frames(frames,p=>audio.volume=Math.max(0,volume*(1-p)),false,token)}else if(c.type==="fade_bgm"&&frames)await this.frames(frames,null,skip,token);if(audio&&this.audio.bgm===audio){audio.pause();this.audio.bgm=null}break;}
       case"stop_bgs":this.audio.bgs?.pause();this.audio.bgs=null;break;
       case"fade_from_black":s.black=255;await this.frames(c.duration,p=>s.black=255*(1-p),skip,token);break;
       case"fade_to_black":s.black=0;await this.frames(c.duration,p=>s.black=255*p,skip,token);break;

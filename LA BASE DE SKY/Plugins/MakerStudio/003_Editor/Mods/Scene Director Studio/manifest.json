@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Consumo de confirmación al volver al mapa, spritesheets infinitos y salidas configurables.",
+  "description": "Diálogos con windowskins independientes, colores de nombre, tiempos precisos y fundidos editables.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
