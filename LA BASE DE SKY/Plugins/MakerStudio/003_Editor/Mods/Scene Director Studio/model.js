@@ -1,3 +1,4 @@
+import {AURA_PROFILES} from "./scene-fx.js";
 import {timelineGroups} from "./timing.js";
 export const FORMAT_VERSION = 1;
 export const SAVE_DIR = "Data/SceneDirector";
@@ -26,6 +27,11 @@ export function cmd(type, data={}){ return {id:uid("cmd"),type,...defaultsFor(ty
 export function defaultsFor(type){
   switch(type){
     case "section": return {label:"Nueva sección"};
+    case "image_transform": return {targetId:"",filename:"",duration:36,transition:"flash",sheetColumns:1,sheetRows:1,sheetFps:8};
+    case "scene_fx": {const a=AURA_PROFILES[0];return {targetId:"",profile:a.id,pattern:a.pattern,color:a.color,blend:a.blend,count:a.count,cycle:a.cycle,rangeX:a.rangeX,rangeY:a.rangeY,scale:a.scale,sway:a.sway,opacity:a.opacity,outline:a.outline,outlineColor:a.outlineColor,graphics:a.graphics.slice(),filename:"",x:320,y:240,z:450,life:0};}
+    case "scene_fx_stop": return {targetId:"",fade:18};
+    case "scene_backdrop": return {color:"#000000",opacity:255,z:190};
+    case "scene_player_form": return {playerId:1};
     case "parallel_anchor": return {};
     case "wait": return {frames:20};
     case "bgm": case "bgs": case "se": return {name:""};
@@ -102,6 +108,11 @@ function commandBody(c){
   const pre=c.store&&/^[a-z_]\w*$/i.test(c.store)?`${c.store} = `:"";
   switch(c.type){
     case "section": return `# ══════════ ${String(c.label||"SECCIÓN").toUpperCase()} ══════════`;
+    case "image_transform": return `scene_transform ${q(c.targetId)}, ${q(c.filename)}, duration: ${n(c.duration)}, transition: ${q(c.transition)}, columns: ${n(c.sheetColumns)}, rows: ${n(c.sheetRows)}, fps: ${n(c.sheetFps)}`;
+    case "scene_fx": return `scene_fx ${q(c.id)}, ${q(c.targetId)}, ${rubyLiteral(c.filename?[c.filename]:c.graphics||[])}, ${["pattern","color","blend","count","cycle","rangeX","rangeY","scale","sway","opacity","outline","outlineColor","x","y","z","life"].map(k=>k.replace(/[A-Z]/g,m=>"_"+m.toLowerCase())+": "+rubyLiteral(c[k])).join(", ")}`;
+    case "scene_fx_stop": return `scene_fx_stop ${q(c.targetId||"")}, fade: ${n(c.fade)}`;
+    case "scene_backdrop": return `scene_backdrop ${q(c.color)}, ${n(c.opacity)}, ${n(c.z)}`;
+    case "scene_player_form": return `pbChangePlayer(${n(c.playerId)})`;
     case "parallel_anchor": return `wait ${Math.max(0,Number(c.frames)||0)}`;
     case "wait": return `wait ${n(c.frames)}`;
     case "bgm": return `bgm ${q(c.name)}`; case "bgs": return `bgs ${q(c.name)}`; case "se": return `se ${q(c.name)}`;
@@ -157,6 +168,7 @@ export const COMMAND_GROUPS=[
   {id:"visual",label:"Imágenes",items:[["image_clip","▣ Clip de imagen"],["show","▣ Mostrar imagen (instantánea)"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
   {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["textbox_style","▭ Estilo de cuadro"],["show_textbox","▭ Reaparecer cuadro de texto"],["hide_textbox","▭ Desaparecer cuadro de texto"]]},
+  {id:"cinematicfx",label:"Transformación y efectos",items:[["image_transform","✧ Transformar imagen"],["scene_fx","✦ Aura / partículas (BSS)"],["scene_fx_stop","■ Detener efecto"],["scene_backdrop","▣ Fondo de color"],["scene_player_form","Cambiar personaje jugador"]]},
   {id:"motion",label:"FX",items:[["start_scrolling","⇢ Scroll"],["stop_scrolling","■ Detener scroll"],["start_aura","✦ Aura"],["stop_aura","✦ Detener aura"],["fade_in_scrolling","⇢ Fade in scroll"],["fade_out_scrolling","⇢ Fade out scroll"],["fade_out_floating","↕ Fade out flotantes"],["fade_out_images","▣ Fade out imágenes"],["fade_out_sprites","◫ Fade refs Ruby"]]},
   {id:"audio",label:"Audio",items:[["bgm","♫ BGM"],["bgs","≈ BGS"],["se","♪ SE"],["fade_bgm","♫ Desvanecer música"],["stop_bgm","♫ Detener BGM"],["stop_bgs","≈ Detener BGS"]]}
 ];

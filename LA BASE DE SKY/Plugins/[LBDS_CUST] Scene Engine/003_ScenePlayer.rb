@@ -10,6 +10,9 @@ class SceneEngine::Player
     @scene_image_files = {}
     @scene_hidden_images = {}
     @scene_persistent_sheets = {}
+    @scene_transformed_images = {}
+    @scene_fx = {}
+    @scene_fx_bitmaps = {}
     @sprites = {}
     @float_anim = nil
     @float_ghosts = []
@@ -90,6 +93,7 @@ class SceneEngine::Player
   end
 
   def cleanup
+    dispose_scene_fx
     stop_float
     stop_aura
     stop_scrolling
@@ -114,6 +118,7 @@ class SceneEngine::Player
       update_floating
     end
     update_scene_sheets
+    update_scene_fx unless @scene_finishing
     # Graphics.frame_rate no siempre representa los FPS reales de mkxp-z.
     # mkxp.json fija 120; los guiones se escriben a 60 pasos/segundo.
     @scene_frame_remainder ||= 0.0
@@ -285,6 +290,7 @@ class SceneEngine::Player
     key = instance_id ? instance_id.to_s : filename.to_s
     @scene_image_files[key] = filename.to_s
     @scene_hidden_images.delete(key)
+    @scene_transformed_images.delete(key)
     @scene_persistent_sheets.delete(key)
     @image_sprites.delete(key)&.dispose
 
@@ -450,7 +456,8 @@ class SceneEngine::Player
     end
     sample.call(0)
     started_at = @scene_logic_frame || 0
-    duration.times { |i| sample.call(i+1); update }
+    duration.times { |i| sample.call(i+1) unless @scene_transformed_images[key]; update }
+    return sprite if @scene_transformed_images[key]
     if persistent && !@scene_hidden_images[key] && !sprite.disposed?
       @scene_persistent_sheets[key] = { sprite: sprite, start: started_at, cols: cols, fw: fw, fh: fh, first: first_frame, count: count, fps: fps, mode: sheet_mode }
     end
@@ -572,6 +579,7 @@ class SceneEngine::Player
     @scene_finishing = true
     sprites = @sprites.values + @image_sprites.values + @float_ghosts
     sprites += @aura_particles.map { |p| p[:sprite] }
+    sprites += @scene_fx.values.flat_map { |fx| fx[:sprites] }
     sprites += @floating_sprites.map { |p| p[:sprite] }
     sprites += @scrolling_sprites.flat_map { |p| p[:sprites] || [] }
     sprites += [@float_anim[:sprite], @float_anim[:glow]] if @float_anim
@@ -652,6 +660,173 @@ class SceneEngine::Player
   end
 
   # --- ASIGNACIÓN DE SPEAKER INDEPENDIENTE ---
+  def scene_backdrop(hex, opacity, z)
+    unless @sprites[:sds_backdrop] && !@sprites[:sds_backdrop].disposed?
+      @sprites[:sds_backdrop] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+    end
+    sprite = @sprites[:sds_backdrop]
+    sprite.bitmap.fill_rect(0,0,Graphics.width,Graphics.height,scene_hex_color(hex,Color.new(0,0,0)))
+    sprite.opacity = [[opacity.to_i,0].max,255].min
+    sprite.z = z.to_i
+  end
+
+  def scene_fx(id, target, graphics, pattern: "rise", color: "#DD445B", blend: "normal", count: 12, cycle: 30,
+               range_x: 55, range_y: 100, scale: 1, sway: 1, opacity: 1, outline: 0, outline_color: "#DD445B",
+               x: 320, y: 240, z: 450, life: 0)
+    scene_fx_stop(id, fade: 0)
+    paths = Array(graphics).reject { |path| path.to_s.empty? }
+    bitmaps = paths.filter_map do |path|
+      begin
+        @scene_fx_bitmaps[path] ||= AnimatedBitmap.new(path).deanimate
+      rescue
+        nil
+      end
+    end
+    return if bitmaps.empty?
+    available = [128 - @scene_fx.values.sum { |fx| fx[:sprites].length }, 0].max
+    count = [[count.to_i,1].max,48,available].min
+    return if count <= 0
+    tint = scene_hex_color(color,Color.new(255,255,255))
+    sprites = Array.new(count) do
+      sprite = Sprite.new(@viewport)
+      sprite.bitmap = bitmaps.first
+      sprite.blend_type = blend == "additive" ? 1 : 0
+      sprite.color = Color.new(tint.red,tint.green,tint.blue,128)
+      sprite.z = z.to_i
+      sprite.opacity = 0
+      sprite
+    end
+    @scene_fx[id] = {sprites: sprites, bitmaps: bitmaps, target: target, start: @scene_logic_frame || 0,
+      pattern: pattern, count: count, cycle: [cycle.to_f,1].max, rx: range_x.to_f, ry: range_y.to_f,
+      scale: [scale.to_f,0.01].max, sway: sway.to_f, opacity: [[opacity.to_f,0].max,1].min,
+      x: x.to_f,y: y.to_f,life: life.to_i,alpha: 1.0}
+    update_scene_fx
+  end
+
+  def update_scene_fx
+    now = @scene_logic_frame || 0
+    @scene_fx.keys.each do |id|
+      fx = @scene_fx[id]
+      elapsed = [now-fx[:start],0].max
+      if fx[:life] > 0 && elapsed >= fx[:life]
+        fx[:sprites].each { |sprite| sprite.dispose unless sprite.disposed? }
+        @scene_fx.delete(id)
+        next
+      end
+      target = @image_sprites[fx[:target]]
+      visible = fx[:target].to_s.empty? || (target && !target.disposed? && target.visible)
+      cx,cy = fx[:x],fx[:y]
+      if target && !target.disposed?
+        cx = target.x + (target.src_rect.width/2.0-target.ox)*target.zoom_x
+        cy = target.y + (target.src_rect.height/2.0-target.oy)*target.zoom_y
+      end
+      fx[:sprites].each_with_index do |sprite,i|
+        sprite.visible = !!visible
+        next unless visible
+        phase = ((elapsed+i*fx[:cycle]/fx[:count])%fx[:cycle])/fx[:cycle]
+        angle = i*2.399963229728653+phase*Math::PI*2
+        rx,ry = fx[:rx],fx[:ry]
+        dx,dy = case fx[:pattern]
+        when "orbit" then [Math.cos(angle)*rx,Math.sin(angle)*ry*0.45]
+        when "vortex" then [Math.cos(angle)*rx*(1-phase),ry*0.5-phase*ry]
+        when "rain" then [Math.sin(i*2.399963)*rx,-ry+phase*ry*2]
+        when "burst" then [Math.cos(i*2.399963)*rx*phase,Math.sin(i*2.399963)*ry*phase]
+        when "halo" then [Math.cos(angle)*rx,-ry*0.5+Math.sin(angle)*ry*0.2]
+        when "ground" then [Math.cos(angle)*rx,ry*0.4+Math.sin(angle)*ry*0.18]
+        else [Math.sin(i*2.399963)*rx+Math.sin(angle)*rx*0.18*fx[:sway],ry*0.5-phase*ry]
+        end
+        bitmap = fx[:bitmaps][((elapsed+i*3)/6).floor%fx[:bitmaps].length]
+        if sprite.bitmap != bitmap
+          sprite.bitmap = bitmap
+          sprite.src_rect.set(0,0,bitmap.width,bitmap.height)
+        end
+        sprite.ox,sprite.oy = bitmap.width/2,bitmap.height/2
+        sprite.x,sprite.y = (cx+dx).round,(cy+dy).round
+        sprite.zoom_x = sprite.zoom_y = fx[:scale]
+        sprite.opacity = (255*Math.sin(phase*Math::PI)*fx[:opacity]*fx[:alpha]).round
+      end
+    end
+  end
+
+  def scene_fx_stop(id = "", fade: 0)
+    keys = id.to_s.empty? ? @scene_fx.keys : [id]
+    frames = [[fade.to_i,0].max,36000].min
+    frames.times do |i|
+      keys.each { |key| @scene_fx[key][:alpha] = 1-(i+1).to_f/frames if @scene_fx[key] }
+      update
+    end
+    keys.each do |key|
+      fx = @scene_fx.delete(key)
+      fx[:sprites].each { |sprite| sprite.dispose unless sprite.disposed? } if fx
+    end
+  end
+
+  def dispose_scene_fx
+    scene_fx_stop("", fade: 0)
+    @scene_fx_bitmaps.each_value { |bitmap| bitmap.dispose unless bitmap.disposed? }
+    @scene_fx_bitmaps.clear
+  end
+
+  def scene_transform(id, filename, duration: 36, transition: "flash", columns: 1, rows: 1, fps: 8)
+    sprite = @image_sprites[id]
+    return if !sprite || sprite.disposed? || filename.to_s.empty?
+    bitmap = AnimatedBitmap.new(filename).deanimate
+    cols, row_count = [[columns.to_i,1].max,bitmap.width].min, [[rows.to_i,1].max,bitmap.height].min
+    fw,fh = bitmap.width/cols,bitmap.height/row_count
+    old_bitmap = sprite.bitmap
+    old_alpha,old_zoom = sprite.opacity,sprite.zoom_x
+    anchor_x = sprite.src_rect.width > 0 ? sprite.ox.to_f/sprite.src_rect.width : 0
+    anchor_y = sprite.src_rect.height > 0 ? sprite.oy.to_f/sprite.src_rect.height : 0
+    @scene_persistent_sheets.delete(id)
+    @scene_transformed_images[id] = true
+    # Transform owns this instance after the preceding clip has ended.
+    frames = transition == "cut" ? 0 : [[duration.to_i,1].max,36000].min
+    ghost = nil
+    if transition == "crossfade"
+      ghost = Sprite.new(@viewport)
+      ghost.bitmap = old_bitmap
+      ghost.src_rect.set(sprite.src_rect.x,sprite.src_rect.y,sprite.src_rect.width,sprite.src_rect.height)
+      ghost.x,ghost.y,ghost.z,ghost.ox,ghost.oy = sprite.x,sprite.y,sprite.z,sprite.ox,sprite.oy
+      ghost.zoom_x,ghost.zoom_y,ghost.angle,ghost.opacity = sprite.zoom_x,sprite.zoom_y,sprite.angle,old_alpha
+    end
+    swap = lambda do
+      sprite.bitmap = bitmap
+      sprite.src_rect.set(0,0,fw,fh)
+      sprite.ox,sprite.oy = (fw*anchor_x).round,(fh*anchor_y).round
+      @scene_image_files[id] = filename
+    end
+    if ghost
+      swap.call
+      sprite.opacity = 0
+      frames.times { |i| p=(i+1).to_f/frames;ghost.opacity=(old_alpha*(1-p)).round;sprite.opacity=(old_alpha*p).round;update }
+    else
+      swapped = false
+      frames.times do |i|
+        p=(i+1).to_f/frames
+        if p>=0.5 && !swapped
+          swap.call
+          swapped=true
+        end
+        strength = Math.sin(p*Math::PI)
+        if transition == "flash"
+          sprite.color = Color.new(255,255,255,(strength*255).round)
+        elsif transition == "shrink"
+          sprite.zoom_x = sprite.zoom_y = old_zoom*(1-0.85*strength)
+        end
+        update
+      end
+      swap.call unless swapped
+    end
+    sprite.opacity = old_alpha
+    sprite.zoom_x = sprite.zoom_y = old_zoom
+    sprite.color = Color.new(0,0,0,0)
+    if cols*row_count > 1
+      @scene_persistent_sheets[id] = {sprite: sprite,start: @scene_logic_frame || 0,cols: cols,fw: fw,fh: fh,first: 0,count: cols*row_count,fps: [[fps.to_f,1].max,60].min,mode: "loop"}
+    end
+  ensure
+    ghost.dispose if ghost && !ghost.disposed?
+  end
+
   def scene_skin_edges(window)
     return [16,16,16,16] unless window.skinformat == 1
     rect = window.skinrect

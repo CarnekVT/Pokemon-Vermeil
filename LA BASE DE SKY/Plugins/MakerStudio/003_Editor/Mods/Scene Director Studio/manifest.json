@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.6",
+  "version": "0.10.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Diálogos con windowskins independientes, colores de nombre, tiempos precisos y fundidos editables.",
+  "description": "Transformaciones de imagen, perfiles BSS de aura y partículas, utilidades de Intro.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

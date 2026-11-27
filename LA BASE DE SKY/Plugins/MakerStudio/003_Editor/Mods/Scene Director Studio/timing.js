@@ -1,5 +1,7 @@
+import {fxDuration} from "./scene-fx.js";
 import {clipLength} from "./animation.js";
 export function duration(c){
+  if(["image_transform","scene_fx","scene_fx_stop","scene_backdrop"].includes(c.type))return fxDuration(c);
   if(c.type==="parallel_anchor")return Math.max(0,Number(c.frames)||0);
   if(c.type==="fade_bgm")return Math.max(1,Math.round((Number(c.fadeSeconds)||0)*60));
   if(c.type==="end_scene")return Math.max(1,(Number(c.holdFrames)||0)+(c.endStyle==="fade"?(Number(c.fadeFrames)||0):0)+(Number(c.breathFrames)||0));
@@ -17,7 +19,7 @@ export function duration(c){
   return 6;
 }
 export const overlapRoots=new Set(["image_clip","wait","parallel_anchor"]);
-const lanes={end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"textbox",hide_textbox:"textbox",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",fade_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
+const lanes={image_transform:"transform",scene_fx:"fx",scene_fx_stop:"fx_stop",scene_backdrop:"screen",end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"textbox",hide_textbox:"textbox",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",fade_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
 export const overlapLane=c=>!c?.sourceRuby&&!c?.store?(c?.type==="image_clip"?"image:"+(c.id||"new"):lanes[c?.type]||null):null;
 export const frameValue=v=>Math.max(0,Math.round((Number(String(v).trim().replace(",","."))||0)*60));
 export function timelineGroups(scene){
