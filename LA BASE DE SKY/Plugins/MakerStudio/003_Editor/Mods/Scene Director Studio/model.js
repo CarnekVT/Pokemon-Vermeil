@@ -156,9 +156,9 @@ function commandBody(c){
   }
 }
 export function compileScene(scene){return timelineGroups(scene).map(g=>{
- if(!g.events.length)return commandToRuby(g.root);
- const rows=[{c:g.root,offset:0,lane:"main"},...g.events.map(e=>({c:e.c,offset:e.requested,lane:e.lane,after:e.after}))];
- return "parallel_scene([\n"+rows.map(e=>"  ["+e.offset+", "+q(e.lane)+", proc {\n"+commandToRuby(e.c).split("\n").map(s=>"    "+s).join("\n")+"\n  }, "+q(e.c.id)+", "+(e.after?q(e.after):"nil")+"]").join(",\n")+"\n])";
+ if(!g.events.length)return (g.root.afterId&&g.root.afterDelay?`wait ${Math.max(0,Math.round(Number(g.root.afterDelay)||0))}\n`:"")+commandToRuby(g.root);
+ const rows=[{c:g.root,offset:0,lane:"main"},...g.events.map(e=>({c:e.c,offset:e.requested,lane:e.lane,after:e.after,delay:e.delay}))];
+ return "parallel_scene([\n"+rows.map(e=>"  ["+e.offset+", "+q(e.lane)+", proc {\n"+commandToRuby(e.c).split("\n").map(s=>"    "+s).join("\n")+"\n  }, "+q(e.c.id)+", "+(e.after?q(e.after):"nil")+", "+(e.delay||0)+"]").join(",\n")+"\n])";
  }).join("\n\n")}
 export function compileProject(project){ const p=clone(project); p.scenes.forEach(s=>s.compiledRuby=compileScene(s)); return p; }
 

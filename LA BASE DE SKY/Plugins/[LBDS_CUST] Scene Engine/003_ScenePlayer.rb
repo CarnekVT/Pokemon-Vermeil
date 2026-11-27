@@ -506,8 +506,8 @@ class SceneEngine::Player
       busy = active.map { |task| task[0] }
       ready = []
       pending.delete_if do |row|
-        offset, lane, block, task_id, after_id = row
-        if offset.to_i <= frame && !busy.include?(lane) && (!after_id || completed[after_id])
+        offset, lane, block, task_id, after_id, delay = row
+        if offset.to_i <= frame && !busy.include?(lane) && (!after_id || (completed.key?(after_id) && frame >= completed[after_id] + [delay.to_i,0].max))
           busy << lane
           ready << [lane, Fiber.new { block.call }, task_id]
           true
@@ -532,7 +532,7 @@ class SceneEngine::Player
       throw :scene_director_end if @scene_end_requested
       active.reject! do |task|
         done = !task[1].alive?
-        completed[task[2]] = true if done && task[2]
+        completed[task[2]] = frame if done && task[2]
         done
       end
       break if active.empty? && pending.empty?
@@ -701,6 +701,12 @@ class SceneEngine::Player
       scale: [scale.to_f,0.01].max, sway: sway.to_f, opacity: [[opacity.to_f,0].max,1].min,
       x: x.to_f,y: y.to_f,life: life.to_i,alpha: 1.0}
     update_scene_fx
+    if life.to_i > 0
+      life.to_i.times do
+        break unless @scene_fx.key?(id)
+        update
+      end
+    end
   end
 
   def update_scene_fx

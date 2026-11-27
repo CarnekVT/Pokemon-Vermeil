@@ -108,4 +108,6 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-hide-after{display:grid;gap:7px}.sd-hide-after .sd-prop-title{margin-bottom:0}.sd-hide-after .sd-help{margin:0}.sd-hide-after button{white-space:normal}
 
 .sd-clip-section input[type=color]{width:100%;min-height:28px;background:transparent;border:1px solid #555;border-radius:4px}.sd-timing .sd-inline{flex-wrap:wrap}.sd-timing [data-nudge]{flex:1;font-size:11px;white-space:nowrap}
+
+.sd-track-dot[class*="fx"]{background:#bb82d1}.sd-block.visual[title*="Aura"]{border-color:#ac80c8}
 `;

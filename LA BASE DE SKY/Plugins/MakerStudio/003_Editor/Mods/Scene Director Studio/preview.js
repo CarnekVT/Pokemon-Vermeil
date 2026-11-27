@@ -36,14 +36,14 @@ export class ScenePreview{
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${Math.max(1,Math.round(this.w*this.zoom))}px`;this.canvas.style.height=`${Math.max(1,Math.round(this.h*this.zoom))}px`;this.canvas.style.imageRendering="pixelated";if(manual)this.host.dataset.manualZoom="1";this.onZoom?.(this.zoom);}
   stepZoom(dir){const levels=[.25,.5,.75,1,1.5,2,3,4];const next=dir>0?levels.find(z=>z>this.zoom+1e-6):levels.slice().reverse().find(z=>z<this.zoom-1e-6);this.setZoom(next??(dir>0?4:.25));}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],sceneFX:new Map(),backdrop:null,endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,nameSkin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
+    this.state={frame:0,audioNames:{BGM:null,BGS:null},images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],sceneFX:new Map(),backdrop:null,endAlpha:1,finished:false,black:0,white:0,textbox:0,skin:null,nameSkin:null,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path).replace(/\\/g,"/");if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
     const pr=(async()=>{const url=await loadProjectBlobUrl(this.ctx,p,mimeFor(p));if(!url)return null;this.urls.push(url);const im=new Image();await new Promise((ok,fail)=>{im.onload=ok;im.onerror=fail;im.src=url});return im})().catch(()=>null);
     this.cache.set(path,pr);pr.then(im=>{if(!im&&this.cache.get(path)===pr)this.cache.delete(path)});return pr;
   }
-  tick(){const now=performance.now(),dt=Math.min(.05,(now-this.last)/1000);this.last=now;if(!this.seeking&&this.host.getClientRects().length){if(this.livePlayback)this.state.frame+=dt*60;this.draw();}this.raf=requestAnimationFrame(()=>this.tick());}
+  tick(){const now=performance.now(),dt=Math.min(.05,(now-this.last)/1000);this.last=now;if(!this.seeking&&this.host.getClientRects().length){if(this.livePlayback){this.state.frame+=dt*60;this.onFrame?.(this.state.frame)}this.draw();}this.raf=requestAnimationFrame(()=>this.tick());}
   gameFont(size=null){const px=Number(size||this.settings().fontSize||29);this.g.font=`${px}px ${this.gameFontFamily}`;this.g.textBaseline="top";}
   rgba(c,fallback){const a=Array.isArray(c)?c:fallback;return `rgb(${a?.[0]??255},${a?.[1]??255},${a?.[2]??255})`;}
   drawShadowText(text,x,y,color,shadow){const g=this.g;g.fillStyle=shadow;g.fillText(text,x+2,y+2);g.fillStyle=color;g.fillText(text,x,y);}
@@ -273,28 +273,89 @@ export class ScenePreview{
     for(let i=0;i<3;i++)for(let j=0;j<3;j++){const sw=sx[i+1]-sx[i],sh=sy[j+1]-sy[j],dw=dx[i+1]-dx[i],dh=dy[j+1]-dy[j];if(sw>0&&sh>0&&dw>0&&dh>0)g.drawImage(im,sx[i],sy[j],sw,sh,dx[i],dy[j],dw,dh)}
   }
   async setSkin(path,token){const im=path?await this.image(path):null;if(token===this.playToken)this.state.skin=im}
-  async playGroup(g,token){
-  const start=this.state.frame,lanes=new Map(),done=new Map();for(const e of g.events){let resolve;const promise=new Promise(r=>resolve=r);done.set(e.c.id,{promise,resolve})}
-  for(const e of g.events){if(!lanes.has(e.lane))lanes.set(e.lane,[]);lanes.get(e.lane).push(e)}
-  const jobs=[this.apply(g.root,false,token)];
-  for(const events of lanes.values())jobs.push((async()=>{for(const e of events){if(token!==this.playToken){done.get(e.c.id)?.resolve();continue}if(e.after&&done.has(e.after))await done.get(e.after).promise;const left=start+e.requested-this.state.frame;if(left>0)await this.frames(left,null,false,token);try{if(token===this.playToken&&!this.state.finished)await this.apply(e.c,false,token)}finally{done.get(e.c.id)?.resolve()}}})());
-  await Promise.all(jobs);
- }
+  groupJobs(g){return [{c:g.root,offset:0,requested:0,length:g.length,lane:"main"},...g.events]}
+  async seekAction(job,elapsed,token){
+    const c=job.c,full=elapsed>=job.length;
+    if(c.type==="image_clip"){
+      await this.applyImageClip(c,true,token,Math.min(job.length,elapsed));
+      const it=this.state.images.get(c.id);if(full&&it&&!c.keep&&!it.persistent)it.visible=false;
+    }else if(c.type==="scene_fx")await this.apply(c,true,token);
+    else if(!["wait","parallel_anchor","wait_confirm"].includes(c.type))await this.apply(c,true,token);
+  }
   async seekGroup(g,frame,token){
-  const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
-  if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&!s.images.get(g.root.id)?.persistent&&s.images.get(g.root.id))s.images.get(g.root.id).visible=false}
-  else if(!["wait","parallel_anchor"].includes(g.root.type))await this.apply(g.root,true,token);
-  for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)continue;s.frame=base+e.offset;if(e.c.type==="image_clip"){const elapsed=Math.min(e.length,Math.max(0,f-e.offset));await this.applyImageClip(e.c,true,token,elapsed);if(elapsed>=e.length&&!e.c.keep&&!s.images.get(e.c.id)?.persistent&&s.images.get(e.c.id))s.images.get(e.c.id).visible=false}else await this.apply(e.c,true,token)}
-  if(token===this.playToken)s.frame=base+f;
- }
+    const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
+    for(const job of this.groupJobs(g).slice().sort((a,b)=>a.offset-b.offset)){
+      if(token!==this.playToken)return;if(job.offset>f)continue;s.frame=base+job.offset;await this.seekAction(job,Math.min(job.length,f-job.offset),token)
+    }
+    if(token===this.playToken)s.frame=base+f;
+  }
+  async seekFrame(scene,frame){
+    this.stop();const token=++this.playToken;this.seeking=true;this.resetState();
+    try{for(const g of timelineGroups(scene)){if(token!==this.playToken)return;if(frame<g.start)break;this.state.frame=g.start;await this.seekGroup(g,Math.min(g.total,frame-g.start),token);if(frame<g.start+g.total)break}if(token===this.playToken)this.state.frame=frame}
+    finally{if(token===this.playToken){this.seeking=false;this.draw()}}
+  }
+  async resumeJob(job,elapsed,token){
+    const c=job.c,left=Math.max(0,job.length-elapsed);
+    if(c.type==="image_clip"&&elapsed>0){
+      let it=this.state.images.get(c.id);
+      if(!it){await this.applyImageClip(c,true,token,elapsed);it=this.state.images.get(c.id)}
+      if(it){await this.frames(left,p=>{if(!it.transformed)this.pose(it,c,elapsed+p*left)},false,token);if(!c.keep&&!it.persistent&&!it.transformed)it.visible=false;return}
+    }
+    if(c.type==="scene_fx"&&elapsed>0){if(!this.state.sceneFX.has(c.id))await this.apply(c,true,token);await this.frames(left,null,false,token);return}
+    if(["wait","parallel_anchor"].includes(c.type)){await this.frames(left,null,false,token);return}
+    if(elapsed>0&&["fade_to_black","fade_from_black","to_white","from_white","show_textbox","hide_textbox"].includes(c.type)){
+      const s=this.state,key=c.type.includes("textbox")?"textbox":c.type.includes("white")?"white":"black",max=key==="textbox"?1:255,to=["fade_to_black","to_white","show_textbox"].includes(c.type)?max:0,from=to===0?max:0;
+      s[key]=from+(to-from)*elapsed/job.length;await this.frames(left,p=>s[key]=from+(to-from)*(elapsed+p*left)/job.length,false,token);return
+    }
+    await this.apply(c,false,token);
+  }
+  async playGroup(g,token,at=0){
+    const base=this.state.frame-at,done=new Map(),lanes=new Map(),jobs=this.groupJobs(g);
+    for(const job of jobs){let resolve;const promise=new Promise(r=>resolve=r);done.set(job.c.id,{promise,resolve,frame:null});if(!lanes.has(job.lane))lanes.set(job.lane,[]);lanes.get(job.lane).push(job)}
+    if(at>0){
+      for(const job of jobs.slice().sort((a,b)=>a.offset-b.offset)){
+        if(token!==this.playToken)return;if(job.offset>=at)continue;const elapsed=Math.min(job.length,at-job.offset);
+        if(elapsed>=job.length||["image_clip","scene_fx"].includes(job.c.type)){this.state.frame=base+job.offset;await this.seekAction(job,elapsed,token)}
+        if(elapsed>=job.length){const d=done.get(job.c.id);d.frame=base+job.offset+job.length;d.resolve()}
+      }
+      this.state.frame=base+at;
+      for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name)}
+    }
+    const live=async events=>{for(const job of events){
+      const d=done.get(job.c.id);if(d.frame!==null)continue;
+      try{if(token!==this.playToken||this.state.finished)continue;
+        const dep=done.get(job.after);if(dep)await dep.promise;
+        if(token!==this.playToken||this.state.finished)continue;
+        const due=Math.max(base+job.requested,dep?.frame!=null?dep.frame+(job.delay||0):0);
+        const wait=due-this.state.frame;if(wait>0)await this.frames(wait,null,false,token);
+        if(token!==this.playToken||this.state.finished)continue;
+        const elapsed=Math.max(0,Math.min(job.length,at-job.offset));await this.resumeJob(job,elapsed,token);
+      }finally{d.frame=this.state.frame;d.resolve()}
+    }};
+    this.seeking=false;this.livePlayback=true;await Promise.all([...lanes.values()].map(live));
+  }
   async seekParallel(scene,index,clipFrame){
   this.stop();const token=++this.playToken;this.seeking=true;this.resetState();const target=scene.commands[index],groups=timelineGroups(scene);
   try{for(const g of groups){if(token!==this.playToken)return;const e=g.events.find(e=>e.c.id===target?.id);if(g.root.id===target?.id||e){if(g.events.length)await this.seekGroup(g,e?e.offset+(e.c.type==="image_clip"?(clipFrame??0):0):(clipFrame??g.length),token);else if(g.root.type==="image_clip")await this.applyImageClip(g.root,true,token,clipFrame??spans(g.root).enter);else await this.apply(g.root,true,token);break}if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token)}}finally{if(token===this.playToken){this.seeking=false;this.draw()}}
  }
-  async play(scene,{from=0}={}){
-   this.stop();const token=++this.playToken;this.livePlayback=true;this.editClip=null;this.onionSnapshots=null;this.resetState();
-   try{const groups=timelineGroups(scene),target=scene.commands[from],start=Math.max(0,groups.findIndex(g=>g.root.id===target?.id||g.events.some(e=>e.c.id===target?.id)));for(let i=0;i<groups.length;i++){if(token!==this.playToken)return;const g=groups[i];if(i<start){if(g.events.length)await this.seekGroup(g,g.total,token);else await this.apply(g.root,true,token);continue}this.onCommand?.(scene.commands.indexOf(g.root),g.root);if(g.events.length)await this.playGroup(g,token);else await this.apply(g.root,false,token)}}finally{if(token===this.playToken)this.livePlayback=false}
- }
+  async play(scene,{from=0,frame=null}={}){
+    this.stop();const token=++this.playToken;this.seeking=true;this.livePlayback=false;this.editClip=null;this.onionSnapshots=null;this.resetState();
+    try{
+      const groups=timelineGroups(scene),target=scene.commands[from],total=groups.length?groups.at(-1).start+groups.at(-1).total:0;
+      const selected=groups.find(g=>g.root.id===target?.id||g.events.some(e=>e.c.id===target?.id));
+      const requested=frame==null?(selected?selected.start+(selected.events.find(e=>e.c.id===target?.id)?.offset||0):0):Math.max(0,Math.min(total,frame));
+      if(requested>=total){for(const g of groups){if(token!==this.playToken)return;this.state.frame=g.start;await this.seekGroup(g,g.total,token)}this.state.frame=total;return}
+      for(const g of groups){
+        if(token!==this.playToken)return;
+        if(g.start+g.total<=requested){this.state.frame=g.start;await this.seekGroup(g,g.total,token);continue}
+        const at=Math.max(0,requested-g.start);
+        if(!this.livePlayback){this.state.frame=g.start+at;if(!at)for(const kind of ["BGM","BGS"]){const name=this.state.audioNames[kind];if(name)await this.playAudio(kind,name)}}
+        this.onCommand?.(scene.commands.indexOf(g.root),g.root);
+        if(at>0||g.events.length)await this.playGroup(g,token,at);
+        else{this.seeking=false;this.livePlayback=true;await this.apply(g.root,false,token)}
+      }
+    }finally{if(token===this.playToken){this.seeking=false;this.livePlayback=false;this.draw()}}
+  }
   cloneState(value,seen=new Map()){
    if(!value||typeof value!=="object")return value;if(seen.has(value))return seen.get(value);
    if(value instanceof Map){const copy=new Map();seen.set(value,copy);for(const [k,v] of value)copy.set(k,this.cloneState(v,seen));return copy}
@@ -453,11 +514,11 @@ export class ScenePreview{
       case"section":break;
       case"script":await this.applyScriptPreview(c.code,skip,token);break;
       case"wait":await this.frames(c.frames,null,skip,token);break;
-      case"bgm":if(!skip)await this.playAudio("BGM",c.name);break;
-      case"bgs":if(!skip)await this.playAudio("BGS",c.name);break;
+      case"bgm":s.audioNames.BGM=c.name||null;if(!skip)await this.playAudio("BGM",c.name);break;
+      case"bgs":s.audioNames.BGS=c.name||null;if(!skip)await this.playAudio("BGS",c.name);break;
       case"se":if(!skip)await this.playAudio("SE",c.name);break;
-      case"fade_bgm":case"stop_bgm":{const audio=this.audio.bgm,frames=Math.max(0,Math.round((Number(c.fadeSeconds)||0)*60));if(audio&&!skip&&frames){const volume=audio.volume;await this.frames(frames,p=>audio.volume=Math.max(0,volume*(1-p)),false,token)}else if(c.type==="fade_bgm"&&frames)await this.frames(frames,null,skip,token);if(audio&&this.audio.bgm===audio){audio.pause();this.audio.bgm=null}break;}
-      case"stop_bgs":this.audio.bgs?.pause();this.audio.bgs=null;break;
+      case"fade_bgm":case"stop_bgm":{s.audioNames.BGM=null;const audio=this.audio.bgm,frames=Math.max(0,Math.round((Number(c.fadeSeconds)||0)*60));if(audio&&!skip&&frames){const volume=audio.volume;await this.frames(frames,p=>audio.volume=Math.max(0,volume*(1-p)),false,token)}else if(c.type==="fade_bgm"&&frames)await this.frames(frames,null,skip,token);if(audio&&this.audio.bgm===audio){audio.pause();this.audio.bgm=null}break;}
+      case"stop_bgs":s.audioNames.BGS=null;this.audio.bgs?.pause();this.audio.bgs=null;break;
       case"fade_from_black":s.black=255;await this.frames(c.duration,p=>s.black=255*(1-p),skip,token);break;
       case"fade_to_black":s.black=0;await this.frames(c.duration,p=>s.black=255*p,skip,token);break;
       case"to_white":s.white=0;await this.frames(c.duration,p=>s.white=255*p,skip,token);break;
@@ -526,7 +587,7 @@ export class ScenePreview{
       case"change_float_bitmap":if(s.float){const im=await this.image(c.filename);if(im)s.float.img=im;}break;
       case"scene_backdrop":s.backdrop={color:c.color,opacity:Math.max(0,Math.min(255,Number(c.opacity)||0)),z:Number(c.z)||190};break;
       case"scene_player_form":break;
-      case"scene_fx":{const images=(await Promise.all((c.filename?[c.filename]:c.graphics||[]).map(p=>this.image(p)))).filter(Boolean);if(token!==this.playToken||!images.length)break;const used=[...s.sceneFX.values()].reduce((n,x)=>n+x.count,0);s.sceneFX.set(c.id,{c,images,count:Math.max(0,Math.min(48,Number(c.count)||1,FX_LIMIT-used)),start:s.frame,alpha:1});break;}
+      case"scene_fx":{const images=(await Promise.all((c.filename?[c.filename]:c.graphics||[]).map(p=>this.image(p)))).filter(Boolean);if(token!==this.playToken||!images.length)break;const used=[...s.sceneFX.values()].reduce((n,x)=>n+x.count,0);s.sceneFX.set(c.id,{c,images,count:Math.max(0,Math.min(48,Number(c.count)||1,FX_LIMIT-used)),start:s.frame,alpha:1});if(!skip&&Number(c.life)>0){const end=s.frame+Number(c.life);while(token===this.playToken&&s.sceneFX.has(c.id)&&s.frame<end)await new Promise(r=>requestAnimationFrame(r))}break;}
       case"scene_fx_stop":{const targets=[...s.sceneFX.entries()].filter(([id])=>!c.targetId||id===c.targetId);await this.frames(c.fade,p=>targets.forEach(([id,fx])=>fx.alpha=1-p),skip,token);targets.forEach(([id])=>s.sceneFX.delete(id));break;}
       case"image_transform":{const it=s.images.get(c.targetId),im=await this.image(c.filename);if(!it||!im||token!==this.playToken)break;it.transformed=true;const old={...it},ax=(it.anchorX||0)/Math.max(1,(it.sw||it.img.width)*it.zoom),ay=(it.anchorY||0)/Math.max(1,(it.sh||it.img.height)*it.zoom),cx=it.x+(it.anchorX||0),cy=it.y+(it.anchorY||0),config={resourceType:"sheet",columns:c.sheetColumns||1,rows:c.sheetRows||1,sheetFps:c.sheetFps||8,sheetMode:"loop"},rect=sheetRect(config,im,0),swap=()=>{Object.assign(it,rect,{img:im,filename:c.filename,anchorX:rect.sw*old.zoom*ax,anchorY:rect.sh*old.zoom*ay,persistent:(config.columns*config.rows>1?config:null),sheetStartFrame:s.frame});it.x=cx-it.anchorX;it.y=cy-it.anchorY};it.persistent=null;let swapped=false;const ghostKey=c.id+":ghost";if(c.transition==="crossfade"&&!skip){s.images.set(ghostKey,{...old,persistent:null});swap();swapped=true;it.opacity=0}await this.frames(c.transition==="cut"?0:c.duration,p=>{if(!swapped&&p>=.5){swap();swapped=true}if(c.transition==="crossfade"){it.opacity=old.opacity*p;const ghost=s.images.get(ghostKey);if(ghost)ghost.opacity=old.opacity*(1-p)}else if(c.transition==="shrink")it.zoom=old.zoom*(1-.85*Math.sin(p*Math.PI));else if(c.transition==="flash")it.flash=Math.sin(p*Math.PI)},skip,token);if(!swapped)swap();it.opacity=old.opacity;it.zoom=old.zoom;it.flash=0;s.images.delete(ghostKey);break;}
       case"start_aura":{

@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Transformaciones de imagen, perfiles BSS de aura y partículas, utilidades de Intro.",
+  "description": "Dependencias generales entre acciones, reproducción desde cabezal y pistas FX simultáneas.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

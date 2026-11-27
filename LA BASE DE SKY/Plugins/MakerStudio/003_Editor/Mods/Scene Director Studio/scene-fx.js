@@ -524,4 +524,4 @@ export function fxParticle(c,i,elapsed){
  const alpha=Math.sin(phase*Math.PI)*clamp(Number(c.opacity??1),0,1);
  return {x,y,alpha,scale:Math.max(.01,Number(c.scale)||1),graphic:Math.floor((elapsed+i*3)/6)};
 }
-export function fxDuration(c){return c.type==="image_transform"?Math.max(1,Math.round(Number(c.duration)||1)):c.type==="scene_fx_stop"?Math.max(1,Math.round(Number(c.fade)||0)):1}
+export function fxDuration(c){return c.type==="image_transform"?(c.transition==="cut"?1:Math.max(1,Math.round(Number(c.duration)||1))):c.type==="scene_fx"?Math.max(1,Math.round(Number(c.life)||0)):c.type==="scene_fx_stop"?Math.max(1,Math.round(Number(c.fade)||0)):1}
