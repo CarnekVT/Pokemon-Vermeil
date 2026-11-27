@@ -104,4 +104,6 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-track-dot[class*="image"]{background:#75a5cc}.sd-block.parallel.visual{border-style:solid}.sd-block.parallel.visual.active{outline:1px solid #e3d5ff}
 
 .sd-canvas{flex:0 0 auto;max-width:none;max-height:none;image-rendering:crisp-edges;image-rendering:pixelated}.sd-image-resource canvas,.sd-sheet-preview,.sd-gb-thumb img,.sd-gb-preview img,.sd-media-thumb img{image-rendering:crisp-edges;image-rendering:pixelated}
+
+.sd-hide-after{display:grid;gap:7px}.sd-hide-after .sd-prop-title{margin-bottom:0}.sd-hide-after .sd-help{margin:0}.sd-hide-after button{white-space:normal}
 `;

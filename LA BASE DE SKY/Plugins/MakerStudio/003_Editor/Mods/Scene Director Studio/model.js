@@ -26,6 +26,7 @@ export function cmd(type, data={}){ return {id:uid("cmd"),type,...defaultsFor(ty
 export function defaultsFor(type){
   switch(type){
     case "section": return {label:"Nueva sección"};
+    case "parallel_anchor": return {};
     case "wait": return {frames:20};
     case "bgm": case "bgs": case "se": return {name:""};
     case "stop_bgm": return {fadeSeconds:0};
@@ -99,6 +100,7 @@ function commandBody(c){
   const pre=c.store&&/^[a-z_]\w*$/i.test(c.store)?`${c.store} = `:"";
   switch(c.type){
     case "section": return `# ══════════ ${String(c.label||"SECCIÓN").toUpperCase()} ══════════`;
+    case "parallel_anchor": return "wait 0";
     case "wait": return `wait ${n(c.frames)}`;
     case "bgm": return `bgm ${q(c.name)}`; case "bgs": return `bgs ${q(c.name)}`; case "se": return `se ${q(c.name)}`;
     case "stop_bgm": return `stop_bgm ${n(c.fadeSeconds)}`; case "stop_bgs": return `stop_bgs`;

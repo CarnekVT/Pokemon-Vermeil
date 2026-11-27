@@ -1,5 +1,6 @@
 import {clipLength} from "./animation.js";
 export function duration(c){
+  if(c.type==="parallel_anchor")return 0;
   if(c.type==="image_clip")return clipLength(c);
   if(c.type==="wait")return Math.max(0,Number(c.frames)||0);
   if(/fade|white|textbox/.test(c.type))return Math.max(1,Number(c.duration??c.fade)||10);
@@ -13,7 +14,7 @@ export function duration(c){
   }
   return 6;
 }
-export const overlapRoots=new Set(["image_clip","wait"]);
+export const overlapRoots=new Set(["image_clip","wait","parallel_anchor"]);
 const lanes={end_scene:"control",next_scene:"control",common_event:"control",wait_confirm:"dialog",set_switch:"control",set_variable:"control",text_inline:"dialog",treatment_text:"dialog",show_centered_text:"dialog",hide_centered_text:"dialog",show_textbox:"dialog",hide_textbox:"dialog",textbox_style:"dialog",bgm:"audio",bgs:"audio",se:"audio",stop_bgm:"audio",stop_bgs:"audio",fade_from_black:"screen",fade_to_black:"screen",to_white:"screen",from_white:"screen",show:"visual",hide:"visual",show_floating:"visual",start_scrolling:"visual",stop_scrolling:"visual",start_aura:"visual",stop_aura:"visual"};
 export const overlapLane=c=>!c?.sourceRuby&&!c?.store?(c?.type==="image_clip"?"image:"+(c.id||"new"):lanes[c?.type]||null):null;
 export const frameValue=v=>Math.max(0,Math.round((Number(String(v).trim().replace(",","."))||0)*60));
@@ -28,3 +29,32 @@ export function timelineGroups(scene){
 }
 export function layoutTimeline(scene){const groups=timelineGroups(scene),entries=[];for(const g of groups){entries.push({c:g.root,start:g.start,length:g.length,group:g});for(const e of g.events)entries.push({c:e.c,start:g.start+e.offset,length:e.length,group:g,parallel:true,requested:g.start+e.requested})}return {groups,entries,total:groups.length?groups.at(-1).start+groups.at(-1).total:0}}
 export function anchorAt(scene,frame){return timelineGroups(scene).find(g=>overlapRoots.has(g.root.type)&&frame>=g.start&&frame<g.start+g.total)||null}
+
+export function linkAfterDialogue(scene,action,dialogue,makeAnchor){
+ const commands=scene.commands;
+ if(!commands.includes(action)||!commands.includes(dialogue)||action===dialogue||!["text_inline","treatment_text"].includes(dialogue.type))return false;
+ // Do not introduce a dependency cycle (including existing chained dialogues).
+ const seen=new Set([action.id]);let dep=dialogue;
+ while(dep){if(seen.has(dep.id))return false;seen.add(dep.id);dep=commands.find(c=>c.id===dep.afterId)}
+ const children=commands.filter(c=>c.overlapParent===action.id);
+ if(children.length){
+   const anchor=makeAnchor();
+   commands.splice(commands.indexOf(action),0,anchor);
+   for(const child of children)child.overlapParent=anchor.id;
+ }
+ delete action.overlapParent;delete action.offsetFrames;delete action.afterId;
+ // Resolve the dialogue's group after moving the old root's children.
+ const entry=layoutTimeline(scene).entries.find(e=>e.c.id===dialogue.id);
+ if(!entry)return false;
+ commands.splice(commands.indexOf(action),1);
+ if(entry.parallel&&overlapLane(action)){
+   action.overlapParent=entry.group.root.id;
+   action.offsetFrames=Math.max(0,entry.requested-entry.group.start);
+   commands.splice(commands.indexOf(dialogue)+1,0,action);
+ }else{
+   const root=entry.group.root;
+   commands.splice(commands.indexOf(root)+1,0,action);
+ }
+ action.afterId=dialogue.id;
+ return true;
+}

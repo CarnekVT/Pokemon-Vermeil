@@ -267,7 +267,7 @@ export class ScenePreview{
   async seekGroup(g,frame,token){
   const s=this.state,base=s.frame,f=Math.max(0,Math.min(g.total,frame));
   if(g.root.type==="image_clip"){await this.applyImageClip(g.root,true,token,Math.min(f,g.length));if(f>=g.length&&!g.root.keep&&s.images.get(g.root.id))s.images.get(g.root.id).visible=false}
-  else if(g.root.type!=="wait")await this.apply(g.root,true,token);
+  else if(!["wait","parallel_anchor"].includes(g.root.type))await this.apply(g.root,true,token);
   for(const e of g.events){if(token!==this.playToken)return;if(e.offset>f)continue;s.frame=base+e.offset;if(e.c.type==="image_clip"){const elapsed=Math.min(e.length,Math.max(0,f-e.offset));await this.applyImageClip(e.c,true,token,elapsed);if(elapsed>=e.length&&!e.c.keep&&s.images.get(e.c.id))s.images.get(e.c.id).visible=false}else await this.apply(e.c,true,token)}
   if(token===this.playToken)s.frame=base+f;
  }
@@ -308,7 +308,7 @@ export class ScenePreview{
    if(this.onionMode!=="next")draw(this.onionSnapshots.previous,"#ff777a");
    if(this.onionMode!=="previous")draw(this.onionSnapshots.next,"#71dbff");
  }
-  pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:item.hidden?item.opacity:a.opacity,visible:!item.hidden})}
+  pose(item,c,f){const a=sample(c,f),rect=sheetRect(c,item.img,f),w=rect.sw*a.zoom,h=rect.sh*a.zoom,ax=c.origin==="center"||c.origin==="bottom"?w/2:0,ay=c.origin==="center"?h/2:c.origin==="bottom"?h:0;Object.assign(item,rect,{x:a.x-ax,y:a.y-ay,anchorX:ax,anchorY:ay,zoom:a.zoom,angle:a.angle,opacity:(item.hidden||item.hiding)?item.opacity:a.opacity,visible:!item.hidden})}
   async applyImageClip(c,skip,token,at=null){const state=this.state,im=await this.image(c.filename);if(token!==this.playToken)return;const length=clipLength(c);if(!im){await this.frames(at??length,null,skip,token);return}const item={img:im,z:this.num(c.z??200+state.images.size,200),zoom:1,opacity:255,visible:true,clipId:c.id};item.filename=c.filename;state.images.set(c.id,item);this.pose(item,c,0);if(at!==null){this.pose(item,c,at);state.frame+=at;return}await this.frames(length,p=>this.pose(item,c,p*length),skip,token);if(token===this.playToken&&!c.keep)item.visible=false}
   selectedGraphic(){const c=this.editClip;return c?this.state.images.get(c.type==="image_clip"?c.id:c.filename):null}
   drawHandles(){if(this.livePlayback||this.seeking||!this.editClip)return;const it=this.selectedGraphic();if(!it?.img)return;const g=this.g,w=(it.sw||it.img.width)*it.zoom,h=(it.sh||it.img.height)*it.zoom,ax=it.anchorX||0,ay=it.anchorY||0;g.save();if(this.isolateGraphic){g.clearRect(0,0,this.w,this.h);g.fillStyle="#252934";g.fillRect(0,0,this.w,this.h);g.fillStyle="#303541";for(let y=0;y<this.h;y+=16)for(let x=0;x<this.w;x+=16)if((x/16+y/16)%2===0)g.fillRect(x,y,16,16)}const dx=it.angle?it.x:Math.round(it.x),dy=it.angle?it.y:Math.round(it.y);g.translate(dx+ax,dy+ay);g.rotate((it.angle||0)*Math.PI/180);g.translate(-ax,-ay);if(this.isolateGraphic){g.globalAlpha=Math.max(.35,(it.opacity??255)/255);g.drawImage(it.img,it.sx||0,it.sy||0,it.sw||it.img.width,it.sh||it.img.height,0,0,Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));g.globalAlpha=1}g.strokeStyle="#d6c4ff";g.lineWidth=1/Math.max(.2,this.zoom);g.setLineDash([4,3]);g.strokeRect(0,0,w,h);g.setLineDash([]);const z=7/Math.max(.2,this.zoom);g.fillStyle="#f0e7ff";for(const [x,y] of [[0,0],[w,0],[0,h],[w,h]])g.fillRect(x-z/2,y-z/2,z,z);g.restore()}
@@ -449,8 +449,9 @@ export class ScenePreview{
       case"image_clip":{await this.applyImageClip(c,skip,token);break;}
       case"show":{
         const im=await this.image(c.filename);if(im){let x=this.num(c.x,0),y=this.num(c.y,0),zoom=this.num(c.zoom,1);if(c.origin==="center"){x-=im.width*zoom/2;y-=im.height*zoom/2}else if(c.origin==="bottom"){x-=im.width*zoom/2;y-=im.height*zoom}const fade=this.num(c.fade,20),it={img:im,x,y,anchorX:c.origin==="center"||c.origin==="bottom"?im.width*zoom/2:0,anchorY:c.origin==="center"?im.height*zoom/2:c.origin==="bottom"?im.height*zoom:0,z:this.num(c.z??200+s.images.size,200+s.images.size),zoom,opacity:fade>0?0:255,visible:true};s.images.set(c.filename,it);if(fade>0)await this.frames(fade,p=>it.opacity=255*p,skip,token);it.opacity=255;}break;}
-      case"hide":{const targets=(c.targetId?[s.images.get(c.targetId)]:[...s.images.entries()].filter(([k,v])=>!c.filename||k===c.filename||v.filename===c.filename).map(([k,v])=>v)).filter(Boolean).map(x=>({x,alpha:x.opacity??255}));targets.forEach(({x})=>x.hidden=true);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(({x,alpha})=>{x.visible=true;x.opacity=alpha*(1-p)}),skip,token);targets.forEach(({x})=>x.visible=false);break;}
+      case"hide":{const targets=(c.targetId?[s.images.get(c.targetId)]:[...s.images.entries()].filter(([k,v])=>!c.filename||k===c.filename||v.filename===c.filename).map(([k,v])=>v)).filter(Boolean).map(x=>({x,alpha:x.opacity??255}));targets.forEach(({x})=>x.hiding=true);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(({x,alpha})=>{x.opacity=alpha*(1-p)}),skip,token);targets.forEach(({x})=>{x.hiding=false;x.hidden=true;x.visible=false});break;}
       case"hide_all":{await this.apply({...c,type:"hide",filename:"",targetId:""},skip,token);break;}
+      case"parallel_anchor":break;
       case"end_scene":case"next_scene":if(!skip)this.stop();break;
       case"wait_confirm":if(!skip){this.onWaiting?.(true);await this.waitInput(token,this.inputSerial);this.onWaiting?.(false)}break;
       case"common_event":case"set_switch":case"set_variable":break;

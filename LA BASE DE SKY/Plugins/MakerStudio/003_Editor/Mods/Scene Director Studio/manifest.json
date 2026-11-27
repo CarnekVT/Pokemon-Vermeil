@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Renderizado nítido de pixel art y spritesheets en el visor SDS; zoom de vista con escalas exactas.",
+  "description": "Vinculación de clips con acciones simultáneas y desaparición al confirmar diálogo.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
